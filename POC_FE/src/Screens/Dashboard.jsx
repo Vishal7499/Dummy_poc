@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
 
 const Dashboard = () => {
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('ftd')
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true)
@@ -147,7 +149,7 @@ const Dashboard = () => {
             <div className="w-64 space-y-4">
               {/* Section 1: Filters */}
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 h-fit">
-                <h3 className="text-sm font-semibold text-gray-800 mb-3">Section 1: Filters</h3>
+                <h3 className="text-sm font-semibold text-gray-800 mb-3">Filters</h3>
                 <div className="space-y-3">
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">Type of Loan</label>
@@ -224,7 +226,7 @@ const Dashboard = () => {
 
               {/* Section 6: Delegation Tracking */}
               <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Section 6: Delegation Tracking</h3>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Delegation Tracking</h3>
                 <div className="space-y-2">
                   <div className="bg-purple-50 border border-purple-200 rounded-lg p-2">
                     <div className="text-purple-800 text-xs font-semibold">Delegation Summary</div>
@@ -249,24 +251,23 @@ const Dashboard = () => {
 
             {/* Right Side - Main Content */}
             <div className="flex-1">
-              {/* Section 2: Staff Monitoring (Summary) */}
+              {/* Staff Monitoring (Summary) */}
               <div className="mb-4">
-                <h2 className="text-lg font-semibold text-gray-800 mb-3">Section 2: Staff Monitoring (Summary)</h2>
+                <h2 className="text-lg font-semibold text-gray-800 mb-3">Staff Monitoring (Summary)</h2>
                 <div className="grid grid-cols-5 gap-3 relative">
                   {/* Collection Efficiency Card */}
                   <div 
-                    className="group bg-blue-50 border border-blue-200 rounded-lg p-3 cursor-pointer transition-all duration-300 h-24 relative"
+                    className="group bg-blue-50 border border-blue-200 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative"
                     onMouseEnter={() => setExpandedCard('collection')}
                     onMouseLeave={() => setExpandedCard(null)}
+                    onClick={() => navigate('/staff?metric=collection')}
                   >
                     <div className="text-blue-600 text-xs">Collection Efficiency (%)</div>
                     <div className="text-lg font-bold text-blue-900">86.4%</div>
-                    <div className="text-xs text-blue-500">Amount collected ÷ Total due</div>
                     {expandedCard === 'collection' && (
                       <div className="absolute top-0 left-0 right-0 bg-blue-50 border border-blue-200 rounded-lg p-3 z-50 shadow-lg">
                         <div className="text-blue-600 text-xs">Collection Efficiency (%)</div>
                         <div className="text-lg font-bold text-blue-900">86.4%</div>
-                        <div className="text-xs text-blue-500">Amount collected ÷ Total due</div>
                         <div className="mt-2 space-y-1">
                           <div className="flex justify-between text-xs text-blue-700">
                             <span>Amount Collected:</span>
@@ -287,18 +288,17 @@ const Dashboard = () => {
 
                   {/* PTP Conversion Rate Card */}
                   <div 
-                    className="group bg-green-50 border border-green-200 rounded-lg p-3 cursor-pointer transition-all duration-300 h-24 relative"
+                    className="group bg-green-50 border border-green-200 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative"
                     onMouseEnter={() => setExpandedCard('ptp')}
                     onMouseLeave={() => setExpandedCard(null)}
+                    onClick={() => navigate('/staff?metric=ptp')}
                   >
                     <div className="text-green-600 text-xs">PTP Conversion Rate (%)</div>
                     <div className="text-lg font-bold text-green-900">72.3%</div>
-                    <div className="text-xs text-green-500">PTPs fulfilled ÷ Total PTPs</div>
                     {expandedCard === 'ptp' && (
                       <div className="absolute top-0 left-0 right-0 bg-green-50 border border-green-200 rounded-lg p-3 z-50 shadow-lg">
                         <div className="text-green-600 text-xs">PTP Conversion Rate (%)</div>
                         <div className="text-lg font-bold text-green-900">72.3%</div>
-                        <div className="text-xs text-green-500">PTPs fulfilled ÷ Total PTPs</div>
                         <div className="mt-2 space-y-1">
                           <div className="flex justify-between text-xs text-green-700">
                             <span>PTPs Fulfilled:</span>
@@ -319,18 +319,17 @@ const Dashboard = () => {
 
                   {/* Visit Compliance Rate Card */}
                   <div 
-                    className="group bg-purple-50 border border-purple-200 rounded-lg p-3 cursor-pointer transition-all duration-300 h-24 relative"
+                    className="group bg-purple-50 border border-purple-200 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative"
                     onMouseEnter={() => setExpandedCard('visit')}
                     onMouseLeave={() => setExpandedCard(null)}
+                    onClick={() => navigate('/staff?metric=visit')}
                   >
                     <div className="text-purple-600 text-xs">Visit Compliance Rate (%)</div>
                     <div className="text-lg font-bold text-purple-900">78.5%</div>
-                    <div className="text-xs text-purple-500">Completed ÷ Planned visits</div>
                     {expandedCard === 'visit' && (
                       <div className="absolute top-0 left-0 right-0 bg-purple-50 border border-purple-200 rounded-lg p-3 z-50 shadow-lg">
                         <div className="text-purple-600 text-xs">Visit Compliance Rate (%)</div>
                         <div className="text-lg font-bold text-purple-900">78.5%</div>
-                        <div className="text-xs text-purple-500">Completed ÷ Planned visits</div>
                         <div className="mt-2 space-y-1">
                           <div className="flex justify-between text-xs text-purple-700">
                             <span>Completed Visits:</span>
@@ -351,18 +350,17 @@ const Dashboard = () => {
 
                   {/* Staff Productivity Index Card */}
                   <div 
-                    className="group bg-orange-50 border border-orange-200 rounded-lg p-3 cursor-pointer transition-all duration-300 h-24 relative"
+                    className="group bg-orange-50 border border-orange-200 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative"
                     onMouseEnter={() => setExpandedCard('productivity')}
                     onMouseLeave={() => setExpandedCard(null)}
+                    onClick={() => navigate('/staff?metric=productivity')}
                   >
                     <div className="text-orange-600 text-xs">Staff Productivity Index</div>
                     <div className="text-lg font-bold text-orange-900">156</div>
-                    <div className="text-xs text-orange-500">Weighted calls + visits</div>
                     {expandedCard === 'productivity' && (
                       <div className="absolute top-0 left-0 right-0 bg-orange-50 border border-orange-200 rounded-lg p-3 z-50 shadow-lg">
                         <div className="text-orange-600 text-xs">Staff Productivity Index</div>
                         <div className="text-lg font-bold text-orange-900">156</div>
-                        <div className="text-xs text-orange-500">Weighted calls + visits</div>
                         <div className="mt-2 space-y-1">
                           <div className="flex justify-between text-xs text-orange-700">
                             <span>Total Calls:</span>
@@ -383,13 +381,13 @@ const Dashboard = () => {
 
                   {/* Inactive/Non-performing Staff Card */}
                   <div 
-                    className="group bg-red-50 border border-red-200 rounded-lg p-3 relative cursor-pointer transition-all duration-300 h-24"
+                    className="group bg-red-50 border border-red-200 rounded-lg p-3 relative cursor-pointer transition-all duration-300 h-20"
                     onMouseEnter={() => setExpandedCard('inactive')}
                     onMouseLeave={() => setExpandedCard(null)}
+                    onClick={() => navigate('/staff?metric=inactive')}
                   >
                     <div className="text-red-600 text-xs">Inactive/Non-performing Staff</div>
                     <div className="text-lg font-bold text-red-900">3</div>
-                    <div className="text-xs text-red-500">0 calls or 0 visits</div>
                     <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">3</div>
                     {expandedCard === 'inactive' && (
                       <div className="absolute top-0 left-0 right-0 bg-red-50 border border-red-200 rounded-lg p-3 z-50 shadow-lg">
@@ -417,9 +415,9 @@ const Dashboard = () => {
               </div>
             </div>
 
-              {/* Section 3: Customer Engagement */}
+              {/* Customer Engagement */}
               <div className="mb-4">
-                <h2 className="text-lg font-semibold text-gray-800 mb-3">Section 3: Customer Engagement</h2>
+                <h2 className="text-lg font-semibold text-gray-800 mb-3">Customer Engagement</h2>
                 <div className="grid grid-cols-4 gap-3">
                   <div className="bg-green-50 border border-green-200 rounded-lg p-3">
                     <h3 className="text-sm font-semibold text-green-800 mb-2">WhatsApp Engagements</h3>
@@ -499,9 +497,9 @@ const Dashboard = () => {
               </div>
             </div>
 
-              {/* Section 4: Payment Intent & Behavior */}
+              {/* Payment Intent & Behavior */}
               <div className="mb-4">
-                <h2 className="text-lg font-semibold text-gray-800 mb-3">Section 4: Payment Intent & Behavior</h2>
+                <h2 className="text-lg font-semibold text-gray-800 mb-3">Payment Intent & Behavior</h2>
                 <div className="grid grid-cols-3 gap-4">
                   <div className="bg-red-50 border border-red-200 rounded-lg p-3">
                     <h3 className="text-sm font-semibold text-red-800 mb-2">Top Overdue Accounts</h3>
@@ -683,7 +681,7 @@ const Dashboard = () => {
                 <div className="space-y-4">
                   {/* Section 5: Allocation Monitoring */}
                   <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mt-3">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-2">Section 5: Allocation Monitoring</h3>
+                    <h3 className="text-sm font-semibold text-gray-900 mb-2">Allocation Monitoring</h3>
                     <div className="space-y-2">
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
                         <div className="text-blue-800 text-xs font-semibold">Allocation Summary</div>

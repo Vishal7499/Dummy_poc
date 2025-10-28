@@ -44,7 +44,7 @@ const Navbar = ({ onMobileMenuClick, isSidebarCollapsed, onBellClick }) => {
                     
                     {/* Show welcome text when sidebar is OPEN */}
                     {!isSidebarCollapsed && (
-                      <span className="text-base sm:text-lg font-semibold text-gray-900 ml-2">Welcome, {user?.name || "Admin User"}</span>
+                      <span className="text-base sm:text-md text-gray-900 ml-65">Welcome, {user?.name || "Admin User"}</span>
                     )}
                   </div>
            <div className="flex items-center space-x-2 sm:space-x-4">
