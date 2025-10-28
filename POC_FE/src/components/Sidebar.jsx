@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import sarthiLogo from '../assets/Images/sarthi_logo.png'
 
-const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
+const Sidebar = ({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollapsed }) => {
   const navigate = useNavigate()
   const location = useLocation()
-  const [isCollapsed, setIsCollapsed] = useState(true)
 
   const menuItems = [
     {
@@ -89,49 +89,40 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
         />
       )}
       
-      {/* Sidebar */}
-      <div className={`
-        bg-white border-r border-gray-200 transition-all duration-300 h-screen flex flex-col
-        ${isCollapsed ? 'w-16' : 'w-64'}
-        ${isMobileOpen ? 'fixed inset-y-0 left-0 z-50 lg:relative lg:z-auto' : 'hidden lg:flex'}
-      `}>
-        {/* Header with Logo and Toggle */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <div className="flex items-center space-x-3">
-            {/* Burger Menu Icon */}
-            <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-            
-            {/* Logo and Title */}
-            {!isCollapsed && (
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">S</span>
-                </div>
-                <div>
-                  <h1 className="text-lg font-semibold text-gray-900">Sarthi Kotak</h1>
-                  <p className="text-xs text-gray-500">POC Dashboard</p>
-                </div>
-              </div>
-            )}
-          </div>
-          
-          {/* Mobile Close Button */}
-          <button
-            onClick={() => setIsMobileOpen(false)}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors lg:hidden"
-          >
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+       {/* Sidebar */}
+       <div className="bg-white border-r border-gray-200 h-screen flex flex-col w-full">
+         {/* Header with Toggle */}
+         <div className="flex items-center p-4 border-b border-gray-200 h-16">
+           <button
+             onClick={() => setIsCollapsed(!isCollapsed)}
+             className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+           >
+             <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+             </svg>
+           </button>
+           
+                  {/* Logo and Title - Always show logo, text only when expanded */}
+                  <div className={`flex items-center space-x-2 ${isCollapsed ? 'ml-0' : 'ml-3'}`}>
+                    <img src={sarthiLogo} alt="Sarthi Logo" className="w-8 h-8" />
+                    {!isCollapsed && (
+                      <div>
+                        <h1 className="text-base font-semibold text-gray-900">Sarthi Kotak POC</h1>
+                        <p className="text-xs text-gray-600">Supervisor Dashboard</p>
+                      </div>
+                    )}
+                  </div>
+           
+           {/* Mobile Close Button */}
+           <button
+             onClick={() => setIsMobileOpen(false)}
+             className="absolute top-4 right-4 p-2 rounded-lg hover:bg-gray-100 transition-colors lg:hidden cursor-pointer"
+           >
+             <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+             </svg>
+           </button>
+         </div>
 
       {/* Navigation Menu */}
       <nav className="flex-1 overflow-y-auto">
@@ -139,17 +130,17 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
           <ul className="space-y-1">
             {menuItems.map((item, index) => (
               <li key={index}>
-                <button
-                  onClick={() => handleNavigation(item.path)}
-                  className={`w-full flex items-center rounded-lg text-sm font-medium transition-colors ${
-                    isCollapsed 
-                      ? 'justify-center px-3 py-3' 
-                      : 'px-3 py-3'
-                  } ${
-                    item.active
-                      ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
+                          <button
+                            onClick={() => handleNavigation(item.path)}
+                            className={`w-full flex items-center rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                              isCollapsed 
+                                ? 'justify-center px-3 py-3' 
+                                : 'px-3 py-3'
+                            } ${
+                              item.active
+                                ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                                : 'text-gray-700 hover:bg-gray-50'
+                            }`}
                   title={isCollapsed ? item.name : ''}
                 >
                   <span className={`${isCollapsed ? '' : 'mr-3'}`}>
@@ -165,20 +156,12 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
         </div>
       </nav>
 
-      {/* Bottom Section */}
-      <div className="flex-shrink-0 p-4 border-t border-gray-200">
-        {!isCollapsed ? (
-          <div className="text-xs text-gray-500 text-center">
-            Sarthi Kotak POC v1.0
-          </div>
-        ) : (
-          <div className="flex justify-center">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xs">S</span>
-            </div>
-          </div>
-        )}
-      </div>
+       {/* Bottom Section */}
+       <div className="flex-shrink-0 p-4 border-t border-gray-200">
+         <div className="text-xs text-gray-500 text-center">
+         Sarthi Kotak POC v1.0
+         </div>
+       </div>
       </div>
     </>
   )

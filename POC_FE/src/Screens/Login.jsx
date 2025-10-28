@@ -1,18 +1,14 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import sarthiLogo from '../assets/Images/sarthi_logo.png'
 
 const Login = () => {
-  const [isActive, setIsActive] = useState(false)
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
     password: ''
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
   
   const { login } = useAuth()
   const navigate = useNavigate()
@@ -24,7 +20,7 @@ const Login = () => {
     })
   }
 
-  const handleSignIn = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError('')
@@ -49,188 +45,70 @@ const Login = () => {
     }
   }
 
-  const handleSignUp = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-
-    try {
-      // Simulate API call for registration
-      if (formData.name && formData.email && formData.password) {
-        const userData = {
-          id: Date.now(),
-          email: formData.email,
-          name: formData.name
-        }
-        login(userData)
-        navigate('/dashboard')
-      } else {
-        setError('Please fill in all fields')
-      }
-    } catch (err) {
-      setError('Registration failed. Please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center font-['Montserrat'] p-4" style={{background: 'linear-gradient(to right, #e2e2e2, #c9d6ff)', minHeight: '100vh'}}>
-      <div className={`bg-white relative overflow-hidden transition-all duration-700 ease-in-out ${isActive ? 'active' : ''}`} style={{boxShadow: '0 5px 15px rgba(0, 0, 0, 0.35)', borderRadius: '30px', width: '100%', maxWidth: '768px', minHeight: '480px'}}>
-        
-        {/* Sign Up Form */}
-        <div className={`absolute top-0 left-0 w-1/2 h-full transition-all duration-700 ease-in-out z-10 ${isActive ? 'transform translate-x-full opacity-100 z-50' : 'transform translate-x-0 opacity-0'}`}>
-          <form onSubmit={handleSignUp} className="bg-white flex flex-col items-center justify-center h-full" style={{padding: '0 40px'}}>
-            <h1 className="text-2xl font-bold text-gray-800 mb-6">Create Account</h1>
-            
-            <div className="flex items-center justify-center" style={{margin: '20px 0'}}>
-              <a href="#" className="flex items-center justify-center w-10 h-10" style={{border: '1px solid #ccc', borderRadius: '20%', margin: '0 3px'}}>
-                <i className="fab fa-google-plus-g text-gray-600"></i>
-              </a>
-              <a href="#" className="flex items-center justify-center w-10 h-10" style={{border: '1px solid #ccc', borderRadius: '20%', margin: '0 3px'}}>
-                <i className="fab fa-facebook-f text-gray-600"></i>
-              </a>
-              <a href="#" className="flex items-center justify-center w-10 h-10" style={{border: '1px solid #ccc', borderRadius: '20%', margin: '0 3px'}}>
-                <i className="fab fa-github text-gray-600"></i>
-              </a>
-              <a href="#" className="flex items-center justify-center w-10 h-10" style={{border: '1px solid #ccc', borderRadius: '20%', margin: '0 3px'}}>
-                <i className="fab fa-linkedin-in text-gray-600"></i>
-              </a>
-            </div>
-            
-            <span style={{fontSize: '12px', color: '#333'}}>or use your email for registration</span>
-            
-            <input
-              type="text"
-              name="name"
-              placeholder="Name"
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full outline-none"
-              style={{backgroundColor: '#eee', border: 'none', margin: '8px 0', padding: '10px 15px', fontSize: '13px', borderRadius: '8px', width: '100%'}}
-              required
-            />
-            <input
-              type="email"
-              name="email"
-              placeholder="UserID"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full outline-none"
-              style={{backgroundColor: '#eee', border: 'none', margin: '8px 0', padding: '10px 15px', fontSize: '13px', borderRadius: '8px', width: '100%'}}
-              required
-            />
-            <div className="relative w-full">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full outline-none"
-                style={{backgroundColor: '#eee', border: 'none', margin: '8px 0', padding: '10px 15px', paddingRight: '45px', fontSize: '13px', borderRadius: '8px', width: '100%'}}
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-                style={{background: 'none', border: 'none', cursor: 'pointer'}}
-              >
-                {showPassword ? (
-                  <i className="fas fa-eye-slash text-sm"></i>
-                ) : (
-                  <i className="fas fa-eye text-sm"></i>
-                )}
-              </button>
-            </div>
-            
-            <button
-              type="submit"
-              disabled={loading}
-              className="text-white border border-transparent rounded-lg font-semibold uppercase cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{backgroundColor: 'orange', fontSize: '12px', padding: '10px 45px', letterSpacing: '0.5px', marginTop: '10px'}}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#00a1ff'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = 'orange'}
-            >
-              {loading ? (
-                <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Signing up...
-                </div>
-              ) : (
-                'Sign Up'
-              )}
-            </button>
-          </form>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-100">
+            <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Sign in to your account
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Demo credentials: admin@example.com / password
+          </p>
         </div>
-
-        {/* Sign In Form */}
-        <div className={`absolute top-0 left-0 w-1/2 h-full transition-all duration-700 ease-in-out z-20 ${isActive ? 'transform translate-x-full' : 'transform translate-x-0'}`}>
-          <form onSubmit={handleSignIn} className="bg-white flex flex-col items-center justify-center h-full" style={{padding: '0 40px'}}>
-            <h1 className="text-2xl font-bold text-gray-800 mb-6">Sign In</h1>
-            
-            <div className="flex items-center justify-center" style={{margin: '20px 0'}}>
-              <a href="#" className="flex items-center justify-center w-10 h-10" style={{border: '1px solid #ccc', borderRadius: '20%', margin: '0 3px'}}>
-                <i className="fab fa-google-plus-g text-gray-600"></i>
-              </a>
-              <a href="#" className="flex items-center justify-center w-10 h-10" style={{border: '1px solid #ccc', borderRadius: '20%', margin: '0 3px'}}>
-                <i className="fab fa-facebook-f text-gray-600"></i>
-              </a>
-              <a href="#" className="flex items-center justify-center w-10 h-10" style={{border: '1px solid #ccc', borderRadius: '20%', margin: '0 3px'}}>
-                <i className="fab fa-github text-gray-600"></i>
-              </a>
-              <a href="#" className="flex items-center justify-center w-10 h-10" style={{border: '1px solid #ccc', borderRadius: '20%', margin: '0 3px'}}>
-                <i className="fab fa-linkedin-in text-gray-600"></i>
-              </a>
-            </div>
-            
-            <span style={{fontSize: '12px', color: '#333'}}>or use your email password</span>
-            
-            <input
-              type="email"
-              name="email"
-              placeholder="UserID"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full outline-none"
-              style={{backgroundColor: '#eee', border: 'none', margin: '8px 0', padding: '10px 15px', fontSize: '13px', borderRadius: '8px', width: '100%'}}
-              required
-            />
-            <div className="relative w-full">
+        
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div className="rounded-md shadow-sm -space-y-px">
+            <div>
+              <label htmlFor="email" className="sr-only">
+                Email address
+              </label>
               <input
-                type={showPassword ? "text" : "password"}
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="Email address"
+                value={formData.email}
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              <label htmlFor="password" className="sr-only">
+                Password
+              </label>
+              <input
+                id="password"
                 name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full outline-none"
-                style={{backgroundColor: '#eee', border: 'none', margin: '8px 0', padding: '10px 15px', paddingRight: '45px', fontSize: '13px', borderRadius: '8px', width: '100%'}}
-                required
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-                style={{background: 'none', border: 'none', cursor: 'pointer'}}
-              >
-                {showPassword ? (
-                  <i className="fas fa-eye-slash text-sm"></i>
-                ) : (
-                  <i className="fas fa-eye text-sm"></i>
-                )}
-              </button>
             </div>
-            
-            <a href="#" className="no-underline" style={{color: '#333', fontSize: '13px', margin: '15px 0 10px'}}>Forget Your Password?</a>
-            
+          </div>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
+              {error}
+            </div>
+          )}
+
+          <div>
             <button
               type="submit"
               disabled={loading}
-              className="text-white border border-transparent rounded-lg font-semibold uppercase cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{backgroundColor: 'orange', fontSize: '12px', padding: '10px 45px', letterSpacing: '0.5px', marginTop: '10px'}}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#00a1ff'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = 'orange'}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <div className="flex items-center">
@@ -238,68 +116,11 @@ const Login = () => {
                   Signing in...
                 </div>
               ) : (
-                'Sign In'
+                'Sign in'
               )}
             </button>
-          </form>
-        </div>
-
-        {/* Toggle Container */}
-        <div className={`absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-all duration-700 ease-in-out z-50 ${isActive ? 'transform -translate-x-full' : 'transform translate-x-0'}`} style={{borderRadius: isActive ? '0 150px 100px 0' : '150px 0 0 100px'}}>
-          <div className={`text-white relative h-full w-full transform transition-all duration-700 ease-in-out ${isActive ? 'translate-x-1/2' : 'translate-x-0'}`} style={{background: 'linear-gradient(to right, #C33764, #1D2671)', left: '-100%', width: '200%'}}>
-            
-            {/* Toggle Left Panel */}
-            <div className={`absolute w-1/2 h-full flex flex-col items-center justify-center text-center top-0 transform transition-all duration-700 ease-in-out ${isActive ? 'translate-x-0' : '-translate-x-full'}`} style={{padding: '0 30px'}}>
-              <img src={sarthiLogo} alt="Sarthi Logo" className="mb-6" style={{width: '80px', height: 'auto'}} />
-              <h1 className="text-2xl font-bold mb-4">Welcome Back!</h1>
-              <p style={{fontSize: '14px', lineHeight: '20px', letterSpacing: '0.3px', margin: '20px 0'}}>Enter your personal details to use all Sarthi Kotak POC </p>
-              <button
-                onClick={() => setIsActive(false)}
-                className="text-white rounded-lg font-semibold uppercase cursor-pointer transition-colors"
-                style={{backgroundColor: 'transparent', border: '1px solid #fff', fontSize: '12px', padding: '10px 45px', letterSpacing: '0.5px', marginTop: '10px'}}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = '#fff';
-                  e.target.style.color = '#C33764';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = 'transparent';
-                  e.target.style.color = '#fff';
-                }}
-              >
-                Sign In
-              </button>
-            </div>
-            
-            {/* Toggle Right Panel */}
-            <div className={`absolute w-1/2 h-full flex flex-col items-center justify-center text-center top-0 right-0 transform transition-all duration-700 ease-in-out ${isActive ? 'translate-x-full' : 'translate-x-0'}`} style={{padding: '0 30px'}}>
-              <img src={sarthiLogo} alt="Sarthi Logo" className="mb-6" style={{width: '80px', height: 'auto'}} />
-              <h1 className="text-2xl font-bold mb-4">Welcome To Sarthi!</h1>
-              <p style={{fontSize: '14px', lineHeight: '20px', letterSpacing: '0.3px', margin: '20px 0'}}>Enter your personal details to use all Sarthi Kotak POC</p>
-              <button
-                onClick={() => setIsActive(true)}
-                className="text-white rounded-lg font-semibold uppercase cursor-pointer transition-colors"
-                style={{backgroundColor: 'transparent', border: '1px solid #fff', fontSize: '12px', padding: '10px 45px', letterSpacing: '0.5px', marginTop: '10px'}}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = '#fff';
-                  e.target.style.color = '#C33764';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = 'transparent';
-                  e.target.style.color = '#fff';
-                }}
-              >
-                Sign Up
-              </button>
-            </div>
           </div>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm z-50">
-            {error}
-          </div>
-        )}
+        </form>
       </div>
     </div>
   )

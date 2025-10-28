@@ -4,6 +4,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import Login from './Screens/Login'
 import Dashboard from './Screens/Dashboard'
+import StaffManagement from './Screens/StaffManagement'
 
 function App() {
   return (
@@ -20,6 +21,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/staff" 
+              element={
+                <ProtectedRoute>
+                  <StaffManagement />
                 </ProtectedRoute>
               } 
             />
