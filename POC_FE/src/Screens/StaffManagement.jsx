@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
 
 const StaffManagement = () => {
+  const [searchParams] = useSearchParams()
+  const selectedMetric = searchParams.get('metric') || 'overview'
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
@@ -12,6 +15,45 @@ const StaffManagement = () => {
   const mainContentRef = useRef(null)
   
   const itemsPerPage = 10
+
+  // Region-wise performance data
+  const regionData = {
+    collection: [
+      { region: 'North', value: 89.2, count: 45, amount: '₹2.1Cr' },
+      { region: 'South', value: 85.7, count: 38, amount: '₹1.8Cr' },
+      { region: 'East', value: 82.3, count: 42, amount: '₹1.9Cr' },
+      { region: 'West', value: 87.1, count: 35, amount: '₹1.6Cr' },
+      { region: 'Central', value: 84.5, count: 40, amount: '₹1.7Cr' }
+    ],
+    ptp: [
+      { region: 'North', value: 75.8, count: 234, amount: '₹89L' },
+      { region: 'South', value: 71.2, count: 198, amount: '₹76L' },
+      { region: 'East', value: 68.9, count: 156, amount: '₹62L' },
+      { region: 'West', value: 73.4, count: 189, amount: '₹71L' },
+      { region: 'Central', value: 70.6, count: 167, amount: '₹64L' }
+    ],
+    visit: [
+      { region: 'North', value: 81.5, count: 156, amount: '89%' },
+      { region: 'South', value: 76.2, count: 134, amount: '82%' },
+      { region: 'East', value: 79.8, count: 142, amount: '85%' },
+      { region: 'West', value: 77.9, count: 128, amount: '83%' },
+      { region: 'Central', value: 75.4, count: 119, amount: '80%' }
+    ],
+    productivity: [
+      { region: 'North', value: 168, count: 45, amount: 'High' },
+      { region: 'South', value: 152, count: 38, amount: 'Medium' },
+      { region: 'East', value: 145, count: 42, amount: 'Medium' },
+      { region: 'West', value: 161, count: 35, amount: 'High' },
+      { region: 'Central', value: 148, count: 40, amount: 'Medium' }
+    ],
+    inactive: [
+      { region: 'North', value: 2, count: 45, amount: 'Low' },
+      { region: 'South', value: 4, count: 38, amount: 'Medium' },
+      { region: 'East', value: 3, count: 42, amount: 'Low' },
+      { region: 'West', value: 5, count: 35, amount: 'High' },
+      { region: 'Central', value: 3, count: 40, amount: 'Low' }
+    ]
+  }
 
   // Click outside handler to close sidebar
   useEffect(() => {
@@ -104,10 +146,91 @@ const StaffManagement = () => {
         {/* Main Content - Scrollable */}
         <main className="flex-1 overflow-y-auto">
           <div className="bg-white min-h-screen p-6">
-            {/* Page Header */}
+         
+
+            {/* Staff Performance Cards */}
             <div className="mb-6">
-              <h1 className="text-2xl font-bold text-gray-900">Staff Management</h1>
-              <p className="text-gray-600 mt-1">Manage and monitor staff performance across all regions</p>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                {selectedMetric === 'overview' ? 'Staff Performance Overview' : 
+                 selectedMetric === 'collection' ? 'Collection Efficiency by Region' :
+                 selectedMetric === 'ptp' ? 'PTP Conversion Rate by Region' :
+                 selectedMetric === 'visit' ? 'Visit Compliance Rate by Region' :
+                 selectedMetric === 'productivity' ? 'Staff Productivity Index by Region' :
+                 selectedMetric === 'inactive' ? 'Inactive/Non-performing Staff by Region' :
+                 'Staff Performance Overview'}
+              </h3>
+              
+              {selectedMetric === 'overview' ? (
+                <div className="grid grid-cols-5 gap-3">
+                  {/* Collection Efficiency Card */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div className="text-blue-600 text-xs">Collection Efficiency (%)</div>
+                    <div className="text-lg font-bold text-blue-900">86.4%</div>
+                  </div>
+
+                  {/* PTP Conversion Rate Card */}
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <div className="text-green-600 text-xs">PTP Conversion Rate (%)</div>
+                    <div className="text-lg font-bold text-green-900">72.3%</div>
+                  </div>
+
+                  {/* Visit Compliance Rate Card */}
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                    <div className="text-purple-600 text-xs">Visit Compliance Rate (%)</div>
+                    <div className="text-lg font-bold text-purple-900">78.5%</div>
+                  </div>
+
+                  {/* Staff Productivity Index Card */}
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                    <div className="text-orange-600 text-xs">Staff Productivity Index</div>
+                    <div className="text-lg font-bold text-orange-900">156</div>
+                  </div>
+
+                  {/* Inactive/Non-performing Staff Card */}
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3 relative">
+                    <div className="text-red-600 text-xs">Inactive/Non-performing Staff</div>
+                    <div className="text-lg font-bold text-red-900">3</div>
+                    <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">3</div>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-5 gap-3">
+                  {regionData[selectedMetric]?.map((region, index) => (
+                    <div key={index} className={`border rounded-lg p-3 ${
+                      selectedMetric === 'collection' ? 'bg-blue-50 border-blue-200' :
+                      selectedMetric === 'ptp' ? 'bg-green-50 border-green-200' :
+                      selectedMetric === 'visit' ? 'bg-purple-50 border-purple-200' :
+                      selectedMetric === 'productivity' ? 'bg-orange-50 border-orange-200' :
+                      selectedMetric === 'inactive' ? 'bg-red-50 border-red-200' :
+                      'bg-gray-50 border-gray-200'
+                    }`}>
+                      <div className={`text-xs ${
+                        selectedMetric === 'collection' ? 'text-blue-600' :
+                        selectedMetric === 'ptp' ? 'text-green-600' :
+                        selectedMetric === 'visit' ? 'text-purple-600' :
+                        selectedMetric === 'productivity' ? 'text-orange-600' :
+                        selectedMetric === 'inactive' ? 'text-red-600' :
+                        'text-gray-600'
+                      }`}>
+                        {region.region} Region
+                      </div>
+                      <div className={`text-lg font-bold ${
+                        selectedMetric === 'collection' ? 'text-blue-900' :
+                        selectedMetric === 'ptp' ? 'text-green-900' :
+                        selectedMetric === 'visit' ? 'text-purple-900' :
+                        selectedMetric === 'productivity' ? 'text-orange-900' :
+                        selectedMetric === 'inactive' ? 'text-red-900' :
+                        'text-gray-900'
+                      }`}>
+                        {selectedMetric === 'inactive' ? region.value : `${region.value}${selectedMetric === 'productivity' ? '' : '%'}`}
+                      </div>
+                      <div className="text-xs text-gray-600 mt-1">
+                        Staff: {region.count} | {region.amount}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Staff Performance Leaderboard - Full Width */}
