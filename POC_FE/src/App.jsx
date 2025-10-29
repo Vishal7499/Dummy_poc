@@ -5,6 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import Login from './Screens/Login'
 import Dashboard from './Screens/Dashboard'
 import StaffManagement from './Screens/StaffManagement'
+import CustomerEngagement from './Screens/CustomerEngagement'
 
 function App() {
   return (
@@ -29,6 +30,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <StaffManagement />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/customer-engagement" 
+              element={
+                <ProtectedRoute>
+                  <CustomerEngagement />
                 </ProtectedRoute>
               } 
             />
