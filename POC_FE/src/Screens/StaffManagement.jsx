@@ -14,6 +14,8 @@ const StaffManagement = () => {
   const [sortBy, setSortBy] = useState('efficiency')
   const [sortOrder, setSortOrder] = useState('desc')
   const [selectedRegion, setSelectedRegion] = useState(null)
+  const [selectedProduct, setSelectedProduct] = useState(null)
+  const [viewType, setViewType] = useState('region') // 'region' or 'product'
   const [selectedStaff, setSelectedStaff] = useState(null)
   const [showCustomerDetails, setShowCustomerDetails] = useState(false)
   const [customerCurrentPage, setCustomerCurrentPage] = useState(1)
@@ -27,18 +29,33 @@ const StaffManagement = () => {
   const handleMainCardClick = (metric) => {
     setActiveRegionMetric(metric)
     setSelectedRegion(null) // Clear any selected region
+    setSelectedProduct(null) // Clear any selected product
     setCurrentPage(1) // Reset to first page
   }
 
   // Handle region card click
   const handleRegionClick = (region) => {
     setSelectedRegion(region)
+    setSelectedProduct(null) // Clear product when region is selected
+    setCurrentPage(1) // Reset to first page when filtering
+  }
+
+  // Handle product card click
+  const handleProductClick = (product) => {
+    setSelectedProduct(product)
+    setSelectedRegion(null) // Clear region when product is selected
     setCurrentPage(1) // Reset to first page when filtering
   }
 
   // Clear region filter
   const clearRegionFilter = () => {
     setSelectedRegion(null)
+    setCurrentPage(1)
+  }
+
+  // Clear product filter
+  const clearProductFilter = () => {
+    setSelectedProduct(null)
     setCurrentPage(1)
   }
 
@@ -112,16 +129,52 @@ const StaffManagement = () => {
     ]
   }
 
-  // Reset selected region when metric changes (from URL)
+  // Product-wise (Loan Type) performance data
+  const productData = {
+    allocation: [
+      { product: 'Tractor', value: 2156, count: 82, amount: '₹3.8Cr' },
+      { product: 'Commercial Vehicle', value: 1834, count: 68, amount: '₹3.2Cr' },
+      { product: 'Construction Equipment', value: 1292, count: 50, amount: '₹2.3Cr' }
+    ],
+    collection: [
+      { product: 'Tractor', value: 88.5, count: 82, amount: '₹3.8Cr' },
+      { product: 'Commercial Vehicle', value: 85.2, count: 68, amount: '₹3.2Cr' },
+      { product: 'Construction Equipment', value: 83.1, count: 50, amount: '₹2.3Cr' }
+    ],
+    ptp: [
+      { product: 'Tractor', value: 74.2, count: 312, amount: '₹98L' },
+      { product: 'Commercial Vehicle', value: 71.8, count: 267, amount: '₹82L' },
+      { product: 'Construction Equipment', value: 69.5, count: 178, amount: '₹58L' }
+    ],
+    visit: [
+      { product: 'Tractor', value: 80.3, count: 198, amount: '87%' },
+      { product: 'Commercial Vehicle', value: 78.1, count: 176, amount: '84%' },
+      { product: 'Construction Equipment', value: 76.8, count: 147, amount: '81%' }
+    ],
+    productivity: [
+      { product: 'Tractor', value: 162, count: 82, amount: 'High' },
+      { product: 'Commercial Vehicle', value: 155, count: 68, amount: 'Medium' },
+      { product: 'Construction Equipment', value: 148, count: 50, amount: 'Medium' }
+    ],
+    inactive: [
+      { product: 'Tractor', value: 3, count: 82, amount: 'Low' },
+      { product: 'Commercial Vehicle', value: 5, count: 68, amount: 'Medium' },
+      { product: 'Construction Equipment', value: 4, count: 50, amount: 'Low' }
+    ]
+  }
+
+  // Reset selected region/product when metric changes (from URL)
   useEffect(() => {
     setActiveRegionMetric(selectedMetric !== 'overview' ? selectedMetric : null)
     setSelectedRegion(null)
+    setSelectedProduct(null)
     setCurrentPage(1)
   }, [selectedMetric])
 
-  // Reset selected region when activeRegionMetric changes (from card click)
+  // Reset selected region/product when activeRegionMetric changes (from card click)
   useEffect(() => {
     setSelectedRegion(null)
+    setSelectedProduct(null)
     setCurrentPage(1)
   }, [activeRegionMetric])
 
@@ -227,6 +280,9 @@ const StaffManagement = () => {
     // Apply region filter if selected
     const matchesRegion = selectedRegion ? staff.region === selectedRegion : true
     
+    // Apply product filter if selected
+    const matchesProduct = selectedProduct ? staff.loanType === selectedProduct : true
+    
     // Apply metric-specific filter for inactive staff
     let matchesMetric = true
     if (activeRegionMetric === 'inactive') {
@@ -234,7 +290,7 @@ const StaffManagement = () => {
     }
     // For allocation, show all staff (no specific filtering)
     
-    return matchesSearch && matchesRegion && matchesMetric
+    return matchesSearch && matchesRegion && matchesProduct && matchesMetric
   }).sort((a, b) => {
     const aValue = a[sortBy]
     const bValue = b[sortBy]
@@ -257,14 +313,15 @@ const StaffManagement = () => {
   const paginatedCustomers = currentCustomers.slice(customerStartIndex, customerStartIndex + customerItemsPerPage)
 
   // Get metric title
-  const getMetricTitle = (metric) => {
+  const getMetricTitle = (metric, viewType) => {
+    const viewLabel = viewType === 'product' ? 'Product' : 'Region'
     switch (metric) {
-      case 'allocation': return 'Allocation Summary by Region'
-      case 'collection': return 'Collection Efficiency by Region'
-      case 'ptp': return 'PTP Conversion Rate by Region'
-      case 'visit': return 'Visit Compliance Rate by Region'
-      case 'productivity': return 'Staff Productivity Index by Region'
-      case 'inactive': return 'Inactive/Non-performing Staff by Region'
+      case 'allocation': return `Allocation Summary by ${viewLabel}`
+      case 'collection': return `Collection Efficiency by ${viewLabel}`
+      case 'ptp': return `PTP Conversion Rate by ${viewLabel}`
+      case 'visit': return `Visit Compliance Rate by ${viewLabel}`
+      case 'productivity': return `Staff Productivity Index by ${viewLabel}`
+      case 'inactive': return `Inactive/Non-performing Staff by ${viewLabel}`
       default: return 'Staff Performance Overview'
     }
   }
@@ -383,15 +440,49 @@ const StaffManagement = () => {
               </div>
             </div>
 
-            {/* Region-wise Cards (Conditional Rendering) */}
-            {activeRegionMetric && regionData[activeRegionMetric] && (
+            {/* Region/Product-wise Cards (Conditional Rendering) */}
+            {activeRegionMetric && (
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">{getMetricTitle(activeRegionMetric)}</h3>
-                <div className="grid grid-cols-5 gap-3">
-                  {regionData[activeRegionMetric]?.map((region, index) => (
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-gray-800">{getMetricTitle(activeRegionMetric, viewType)}</h3>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setViewType('region')
+                        setSelectedProduct(null)
+                        setSelectedRegion(null)
+                        setCurrentPage(1)
+                      }}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        viewType === 'region'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      By Region
+                    </button>
+                    <button
+                      onClick={() => {
+                        setViewType('product')
+                        setSelectedRegion(null)
+                        setSelectedProduct(null)
+                        setCurrentPage(1)
+                      }}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        viewType === 'product'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      By Product
+                    </button>
+                  </div>
+                </div>
+                <div className={`grid gap-3 ${viewType === 'region' ? 'grid-cols-5' : 'grid-cols-3'}`}>
+                  {viewType === 'region' && regionData[activeRegionMetric]?.map((region, index) => (
                     <div 
                       key={index} 
-                      className={`border rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md ${
+                      className={`border rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative ${
                         selectedRegion === region.region ? 'ring-2 ring-blue-500 shadow-lg' : ''
                       } ${
                         activeRegionMetric === 'allocation' ? 'bg-indigo-50 border-indigo-200 hover:bg-indigo-100' :
@@ -438,6 +529,56 @@ const StaffManagement = () => {
                       )}
                     </div>
                   ))}
+                  {viewType === 'product' && productData[activeRegionMetric]?.map((product, index) => (
+                    <div 
+                      key={index} 
+                      className={`border rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative ${
+                        selectedProduct === product.product ? 'ring-2 ring-blue-500 shadow-lg' : ''
+                      } ${
+                        activeRegionMetric === 'allocation' ? 'bg-indigo-50 border-indigo-200 hover:bg-indigo-100' :
+                        activeRegionMetric === 'collection' ? 'bg-blue-50 border-blue-200 hover:bg-blue-100' :
+                        activeRegionMetric === 'ptp' ? 'bg-green-50 border-green-200 hover:bg-green-100' :
+                        activeRegionMetric === 'visit' ? 'bg-purple-50 border-purple-200 hover:bg-purple-100' :
+                        activeRegionMetric === 'productivity' ? 'bg-orange-50 border-orange-200 hover:bg-orange-100' :
+                        activeRegionMetric === 'inactive' ? 'bg-red-50 border-red-200 hover:bg-red-100' :
+                        'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                      }`}
+                      onClick={() => handleProductClick(product.product)}
+                    >
+                      <div className={`text-xs ${
+                        activeRegionMetric === 'allocation' ? 'text-indigo-600' :
+                        activeRegionMetric === 'collection' ? 'text-blue-600' :
+                        activeRegionMetric === 'ptp' ? 'text-green-600' :
+                        activeRegionMetric === 'visit' ? 'text-purple-600' :
+                        activeRegionMetric === 'productivity' ? 'text-orange-600' :
+                        activeRegionMetric === 'inactive' ? 'text-red-600' :
+                        'text-gray-600'
+                      }`}>
+                        {product.product}
+                      </div>
+                      <div className={`text-lg font-bold ${
+                        activeRegionMetric === 'allocation' ? 'text-indigo-900' :
+                        activeRegionMetric === 'collection' ? 'text-blue-900' :
+                        activeRegionMetric === 'ptp' ? 'text-green-900' :
+                        activeRegionMetric === 'visit' ? 'text-purple-900' :
+                        activeRegionMetric === 'productivity' ? 'text-orange-900' :
+                        activeRegionMetric === 'inactive' ? 'text-red-900' :
+                        'text-gray-900'
+                      }`}>
+                        {activeRegionMetric === 'inactive' ? product.value : 
+                         activeRegionMetric === 'allocation' ? product.value.toLocaleString() :
+                         `${product.value}${activeRegionMetric === 'productivity' ? '' : '%'}`}
+                      </div>
+                      <div className="text-xs text-gray-600 mt-1">
+                        Staff: {product.count} | {product.amount}
+                      </div>
+                      {selectedProduct === product.product && (
+                        <div className="absolute top-2 right-2">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -445,16 +586,27 @@ const StaffManagement = () => {
             {/* Staff Performance Leaderboard - Full Width */}
             <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 flex-wrap">
                   <h2 className="text-xl font-semibold text-gray-900">Staff Performance Leaderboard</h2>
                   {selectedRegion && (
                     <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-1">
-                      <span className="text-sm text-blue-700">Filtered by: {selectedRegion} Region</span>
+                      <span className="text-sm text-blue-700">Region: {selectedRegion}</span>
                       <button
                         onClick={clearRegionFilter}
                         className="text-blue-600 hover:text-blue-800 text-sm font-medium cursor-pointer"
                       >
-                        ✕ Clear
+                        ✕
+                      </button>
+                    </div>
+                  )}
+                  {selectedProduct && (
+                    <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-1">
+                      <span className="text-sm text-green-700">Product: {selectedProduct}</span>
+                      <button
+                        onClick={clearProductFilter}
+                        className="text-green-600 hover:text-green-800 text-sm font-medium cursor-pointer"
+                      >
+                        ✕
                       </button>
                     </div>
                   )}
@@ -583,9 +735,11 @@ const StaffManagement = () => {
               {/* Pagination */}
               <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
                 <div className="text-sm text-gray-600">
-                  {selectedRegion ? (
+                  {selectedRegion || selectedProduct ? (
                     <>
-                      Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredStaff.length)} of {filteredStaff.length} staff in {selectedRegion} Region
+                      Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredStaff.length)} of {filteredStaff.length} staff
+                      {selectedRegion && ` in ${selectedRegion} Region`}
+                      {selectedProduct && ` with ${selectedProduct}`}
                     </>
                   ) : (
                     <>

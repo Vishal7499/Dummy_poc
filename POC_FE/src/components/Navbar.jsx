@@ -1,15 +1,24 @@
 import React from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
-import sarthiLogo from '../assets/Images/sarthi_logo.png'
+import sarthiLogo from '/src/assets/Images/kotaklogo.png'
+import { logoutApi } from '../utils/api'
 
 const Navbar = ({ onMobileMenuClick, isSidebarCollapsed, onBellClick }) => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
-  const handleLogout = () => {
-    logout()
-    navigate('/login')
+  const handleLogout = async () => {
+    try {
+      if (user?.accessToken) {
+        await logoutApi(user.accessToken)
+      }
+    } catch (e) {
+      // ignore network/logout errors
+    } finally {
+      logout()
+      navigate('/login')
+    }
   }
 
   return (
@@ -30,9 +39,9 @@ const Navbar = ({ onMobileMenuClick, isSidebarCollapsed, onBellClick }) => {
                     {/* Show logo and text when sidebar is collapsed */}
                     {isSidebarCollapsed && (
                       <>
-                        <img src={sarthiLogo} alt="Sarthi Logo" className="w-6 h-6 sm:w-8 sm:h-8" />
+                        <img src={sarthiLogo} alt="Sarthi Logo" className="w-40 h-6 sm:w-8 sm:h-8" style={{width: '50px', height: '50px'}} />
                         <div className="hidden sm:block">
-                          <h1 className="text-base sm:text-lg font-semibold text-gray-900">Sarthi Kotak POC</h1>
+                          <h1 className="text-base sm:text-lg font-semibold text-gray-900">Sarthi Collection Kotak Bank</h1>
                           <p className="text-xs text-gray-600">Supervisor Dashboard</p>
                         </div>
                         <div className="block sm:hidden">

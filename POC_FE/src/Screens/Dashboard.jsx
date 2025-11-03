@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { GoPin } from 'react-icons/go'
+import { LuPinOff } from 'react-icons/lu'
 import { useNavigate } from 'react-router-dom'
+import Chart from 'react-apexcharts'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
 
@@ -11,8 +14,14 @@ const Dashboard = () => {
   const [showAlerts, setShowAlerts] = useState(false)
   const [expandedCard, setExpandedCard] = useState(null)
   const [chartFilter, setChartFilter] = useState('ftd')
-  const [hoveredBar, setHoveredBar] = useState(null)
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
+  const [favoriteCards, setFavoriteCards] = useState(() => {
+    try {
+      const stored = localStorage.getItem('favoriteCards')
+      return stored ? JSON.parse(stored) : []
+    } catch (e) {
+      return []
+    }
+  })
   const alertsRef = useRef(null)
   const mainContentRef = useRef(null)
 
@@ -79,118 +88,156 @@ const Dashboard = () => {
 
   const currentData = staffData[activeTab]
 
-  // Chart data for different filter ranges
+  // Chart data for different filter ranges (values in Rupees - will be formatted to Lacs/Crores in chart)
   const chartData = {
     ftd: {
       title: 'Collection Trend (For the Day)',
       data: [
-        { day: 'Mon', value: 45, height: '60%' },
-        { day: 'Tue', value: 52, height: '70%' },
-        { day: 'Wed', value: 38, height: '50%' },
-        { day: 'Thu', value: 68, height: '90%' },
-        { day: 'Fri', value: 55, height: '75%' },
-        { day: 'Sat', value: 72, height: '95%' },
-        { day: 'Sun', value: 48, height: '65%' }
+        { day: 'Mon', value: 4500000, height: '60%' },  // 45 Lacs
+        { day: 'Tue', value: 5200000, height: '70%' },  // 52 Lacs
+        { day: 'Wed', value: 3800000, height: '50%' },  // 38 Lacs
+        { day: 'Thu', value: 6800000, height: '90%' },  // 68 Lacs
+        { day: 'Fri', value: 5500000, height: '75%' },  // 55 Lacs
+        { day: 'Sat', value: 7200000, height: '95%' },  // 72 Lacs
+        { day: 'Sun', value: 4800000, height: '65%' }   // 48 Lacs
       ]
     },
     wtd: {
       title: 'Collection Trend (Week Till Date)',
       data: [
-        { day: 'Mon', value: 120, height: '65%' },
-        { day: 'Tue', value: 145, height: '80%' },
-        { day: 'Wed', value: 98, height: '55%' },
-        { day: 'Thu', value: 178, height: '95%' },
-        { day: 'Fri', value: 156, height: '85%' },
-        { day: 'Sat', value: 189, height: '100%' },
-        { day: 'Sun', value: 134, height: '70%' }
+        { day: 'Mon', value: 12000000, height: '65%' },  // 1.2 Cr
+        { day: 'Tue', value: 14500000, height: '80%' },  // 1.45 Cr
+        { day: 'Wed', value: 9800000, height: '55%' },   // 98 Lacs
+        { day: 'Thu', value: 17800000, height: '95%' },  // 1.78 Cr
+        { day: 'Fri', value: 15600000, height: '85%' },  // 1.56 Cr
+        { day: 'Sat', value: 18900000, height: '100%' }, // 1.89 Cr
+        { day: 'Sun', value: 13400000, height: '70%' }   // 1.34 Cr
       ]
     },
     mtd: {
       title: 'Collection Trend (Month Till Date)',
       data: [
-        { day: '1', value: 45, height: '60%' },
-        { day: '2', value: 52, height: '70%' },
-        { day: '3', value: 38, height: '50%' },
-        { day: '4', value: 68, height: '90%' },
-        { day: '5', value: 55, height: '75%' },
-        { day: '6', value: 72, height: '95%' },
-        { day: '7', value: 48, height: '65%' },
-        { day: '8', value: 61, height: '80%' },
-        { day: '9', value: 43, height: '55%' },
-        { day: '10', value: 79, height: '100%' },
-        { day: '11', value: 56, height: '72%' },
-        { day: '12', value: 67, height: '85%' },
-        { day: '13', value: 49, height: '62%' },
-        { day: '14', value: 73, height: '92%' },
-        { day: '15', value: 58, height: '74%' },
-        { day: '16', value: 64, height: '82%' },
-        { day: '17', value: 41, height: '52%' },
-        { day: '18', value: 76, height: '96%' },
-        { day: '19', value: 53, height: '68%' },
-        { day: '20', value: 69, height: '88%' },
-        { day: '21', value: 47, height: '60%' },
-        { day: '22', value: 71, height: '90%' },
-        { day: '23', value: 59, height: '75%' },
-        { day: '24', value: 65, height: '83%' },
-        { day: '25', value: 44, height: '56%' },
-        { day: '26', value: 78, height: '98%' },
-        { day: '27', value: 54, height: '69%' },
-        { day: '28', value: 70, height: '89%' },
-        { day: '29', value: 46, height: '58%' },
-        { day: '30', value: 74, height: '94%' },
-        { day: '31', value: 51, height: '65%' }
+        { day: '1', value: 4500000, height: '60%' },   // 45 Lacs
+        { day: '2', value: 5200000, height: '70%' },   // 52 Lacs
+        { day: '3', value: 3800000, height: '50%' },   // 38 Lacs
+        { day: '4', value: 6800000, height: '90%' },   // 68 Lacs
+        { day: '5', value: 5500000, height: '75%' },   // 55 Lacs
+        { day: '6', value: 7200000, height: '95%' },   // 72 Lacs
+        { day: '7', value: 4800000, height: '65%' },   // 48 Lacs
+        { day: '8', value: 6100000, height: '80%' },   // 61 Lacs
+        { day: '9', value: 4300000, height: '55%' },   // 43 Lacs
+        { day: '10', value: 7900000, height: '100%' }, // 79 Lacs
+        { day: '11', value: 5600000, height: '72%' },  // 56 Lacs
+        { day: '12', value: 6700000, height: '85%' },  // 67 Lacs
+        { day: '13', value: 4900000, height: '62%' },  // 49 Lacs
+        { day: '14', value: 7300000, height: '92%' },  // 73 Lacs
+        { day: '15', value: 5800000, height: '74%' },  // 58 Lacs
+        { day: '16', value: 6400000, height: '82%' },  // 64 Lacs
+        { day: '17', value: 4100000, height: '52%' },  // 41 Lacs
+        { day: '18', value: 7600000, height: '96%' },  // 76 Lacs
+        { day: '19', value: 5300000, height: '68%' },  // 53 Lacs
+        { day: '20', value: 6900000, height: '88%' },  // 69 Lacs
+        { day: '21', value: 4700000, height: '60%' },  // 47 Lacs
+        { day: '22', value: 7100000, height: '90%' },  // 71 Lacs
+        { day: '23', value: 5900000, height: '75%' },  // 59 Lacs
+        { day: '24', value: 6500000, height: '83%' },  // 65 Lacs
+        { day: '25', value: 4400000, height: '56%' },  // 44 Lacs
+        { day: '26', value: 7800000, height: '98%' },  // 78 Lacs
+        { day: '27', value: 5400000, height: '69%' },  // 54 Lacs
+        { day: '28', value: 7000000, height: '89%' },  // 70 Lacs
+        { day: '29', value: 4600000, height: '58%' },  // 46 Lacs
+        { day: '30', value: 7400000, height: '94%' },  // 74 Lacs
+        { day: '31', value: 5100000, height: '65%' }   // 51 Lacs
       ]
     },
     fy: {
       title: 'Collection Trend (Current Financial Year)',
       data: [
-        { day: 'Apr', value: 1200, height: '60%' },
-        { day: 'May', value: 1350, height: '70%' },
-        { day: 'Jun', value: 980, height: '50%' },
-        { day: 'Jul', value: 1680, height: '90%' },
-        { day: 'Aug', value: 1450, height: '75%' },
-        { day: 'Sep', value: 1720, height: '95%' },
-        { day: 'Oct', value: 1480, height: '65%' },
-        { day: 'Nov', value: 1320, height: '68%' },
-        { day: 'Dec', value: 1580, height: '82%' },
-        { day: 'Jan', value: 1420, height: '73%' },
-        { day: 'Feb', value: 1160, height: '58%' },
-        { day: 'Mar', value: 1650, height: '85%' }
+        { day: 'Apr', value: 120000000, height: '60%' },  // 12 Cr
+        { day: 'May', value: 135000000, height: '70%' },  // 13.5 Cr
+        { day: 'Jun', value: 98000000, height: '50%' },   // 9.8 Cr
+        { day: 'Jul', value: 168000000, height: '90%' },  // 16.8 Cr
+        { day: 'Aug', value: 145000000, height: '75%' },  // 14.5 Cr
+        { day: 'Sep', value: 172000000, height: '95%' },  // 17.2 Cr
+        { day: 'Oct', value: 148000000, height: '65%' },  // 14.8 Cr
+        { day: 'Nov', value: 132000000, height: '68%' },  // 13.2 Cr
+        { day: 'Dec', value: 158000000, height: '82%' },  // 15.8 Cr
+        { day: 'Jan', value: 142000000, height: '73%' },  // 14.2 Cr
+        { day: 'Feb', value: 116000000, height: '58%' },  // 11.6 Cr
+        { day: 'Mar', value: 165000000, height: '85%' }   // 16.5 Cr
       ]
     },
     lfy: {
       title: 'Collection Trend (Last Financial Year)',
       data: [
-        { day: 'Apr', value: 1100, height: '55%' },
-        { day: 'May', value: 1250, height: '65%' },
-        { day: 'Jun', value: 880, height: '45%' },
-        { day: 'Jul', value: 1580, height: '85%' },
-        { day: 'Aug', value: 1350, height: '70%' },
-        { day: 'Sep', value: 1620, height: '90%' },
-        { day: 'Oct', value: 1380, height: '60%' },
-        { day: 'Nov', value: 1220, height: '58%' },
-        { day: 'Dec', value: 1480, height: '78%' },
-        { day: 'Jan', value: 1320, height: '68%' },
-        { day: 'Feb', value: 1060, height: '48%' },
-        { day: 'Mar', value: 1550, height: '80%' }
+        { day: 'Apr', value: 110000000, height: '55%' },  // 11 Cr
+        { day: 'May', value: 125000000, height: '65%' },  // 12.5 Cr
+        { day: 'Jun', value: 88000000, height: '45%' },   // 8.8 Cr
+        { day: 'Jul', value: 158000000, height: '85%' },  // 15.8 Cr
+        { day: 'Aug', value: 135000000, height: '70%' },  // 13.5 Cr
+        { day: 'Sep', value: 162000000, height: '90%' },  // 16.2 Cr
+        { day: 'Oct', value: 138000000, height: '60%' },  // 13.8 Cr
+        { day: 'Nov', value: 122000000, height: '58%' },  // 12.2 Cr
+        { day: 'Dec', value: 148000000, height: '78%' },  // 14.8 Cr
+        { day: 'Jan', value: 132000000, height: '68%' },  // 13.2 Cr
+        { day: 'Feb', value: 106000000, height: '48%' },  // 10.6 Cr
+        { day: 'Mar', value: 155000000, height: '80%' }   // 15.5 Cr
       ]
     }
   }
 
   const currentChartData = chartData[chartFilter]
 
-  // Handle bar hover for tooltip
-  const handleBarHover = (item, index, event) => {
-    setHoveredBar({ item, index })
-    const rect = event.currentTarget.getBoundingClientRect()
-    setTooltipPosition({
-      x: rect.left + rect.width / 2,
-      y: rect.top - 10
-    })
+  // All available cards for favorites
+  const allCards = [
+    { id: 'allocation', name: 'Allocation Summary', category: 'Staff Monitoring' },
+    { id: 'collection', name: 'Collection Efficiency (%)', category: 'Staff Monitoring' },
+    { id: 'ptp', name: 'PTP Conversion Rate (%)', category: 'Staff Monitoring' },
+    { id: 'productivity', name: 'Staff Productivity Index', category: 'Staff Monitoring' },
+    { id: 'inactive', name: 'Inactive/Non-performing Staff', category: 'Staff Monitoring' },
+    { id: 'whatsapp', name: 'WhatsApp Engagements', category: 'Customer Engagement' },
+    { id: 'aiCalls', name: 'AI Calls', category: 'Customer Engagement' },
+    { id: 'dialler', name: 'Dialler Calls', category: 'Customer Engagement' },
+    { id: 'fieldVisits', name: 'Field Visits', category: 'Customer Engagement' },
+    { id: 'overdue', name: 'Overdue Accounts', category: 'Payment Intent' },
+    { id: 'promised', name: 'Promised to Pay', category: 'Payment Intent' },
+    { id: 'refused', name: 'Refused to Pay', category: 'Payment Intent' },
+    { id: 'paid', name: 'Already Paid', category: 'Payment Intent' },
+    { id: 'broken', name: 'Broken Promises', category: 'Payment Intent' },
+    { id: 'wrong', name: 'Wrong Numbers / Unreachable', category: 'Payment Intent' }
+  ]
+
+  // Handle favorite toggle
+  const toggleFavorite = (cardId) => {
+    setFavoriteCards(prev => 
+      prev.includes(cardId) 
+        ? prev.filter(id => id !== cardId)
+        : [...prev, cardId]
+    )
   }
 
-  const handleBarLeave = () => {
-    setHoveredBar(null)
+  // Persist favorites across refreshes
+  useEffect(() => {
+    try {
+      localStorage.setItem('favoriteCards', JSON.stringify(favoriteCards))
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [favoriteCards])
+
+  const renderFavoritePin = (cardId) => {
+    const isFav = favoriteCards.includes(cardId)
+    return (
+      <button
+        type="button"
+        className={`absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center ${isFav ? 'bg-yellow-400 text-yellow-800' : 'bg-gray-200 text-gray-600'} cursor-pointer shadow-sm z-[60] opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity`}
+        onClick={(e) => { e.stopPropagation(); toggleFavorite(cardId) }}
+        aria-label={isFav ? 'Unpin from favorites' : 'Pin to favorites'}
+        title={isFav ? 'Unpin from favorites' : 'Pin to favorites'}
+      >
+        {isFav ? <LuPinOff size={14} /> : <GoPin size={14} />}
+      </button>
+    )
   }
 
   return (
@@ -341,7 +388,9 @@ const Dashboard = () => {
             </div>
           </div>
 
-                {/* Section 6: Delegation Tracking */}
+                
+
+                {/* Section 7: Delegation Tracking */}
                 <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                   <h3 className="text-sm font-semibold text-gray-900 mb-3">Delegation Tracking</h3>
                   <div className="space-y-2">
@@ -368,6 +417,239 @@ const Dashboard = () => {
 
               {/* Right Side - Main Content */}
               <div className="flex-1">
+                {/* Favorites Section */}
+                {favoriteCards.length > 0 && (
+                  <div className="mb-4">
+                    <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                      ⭐ Favorites ({favoriteCards.length})
+                    </h2>
+                    <div className="grid grid-cols-5 gap-3">
+                      {favoriteCards.map(cardId => {
+                        const card = allCards.find(c => c.id === cardId)
+                        if (!card) return null
+                        
+                        // Render different cards based on their ID
+                        if (cardId === 'allocation') {
+                          return (
+                            <div key={cardId} className="group bg-indigo-50 border-2 border-yellow-400 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg">
+                              <div className="text-indigo-600 text-xs">Allocation Summary</div>
+                              <div className="text-lg font-bold text-indigo-900">1,245</div>
+                              {renderFavoritePin('allocation')}
+                            </div>
+                          )
+                        } else if (cardId === 'collection') {
+                          return (
+                            <div key={cardId} className="group bg-blue-50 border-2 border-yellow-400 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg">
+                              <div className="text-blue-600 text-xs">Collection Efficiency (%)</div>
+                              <div className="text-lg font-bold text-blue-900">86.4%</div>
+                              {renderFavoritePin('collection')}
+                            </div>
+                          )
+                        } else if (cardId === 'ptp') {
+                          return (
+                            <div key={cardId} className="group bg-green-50 border-2 border-yellow-400 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg">
+                              <div className="text-green-600 text-xs">PTP Conversion Rate (%)</div>
+                              <div className="text-lg font-bold text-green-900">72.3%</div>
+                              {renderFavoritePin('ptp')}
+                            </div>
+                          )
+                        } else if (cardId === 'productivity') {
+                          return (
+                            <div key={cardId} className="group bg-orange-50 border-2 border-yellow-400 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg">
+                              <div className="text-orange-600 text-xs">Staff Productivity Index</div>
+                              <div className="text-lg font-bold text-orange-900">156</div>
+                              {renderFavoritePin('productivity')}
+                            </div>
+                          )
+                        } else if (cardId === 'inactive') {
+                          return (
+                            <div key={cardId} className="group bg-red-50 border-2 border-yellow-400 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg">
+                              <div className="text-red-600 text-xs">Inactive/Non-performing Staff</div>
+                              <div className="text-lg font-bold text-red-900">3</div>
+                              {renderFavoritePin('inactive')}
+                            </div>
+                          )
+                        } else if (cardId === 'whatsapp') {
+                          return (
+                            <div key={cardId} className="group bg-green-50 border-2 border-yellow-400 rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-green-100 shadow-lg relative">
+                              {renderFavoritePin('whatsapp')}
+                              <h3 className="text-sm font-semibold text-green-800 mb-2">WhatsApp Engagements</h3>
+                              <div className="space-y-1">
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-green-600">Messages Sent</span>
+                                  <span className="font-semibold text-green-800">1,245</span>
+                                </div>
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-green-600">Delivered</span>
+                                  <span className="font-semibold text-green-800">1,180</span>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        } else if (cardId === 'aiCalls') {
+                          return (
+                            <div key={cardId} className="group bg-blue-50 border-2 border-yellow-400 rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-blue-100 shadow-lg relative">
+                              {renderFavoritePin('aiCalls')}
+                              <h3 className="text-sm font-semibold text-blue-800 mb-2">AI Calls</h3>
+                              <div className="space-y-1">
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-blue-600">Calls Triggered</span>
+                                  <span className="font-semibold text-blue-800">2,100</span>
+                                </div>
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-blue-600">Answered</span>
+                                  <span className="font-semibold text-blue-800">1,580</span>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        } else if (cardId === 'dialler') {
+                          return (
+                            <div key={cardId} className="group bg-purple-50 border-2 border-yellow-400 rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-purple-100 shadow-lg relative">
+                              {renderFavoritePin('dialler')}
+                              <h3 className="text-sm font-semibold text-purple-800 mb-2">Dialler Calls</h3>
+                              <div className="space-y-1">
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-purple-600">Total Calls</span>
+                                  <span className="font-semibold text-purple-800">1,850</span>
+                                </div>
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-purple-600">Successful Connects</span>
+                                  <span className="font-semibold text-purple-800">1,340</span>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        } else if (cardId === 'fieldVisits') {
+                          return (
+                            <div key={cardId} className="group bg-orange-50 border-2 border-yellow-400 rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-orange-100 shadow-lg relative">
+                              {renderFavoritePin('fieldVisits')}
+                              <h3 className="text-sm font-semibold text-orange-800 mb-2">Field Visits</h3>
+                              <div className="space-y-1">
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-orange-600">Planned Visits</span>
+                                  <span className="font-semibold text-orange-800">156</span>
+                                </div>
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-orange-600">Completed Visits</span>
+                                  <span className="font-semibold text-orange-800">122</span>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        } else if (cardId === 'overdue') {
+                          return (
+                            <div key={cardId} className="bg-red-50 border-2 border-yellow-400 rounded-lg p-3 shadow-lg relative">
+                              {renderFavoritePin('overdue')}
+                              <h3 className="text-sm font-semibold text-red-800 mb-2">Overdue Accounts</h3>
+                              <div className="space-y-1">
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-red-600">Customer Count</span>
+                                  <span className="font-semibold text-red-800">45</span>
+                                </div>
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-red-600">Amount</span>
+                                  <span className="font-semibold text-red-800">₹1.25Cr</span>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        } else if (cardId === 'promised') {
+                          return (
+                            <div key={cardId} className="bg-green-50 border-2 border-yellow-400 rounded-lg p-3 shadow-lg relative col-span-2">
+                              {renderFavoritePin('promised')}
+                              <h3 className="text-sm font-semibold text-green-800 mb-2">Promised to Pay</h3>
+                              <div className="space-y-1">
+                                <div className="flex flex-row justify-between text-xs">
+                                  <span className="text-green-600"># Todays PTP</span>
+                                  <span className="font-semibold text-green-800">23</span>
+                                  <span className="text-green-600"># Future PTP</span>
+                                  <span className="font-semibold text-green-800">890</span>
+                                </div>
+                                <div className="flex flex-row justify-between text-xs">
+                                  <span className="text-green-600"># Failed PTP</span>
+                                  <span className="font-semibold text-green-800">234</span>
+                                  <span className="text-green-600"># Total PTP</span>
+                                  <span className="font-semibold text-green-800">1120</span>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        } else if (cardId === 'refused') {
+                          return (
+                            <div key={cardId} className="bg-orange-50 border-2 border-yellow-400 rounded-lg p-3 shadow-lg relative">
+                              {renderFavoritePin('refused')}
+                              <h3 className="text-sm font-semibold text-orange-800 mb-2">Refused to Pay</h3>
+                              <div className="space-y-1">
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-orange-600"># Customers</span>
+                                  <span className="font-semibold text-orange-800">67</span>
+                                </div>
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-orange-600">Pending Amount</span>
+                                  <span className="font-semibold text-orange-800">₹34L</span>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        } else if (cardId === 'paid') {
+                          return (
+                            <div key={cardId} className="bg-blue-50 border-2 border-yellow-400 rounded-lg p-3 shadow-lg relative">
+                              {renderFavoritePin('paid')}
+                              <h3 className="text-sm font-semibold text-blue-800 mb-2">Already Paid</h3>
+                              <div className="space-y-1">
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-blue-600"># Customers</span>
+                                  <span className="font-semibold text-blue-800">189</span>
+                                </div>
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-blue-600">Collected Amount</span>
+                                  <span className="font-semibold text-blue-800">₹56L</span>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        } else if (cardId === 'broken') {
+                          return (
+                            <div key={cardId} className="bg-purple-50 border-2 border-yellow-400 rounded-lg p-3 shadow-lg relative">
+                              {renderFavoritePin('broken')}
+                              <h3 className="text-sm font-semibold text-purple-800 mb-2">Broken Promises</h3>
+                              <div className="space-y-1">
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-purple-600"># Customers</span>
+                                  <span className="font-semibold text-purple-800">89</span>
+                                </div>
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-purple-600">Broken Amount</span>
+                                  <span className="font-semibold text-purple-800">₹28L</span>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        } else if (cardId === 'wrong') {
+                          return (
+                            <div key={cardId} className="bg-gray-50 border-2 border-yellow-400 rounded-lg p-3 shadow-lg relative">
+                              {renderFavoritePin('wrong')}
+                              <h3 className="text-sm font-semibold text-gray-800 mb-2">Wrong Numbers / Unreachable</h3>
+                              <div className="space-y-1">
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-gray-600">Count of Invalid Contacts</span>
+                                  <span className="font-semibold text-gray-800">156</span>
+                                </div>
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-gray-600">Status</span>
+                                  <span className="font-semibold text-gray-800">Data Correction</span>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        }
+                        return null
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 {/* Staff Monitoring (Summary) */}
                 <div className="mb-4">
                   <h2 className="text-lg font-semibold text-gray-800 mb-3">Staff Monitoring (Summary)</h2>
@@ -379,6 +661,7 @@ const Dashboard = () => {
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={() => navigate('/staff?metric=allocation')}
                     >
+                      {renderFavoritePin('allocation')}
                       <div className="text-indigo-600 text-xs">Allocation Summary</div>
                       <div className="text-lg font-bold text-indigo-900">1,245</div>
                       {expandedCard === 'allocation' && (
@@ -414,6 +697,7 @@ const Dashboard = () => {
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={() => navigate('/staff?metric=collection')}
                     >
+                      {renderFavoritePin('collection')}
                       <div className="text-blue-600 text-xs">Collection Efficiency (%)</div>
                       <div className="text-lg font-bold text-blue-900">86.4%</div>
                       {expandedCard === 'collection' && (
@@ -445,6 +729,7 @@ const Dashboard = () => {
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={() => navigate('/staff?metric=ptp')}
                     >
+                      {renderFavoritePin('ptp')}
                       <div className="text-green-600 text-xs">PTP Conversion Rate (%)</div>
                       <div className="text-lg font-bold text-green-900">72.3%</div>
                       {expandedCard === 'ptp' && (
@@ -476,6 +761,7 @@ const Dashboard = () => {
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={() => navigate('/staff?metric=productivity')}
                     >
+                      {renderFavoritePin('productivity')}
                       <div className="text-orange-600 text-xs">Staff Productivity Index</div>
                       <div className="text-lg font-bold text-orange-900">156</div>
                       {expandedCard === 'productivity' && (
@@ -507,6 +793,7 @@ const Dashboard = () => {
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={() => navigate('/staff?metric=inactive')}
                     >
+                      {renderFavoritePin('inactive')}
                       <div className="text-red-600 text-xs">Inactive/Non-performing Staff</div>
                       <div className="text-lg font-bold text-red-900">3</div>
                       <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">3</div>
@@ -541,9 +828,10 @@ const Dashboard = () => {
                   <h2 className="text-lg font-semibold text-gray-800 mb-3">Customer Engagement</h2>
                   <div className="grid grid-cols-4 gap-3">
                     <div 
-                      className="bg-green-50 border border-green-200 rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-green-100"
+                      className="group bg-green-50 border border-green-200 rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-green-100 relative"
                       onClick={() => navigate('/customer-engagement')}
                     >
+                      {renderFavoritePin('whatsapp')}
                       <h3 className="text-sm font-semibold text-green-800 mb-2">WhatsApp Engagements</h3>
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs">
@@ -566,9 +854,10 @@ const Dashboard = () => {
                     </div>
 
                     <div 
-                      className="bg-blue-50 border border-blue-200 rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-blue-100"
+                      className="group bg-blue-50 border border-blue-200 rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-blue-100 relative"
                       onClick={() => navigate('/customer-engagement')}
                     >
+                      {renderFavoritePin('aiCalls')}
                       <h3 className="text-sm font-semibold text-blue-800 mb-2">AI Calls</h3>
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs">
@@ -587,9 +876,10 @@ const Dashboard = () => {
                     </div>
 
                     <div 
-                      className="bg-purple-50 border border-purple-200 rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-purple-100"
+                      className="group bg-purple-50 border border-purple-200 rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-purple-100 relative"
                       onClick={() => navigate('/customer-engagement')}
                     >
+                      {renderFavoritePin('dialler')}
                       <h3 className="text-sm font-semibold text-purple-800 mb-2">Dialler Calls</h3>
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs">
@@ -608,9 +898,10 @@ const Dashboard = () => {
                   </div>
 
                     <div 
-                      className="bg-orange-50 border border-orange-200 rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-orange-100"
+                      className="group bg-orange-50 border border-orange-200 rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-orange-100 relative"
                       onClick={() => navigate('/customer-engagement')}
                     >
+                      {renderFavoritePin('fieldVisits')}
                       <h3 className="text-sm font-semibold text-orange-800 mb-2">Field Visits</h3>
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs">
@@ -634,7 +925,8 @@ const Dashboard = () => {
                 <div className="mb-4">
                   <h2 className="text-lg font-semibold text-gray-800 mb-3">Payment Intent & Behavior</h2>
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <div className="group bg-red-50 border border-red-200 rounded-lg p-3 relative">
+                      {renderFavoritePin('overdue')}
                       <h3 className="text-sm font-semibold text-red-800 mb-2">Overdue Accounts</h3>
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs">
@@ -648,7 +940,8 @@ const Dashboard = () => {
                       </div>
                     </div>
 
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <div className="group bg-green-50 border border-green-200 rounded-lg p-3 relative">
+                      {renderFavoritePin('promised')}
                       <h3 className="text-sm font-semibold text-green-800 mb-2">Promised to Pay</h3>
                       <div className="space-y-1">
                         <div className="flex flex-row justify-between text-xs">
@@ -672,7 +965,8 @@ const Dashboard = () => {
                       </div>
                     </div>
 
-                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                    <div className="group bg-orange-50 border border-orange-200 rounded-lg p-3 relative">
+                      {renderFavoritePin('refused')}
                       <h3 className="text-sm font-semibold text-orange-800 mb-2">Refused to Pay</h3>
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs">
@@ -686,7 +980,8 @@ const Dashboard = () => {
                       </div>
                     </div>
 
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div className="group bg-blue-50 border border-blue-200 rounded-lg p-3 relative">
+                      {renderFavoritePin('paid')}
                       <h3 className="text-sm font-semibold text-blue-800 mb-2">Already Paid</h3>
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs">
@@ -700,7 +995,8 @@ const Dashboard = () => {
                       </div>
                     </div>
 
-                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                    <div className="group bg-purple-50 border border-purple-200 rounded-lg p-3 relative">
+                      {renderFavoritePin('broken')}
                       <h3 className="text-sm font-semibold text-purple-800 mb-2">Broken Promises</h3>
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs">
@@ -714,7 +1010,8 @@ const Dashboard = () => {
                     </div>
                   </div>
 
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                    <div className="group bg-gray-50 border border-gray-200 rounded-lg p-3 relative">
+                      {renderFavoritePin('wrong')}
                       <h3 className="text-sm font-semibold text-gray-800 mb-2">Wrong Numbers / Unreachable</h3>
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs">
@@ -735,13 +1032,13 @@ const Dashboard = () => {
                   {/* Left Side - Charts */}
                   <div className="col-span-2 space-y-4">
                      {/* Collection Trend Chart */}
-                     <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mt-2">
+                     <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mt-2 relative">
                        <div className="flex justify-between items-center mb-4">
                          <h3 className="text-sm font-semibold text-gray-900">{currentChartData.title}</h3>
                          <select 
                            value={chartFilter} 
                            onChange={(e) => setChartFilter(e.target.value)}
-                           className="px-3 py-1 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                           className="px-3 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
                          >
                            <option value="ftd">For the Day (FTD)</option>
                            <option value="wtd">Week Till Date (WTD)</option>
@@ -750,64 +1047,144 @@ const Dashboard = () => {
                            <option value="lfy">Last Financial Year</option>
                          </select>
                        </div>
-                       <div className="h-56 bg-white rounded-lg border-2 mb-3 border-blue-200 relative chart-container">
-                         {/* Dynamic Chart Data */}
-                         <div className="absolute inset-0 p-4">
-                           <div className="h-full flex items-end justify-between" style={{gap: currentChartData.data.length > 20 ? '2px' : currentChartData.data.length > 10 ? '3px' : '6px'}}>
-                             {currentChartData.data.map((item, index) => (
-                               <div 
-                                 key={index} 
-                                 className="bg-blue-500 rounded-t cursor-pointer transition-all duration-200 hover:bg-blue-600 hover:shadow-lg" 
-                                 style={{
-                                   height: item.height,
-                                   width: currentChartData.data.length > 20 ? '8px' : currentChartData.data.length > 10 ? '10px' : '16px',
-                                   minWidth: '4px'
-                                 }}
-                                 onMouseEnter={(e) => handleBarHover(item, index, e)}
-                                 onMouseLeave={handleBarLeave}
-                               ></div>
-                             ))}
-                           </div>
-                           <div className="absolute bottom-0 left-0 right-0 flex justify-between text-xs text-gray-500 px-1" style={{gap: currentChartData.data.length > 20 ? '2px' : currentChartData.data.length > 10 ? '3px' : '6px'}}>
-                             {currentChartData.data.map((item, index) => (
-                               <span 
-                                 key={index} 
-                                 className="text-center"
-                                 style={{
-                                   fontSize: currentChartData.data.length > 20 ? '9px' : '10px',
-                                   width: currentChartData.data.length > 20 ? '8px' : currentChartData.data.length > 10 ? '10px' : '16px',
-                                   minWidth: '4px'
-                                 }}
-                               >
-                                 {item.day}
-                               </span>
-                             ))}
-                           </div>
-                         </div>
+                       
+                       <div className="relative">
+                         <Chart
+                         options={{
+                           chart: {
+                             type: 'bar',
+                             height: 350,
+                             toolbar: { show: false },
+                             animations: {
+                               enabled: true,
+                               easing: 'easeinout',
+                               speed: 800
+                             }
+                           },
+                           plotOptions: {
+                             bar: {
+                               borderRadius: 4,
+                               columnWidth: currentChartData.data.length > 20 ? '60%' : currentChartData.data.length > 10 ? '70%' : '80%',
+                               dataLabels: {
+                                 position: 'top'
+                               }
+                             }
+                           },
+                           dataLabels: {
+                             enabled: true,
+                             offsetY: -20,
+                             style: {
+                               fontSize: '11px',
+                               fontWeight: 600,
+                               colors: ['#1e40af']
+                             },
+                             formatter: function (val) {
+                               if (val >= 10000000) {
+                                 return `₹${(val / 10000000).toFixed(2)}Cr`;
+                               } else if (val >= 100000) {
+                                 return `₹${(val / 100000).toFixed(2)}L`;
+                               } else if (val >= 1000) {
+                                 return `₹${(val / 1000).toFixed(1)}K`;
+                               }
+                               return `₹${val}`;
+                             }
+                           },
+                           xaxis: {
+                             categories: currentChartData.data.map(item => item.day),
+                             labels: {
+                               style: {
+                                 fontSize: '11px',
+                                 fontWeight: 500,
+                                 colors: '#4b5563'
+                               }
+                             },
+                             axisBorder: {
+                               show: true,
+                               color: '#e5e7eb'
+                             },
+                             axisTicks: {
+                               show: true,
+                               color: '#e5e7eb'
+                             }
+                           },
+                           yaxis: {
+                             title: {
+                               text: 'Collection (₹)',
+                               style: {
+                                 fontSize: '11px',
+                                 fontWeight: 600,
+                                 color: '#4b5563'
+                               }
+                             },
+                             labels: {
+                               style: {
+                                 fontSize: '11px',
+                                 colors: '#6b7280'
+                               },
+                               formatter: function (val) {
+                                 if (val >= 10000000) {
+                                   return `₹${(val / 10000000).toFixed(2)}Cr`;
+                                 } else if (val >= 100000) {
+                                   return `₹${(val / 100000).toFixed(2)}L`;
+                                 } else if (val >= 1000) {
+                                   return `₹${(val / 1000).toFixed(1)}K`;
+                                 }
+                                 return `₹${val}`;
+                               }
+                             }
+                           },
+                           colors: ['#3b82f6'],
+                           grid: {
+                             borderColor: '#e5e7eb',
+                             strokeDashArray: 3,
+                             xaxis: {
+                               lines: {
+                                 show: false
+                               }
+                             },
+                             yaxis: {
+                               lines: {
+                                 show: true
+                               }
+                             }
+                           },
+                           tooltip: {
+                             theme: 'light',
+                             y: {
+                               formatter: function (val) {
+                                 if (val >= 10000000) {
+                                   return `₹${(val / 10000000).toFixed(2)} Cr (₹${val.toLocaleString('en-IN')})`;
+                                 } else if (val >= 100000) {
+                                   return `₹${(val / 100000).toFixed(2)} L (₹${val.toLocaleString('en-IN')})`;
+                                 } else if (val >= 1000) {
+                                   return `₹${(val / 1000).toFixed(1)} K (₹${val.toLocaleString('en-IN')})`;
+                                 }
+                                 return `₹${val.toLocaleString('en-IN')}`;
+                               }
+                             }
+                           },
+                           responsive: [{
+                             breakpoint: 768,
+                             options: {
+                               chart: {
+                                 height: 300
+                               },
+                               dataLabels: {
+                                 fontSize: '9px'
+                               }
+                             }
+                           }]
+                         }}
+                         series={[{
+                           name: 'Collection',
+                           data: currentChartData.data.map(item => item.value)
+                         }]}
+                         type="bar"
+                         height={350}
+                       />
                          <div className="absolute top-2 right-2 bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
                            📊 Live Chart
                          </div>
-                         
-                         {/* Modern Tooltip */}
-                         {hoveredBar && (
-                           <div 
-                             className="fixed bg-gray-900 text-white px-3 py-2 rounded-lg shadow-xl pointer-events-none"
-                             style={{
-                               left: tooltipPosition.x - 50,
-                               top: tooltipPosition.y - 50,
-                               transform: 'translateX(-50%)',
-                               zIndex: 9999
-                             }}
-                           >
-                             <div className="text-sm font-semibold mb-1">
-                               {hoveredBar.item.day}
-                             </div>
-                             <div className="text-xs text-gray-300">
-                               Collection: ₹{hoveredBar.item.value.toLocaleString()}
-                             </div>
-                             <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
-                           </div>
-                         )}
                        </div>
                      </div>
 

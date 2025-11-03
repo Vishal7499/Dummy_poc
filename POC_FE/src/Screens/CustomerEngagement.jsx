@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
 import Chart from 'react-apexcharts';
-import Slider from 'react-slick';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
-import './Dashboard.scss';
+import { useNavigate } from 'react-router-dom'
 
 // Dummy data matching the dashboard image
 const dummyData = {
@@ -50,6 +47,52 @@ const CustomerEngagement = () => {
   const [selectedDate, setSelectedDate] = useState('27-10-2025');
   const [expanded, setExpanded] = useState(true);
   const mainContentRef = React.useRef(null);
+  const navigate = useNavigate();
+  const timelineScrollRef = React.useRef(null);
+
+  // Helpers for date parsing/formatting (DD-MM-YYYY)
+  const parseDate = (str) => {
+    const [dd, mm, yyyy] = str.split('-').map(Number)
+    return new Date(yyyy, mm - 1, dd)
+  }
+
+  const formatDate = (dateObj) => {
+    const dd = String(dateObj.getDate()).padStart(2, '0')
+    const mm = String(dateObj.getMonth() + 1).padStart(2, '0')
+    const yyyy = dateObj.getFullYear()
+    return `${dd}-${mm}-${yyyy}`
+  }
+
+  const getMonthDays = (dateStr) => {
+    const base = parseDate(dateStr)
+    const year = base.getFullYear()
+    const month = base.getMonth()
+    const first = new Date(year, month, 1)
+    const last = new Date(year, month + 1, 0)
+    const total = last.getDate()
+    const dataMap = new Map(dummyData.timelineData.map(d => [d.date, d]))
+    const days = []
+    for (let d = 1; d <= total; d++) {
+      const dt = new Date(year, month, d)
+      const key = formatDate(dt)
+      const item = dataMap.get(key)
+      days.push({
+        date: key,
+        value: item ? item.value : 0,
+        isHoliday: item ? !!item.isHoliday : false,
+      })
+    }
+    return days
+  }
+
+  const monthDays = getMonthDays(selectedDate)
+
+  const scrollTimeline = (dir) => {
+    const el = timelineScrollRef.current
+    if (!el) return
+    const amount = Math.floor(el.clientWidth * 0.8)
+    el.scrollBy({ left: dir === 'left' ? -amount : amount, behavior: 'smooth' })
+  }
 
   // Chart configuration
   const chartOptions = {
@@ -106,31 +149,7 @@ const CustomerEngagement = () => {
     data: dummyData.chartData.values
   }];
 
-  // Timeline slider settings
-  const timelineSettings = {
-    dots: false,
-    infinite: false,
-    speed: 500,
-    slidesToShow: 7,
-    slidesToScroll: 2,
-    arrows: true,
-    responsive: [
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 3,
-          slidesToScroll: 3,
-        },
-      },
-      {
-        breakpoint: 600,
-        settings: {
-          slidesToShow: 2,
-          slidesToScroll: 2,
-        },
-      },
-    ],
-  };
+  // No external slider; using Tailwind horizontal scroll instead
 
   // Click outside handler to close sidebar
   React.useEffect(() => {
@@ -151,7 +170,6 @@ const CustomerEngagement = () => {
 
   return (
     <div className="h-screen font-['Montserrat'] flex" style={{background: 'linear-gradient(135deg,rgb(255, 255, 255) 0%,rgb(255, 255, 255) 100%)'}}>
-      {/* Sidebar - Small when closed, overlay when open */}
       <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : 'w-0 overflow-hidden'}`}>
         <Sidebar 
           isMobileOpen={isMobileSidebarOpen} 
@@ -160,8 +178,6 @@ const CustomerEngagement = () => {
           setIsCollapsed={setIsSidebarCollapsed}
         />
       </div>
-      
-      {/* Overlay Sidebar when expanded */}
       {!isSidebarCollapsed && (
         <div className="fixed inset-y-0 left-0 z-50 w-68 bg-white border-r border-gray-200 shadow-lg">
           <Sidebar 
@@ -172,440 +188,152 @@ const CustomerEngagement = () => {
           />
         </div>
       )}
-      
       <div ref={mainContentRef} className="flex flex-col overflow-hidden flex-1">
-        {/* Navbar */}
         <Navbar 
           onMobileMenuClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)} 
           isSidebarCollapsed={isSidebarCollapsed}
         />
-        
-        {/* Main Content - Scrollable */}
         <main className="flex-1 overflow-y-auto">
-          <div className="dashboard-container">
+          <div className="min-h-screen bg-gray-50">
             {/* Header */}
-            <div className="dashboard-header">
-              <div className="header-left">
-                <button className="back-button">
-                  ← Dashboard
-                </button>
-              </div>
-              <div className="header-center">
-                <h3 className="company-title">
-                  AARTHSIDDHI SERVICES PRIVATE LTD
-                </h3>
-              </div>
-              <div className="header-right">
-                <button className="header-icon">🔍</button>
-                <button className="header-icon">👤</button>
-              </div>
-            </div>
+          
 
             {/* Timeline */}
-            <div className="timeline-container">
-              <div className="flex items-center justify-between gap-1">
-                <button className="move-btn text-2xl">
-                  ⟪
-                </button>
-                <button className="move-btn text-xl">
-                  ⟨
-                </button>
-                
-                <div className="slider-container" style={{ flex: 1, minWidth: 0 }}>
-                  <Slider {...timelineSettings}>
-                    {dummyData.timelineData.map((item, index) => (
-                      <div
+            <div className="p-4">
+              <div className="flex items-center gap-2">
+                <button onClick={() => scrollTimeline('left')} className="px-2 py-2 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 cursor-pointer">⟨</button>
+                <div ref={timelineScrollRef} className="flex-1 overflow-x-auto scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                  <div className="flex gap-2 min-w-max">
+                    {monthDays.map((item, index) => (
+                      <button
                         key={index}
-                        className={`d-card ${index === dummyData.timelineData.length - 1 ? 'last-card' : ''}`}
                         onClick={() => setSelectedDate(item.date)}
+                        className={`relative px-4 py-3 rounded-lg border text-xs snap-start transition-colors shadow-sm ${selectedDate === item.date ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white border-gray-200 text-gray-700'} ${item.isHoliday ? 'ring-1 ring-red-200 pt-5' : ''}`}
                       >
-                        <div
-                          className={`timeline-card ${selectedDate === item.date ? 'selected' : ''} ${item.isHoliday ? 'holiday-card' : ''}`}
-                        >
-                          {item.isHoliday && <span className="ribbon">Holiday</span>}
-                          <span className={`value ${selectedDate === item.date ? 'selected-text' : ''}`}>
-                            {item.value}
-                          </span>
-                          <span className={`date ${selectedDate === item.date ? 'selected-text' : ''}`}>
-                            {item.date}
-                          </span>
-                        </div>
-                      </div>
+                        {item.isHoliday && <span className="absolute top-1 left-2 z-10 bg-red-500 text-white text-[10px] px-2 py-[2px] rounded shadow">Holiday</span>}
+                        <div className="font-semibold text-base">{item.value}</div>
+                        <div className="text-[11px] text-gray-500">{item.date}</div>
+                      </button>
                     ))}
-                  </Slider>
+                  </div>
                 </div>
-                
-                <button className="move-btn text-xl">
-                  ⟩
-                </button>
-                <button className="move-btn text-2xl">
-                  ⟫
-                </button>
+                <button onClick={() => scrollTimeline('right')} className="px-2 py-2 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 cursor-pointer">⟩</button>
               </div>
             </div>
 
             {/* Main Content */}
-            <div className="dashboard-content">
-              {/* Top Row */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
-                {/* Left Side - Total Customers Engagement Card + Customer Metrics */}
-                <div className="lg:col-span-1 flex flex-col gap-4">
-                  {/* Total Customers Engagement Card */}
-                  <div className="customer-engagement flex-1">
-                    {/* Total customer engagement */}
-                    <div
-                      className="total-container flex gap-1"
-                      style={{ flexDirection: `${!expanded ? "column" : "row"}` }}
-                    >
-                      {/* <img
-                        src="/api/placeholder/30/30"
-                        alt="engagement-customer"
-                        className="img-icon"
-                      /> */}
-                      <div className="flex justify-between" style={{ flex: 1 }}>
-                        <span className={`title ${!expanded ? "down" : "up"}`}>
-                          Total Customers Engagement
-                        </span>
-                        <span className="value">
-                          {dummyData.totalEngagement.toLocaleString()}
-                        </span>
-                      </div>
+            <div className="p-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                {/* Total Engagement + Breakdown */}
+                <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-semibold text-gray-900">Total Customers Engagement</div>
+                    <div className="text-2xl font-bold text-gray-800">{dummyData.totalEngagement.toLocaleString()}</div>
+                  </div>
+                  <div className="mt-4 grid grid-cols-4 gap-3">
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                      <div className="text-2xl">💬</div>
+                      <div className="text-sm font-semibold text-green-800">{dummyData.engagementBreakdown.whatsapp.toLocaleString()}</div>
+                      <div className="text-xs text-green-700">WhatsApp</div>
                     </div>
-
-                    {/* Engagement breakdown */}
-                    <div className="dropdown-container" style={{ padding: `${expanded ? "0.3rem 0.7rem" : "0.7rem"}` }}>
-                      <button
-                        className="arrow-container"
-                        onClick={() => setExpanded(!expanded)}
-                      >
-                        <span className={`arrow ${!expanded ? "down" : "up"}`}></span>
-                      </button>
-                      {expanded && (
-                        <div className="normal flex gap-1 justify-between items-end">
-                          <div className="size-increase flex flex-col items-center flex-wrap justify-center">
-                            <div className="img-div">
-                              💬
-                            </div>
-                            <span className="engagement-value">
-                              {dummyData.engagementBreakdown.whatsapp.toLocaleString()}
-                            </span>
-                            <span className="engagement-text">WhatsApp</span>
-                          </div>
-                          
-                          <div className="size-increase flex flex-col items-center flex-wrap justify-center">
-                            <div className="img-div">
-                              🔊
-                            </div>
-                            <span className="engagement-value">
-                              {dummyData.engagementBreakdown.blaster.toLocaleString()}
-                            </span>
-                            <span className="engagement-text">Blaster</span>
-                          </div>
-                          
-                          <div className="size-increase flex flex-col items-center flex-wrap justify-center">
-                            <div className="img-div">
-                              🤖
-                            </div>
-                            <span className="engagement-value">
-                              {dummyData.engagementBreakdown.aiCalls.toLocaleString()}
-                            </span>
-                            <span className="engagement-text">AI Calls</span>
-                          </div>
-                          
-                          <div className="size-increase flex flex-col items-center flex-wrap justify-center">
-                            <div className="img-div">
-                              📞
-                            </div>
-                            <span className="engagement-value">
-                              {dummyData.engagementBreakdown.dialers.toLocaleString()}
-                            </span>
-                            <span className="engagement-text">Dialers</span>
-                          </div>
-                        </div>
-                      )}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+                      <div className="text-2xl">🔊</div>
+                      <div className="text-sm font-semibold text-blue-800">{dummyData.engagementBreakdown.blaster.toLocaleString()}</div>
+                      <div className="text-xs text-blue-700">Blaster</div>
+                    </div>
+                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
+                      <div className="text-2xl">🤖</div>
+                      <div className="text-sm font-semibold text-purple-800">{dummyData.engagementBreakdown.aiCalls.toLocaleString()}</div>
+                      <div className="text-xs text-purple-700">AI Calls</div>
+                    </div>
+                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 text-center">
+                      <div className="text-2xl">📞</div>
+                      <div className="text-sm font-semibold text-orange-800">{dummyData.engagementBreakdown.dialers.toLocaleString()}</div>
+                      <div className="text-xs text-orange-700">Dialers</div>
                     </div>
                   </div>
-
-                  {/* Customer Metrics Box - Below Total Customers Engagement */}
-                  <div className="customer-details flex-1">
-                    <div className="flex gap-0 justify-evenly">
-                      <div className="container flex gap-2">
-                        <div
-                          className="flex flex-col items-center gap-1 cursor-pointer"
-                          style={{
-                            borderRight: "1px solid black",
-                            height: "100%",
-                            padding: "0 1rem 0 0",
-                          }}
-                        >
-                          <div className="customer-img-div">
-                            👤
-                          </div>
-                          <span className="customer-value">
-                            {dummyData.customerMetrics.totalCustomers.toLocaleString()}
-                          </span>
-                          <span className="customer-text">Total Customers</span>
-                        </div>
-
-                        <div
-                          className="flex flex-col items-center gap-1"
-                          style={{
-                            borderRight: "1px solid black",
-                            height: "100%",
-                            padding: "0 1rem 0 0",
-                          }}
-                        >
-                          <div className="customer-img-div">
-                            👥
-                          </div>
-                          <span className="customer-value">
-                            {dummyData.customerMetrics.connectedCustomers.toLocaleString()}
-                          </span>
-                          <span className="customer-text">
-                            Total Customers Connected
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="container flex gap-2">
-                        <div
-                          className="flex flex-col items-center gap-1 customer-container"
-                          style={{
-                            borderRight: "1px solid black",
-                            height: "100%",
-                            padding: "0 1rem 0 0",
-                          }}
-                        >
-                          <div className="customer-img-div">
-                            💰
-                          </div>
-                          <span className="customer-value">
-                            ₹{dummyData.customerMetrics.amountPromised.toLocaleString()}
-                          </span>
-                          <span className="customer-text">
-                            Total Amount Promised by Customers
-                          </span>
-                        </div>
-
-                        <div
-                          className="flex flex-col items-center gap-1 customer-container"
-                        >
-                          <div className="customer-img-div">
-                            💳
-                          </div>
-                          <span className="customer-value">
-                            ₹{dummyData.customerMetrics.amountCollected.toLocaleString()}
-                          </span>
-                          <span className="customer-text">
-                            Total Amount Collected from Customers
-                          </span>
-                        </div>
-                      </div>
+                  <div className="mt-4 grid grid-cols-4 gap-3">
+                    <div className="col-span-1 bg-white border border-gray-200 rounded-lg p-3 text-center">
+                      <div className="text-2xl">👤</div>
+                      <div className="text-base font-semibold text-gray-800">{dummyData.customerMetrics.totalCustomers.toLocaleString()}</div>
+                      <div className="text-xs text-gray-600">Total Customers</div>
+                    </div>
+                    <div className="col-span-1 bg-white border border-gray-200 rounded-lg p-3 text-center">
+                      <div className="text-2xl">👥</div>
+                      <div className="text-base font-semibold text-gray-800">{dummyData.customerMetrics.connectedCustomers.toLocaleString()}</div>
+                      <div className="text-xs text-gray-600">Connected</div>
+                    </div>
+                    <div className="col-span-1 bg-white border border-gray-200 rounded-lg p-3 text-center">
+                      <div className="text-2xl">💰</div>
+                      <div className="text-base font-semibold text-gray-800">₹{dummyData.customerMetrics.amountPromised.toLocaleString()}</div>
+                      <div className="text-xs text-gray-600">Amount Promised</div>
+                    </div>
+                    <div className="col-span-1 bg-white border border-gray-200 rounded-lg p-3 text-center">
+                      <div className="text-2xl">💳</div>
+                      <div className="text-base font-semibold text-gray-800">₹{dummyData.customerMetrics.amountCollected.toLocaleString()}</div>
+                      <div className="text-xs text-gray-600">Amount Collected</div>
                     </div>
                   </div>
                 </div>
 
-                {/* Right Side - Customer Engagement Chart */}
-                <div className="lg:col-span-1">
-                  <div className="chart-container">
-                    <div className="chart-header flex justify-between">
-                      <h4 className="chart-title">Customers Engagement</h4>
-                      <select 
-                        value={selectedDays} 
-                        onChange={(e) => setSelectedDays(e.target.value)}
-                        className="custom-select"
-                      >
-                        <option value="Last 7 days">Last 7 days</option>
-                        <option value="Last 15 days">Last 15 days</option>
-                        <option value="Last 30 days">Last 30 days</option>
-                      </select>
-                    </div>
-                    <div className="x-scroll">
-                      <Chart
-                        options={chartOptions}
-                        series={chartSeries}
-                        type="bar"
-                        height={260}
-                      />
-                    </div>
+                {/* Chart */}
+                <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-sm font-semibold text-gray-900">Customers Engagement</h4>
+                    <select 
+                      value={selectedDays} 
+                      onChange={(e) => setSelectedDays(e.target.value)}
+                      className="px-3 py-1 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                    >
+                      <option value="Last 7 days">Last 7 days</option>
+                      <option value="Last 15 days">Last 15 days</option>
+                      <option value="Last 30 days">Last 30 days</option>
+                    </select>
                   </div>
+                  <Chart options={chartOptions} series={chartSeries} type="bar" height={260} />
                 </div>
               </div>
 
-              {/* Bottom Row - Status Cards */}
-              <div className="mb-5">
-                <div className="pay-container flex items-center gap-3">
-                  <button className="move-btn text-3xl flex-shrink-0">
-                    ⟨
-                  </button>
-                  <div style={{ flex: 1 }}>
-                    <Slider
-                      dots={true}
-                      infinite={false}
-                      speed={500}
-                      slidesToShow={4}
-                      slidesToScroll={2}
-                      arrows={false}
-                      draggable={true}
-                      swipe={true}
-                      touchMove={true}
-                      cssEase="linear"
-                      adaptiveHeight={true}
-                      responsive={[
-                      {
-                        breakpoint: 1200,
-                        settings: {
-                          slidesToShow: 4,
-                          slidesToScroll: 4,
-                        },
-                      },
-                      {
-                        breakpoint: 992,
-                        settings: {
-                          slidesToShow: 4,
-                          slidesToScroll: 4,
-                        },
-                      },
-                      {
-                        breakpoint: 768,
-                        settings: {
-                          slidesToShow: 3,
-                          slidesToScroll: 3,
-                        },
-                      },
-                      {
-                        breakpoint: 576,
-                        settings: {
-                          slidesToShow: 1,
-                          slidesToScroll: 1,
-                        },
-                      },
-                    ]}
-                  >
-                     {/* Promised to Pay */}
-                     <div className="card">
-                       <div
-                         className="flex justify-between items-center"
-                         style={{ borderBottom: "1px solid black" }}
-                       >
-                         <span className="title" style={{ color: '#10B981' }}>
-                           <span className="text-green-500 mr-2">●</span> Promised to Pay
-                         </span>
-                         <div className="img-div">
-                           📄
-                         </div>
-                       </div>
-                       <p className="text">
-                         Account:{" "}
-                         <span style={{
-                           color: "#1D3261",
-                           fontSize: "16px",
-                           marginInlineStart: "1rem",
-                         }}>
-                           {dummyData.statusCards.promisedToPay.accounts}
-                         </span>
-                       </p>
-                       <p className="text">
-                         Amount:{" "}
-                         <span style={{
-                           color: "#1D3261",
-                           fontSize: "16px",
-                           marginInlineStart: "1rem",
-                         }}>
-                           ₹{dummyData.statusCards.promisedToPay.amount.toLocaleString()}
-                         </span>
-                       </p>
-                     </div>
-
-                     {/* Refused to Pay */}
-                     <div className="card">
-                       <div
-                         className="flex justify-between items-center"
-                         style={{ borderBottom: "1px solid black" }}
-                       >
-                         <span className="title" style={{ color: '#EF4444' }}>
-                           <span className="text-red-500 mr-2">●</span> Refused to Pay
-                         </span>
-                         <div className="img-div">
-                           🔄
-                         </div>
-                       </div>
-                       <p className="text">
-                         Account:{" "}
-                         <span style={{
-                           color: "#1D3261",
-                           fontSize: "16px",
-                           marginInlineStart: "1rem",
-                         }}>
-                           {dummyData.statusCards.refusedToPay.accounts}
-                         </span>
-                       </p>
-                     </div>
-
-                     {/* Already Paid */}
-                     <div className="card">
-                       <div
-                         className="flex justify-between items-center"
-                         style={{ borderBottom: "1px solid black" }}
-                       >
-                         <span className="title" style={{ color: '#EF4444' }}>
-                           <span className="text-red-500 mr-2">●</span> Already Paid
-                         </span>
-                         <div className="img-div">
-                           💰
-                         </div>
-                       </div>
-                       <p className="text">
-                         Account:{" "}
-                         <span style={{
-                           color: "#1D3261",
-                           fontSize: "16px",
-                           marginInlineStart: "1rem",
-                         }}>
-                           {dummyData.statusCards.alreadyPaid.accounts}
-                         </span>
-                       </p>
-                       <p className="text">
-                         Amount:{" "}
-                         <span style={{
-                           color: "#1D3261",
-                           fontSize: "16px",
-                           marginInlineStart: "1rem",
-                         }}>
-                           ₹{dummyData.statusCards.alreadyPaid.amount.toLocaleString()}
-                         </span>
-                       </p>
-                     </div>
-
-                     {/* Wrong Number */}
-                     <div className="card">
-                       <div
-                         className="flex justify-between items-center"
-                         style={{ borderBottom: "1px solid black" }}
-                       >
-                         <span className="title" style={{ color: '#3B82F6' }}>
-                           <span className="text-blue-500 mr-2">●</span> Wrong Number
-                         </span>
-                         <div className="img-div">
-                           📞
-                         </div>
-                       </div>
-                       <p className="text">
-                         Account:{" "}
-                         <span style={{
-                           color: "#1D3261",
-                           fontSize: "16px",
-                           marginInlineStart: "1rem",
-                         }}>
-                           {dummyData.statusCards.wrongNumber.accounts}
-                         </span>
-                       </p>
-                     </div>
-                    </Slider>
+              {/* Status Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between border-b border-green-200 pb-2 mb-2">
+                    <span className="text-sm font-semibold text-green-800"><span className="text-green-500 mr-2">●</span>Promised to Pay</span>
+                    <div className="text-xl">📄</div>
                   </div>
-                  <button className="move-btn text-3xl flex-shrink-0">
-                    ⟩
-                  </button>
+                  <div className="text-xs text-gray-600">Accounts</div>
+                  <div className="text-base font-semibold text-gray-900">{dummyData.statusCards.promisedToPay.accounts.toLocaleString()}</div>
+                  <div className="mt-2 text-xs text-gray-600">Amount</div>
+                  <div className="text-base font-semibold text-gray-900">₹{dummyData.statusCards.promisedToPay.amount.toLocaleString()}</div>
+                </div>
+
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between border-b border-red-200 pb-2 mb-2">
+                    <span className="text-sm font-semibold text-red-800"><span className="text-red-500 mr-2">●</span>Refused to Pay</span>
+                    <div className="text-xl">🔄</div>
+                  </div>
+                  <div className="text-xs text-gray-600">Accounts</div>
+                  <div className="text-base font-semibold text-gray-900">{dummyData.statusCards.refusedToPay.accounts.toLocaleString()}</div>
+                </div>
+
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between border-b border-blue-200 pb-2 mb-2">
+                    <span className="text-sm font-semibold text-blue-800"><span className="text-blue-500 mr-2">●</span>Already Paid</span>
+                    <div className="text-xl">💰</div>
+                  </div>
+                  <div className="text-xs text-gray-600">Accounts</div>
+                  <div className="text-base font-semibold text-gray-900">{dummyData.statusCards.alreadyPaid.accounts.toLocaleString()}</div>
+                  <div className="mt-2 text-xs text-gray-600">Amount</div>
+                  <div className="text-base font-semibold text-gray-900">₹{dummyData.statusCards.alreadyPaid.amount.toLocaleString()}</div>
+                </div>
+
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between border-b border-gray-200 pb-2 mb-2">
+                    <span className="text-sm font-semibold text-gray-800"><span className="text-blue-500 mr-2">●</span>Wrong Number</span>
+                    <div className="text-xl">📞</div>
+                  </div>
+                  <div className="text-xs text-gray-600">Accounts</div>
+                  <div className="text-base font-semibold text-gray-900">{dummyData.statusCards.wrongNumber.accounts.toLocaleString()}</div>
                 </div>
               </div>
             </div>

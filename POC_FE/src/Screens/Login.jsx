@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import sarthiLogo from '../assets/Images/sarthi_logo.png'
+import sarthiLogo from '/src/assets/Images/sarthi_logo.png'
+import { loginApi } from '../utils/api'
 
 const Login = () => {
   const [isActive, setIsActive] = useState(false)
@@ -30,165 +31,44 @@ const Login = () => {
     setError('')
 
     try {
-      // Simulate API call - replace with actual authentication
-      if (formData.email === 'admin@example.com' && formData.password === 'password') {
-        const userData = {
-          id: 1,
-          email: formData.email,
-          name: 'Admin User'
-        }
-        login(userData)
-        navigate('/dashboard')
-      } else {
-        setError('Invalid email or password')
+      const data = await loginApi({ username: formData.email, password: formData.password })
+      const userData = {
+        username: data.username,
+        role: data.role,
+        accessToken: data.tokens?.access,
+        refreshToken: data.tokens?.refresh,
+        name: data.username,
       }
+      login(userData)
+      navigate('/dashboard')
     } catch (err) {
-      setError('Login failed. Please try again.')
+      setError('Invalid credentials or server error')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleSignUp = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-
-    try {
-      // Simulate API call for registration
-      if (formData.name && formData.email && formData.password) {
-        const userData = {
-          id: Date.now(),
-          email: formData.email,
-          name: formData.name
-        }
-        login(userData)
-        navigate('/dashboard')
-      } else {
-        setError('Please fill in all fields')
-      }
-    } catch (err) {
-      setError('Registration failed. Please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
+  // Sign up not in use
 
   return (
     <div className="min-h-screen flex items-center justify-center font-['Montserrat'] p-4" style={{background: 'linear-gradient(to right, #e2e2e2, #c9d6ff)', minHeight: '100vh'}}>
       <div className={`bg-white relative overflow-hidden transition-all duration-700 ease-in-out ${isActive ? 'active' : ''}`} style={{boxShadow: '0 5px 15px rgba(0, 0, 0, 0.35)', borderRadius: '30px', width: '100%', maxWidth: '768px', minHeight: '480px'}}>
-        
-        {/* Sign Up Form */}
-        <div className={`absolute top-0 left-0 w-1/2 h-full transition-all duration-700 ease-in-out z-10 ${isActive ? 'transform translate-x-full opacity-100 z-50' : 'transform translate-x-0 opacity-0'}`}>
-          <form onSubmit={handleSignUp} className="bg-white flex flex-col items-center justify-center h-full" style={{padding: '0 40px'}}>
-            <h1 className="text-2xl font-bold text-gray-800 mb-6">Create Account</h1>
-            
-            <div className="flex items-center justify-center" style={{margin: '20px 0'}}>
-              <a href="#" className="flex items-center justify-center w-10 h-10" style={{border: '1px solid #ccc', borderRadius: '20%', margin: '0 3px'}}>
-                <i className="fab fa-google-plus-g text-gray-600"></i>
-              </a>
-              <a href="#" className="flex items-center justify-center w-10 h-10" style={{border: '1px solid #ccc', borderRadius: '20%', margin: '0 3px'}}>
-                <i className="fab fa-facebook-f text-gray-600"></i>
-              </a>
-              <a href="#" className="flex items-center justify-center w-10 h-10" style={{border: '1px solid #ccc', borderRadius: '20%', margin: '0 3px'}}>
-                <i className="fab fa-github text-gray-600"></i>
-              </a>
-              <a href="#" className="flex items-center justify-center w-10 h-10" style={{border: '1px solid #ccc', borderRadius: '20%', margin: '0 3px'}}>
-                <i className="fab fa-linkedin-in text-gray-600"></i>
-              </a>
-            </div>
-            
-            <span style={{fontSize: '12px', color: '#333'}}>or use your email for registration</span>
-            
-            <input
-              type="text"
-              name="name"
-              placeholder="Name"
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full outline-none"
-              style={{backgroundColor: '#eee', border: 'none', margin: '8px 0', padding: '10px 15px', fontSize: '13px', borderRadius: '8px', width: '100%'}}
-              required
-            />
-            <input
-              type="email"
-              name="email"
-              placeholder="UserID"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full outline-none"
-              style={{backgroundColor: '#eee', border: 'none', margin: '8px 0', padding: '10px 15px', fontSize: '13px', borderRadius: '8px', width: '100%'}}
-              required
-            />
-            <div className="relative w-full">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full outline-none"
-                style={{backgroundColor: '#eee', border: 'none', margin: '8px 0', padding: '10px 15px', paddingRight: '45px', fontSize: '13px', borderRadius: '8px', width: '100%'}}
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-                style={{background: 'none', border: 'none', cursor: 'pointer'}}
-              >
-                {showPassword ? (
-                  <i className="fas fa-eye-slash text-sm"></i>
-                ) : (
-                  <i className="fas fa-eye text-sm"></i>
-                )}
-              </button>
-            </div>
-            
-            <button
-              type="submit"
-              disabled={loading}
-              className="text-white border border-transparent rounded-lg font-semibold uppercase cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{backgroundColor: 'orange', fontSize: '12px', padding: '10px 45px', letterSpacing: '0.5px', marginTop: '10px'}}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#00a1ff'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = 'orange'}
-            >
-              {loading ? (
-                <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Signing up...
-                </div>
-              ) : (
-                'Sign Up'
-              )}
-            </button>
-          </form>
-        </div>
-
-        {/* Sign In Form */}
+        {/* Sign In Form Only */}
         <div className={`absolute top-0 left-0 w-1/2 h-full transition-all duration-700 ease-in-out z-20 ${isActive ? 'transform translate-x-full' : 'transform translate-x-0'}`}>
           <form onSubmit={handleSignIn} className="bg-white flex flex-col items-center justify-center h-full" style={{padding: '0 40px'}}>
             <h1 className="text-2xl font-bold text-gray-800 mb-6">Sign In</h1>
             
-            <div className="flex items-center justify-center" style={{margin: '20px 0'}}>
-              <a href="#" className="flex items-center justify-center w-10 h-10" style={{border: '1px solid #ccc', borderRadius: '20%', margin: '0 3px'}}>
-                <i className="fab fa-google-plus-g text-gray-600"></i>
+            <div className="flex items-center justify-center" style={{margin: '0px 0'}}>
+              <a href="#" className="flex items-center justify-center w-70 h-20" >
+              <img src={sarthiLogo} alt="Sarthi Logo" className="mb-" style={{width: '200px', height: 'auto'}} />
+
               </a>
-              <a href="#" className="flex items-center justify-center w-10 h-10" style={{border: '1px solid #ccc', borderRadius: '20%', margin: '0 3px'}}>
-                <i className="fab fa-facebook-f text-gray-600"></i>
-              </a>
-              <a href="#" className="flex items-center justify-center w-10 h-10" style={{border: '1px solid #ccc', borderRadius: '20%', margin: '0 3px'}}>
-                <i className="fab fa-github text-gray-600"></i>
-              </a>
-              <a href="#" className="flex items-center justify-center w-10 h-10" style={{border: '1px solid #ccc', borderRadius: '20%', margin: '0 3px'}}>
-                <i className="fab fa-linkedin-in text-gray-600"></i>
-              </a>
+              
             </div>
             
-            <span style={{fontSize: '12px', color: '#333'}}>or use your email password</span>
             
             <input
-              type="email"
+              type="text"
               name="email"
               placeholder="UserID"
               value={formData.email}
@@ -244,15 +124,14 @@ const Login = () => {
           </form>
         </div>
 
-        {/* Toggle Container */}
+        {/* Toggle Container (visual only) */}
         <div className={`absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-all duration-700 ease-in-out z-50 ${isActive ? 'transform -translate-x-full' : 'transform translate-x-0'}`} style={{borderRadius: isActive ? '0 150px 100px 0' : '150px 0 0 100px'}}>
           <div className={`text-white relative h-full w-full transform transition-all duration-700 ease-in-out ${isActive ? 'translate-x-1/2' : 'translate-x-0'}`} style={{background: 'linear-gradient(to right, #C33764, #1D2671)', left: '-100%', width: '200%'}}>
             
             {/* Toggle Left Panel */}
             <div className={`absolute w-1/2 h-full flex flex-col items-center justify-center text-center top-0 transform transition-all duration-700 ease-in-out ${isActive ? 'translate-x-0' : '-translate-x-full'}`} style={{padding: '0 30px'}}>
-              <img src={sarthiLogo} alt="Sarthi Logo" className="mb-6" style={{width: '80px', height: 'auto'}} />
               <h1 className="text-2xl font-bold mb-4">Welcome Back!</h1>
-              <p style={{fontSize: '14px', lineHeight: '20px', letterSpacing: '0.3px', margin: '20px 0'}}>Enter your personal details to use all Sarthi Kotak POC </p>
+              <p style={{fontSize: '14px', lineHeight: '20px', letterSpacing: '0.3px', margin: '10px 0'}}>Enter your personal details to use Sarthi Collection Kotak Bank </p>
               <button
                 onClick={() => setIsActive(false)}
                 className="text-white rounded-lg font-semibold uppercase cursor-pointer transition-colors"
@@ -270,11 +149,10 @@ const Login = () => {
               </button>
             </div>
             
-            {/* Toggle Right Panel */}
+            {/* Toggle Right Panel (kept for layout symmetry) */}
             <div className={`absolute w-1/2 h-full flex flex-col items-center justify-center text-center top-0 right-0 transform transition-all duration-700 ease-in-out ${isActive ? 'translate-x-full' : 'translate-x-0'}`} style={{padding: '0 30px'}}>
-              <img src={sarthiLogo} alt="Sarthi Logo" className="mb-6" style={{width: '80px', height: 'auto'}} />
-              <h1 className="text-2xl font-bold mb-4">Welcome To Sarthi!</h1>
-              <p style={{fontSize: '14px', lineHeight: '20px', letterSpacing: '0.3px', margin: '20px 0'}}>Enter your personal details to use all Sarthi Kotak POC</p>
+              <h1 className="text-2xl font-bold mb-4">Welcome To Sarthi Collection Kotak Bank!</h1>
+              <p style={{fontSize: '14px', lineHeight: '20px', letterSpacing: '0.3px', margin: '10px 0'}}>Enter your personal details to use Sarthi Collection Kotak Bank</p>
               <button
                 onClick={() => setIsActive(true)}
                 className="text-white rounded-lg font-semibold uppercase cursor-pointer transition-colors"

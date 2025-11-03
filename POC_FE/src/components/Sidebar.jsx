@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import sarthiLogo from '../assets/Images/sarthi_logo.png'
+import sarthiLogo from '/src/assets/Images/kotaklogo.png'
 
 const Sidebar = ({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollapsed }) => {
   const navigate = useNavigate()
@@ -103,8 +103,8 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollapsed })
            </button>
            
                   {/* Logo and Title - Always show logo, text only when expanded */}
-                  <div className={`flex items-center space-x-2 ${isCollapsed ? 'ml-0' : 'ml-3'}`}>
-                    <img src={sarthiLogo} alt="Sarthi Logo" className="w-8 h-8" />
+                  <div className={`flex items-center space-x-2 ${isCollapsed ? 'ml-0' : 'ml-0'}`}>
+                    <img src={sarthiLogo} alt="Sarthi Logo" className="w-10 h-12" />
                     {!isCollapsed && (
                       <div>
                         <h1 className="text-base font-semibold text-gray-900">Sarthi Kotak POC</h1>

@@ -8,4 +8,7 @@ export default defineConfig({
     react(),
     tailwindcss(), // ✅ Tailwind v4 plugin for Vite
   ],
+  optimizeDeps: {
+    exclude: ['antd'],
+  },
 })
