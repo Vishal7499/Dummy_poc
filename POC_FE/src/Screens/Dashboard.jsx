@@ -5,15 +5,22 @@ import { useNavigate } from 'react-router-dom'
 import Chart from 'react-apexcharts'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
+import { useAuth } from '../contexts/AuthContext'
+import { dashboardApi } from '../utils/api'
+import { formatIndianNumber } from '../utils/formatters'
 
 const Dashboard = () => {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [activeTab, setActiveTab] = useState('ftd')
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true)
   const [showAlerts, setShowAlerts] = useState(false)
   const [expandedCard, setExpandedCard] = useState(null)
   const [chartFilter, setChartFilter] = useState('ftd')
+  const [dashboardData, setDashboardData] = useState(null)
+  const [dashboardLoading, setDashboardLoading] = useState(true)
+  const [dashboardError, setDashboardError] = useState(null)
   const [favoriteCards, setFavoriteCards] = useState(() => {
     try {
       const stored = localStorage.getItem('favoriteCards')
@@ -24,6 +31,41 @@ const Dashboard = () => {
   })
   const alertsRef = useRef(null)
   const mainContentRef = useRef(null)
+  const isFetchingRef = useRef(false)
+
+  // Fetch dashboard data from API when component mounts
+  useEffect(() => {
+    // Prevent duplicate API calls - check if already fetching or have data
+    if (isFetchingRef.current || dashboardData) {
+      return
+    }
+
+    if (!user?.accessToken) {
+      // Wait for auth to load
+      return
+    }
+
+    const fetchDashboardData = async () => {
+      // Mark as fetching to prevent duplicate calls
+      isFetchingRef.current = true
+
+      try {
+        setDashboardLoading(true)
+        setDashboardError(null)
+        const data = await dashboardApi(user.accessToken)
+        setDashboardData(data)
+        console.log('Dashboard data fetched:', data)
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error)
+        setDashboardError(error.message || 'Failed to fetch dashboard data')
+      } finally {
+        setDashboardLoading(false)
+        isFetchingRef.current = false
+      }
+    }
+
+    fetchDashboardData()
+  }, [user?.accessToken, dashboardData])
 
   // Click outside handler for alerts dropdown and sidebar
   useEffect(() => {
@@ -239,6 +281,9 @@ const Dashboard = () => {
       </button>
     )
   }
+
+
+  console.log('dashboardData', dashboardData?.loan_data?.total_loans)
 
   return (
     <div className="h-screen font-['Montserrat'] flex" style={{background: 'linear-gradient(135deg,rgb(255, 255, 255) 0%,rgb(255, 255, 255) 100%)'}}>
@@ -652,7 +697,7 @@ const Dashboard = () => {
 
                 {/* Staff Monitoring (Summary) */}
                 <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-gray-800 mb-3">Staff Monitoring (Summary)</h2>
+                  <h2 className="text-lg font-semibold text-gray-800 mb-3">Staff Monitoring</h2>
                   <div className="grid grid-cols-5 gap-3 relative">
                     {/* Allocation Summary Card */}
                     <div 
@@ -663,23 +708,28 @@ const Dashboard = () => {
                     >
                       {renderFavoritePin('allocation')}
                       <div className="text-indigo-600 text-xs">Allocation Summary</div>
-                      <div className="text-lg font-bold text-indigo-900">1,245</div>
+                      <div className="text-lg font-bold text-indigo-900">{formatIndianNumber(dashboardData?.loan_data?.total_loans)}</div>
                       {expandedCard === 'allocation' && (
                         <div className="absolute top-0 left-0 right-0 bg-indigo-50 border border-indigo-200 rounded-lg p-3 z-50 shadow-lg">
                           <div className="text-indigo-600 text-xs">Allocation Summary</div>
-                          <div className="text-lg font-bold text-indigo-900">1,245</div>
+                          <div className="text-lg font-bold text-indigo-900">{formatIndianNumber(dashboardData?.loan_data?.total_loans)}</div>
                           <div className="mt-2 space-y-1">
                             <div className="flex justify-between text-xs text-indigo-700">
                               <span>Active Accounts:</span>
-                              <span>1,245</span>
+                              <span>{formatIndianNumber(dashboardData?.loan_data?.total_loans)}</span>
+                            </div>
+                            <div className="flex justify-between text-xs text-indigo-700">
+                              <span>Total Staff:</span>
+                              <span>{dashboardData?.loan_data?.unique_staff}</span>
                             </div>
                             <div className="flex justify-between text-xs text-indigo-700">
                               <span>Per Staff Avg:</span>
-                              <span>249</span>
+                              <span>{dashboardData?.loan_data?.avg_loans_per_staff} %</span>
                             </div>
+
                             <div className="flex justify-between text-xs text-indigo-700">
                               <span>Outstanding Value:</span>
-                              <span>₹2.1Cr</span>
+                              <span>{dashboardData?.loan_data?.total_tos_in_cr} Cr</span>
                             </div>
                             <div className="flex justify-between text-xs text-indigo-700">
                               <span>Unallocated Cases:</span>
@@ -699,23 +749,23 @@ const Dashboard = () => {
                     >
                       {renderFavoritePin('collection')}
                       <div className="text-blue-600 text-xs">Collection Efficiency (%)</div>
-                      <div className="text-lg font-bold text-blue-900">86.4%</div>
+                      <div className="text-lg font-bold text-blue-900">{dashboardData?.collection_data?.collection_percentage}%</div>
                       {expandedCard === 'collection' && (
                         <div className="absolute top-0 left-0 right-0 bg-blue-50 border border-blue-200 rounded-lg p-3 z-50 shadow-lg">
                           <div className="text-blue-600 text-xs">Collection Efficiency (%)</div>
-                          <div className="text-lg font-bold text-blue-900">86.4%</div>
+                          <div className="text-lg font-bold text-blue-900">{dashboardData?.collection_data?.collection_percentage}%</div>
                           <div className="mt-2 space-y-1">
                             <div className="flex justify-between text-xs text-blue-700">
                               <span>Amount Collected:</span>
-                              <span>₹2.45Cr</span>
+                              <span>{dashboardData?.collection_data?.collection_amount_cr} Cr</span>
                             </div>
                             <div className="flex justify-between text-xs text-blue-700">
                               <span>Total Due:</span>
-                              <span>₹2.84Cr</span>
+                              <span>{dashboardData?.collection_data?.total_overdue_cr} Cr</span>
                             </div>
                             <div className="flex justify-between text-xs text-blue-700">
                               <span>Difference:</span>
-                              <span>₹39L</span>
+                              <span>{dashboardData?.collection_data?.collection_amount_cr - dashboardData?.collection_data?.total_overdue_cr} Cr</span>
                             </div>
                           </div>
                         </div>

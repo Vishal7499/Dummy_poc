@@ -32,6 +32,12 @@ const Login = () => {
 
     try {
       const data = await loginApi({ username: formData.email, password: formData.password })
+      console.log('Login response data:', data)
+      
+      if (!data.username || !data.tokens?.access) {
+        throw new Error('Invalid response format from server')
+      }
+      
       const userData = {
         username: data.username,
         role: data.role,
@@ -42,7 +48,9 @@ const Login = () => {
       login(userData)
       navigate('/dashboard')
     } catch (err) {
-      setError('Invalid credentials or server error')
+      console.error('Login error:', err)
+      const errorMessage = err.message || 'Invalid credentials or server error'
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
