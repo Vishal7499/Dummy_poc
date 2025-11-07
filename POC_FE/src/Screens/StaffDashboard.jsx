@@ -18,7 +18,6 @@ const StaffDashboard = () => {
   const [showAlerts, setShowAlerts] = useState(false)
   const [expandedCard, setExpandedCard] = useState(null)
   const [chartFilter, setChartFilter] = useState('ftd')
-  const [allocationViewType, setAllocationViewType] = useState('area') // 'area' for staff
   const [dashboardData, setDashboardData] = useState(null)
   const [dashboardLoading, setDashboardLoading] = useState(false)
   const [dashboardError, setDashboardError] = useState(null)
@@ -992,32 +991,6 @@ const StaffDashboard = () => {
                         </div>
                       )}
                     </div>
-                  </div>
-                </div>
-
-                {/* Allocation Summary by Area */}
-                <div className="mb-4">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-semibold text-gray-800">Allocation Summary by Area</h2>
-                  </div>
-                  <div className="grid grid-cols-5 gap-3">
-                    {[
-                      { area: 'Central Area', value: 245, staff: 12, amount: '₹0.8Cr' },
-                      { area: 'North Area', value: 198, staff: 10, amount: '₹0.6Cr' },
-                      { area: 'South Area', value: 187, staff: 9, amount: '₹0.5Cr' },
-                      { area: 'East Area', value: 165, staff: 8, amount: '₹0.4Cr' },
-                      { area: 'West Area', value: 152, staff: 7, amount: '₹0.3Cr' }
-                    ].map((areaData, index) => (
-                      <div 
-                        key={index}
-                        className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-indigo-100"
-                        onClick={() => navigate('/staff/management?metric=allocation&area=' + areaData.area)}
-                      >
-                        <div className="text-indigo-600 text-xs font-medium mb-1">{areaData.area}</div>
-                        <div className="text-lg font-bold text-indigo-900 mb-1">{areaData.value.toLocaleString()}</div>
-                        <div className="text-xs text-indigo-700">Staff: {areaData.staff} | {areaData.amount}</div>
-                      </div>
-                    ))}
                   </div>
                 </div>
 

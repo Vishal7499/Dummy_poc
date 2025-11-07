@@ -15,7 +15,11 @@ const StaffManagement = () => {
   const [sortOrder, setSortOrder] = useState('desc')
   const [selectedRegion, setSelectedRegion] = useState(null)
   const [selectedProduct, setSelectedProduct] = useState(null)
-  const [viewType, setViewType] = useState('region') // 'region' or 'product'
+  const [selectedDivision, setSelectedDivision] = useState(null)
+  const [selectedZone, setSelectedZone] = useState(null)
+  const [selectedBranch, setSelectedBranch] = useState(null)
+  const [selectedArea, setSelectedArea] = useState(null)
+  const [viewType, setViewType] = useState('region') // 'region', 'division', 'zone', 'branch', 'area', 'product'
   const [selectedStaff, setSelectedStaff] = useState(null)
   const [showCustomerDetails, setShowCustomerDetails] = useState(false)
   const [customerCurrentPage, setCustomerCurrentPage] = useState(1)
@@ -28,23 +32,79 @@ const StaffManagement = () => {
   // Handle main performance card click
   const handleMainCardClick = (metric) => {
     setActiveRegionMetric(metric)
-    setSelectedRegion(null) // Clear any selected region
-    setSelectedProduct(null) // Clear any selected product
-    setCurrentPage(1) // Reset to first page
+    setSelectedRegion(null)
+    setSelectedProduct(null)
+    setSelectedDivision(null)
+    setSelectedZone(null)
+    setSelectedBranch(null)
+    setSelectedArea(null)
+    setCurrentPage(1)
   }
 
   // Handle region card click
   const handleRegionClick = (region) => {
     setSelectedRegion(region)
-    setSelectedProduct(null) // Clear product when region is selected
-    setCurrentPage(1) // Reset to first page when filtering
+    setSelectedProduct(null)
+    setSelectedDivision(null)
+    setSelectedZone(null)
+    setSelectedBranch(null)
+    setSelectedArea(null)
+    setCurrentPage(1)
   }
 
   // Handle product card click
   const handleProductClick = (product) => {
     setSelectedProduct(product)
-    setSelectedRegion(null) // Clear region when product is selected
-    setCurrentPage(1) // Reset to first page when filtering
+    setSelectedRegion(null)
+    setSelectedDivision(null)
+    setSelectedZone(null)
+    setSelectedBranch(null)
+    setSelectedArea(null)
+    setCurrentPage(1)
+  }
+
+  // Handle division card click
+  const handleDivisionClick = (division) => {
+    setSelectedDivision(division)
+    setSelectedRegion(null)
+    setSelectedProduct(null)
+    setSelectedZone(null)
+    setSelectedBranch(null)
+    setSelectedArea(null)
+    setCurrentPage(1)
+  }
+
+  // Handle zone card click
+  const handleZoneClick = (zone) => {
+    setSelectedZone(zone)
+    setSelectedRegion(null)
+    setSelectedProduct(null)
+    setSelectedDivision(null)
+    setSelectedBranch(null)
+    setSelectedArea(null)
+    setCurrentPage(1)
+  }
+
+  // Handle branch card click
+  const handleBranchClick = (branch) => {
+    setSelectedBranch(branch)
+    setSelectedRegion(null)
+    setSelectedProduct(null)
+    setSelectedDivision(null)
+    setSelectedZone(null)
+    setSelectedArea(null)
+    setCurrentPage(1)
+  }
+
+  // Handle area card click
+  const handleAreaClick = (area) => {
+    setSelectedArea(area)
+    setSelectedRegion(null)
+    setSelectedProduct(null)
+    setSelectedDivision(null)
+    setSelectedZone(null)
+    setSelectedBranch(null)
+    setCurrentPage(1)
   }
 
   // Clear region filter
@@ -163,18 +223,210 @@ const StaffManagement = () => {
     ]
   }
 
-  // Reset selected region/product when metric changes (from URL)
+  // Division-wise performance data
+  const divisionData = {
+    allocation: [
+      { division: 'Division A', value: 856, count: 32, amount: '₹1.5Cr' },
+      { division: 'Division B', value: 742, count: 28, amount: '₹1.3Cr' },
+      { division: 'Division C', value: 689, count: 26, amount: '₹1.2Cr' },
+      { division: 'Division D', value: 623, count: 24, amount: '₹1.1Cr' },
+      { division: 'Division E', value: 591, count: 22, amount: '₹1.0Cr' }
+    ],
+    collection: [
+      { division: 'Division A', value: 87.2, count: 32, amount: '₹1.5Cr' },
+      { division: 'Division B', value: 85.8, count: 28, amount: '₹1.3Cr' },
+      { division: 'Division C', value: 84.1, count: 26, amount: '₹1.2Cr' },
+      { division: 'Division D', value: 83.5, count: 24, amount: '₹1.1Cr' },
+      { division: 'Division E', value: 82.9, count: 22, amount: '₹1.0Cr' }
+    ],
+    ptp: [
+      { division: 'Division A', value: 73.5, count: 125, amount: '₹38L' },
+      { division: 'Division B', value: 71.2, count: 98, amount: '₹32L' },
+      { division: 'Division C', value: 69.8, count: 87, amount: '₹28L' },
+      { division: 'Division D', value: 68.4, count: 76, amount: '₹25L' },
+      { division: 'Division E', value: 67.1, count: 65, amount: '₹22L' }
+    ],
+    visit: [
+      { division: 'Division A', value: 79.5, count: 78, amount: '85%' },
+      { division: 'Division B', value: 77.8, count: 64, amount: '83%' },
+      { division: 'Division C', value: 76.2, count: 58, amount: '81%' },
+      { division: 'Division D', value: 75.1, count: 52, amount: '80%' },
+      { division: 'Division E', value: 74.3, count: 47, amount: '79%' }
+    ],
+    productivity: [
+      { division: 'Division A', value: 158, count: 32, amount: 'High' },
+      { division: 'Division B', value: 152, count: 28, amount: 'Medium' },
+      { division: 'Division C', value: 148, count: 26, amount: 'Medium' },
+      { division: 'Division D', value: 145, count: 24, amount: 'Medium' },
+      { division: 'Division E', value: 142, count: 22, amount: 'Medium' }
+    ],
+    inactive: [
+      { division: 'Division A', value: 2, count: 32, amount: 'Low' },
+      { division: 'Division B', value: 3, count: 28, amount: 'Low' },
+      { division: 'Division C', value: 4, count: 26, amount: 'Medium' },
+      { division: 'Division D', value: 3, count: 24, amount: 'Low' },
+      { division: 'Division E', value: 2, count: 22, amount: 'Low' }
+    ]
+  }
+
+  // Zone-wise performance data
+  const zoneData = {
+    allocation: [
+      { zone: 'Zone A', value: 512, count: 19, amount: '₹0.9Cr' },
+      { zone: 'Zone B', value: 487, count: 18, amount: '₹0.8Cr' },
+      { zone: 'Zone C', value: 465, count: 17, amount: '₹0.8Cr' },
+      { zone: 'Zone D', value: 443, count: 16, amount: '₹0.7Cr' },
+      { zone: 'Zone E', value: 421, count: 15, amount: '₹0.7Cr' }
+    ],
+    collection: [
+      { zone: 'Zone A', value: 86.5, count: 19, amount: '₹0.9Cr' },
+      { zone: 'Zone B', value: 85.2, count: 18, amount: '₹0.8Cr' },
+      { zone: 'Zone C', value: 84.8, count: 17, amount: '₹0.8Cr' },
+      { zone: 'Zone D', value: 83.9, count: 16, amount: '₹0.7Cr' },
+      { zone: 'Zone E', value: 83.1, count: 15, amount: '₹0.7Cr' }
+    ],
+    ptp: [
+      { zone: 'Zone A', value: 72.8, count: 75, amount: '₹23L' },
+      { zone: 'Zone B', value: 71.5, count: 68, amount: '₹21L' },
+      { zone: 'Zone C', value: 70.2, count: 62, amount: '₹19L' },
+      { zone: 'Zone D', value: 69.1, count: 58, amount: '₹18L' },
+      { zone: 'Zone E', value: 68.4, count: 54, amount: '₹17L' }
+    ],
+    visit: [
+      { zone: 'Zone A', value: 78.5, count: 47, amount: '84%' },
+      { zone: 'Zone B', value: 77.2, count: 43, amount: '82%' },
+      { zone: 'Zone C', value: 76.1, count: 41, amount: '81%' },
+      { zone: 'Zone D', value: 75.3, count: 39, amount: '80%' },
+      { zone: 'Zone E', value: 74.8, count: 37, amount: '79%' }
+    ],
+    productivity: [
+      { zone: 'Zone A', value: 155, count: 19, amount: 'High' },
+      { zone: 'Zone B', value: 150, count: 18, amount: 'Medium' },
+      { zone: 'Zone C', value: 147, count: 17, amount: 'Medium' },
+      { zone: 'Zone D', value: 144, count: 16, amount: 'Medium' },
+      { zone: 'Zone E', value: 141, count: 15, amount: 'Medium' }
+    ],
+    inactive: [
+      { zone: 'Zone A', value: 1, count: 19, amount: 'Low' },
+      { zone: 'Zone B', value: 2, count: 18, amount: 'Low' },
+      { zone: 'Zone C', value: 2, count: 17, amount: 'Low' },
+      { zone: 'Zone D', value: 1, count: 16, amount: 'Low' },
+      { zone: 'Zone E', value: 1, count: 15, amount: 'Low' }
+    ]
+  }
+
+  // Branch-wise performance data
+  const branchData = {
+    allocation: [
+      { branch: 'Mumbai Central', value: 234, count: 9, amount: '₹0.4Cr' },
+      { branch: 'Pune IT Park', value: 198, count: 8, amount: '₹0.3Cr' },
+      { branch: 'Bangalore Whitefield', value: 187, count: 7, amount: '₹0.3Cr' },
+      { branch: 'Chennai T. Nagar', value: 165, count: 6, amount: '₹0.3Cr' },
+      { branch: 'Delhi Connaught Place', value: 152, count: 6, amount: '₹0.2Cr' }
+    ],
+    collection: [
+      { branch: 'Mumbai Central', value: 88.2, count: 9, amount: '₹0.4Cr' },
+      { branch: 'Pune IT Park', value: 86.8, count: 8, amount: '₹0.3Cr' },
+      { branch: 'Bangalore Whitefield', value: 85.5, count: 7, amount: '₹0.3Cr' },
+      { branch: 'Chennai T. Nagar', value: 84.9, count: 6, amount: '₹0.3Cr' },
+      { branch: 'Delhi Connaught Place', value: 83.7, count: 6, amount: '₹0.2Cr' }
+    ],
+    ptp: [
+      { branch: 'Mumbai Central', value: 74.5, count: 45, amount: '₹14L' },
+      { branch: 'Pune IT Park', value: 72.8, count: 38, amount: '₹12L' },
+      { branch: 'Bangalore Whitefield', value: 71.2, count: 34, amount: '₹11L' },
+      { branch: 'Chennai T. Nagar', value: 70.1, count: 29, amount: '₹9L' },
+      { branch: 'Delhi Connaught Place', value: 69.3, count: 27, amount: '₹8L' }
+    ],
+    visit: [
+      { branch: 'Mumbai Central', value: 81.2, count: 28, amount: '86%' },
+      { branch: 'Pune IT Park', value: 79.5, count: 24, amount: '84%' },
+      { branch: 'Bangalore Whitefield', value: 78.1, count: 22, amount: '82%' },
+      { branch: 'Chennai T. Nagar', value: 77.3, count: 19, amount: '81%' },
+      { branch: 'Delhi Connaught Place', value: 76.5, count: 18, amount: '80%' }
+    ],
+    productivity: [
+      { branch: 'Mumbai Central', value: 162, count: 9, amount: 'High' },
+      { branch: 'Pune IT Park', value: 158, count: 8, amount: 'High' },
+      { branch: 'Bangalore Whitefield', value: 155, count: 7, amount: 'Medium' },
+      { branch: 'Chennai T. Nagar', value: 152, count: 6, amount: 'Medium' },
+      { branch: 'Delhi Connaught Place', value: 149, count: 6, amount: 'Medium' }
+    ],
+    inactive: [
+      { branch: 'Mumbai Central', value: 0, count: 9, amount: 'Low' },
+      { branch: 'Pune IT Park', value: 1, count: 8, amount: 'Low' },
+      { branch: 'Bangalore Whitefield', value: 1, count: 7, amount: 'Low' },
+      { branch: 'Chennai T. Nagar', value: 0, count: 6, amount: 'Low' },
+      { branch: 'Delhi Connaught Place', value: 1, count: 6, amount: 'Low' }
+    ]
+  }
+
+  // Area-wise performance data (for staff)
+  const areaData = {
+    allocation: [
+      { area: 'Central Area', value: 245, count: 12, amount: '₹0.8Cr' },
+      { area: 'North Area', value: 198, count: 10, amount: '₹0.6Cr' },
+      { area: 'South Area', value: 187, count: 9, amount: '₹0.5Cr' },
+      { area: 'East Area', value: 165, count: 8, amount: '₹0.4Cr' },
+      { area: 'West Area', value: 152, count: 7, amount: '₹0.3Cr' }
+    ],
+    collection: [
+      { area: 'Central Area', value: 87.5, count: 12, amount: '₹0.8Cr' },
+      { area: 'North Area', value: 86.2, count: 10, amount: '₹0.6Cr' },
+      { area: 'South Area', value: 85.8, count: 9, amount: '₹0.5Cr' },
+      { area: 'East Area', value: 85.1, count: 8, amount: '₹0.4Cr' },
+      { area: 'West Area', value: 84.5, count: 7, amount: '₹0.3Cr' }
+    ],
+    ptp: [
+      { area: 'Central Area', value: 73.2, count: 28, amount: '₹9L' },
+      { area: 'North Area', value: 72.1, count: 24, amount: '₹7L' },
+      { area: 'South Area', value: 71.5, count: 22, amount: '₹6L' },
+      { area: 'East Area', value: 70.8, count: 19, amount: '₹5L' },
+      { area: 'West Area', value: 70.2, count: 17, amount: '₹4L' }
+    ],
+    visit: [
+      { area: 'Central Area', value: 80.5, count: 15, amount: '85%' },
+      { area: 'North Area', value: 79.2, count: 13, amount: '83%' },
+      { area: 'South Area', value: 78.5, count: 12, amount: '82%' },
+      { area: 'East Area', value: 77.8, count: 11, amount: '81%' },
+      { area: 'West Area', value: 77.1, count: 10, amount: '80%' }
+    ],
+    productivity: [
+      { area: 'Central Area', value: 160, count: 12, amount: 'High' },
+      { area: 'North Area', value: 156, count: 10, amount: 'High' },
+      { area: 'South Area', value: 153, count: 9, amount: 'Medium' },
+      { area: 'East Area', value: 150, count: 8, amount: 'Medium' },
+      { area: 'West Area', value: 148, count: 7, amount: 'Medium' }
+    ],
+    inactive: [
+      { area: 'Central Area', value: 0, count: 12, amount: 'Low' },
+      { area: 'North Area', value: 1, count: 10, amount: 'Low' },
+      { area: 'South Area', value: 0, count: 9, amount: 'Low' },
+      { area: 'East Area', value: 1, count: 8, amount: 'Low' },
+      { area: 'West Area', value: 0, count: 7, amount: 'Low' }
+    ]
+  }
+
+  // Reset selected filters when metric changes (from URL)
   useEffect(() => {
     setActiveRegionMetric(selectedMetric !== 'overview' ? selectedMetric : null)
     setSelectedRegion(null)
     setSelectedProduct(null)
+    setSelectedDivision(null)
+    setSelectedZone(null)
+    setSelectedBranch(null)
+    setSelectedArea(null)
     setCurrentPage(1)
   }, [selectedMetric])
 
-  // Reset selected region/product when activeRegionMetric changes (from card click)
+  // Reset selected filters when activeRegionMetric changes (from card click)
   useEffect(() => {
     setSelectedRegion(null)
     setSelectedProduct(null)
+    setSelectedDivision(null)
+    setSelectedZone(null)
+    setSelectedBranch(null)
+    setSelectedArea(null)
     setCurrentPage(1)
   }, [activeRegionMetric])
 
@@ -283,6 +535,18 @@ const StaffManagement = () => {
     // Apply product filter if selected
     const matchesProduct = selectedProduct ? staff.loanType === selectedProduct : true
     
+    // Apply division filter if selected (assuming division mapping from branch)
+    const matchesDivision = selectedDivision ? true : true // Add division mapping logic if needed
+    
+    // Apply zone filter if selected
+    const matchesZone = selectedZone ? true : true // Add zone mapping logic if needed
+    
+    // Apply branch filter if selected
+    const matchesBranch = selectedBranch ? staff.branch === selectedBranch : true
+    
+    // Apply area filter if selected
+    const matchesArea = selectedArea ? true : true // Add area mapping logic if needed
+    
     // Apply metric-specific filter for inactive staff
     let matchesMetric = true
     if (activeRegionMetric === 'inactive') {
@@ -290,7 +554,7 @@ const StaffManagement = () => {
     }
     // For allocation, show all staff (no specific filtering)
     
-    return matchesSearch && matchesRegion && matchesProduct && matchesMetric
+    return matchesSearch && matchesRegion && matchesProduct && matchesDivision && matchesZone && matchesBranch && matchesArea && matchesMetric
   }).sort((a, b) => {
     const aValue = a[sortBy]
     const bValue = b[sortBy]
@@ -314,7 +578,15 @@ const StaffManagement = () => {
 
   // Get metric title
   const getMetricTitle = (metric, viewType) => {
-    const viewLabel = viewType === 'product' ? 'Product' : 'Region'
+    const viewLabels = {
+      'region': 'Region',
+      'division': 'Division',
+      'zone': 'Zone',
+      'branch': 'Branch',
+      'area': 'Area',
+      'product': 'Product'
+    }
+    const viewLabel = viewLabels[viewType] || 'Region'
     switch (metric) {
       case 'allocation': return `Allocation Summary by ${viewLabel}`
       case 'collection': return `Collection Efficiency by ${viewLabel}`
@@ -451,9 +723,13 @@ const StaffManagement = () => {
                         setViewType('region')
                         setSelectedProduct(null)
                         setSelectedRegion(null)
+                        setSelectedDivision(null)
+                        setSelectedZone(null)
+                        setSelectedBranch(null)
+                        setSelectedArea(null)
                         setCurrentPage(1)
                       }}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                         viewType === 'region'
                           ? 'bg-blue-600 text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -463,12 +739,92 @@ const StaffManagement = () => {
                     </button>
                     <button
                       onClick={() => {
+                        setViewType('division')
+                        setSelectedRegion(null)
+                        setSelectedProduct(null)
+                        setSelectedDivision(null)
+                        setSelectedZone(null)
+                        setSelectedBranch(null)
+                        setSelectedArea(null)
+                        setCurrentPage(1)
+                      }}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                        viewType === 'division'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      By Division
+                    </button>
+                    <button
+                      onClick={() => {
+                        setViewType('zone')
+                        setSelectedRegion(null)
+                        setSelectedProduct(null)
+                        setSelectedDivision(null)
+                        setSelectedZone(null)
+                        setSelectedBranch(null)
+                        setSelectedArea(null)
+                        setCurrentPage(1)
+                      }}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                        viewType === 'zone'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      By Zone
+                    </button>
+                    <button
+                      onClick={() => {
+                        setViewType('branch')
+                        setSelectedRegion(null)
+                        setSelectedProduct(null)
+                        setSelectedDivision(null)
+                        setSelectedZone(null)
+                        setSelectedBranch(null)
+                        setSelectedArea(null)
+                        setCurrentPage(1)
+                      }}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                        viewType === 'branch'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      By Branch
+                    </button>
+                    <button
+                      onClick={() => {
+                        setViewType('area')
+                        setSelectedRegion(null)
+                        setSelectedProduct(null)
+                        setSelectedDivision(null)
+                        setSelectedZone(null)
+                        setSelectedBranch(null)
+                        setSelectedArea(null)
+                        setCurrentPage(1)
+                      }}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                        viewType === 'area'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      By Area
+                    </button>
+                    <button
+                      onClick={() => {
                         setViewType('product')
                         setSelectedRegion(null)
                         setSelectedProduct(null)
+                        setSelectedDivision(null)
+                        setSelectedZone(null)
+                        setSelectedBranch(null)
+                        setSelectedArea(null)
                         setCurrentPage(1)
                       }}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                         viewType === 'product'
                           ? 'bg-blue-600 text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -478,7 +834,7 @@ const StaffManagement = () => {
                     </button>
                   </div>
                 </div>
-                <div className={`grid gap-3 ${viewType === 'region' ? 'grid-cols-5' : 'grid-cols-3'}`}>
+                <div className={`grid gap-3 ${viewType === 'region' || viewType === 'division' || viewType === 'zone' || viewType === 'branch' || viewType === 'area' ? 'grid-cols-5' : 'grid-cols-3'}`}>
                   {viewType === 'region' && regionData[activeRegionMetric]?.map((region, index) => (
                     <div 
                       key={index} 
@@ -573,6 +929,206 @@ const StaffManagement = () => {
                         Staff: {product.count} | {product.amount}
                       </div>
                       {selectedProduct === product.product && (
+                        <div className="absolute top-2 right-2">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {viewType === 'division' && divisionData[activeRegionMetric]?.map((division, index) => (
+                    <div 
+                      key={index} 
+                      className={`border rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative ${
+                        selectedDivision === division.division ? 'ring-2 ring-blue-500 shadow-lg' : ''
+                      } ${
+                        activeRegionMetric === 'allocation' ? 'bg-indigo-50 border-indigo-200 hover:bg-indigo-100' :
+                        activeRegionMetric === 'collection' ? 'bg-blue-50 border-blue-200 hover:bg-blue-100' :
+                        activeRegionMetric === 'ptp' ? 'bg-green-50 border-green-200 hover:bg-green-100' :
+                        activeRegionMetric === 'visit' ? 'bg-purple-50 border-purple-200 hover:bg-purple-100' :
+                        activeRegionMetric === 'productivity' ? 'bg-orange-50 border-orange-200 hover:bg-orange-100' :
+                        activeRegionMetric === 'inactive' ? 'bg-red-50 border-red-200 hover:bg-red-100' :
+                        'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                      }`}
+                      onClick={() => handleDivisionClick(division.division)}
+                    >
+                      <div className={`text-xs ${
+                        activeRegionMetric === 'allocation' ? 'text-indigo-600' :
+                        activeRegionMetric === 'collection' ? 'text-blue-600' :
+                        activeRegionMetric === 'ptp' ? 'text-green-600' :
+                        activeRegionMetric === 'visit' ? 'text-purple-600' :
+                        activeRegionMetric === 'productivity' ? 'text-orange-600' :
+                        activeRegionMetric === 'inactive' ? 'text-red-600' :
+                        'text-gray-600'
+                      }`}>
+                        {division.division}
+                      </div>
+                      <div className={`text-lg font-bold ${
+                        activeRegionMetric === 'allocation' ? 'text-indigo-900' :
+                        activeRegionMetric === 'collection' ? 'text-blue-900' :
+                        activeRegionMetric === 'ptp' ? 'text-green-900' :
+                        activeRegionMetric === 'visit' ? 'text-purple-900' :
+                        activeRegionMetric === 'productivity' ? 'text-orange-900' :
+                        activeRegionMetric === 'inactive' ? 'text-red-900' :
+                        'text-gray-900'
+                      }`}>
+                        {activeRegionMetric === 'inactive' ? division.value : 
+                         activeRegionMetric === 'allocation' ? division.value.toLocaleString() :
+                         `${division.value}${activeRegionMetric === 'productivity' ? '' : '%'}`}
+                      </div>
+                      <div className="text-xs text-gray-600 mt-1">
+                        Staff: {division.count} | {division.amount}
+                      </div>
+                      {selectedDivision === division.division && (
+                        <div className="absolute top-2 right-2">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {viewType === 'zone' && zoneData[activeRegionMetric]?.map((zone, index) => (
+                    <div 
+                      key={index} 
+                      className={`border rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative ${
+                        selectedZone === zone.zone ? 'ring-2 ring-blue-500 shadow-lg' : ''
+                      } ${
+                        activeRegionMetric === 'allocation' ? 'bg-indigo-50 border-indigo-200 hover:bg-indigo-100' :
+                        activeRegionMetric === 'collection' ? 'bg-blue-50 border-blue-200 hover:bg-blue-100' :
+                        activeRegionMetric === 'ptp' ? 'bg-green-50 border-green-200 hover:bg-green-100' :
+                        activeRegionMetric === 'visit' ? 'bg-purple-50 border-purple-200 hover:bg-purple-100' :
+                        activeRegionMetric === 'productivity' ? 'bg-orange-50 border-orange-200 hover:bg-orange-100' :
+                        activeRegionMetric === 'inactive' ? 'bg-red-50 border-red-200 hover:bg-red-100' :
+                        'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                      }`}
+                      onClick={() => handleZoneClick(zone.zone)}
+                    >
+                      <div className={`text-xs ${
+                        activeRegionMetric === 'allocation' ? 'text-indigo-600' :
+                        activeRegionMetric === 'collection' ? 'text-blue-600' :
+                        activeRegionMetric === 'ptp' ? 'text-green-600' :
+                        activeRegionMetric === 'visit' ? 'text-purple-600' :
+                        activeRegionMetric === 'productivity' ? 'text-orange-600' :
+                        activeRegionMetric === 'inactive' ? 'text-red-600' :
+                        'text-gray-600'
+                      }`}>
+                        {zone.zone}
+                      </div>
+                      <div className={`text-lg font-bold ${
+                        activeRegionMetric === 'allocation' ? 'text-indigo-900' :
+                        activeRegionMetric === 'collection' ? 'text-blue-900' :
+                        activeRegionMetric === 'ptp' ? 'text-green-900' :
+                        activeRegionMetric === 'visit' ? 'text-purple-900' :
+                        activeRegionMetric === 'productivity' ? 'text-orange-900' :
+                        activeRegionMetric === 'inactive' ? 'text-red-900' :
+                        'text-gray-900'
+                      }`}>
+                        {activeRegionMetric === 'inactive' ? zone.value : 
+                         activeRegionMetric === 'allocation' ? zone.value.toLocaleString() :
+                         `${zone.value}${activeRegionMetric === 'productivity' ? '' : '%'}`}
+                      </div>
+                      <div className="text-xs text-gray-600 mt-1">
+                        Staff: {zone.count} | {zone.amount}
+                      </div>
+                      {selectedZone === zone.zone && (
+                        <div className="absolute top-2 right-2">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {viewType === 'branch' && branchData[activeRegionMetric]?.map((branch, index) => (
+                    <div 
+                      key={index} 
+                      className={`border rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative ${
+                        selectedBranch === branch.branch ? 'ring-2 ring-blue-500 shadow-lg' : ''
+                      } ${
+                        activeRegionMetric === 'allocation' ? 'bg-indigo-50 border-indigo-200 hover:bg-indigo-100' :
+                        activeRegionMetric === 'collection' ? 'bg-blue-50 border-blue-200 hover:bg-blue-100' :
+                        activeRegionMetric === 'ptp' ? 'bg-green-50 border-green-200 hover:bg-green-100' :
+                        activeRegionMetric === 'visit' ? 'bg-purple-50 border-purple-200 hover:bg-purple-100' :
+                        activeRegionMetric === 'productivity' ? 'bg-orange-50 border-orange-200 hover:bg-orange-100' :
+                        activeRegionMetric === 'inactive' ? 'bg-red-50 border-red-200 hover:bg-red-100' :
+                        'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                      }`}
+                      onClick={() => handleBranchClick(branch.branch)}
+                    >
+                      <div className={`text-xs ${
+                        activeRegionMetric === 'allocation' ? 'text-indigo-600' :
+                        activeRegionMetric === 'collection' ? 'text-blue-600' :
+                        activeRegionMetric === 'ptp' ? 'text-green-600' :
+                        activeRegionMetric === 'visit' ? 'text-purple-600' :
+                        activeRegionMetric === 'productivity' ? 'text-orange-600' :
+                        activeRegionMetric === 'inactive' ? 'text-red-600' :
+                        'text-gray-600'
+                      }`}>
+                        {branch.branch}
+                      </div>
+                      <div className={`text-lg font-bold ${
+                        activeRegionMetric === 'allocation' ? 'text-indigo-900' :
+                        activeRegionMetric === 'collection' ? 'text-blue-900' :
+                        activeRegionMetric === 'ptp' ? 'text-green-900' :
+                        activeRegionMetric === 'visit' ? 'text-purple-900' :
+                        activeRegionMetric === 'productivity' ? 'text-orange-900' :
+                        activeRegionMetric === 'inactive' ? 'text-red-900' :
+                        'text-gray-900'
+                      }`}>
+                        {activeRegionMetric === 'inactive' ? branch.value : 
+                         activeRegionMetric === 'allocation' ? branch.value.toLocaleString() :
+                         `${branch.value}${activeRegionMetric === 'productivity' ? '' : '%'}`}
+                      </div>
+                      <div className="text-xs text-gray-600 mt-1">
+                        Staff: {branch.count} | {branch.amount}
+                      </div>
+                      {selectedBranch === branch.branch && (
+                        <div className="absolute top-2 right-2">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {viewType === 'area' && areaData[activeRegionMetric]?.map((area, index) => (
+                    <div 
+                      key={index} 
+                      className={`border rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative ${
+                        selectedArea === area.area ? 'ring-2 ring-blue-500 shadow-lg' : ''
+                      } ${
+                        activeRegionMetric === 'allocation' ? 'bg-indigo-50 border-indigo-200 hover:bg-indigo-100' :
+                        activeRegionMetric === 'collection' ? 'bg-blue-50 border-blue-200 hover:bg-blue-100' :
+                        activeRegionMetric === 'ptp' ? 'bg-green-50 border-green-200 hover:bg-green-100' :
+                        activeRegionMetric === 'visit' ? 'bg-purple-50 border-purple-200 hover:bg-purple-100' :
+                        activeRegionMetric === 'productivity' ? 'bg-orange-50 border-orange-200 hover:bg-orange-100' :
+                        activeRegionMetric === 'inactive' ? 'bg-red-50 border-red-200 hover:bg-red-100' :
+                        'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                      }`}
+                      onClick={() => handleAreaClick(area.area)}
+                    >
+                      <div className={`text-xs ${
+                        activeRegionMetric === 'allocation' ? 'text-indigo-600' :
+                        activeRegionMetric === 'collection' ? 'text-blue-600' :
+                        activeRegionMetric === 'ptp' ? 'text-green-600' :
+                        activeRegionMetric === 'visit' ? 'text-purple-600' :
+                        activeRegionMetric === 'productivity' ? 'text-orange-600' :
+                        activeRegionMetric === 'inactive' ? 'text-red-600' :
+                        'text-gray-600'
+                      }`}>
+                        {area.area}
+                      </div>
+                      <div className={`text-lg font-bold ${
+                        activeRegionMetric === 'allocation' ? 'text-indigo-900' :
+                        activeRegionMetric === 'collection' ? 'text-blue-900' :
+                        activeRegionMetric === 'ptp' ? 'text-green-900' :
+                        activeRegionMetric === 'visit' ? 'text-purple-900' :
+                        activeRegionMetric === 'productivity' ? 'text-orange-900' :
+                        activeRegionMetric === 'inactive' ? 'text-red-900' :
+                        'text-gray-900'
+                      }`}>
+                        {activeRegionMetric === 'inactive' ? area.value : 
+                         activeRegionMetric === 'allocation' ? area.value.toLocaleString() :
+                         `${area.value}${activeRegionMetric === 'productivity' ? '' : '%'}`}
+                      </div>
+                      <div className="text-xs text-gray-600 mt-1">
+                        Staff: {area.count} | {area.amount}
+                      </div>
+                      {selectedArea === area.area && (
                         <div className="absolute top-2 right-2">
                           <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                         </div>
