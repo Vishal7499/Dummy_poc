@@ -2,6 +2,32 @@ import CryptoJS from 'crypto-js'
 
 const SECRET_KEY = import.meta.env.VITE_SECRET_KEY_ENC || ''
 
+export function encryptData(data) {
+  try {
+    if (!SECRET_KEY) {
+      throw new Error('VITE_SECRET_KEY_ENC environment variable is not set. Make sure you have restarted your dev server after creating the .env file.')
+    }
+
+    // Convert data to JSON string (matching backend behavior)
+    const jsonData = JSON.stringify(data)
+    
+    // Parse the key as UTF-8 (matching backend behavior)
+    const key = CryptoJS.enc.Utf8.parse(SECRET_KEY)
+    
+    // Encrypt using AES with ECB mode and PKCS7 padding (matching backend)
+    const encrypted = CryptoJS.AES.encrypt(jsonData, key, {
+      mode: CryptoJS.mode.ECB,
+      padding: CryptoJS.pad.Pkcs7
+    })
+    
+    // Return base64-encoded string (matching backend behavior)
+    return encrypted.toString()
+  } catch (error) {
+    console.error('Encryption error details:', error)
+    throw new Error('Failed to encrypt data: ' + error.message)
+  }
+}
+
 export function decryptData(encryptedData) {
   try {
     console.log('Decrypting data. Key present:', !!SECRET_KEY, 'Key length:', SECRET_KEY?.length)

@@ -6,7 +6,7 @@ import Chart from 'react-apexcharts'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
 import { useAuth } from '../contexts/AuthContext'
-import { dashboardApi } from '../utils/api'
+import { dashboardApi, dashboardCollectionGraphApi } from '../utils/api'
 import { formatIndianNumber } from '../utils/formatters'
 
 const Dashboard = () => {
@@ -19,8 +19,20 @@ const Dashboard = () => {
   const [expandedCard, setExpandedCard] = useState(null)
   const [chartFilter, setChartFilter] = useState('ftd')
   const [dashboardData, setDashboardData] = useState(null)
-  const [dashboardLoading, setDashboardLoading] = useState(true)
+  const [dashboardLoading, setDashboardLoading] = useState(false)
   const [dashboardError, setDashboardError] = useState(null)
+  const [collectionGraphData, setCollectionGraphData] = useState(null)
+  const [collectionGraphLoading, setCollectionGraphLoading] = useState(false)
+  const [collectionGraphError, setCollectionGraphError] = useState(null)
+  // Initialize date filters - default to last 30 days
+  const [fromDate, setFromDate] = useState(() => {
+    const date = new Date()
+    date.setDate(date.getDate() - 30)
+    return date.toISOString().split('T')[0]
+  })
+  const [toDate, setToDate] = useState(() => {
+    return new Date().toISOString().split('T')[0]
+  })
   const [favoriteCards, setFavoriteCards] = useState(() => {
     try {
       const stored = localStorage.getItem('favoriteCards')
@@ -66,6 +78,41 @@ const Dashboard = () => {
 
     fetchDashboardData()
   }, [user?.accessToken, dashboardData])
+
+  // Fetch collection graph data using dynamic date filters
+  useEffect(() => {
+    if (!user?.accessToken || !fromDate || !toDate) {
+      return
+    }
+
+    const fetchCollectionGraphData = async () => {
+      try {
+        setCollectionGraphLoading(true)
+        setCollectionGraphError(null)
+        
+        console.log('Fetching collection graph data from:', fromDate, 'to:', toDate)
+        
+        const data = await dashboardCollectionGraphApi(user.accessToken, fromDate, toDate)
+        setCollectionGraphData(data)
+        console.log('Collection graph data fetched:', data)
+        console.log('Collection graph data - from_date:', data?.from_date)
+        console.log('Collection graph data - to_date:', data?.to_date)
+        console.log('Collection graph data - day array:', data?.day)
+        console.log('Collection graph data - day array length:', data?.day?.length)
+        if (data?.day && data.day.length > 0) {
+          console.log('Sample day data:', data.day[0])
+          console.log('All dates in response:', data.day.map(d => d.date))
+        }
+      } catch (error) {
+        console.error('Error fetching collection graph data:', error)
+        setCollectionGraphError(error.message || 'Failed to fetch collection graph data')
+      } finally {
+        setCollectionGraphLoading(false)
+      }
+    }
+
+    fetchCollectionGraphData()
+  }, [user?.accessToken, fromDate, toDate])
 
   // Click outside handler for alerts dropdown and sidebar
   useEffect(() => {
@@ -130,11 +177,68 @@ const Dashboard = () => {
 
   const currentData = staffData[activeTab]
 
+  // Transform API collection graph data to chart format
+  const transformCollectionGraphData = () => {
+    if (!collectionGraphData?.day || !Array.isArray(collectionGraphData.day) || collectionGraphData.day.length === 0) {
+      console.log('No collection graph data available')
+      return null
+    }
+
+    // Sort data by date to ensure chronological order
+    const sortedData = [...collectionGraphData.day].sort((a, b) => {
+      return new Date(a.date) - new Date(b.date)
+    })
+
+    console.log('Transforming collection graph data, total items:', sortedData.length)
+
+    // Convert API data (collection_amount_cr in crores) to chart format (value in rupees)
+    const transformedData = sortedData.map((item) => {
+      const date = new Date(item.date)
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      const dayName = dayNames[date.getDay()]
+      
+      // Convert crores to rupees (multiply by 10000000)
+      const valueInRupees = (item.collection_amount_cr || 0) * 10000000
+      
+      // Format the label - show day name, date number and month (e.g., "Mon 1 Oct", "Tue 2 Oct")
+      // For better readability, show: "1 Oct" or "Mon 1" based on data density
+      const dateNumber = date.getDate()
+      const monthName = monthNames[date.getMonth()]
+      
+      // Use compact format: "1 Oct" for clarity, or "Mon 1" if many data points
+      const label = sortedData.length > 15 
+        ? `${dateNumber} ${monthName}` 
+        : `${dayName} ${dateNumber} ${monthName}`
+      
+      return {
+        day: label, // Use formatted label with day name, date and month
+        date: item.date, // Keep original date for reference
+        value: valueInRupees,
+        height: '60%' // Will be calculated based on max value
+      }
+    })
+
+    // Calculate height percentages based on max value
+    if (transformedData.length > 0) {
+      const maxValue = Math.max(...transformedData.map(d => d.value), 1)
+      transformedData.forEach(item => {
+        item.height = `${Math.round((item.value / maxValue) * 100)}%`
+      })
+      console.log('Transformed data sample:', transformedData.slice(0, 3))
+      console.log('Max value:', maxValue, 'rupees')
+    }
+
+    return transformedData
+  }
+
+  const apiFtdData = transformCollectionGraphData()
+
   // Chart data for different filter ranges (values in Rupees - will be formatted to Lacs/Crores in chart)
   const chartData = {
     ftd: {
       title: 'Collection Trend (For the Day)',
-      data: [
+      data: apiFtdData || [
         { day: 'Mon', value: 4500000, height: '60%' },  // 45 Lacs
         { day: 'Tue', value: 5200000, height: '70%' },  // 52 Lacs
         { day: 'Wed', value: 3800000, height: '50%' },  // 38 Lacs
@@ -309,13 +413,72 @@ const Dashboard = () => {
         </div>
       )}
       
-      <div ref={mainContentRef} className="flex flex-col overflow-hidden flex-1">
+      <div ref={mainContentRef} className="flex flex-col overflow-hidden flex-1 relative">
         {/* Navbar */}
         <Navbar 
           onMobileMenuClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)} 
           isSidebarCollapsed={isSidebarCollapsed}
           onBellClick={() => setShowAlerts(!showAlerts)}
         />
+
+        {/* Loading Overlay */}
+        {dashboardLoading && (
+          <div className="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50">
+            <div 
+              className="w-16 h-16 border-4 border-blue-600 animate-spin" 
+              style={{
+                borderRadius: '0',
+                borderTopColor: '#2563eb',
+                borderRightColor: '#2563eb',
+                borderBottomColor: '#2563eb',
+                borderLeftColor: '#2563eb'
+              }}
+            ></div>
+          </div>
+        )}
+
+        {/* Error Message */}
+        {dashboardError && !dashboardLoading && (
+          <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-50 bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg shadow-lg max-w-md">
+            <div className="flex items-center space-x-3">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-semibold">Error Loading Dashboard</p>
+                <p className="text-sm mt-1">{dashboardError}</p>
+              </div>
+              <button
+                onClick={() => {
+                  setDashboardError(null)
+                  setDashboardData(null)
+                  isFetchingRef.current = false
+                  const fetchDashboardData = async () => {
+                    if (!user?.accessToken) return
+                    isFetchingRef.current = true
+                    try {
+                      setDashboardLoading(true)
+                      setDashboardError(null)
+                      const data = await dashboardApi(user.accessToken)
+                      setDashboardData(data)
+                    } catch (error) {
+                      setDashboardError(error.message || 'Failed to fetch dashboard data')
+                    } finally {
+                      setDashboardLoading(false)
+                      isFetchingRef.current = false
+                    }
+                  }
+                  fetchDashboardData()
+                }}
+                className="ml-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-sm transition-colors cursor-pointer"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        )}
         
         {/* Live Alerts Dropdown */}
         {showAlerts && (
@@ -382,11 +545,22 @@ const Dashboard = () => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">From Date</label>
-                      <input type="date" className="w-full p-2 border border-gray-300 rounded text-xs" />
+                      <input 
+                        type="date" 
+                        className="w-full p-2 border border-gray-300 rounded text-xs" 
+                        value={fromDate}
+                        onChange={(e) => setFromDate(e.target.value)}
+                      />
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">To Date</label>
-                      <input type="date" className="w-full p-2 border border-gray-300 rounded text-xs" />
+                      <input 
+                        type="date" 
+                        className="w-full p-2 border border-gray-300 rounded text-xs" 
+                        value={toDate}
+                        onChange={(e) => setToDate(e.target.value)}
+                        max={new Date().toISOString().split('T')[0]}
+                      />
                     </div>
                     
                     <div>
@@ -886,19 +1060,19 @@ const Dashboard = () => {
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs">
                           <span className="text-green-600">Messages Sent</span>
-                          <span className="font-semibold text-green-800">1,245</span>
+                          <span className="font-semibold text-green-800">0</span>
                         </div>
                         <div className="flex justify-between text-xs">
                           <span className="text-green-600">Delivered</span>
-                          <span className="font-semibold text-green-800">1,180</span>
+                          <span className="font-semibold text-green-800">0</span>
                         </div>
                         <div className="flex justify-between text-xs">
                           <span className="text-green-600">Read</span>
-                          <span className="font-semibold text-green-800">892</span>
+                          <span className="font-semibold text-green-800">0</span>
                         </div>
                         <div className="flex justify-between text-xs">
                           <span className="text-green-600">Responded</span>
-                          <span className="font-semibold text-green-800">456</span>
+                          <span className="font-semibold text-green-800">0</span>
                         </div>
                       </div>
                     </div>
@@ -912,15 +1086,15 @@ const Dashboard = () => {
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs">
                           <span className="text-blue-600">Calls Triggered</span>
-                          <span className="font-semibold text-blue-800">2,100</span>
+                          <span className="font-semibold text-blue-800">0</span>
                         </div>
                         <div className="flex justify-between text-xs">
                           <span className="text-blue-600">Answered</span>
-                          <span className="font-semibold text-blue-800">1,580</span>
+                          <span className="font-semibold text-blue-800">0</span>
                         </div>
                         <div className="flex justify-between text-xs">
                           <span className="text-blue-600">Positive Response</span>
-                          <span className="font-semibold text-blue-800">75.2%</span>
+                          <span className="font-semibold text-blue-800">0</span>
                         </div>
                       </div>
                     </div>
@@ -934,15 +1108,15 @@ const Dashboard = () => {
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs">
                           <span className="text-purple-600">Total Calls</span>
-                          <span className="font-semibold text-purple-800">1,850</span>
+                          <span className="font-semibold text-purple-800">0</span>
                         </div>
                         <div className="flex justify-between text-xs">
                           <span className="text-purple-600">Successful Connects</span>
-                          <span className="font-semibold text-purple-800">1,340</span>
+                          <span className="font-semibold text-purple-800">0</span>
                         </div>
                         <div className="flex justify-between text-xs">
                           <span className="text-purple-600">Follow-up Actions</span>
-                          <span className="font-semibold text-purple-800">72.4%</span>
+                          <span className="font-semibold text-purple-800">0</span>
                         </div>
                     </div>
                   </div>
@@ -956,15 +1130,15 @@ const Dashboard = () => {
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs">
                           <span className="text-orange-600">Planned Visits</span>
-                          <span className="font-semibold text-orange-800">156</span>
+                          <span className="font-semibold text-orange-800">0</span>
                         </div>
                         <div className="flex justify-between text-xs">
                           <span className="text-orange-600">Completed Visits</span>
-                          <span className="font-semibold text-orange-800">122</span>
+                          <span className="font-semibold text-orange-800">0</span>
                         </div>
                         <div className="flex justify-between text-xs">
                           <span className="text-orange-600">Geo-tagging Compliance</span>
-                          <span className="font-semibold text-orange-800">78.2%</span>
+                          <span className="font-semibold text-orange-800">0</span>
                         </div>
                   </div>
                 </div>
@@ -996,20 +1170,20 @@ const Dashboard = () => {
                       <div className="space-y-1">
                         <div className="flex flex-row justify-between text-xs">
                           <span className="text-green-600"># Todays PTP</span>
-                          <span className="font-semibold text-green-800">23</span>
+                          <span className="font-semibold text-green-800">0</span>
 
                           
                           <span className="text-green-600"># Future PTP</span>
-                          <span className="font-semibold text-green-800">890</span>
+                          <span className="font-semibold text-green-800">0</span>
                         
                         </div>
                        <div className="flex flex-row justify-between text-xs">
                           <span className="text-green-600"># Failed PTP</span>
-                          <span className="font-semibold text-green-800">234</span>
+                          <span className="font-semibold text-green-800">0</span>
 
                           
                           <span className="text-green-600"># Total PTP</span>
-                          <span className="font-semibold text-green-800">1120</span>
+                          <span className="font-semibold text-green-800">0</span>
                         
                         </div>
                       </div>
@@ -1021,11 +1195,11 @@ const Dashboard = () => {
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs">
                           <span className="text-orange-600"># Customers</span>
-                          <span className="font-semibold text-orange-800">67</span>
+                          <span className="font-semibold text-orange-800">0</span>
                         </div>
                         <div className="flex justify-between text-xs">
                           <span className="text-orange-600">Pending Amount</span>
-                          <span className="font-semibold text-orange-800">₹34L</span>
+                          <span className="font-semibold text-orange-800">0</span>
                         </div>
                       </div>
                     </div>
@@ -1036,11 +1210,11 @@ const Dashboard = () => {
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs">
                           <span className="text-blue-600"># Customers</span>
-                          <span className="font-semibold text-blue-800">189</span>
+                          <span className="font-semibold text-blue-800">0</span>
                         </div>
                         <div className="flex justify-between text-xs">
                           <span className="text-blue-600">Collected Amount</span>
-                          <span className="font-semibold text-blue-800">₹56L</span>
+                          <span className="font-semibold text-blue-800">0</span>
                         </div>
                       </div>
                     </div>
@@ -1051,11 +1225,11 @@ const Dashboard = () => {
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs">
                           <span className="text-purple-600"># Customers</span>
-                          <span className="font-semibold text-purple-800">89</span>
+                          <span className="font-semibold text-purple-800">0</span>
                         </div>
                         <div className="flex justify-between text-xs">
                           <span className="text-purple-600">Broken Amount</span>
-                          <span className="font-semibold text-purple-800">₹28L</span>
+                          <span className="font-semibold text-purple-800">0</span>
                         </div>
                     </div>
                   </div>
@@ -1066,7 +1240,7 @@ const Dashboard = () => {
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs">
                           <span className="text-gray-600">Count of Invalid Contacts</span>
-                          <span className="font-semibold text-gray-800">156</span>
+                          <span className="font-semibold text-gray-800">0</span>
                         </div>
                         <div className="flex justify-between text-xs">
                           <span className="text-gray-600">Status</span>

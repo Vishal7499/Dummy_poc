@@ -1,4 +1,4 @@
-import { decryptData } from './crypto'
+import { decryptData, encryptData } from './crypto'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
@@ -6,10 +6,13 @@ export async function loginApi({ username, password }) {
   const url = `${API_BASE}/login/`
   console.log('Login API call to:', url)
   
+  // Encrypt the credentials and send in payload field (matching backend expectation)
+  const encryptedPayload = encryptData({ username, password })
+  
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ payload: encryptedPayload }),
   })
   
   const responseText = await res.text()
@@ -88,6 +91,34 @@ export async function dashboardApi(accessToken) {
   if (!res.ok) {
     const text = await res.text().catch(() => '')
     throw new Error(text || 'Failed to fetch dashboard data')
+  }
+  return res.json()
+}
+
+export async function dashboardCollectionGraphApi(accessToken, fromDate, toDate) {
+  const url = `${API_BASE}/dashboardcollectongraph/`
+  
+  // Convert date from YYYY-MM-DD to DD-MM-YYYY format (backend expects DD-MM-YYYY)
+  const convertDateFormat = (dateStr) => {
+    if (!dateStr) return dateStr
+    const [year, month, day] = dateStr.split('-')
+    return `${day}-${month}-${year}`
+  }
+  
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from_date: convertDateFormat(fromDate),
+      to_date: convertDateFormat(toDate),
+    }),
+  })
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    throw new Error(text || 'Failed to fetch collection graph data')
   }
   return res.json()
 }
