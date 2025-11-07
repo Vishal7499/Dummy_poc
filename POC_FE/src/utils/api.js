@@ -123,4 +123,124 @@ export async function dashboardCollectionGraphApi(accessToken, fromDate, toDate)
   return res.json()
 }
 
+// Admin API Functions
+export async function adminGetUsers(accessToken) {
+  const url = `${API_BASE}/admin/users/`
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+  })
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    throw new Error(text || 'Failed to fetch users')
+  }
+  return res.json()
+}
+
+export async function adminCreateUser(accessToken, userData) {
+  const url = `${API_BASE}/admin/users/create/`
+  const encryptedPayload = encryptData(userData)
+  
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ payload: encryptedPayload }),
+  })
+  
+  const responseText = await res.text()
+  if (!res.ok) {
+    try {
+      const errorData = JSON.parse(responseText)
+      throw new Error(errorData.error || 'Failed to create user')
+    } catch (e) {
+      throw new Error(responseText || 'Failed to create user')
+    }
+  }
+  
+  try {
+    return JSON.parse(responseText)
+  } catch (e) {
+    return { message: 'User created successfully' }
+  }
+}
+
+export async function adminUpdateUser(accessToken, username, userData) {
+  const url = `${API_BASE}/admin/users/${username}/`
+  const encryptedPayload = encryptData(userData)
+  
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ payload: encryptedPayload }),
+  })
+  
+  const responseText = await res.text()
+  if (!res.ok) {
+    try {
+      const errorData = JSON.parse(responseText)
+      throw new Error(errorData.error || 'Failed to update user')
+    } catch (e) {
+      throw new Error(responseText || 'Failed to update user')
+    }
+  }
+  
+  try {
+    return JSON.parse(responseText)
+  } catch (e) {
+    return { message: 'User updated successfully' }
+  }
+}
+
+export async function adminDeleteUser(accessToken, username) {
+  const url = `${API_BASE}/admin/users/${username}/delete/`
+  const res = await fetch(url, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+  })
+  
+  const responseText = await res.text()
+  if (!res.ok) {
+    try {
+      const errorData = JSON.parse(responseText)
+      throw new Error(errorData.error || 'Failed to delete user')
+    } catch (e) {
+      throw new Error(responseText || 'Failed to delete user')
+    }
+  }
+  
+  try {
+    return JSON.parse(responseText)
+  } catch (e) {
+    return { message: 'User deleted successfully' }
+  }
+}
+
+export async function adminGetActivityLogs(accessToken) {
+  const url = `${API_BASE}/admin/activity-logs/`
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+  })
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    throw new Error(text || 'Failed to fetch activity logs')
+  }
+  return res.json()
+}
+
 

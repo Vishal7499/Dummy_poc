@@ -8,6 +8,21 @@ const Navbar = ({ onMobileMenuClick, isSidebarCollapsed, onBellClick }) => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
+  const getDashboardText = () => {
+    if (!user) return 'Supervisor Dashboard'
+    
+    const role = user.role?.toLowerCase()
+    const username = user.username?.toLowerCase()
+    
+    if (role === 'admin' || username === 'adminkotak') {
+      return 'Admin Dashboard'
+    } else if (role === 'staff' || username === 'staffuserr') {
+      return 'Staff User Dashboard'
+    } else {
+      return 'Supervisor Dashboard'
+    }
+  }
+
   const handleLogout = async () => {
     try {
       if (user?.accessToken) {
@@ -42,11 +57,11 @@ const Navbar = ({ onMobileMenuClick, isSidebarCollapsed, onBellClick }) => {
                         <img src={sarthiLogo} alt="Sarthi Logo" className="w-40 h-6 sm:w-8 sm:h-8" style={{width: '50px', height: '50px'}} />
                         <div className="hidden sm:block">
                           <h1 className="text-base sm:text-lg font-semibold text-gray-900">Sarthi Collection Kotak Bank</h1>
-                          <p className="text-xs text-gray-600">Supervisor Dashboard</p>
+                          <p className="text-xs text-gray-600">{getDashboardText()}</p>
                         </div>
                         <div className="block sm:hidden">
                           <h1 className="text-sm font-semibold text-gray-900">Sarthi</h1>
-                          <p className="text-xs text-gray-600">Dashboard</p>
+                          <p className="text-xs text-gray-600">{getDashboardText()}</p>
                         </div>
                       </>
                     )}

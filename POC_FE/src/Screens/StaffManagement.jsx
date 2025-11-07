@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import Sidebar from '../components/Sidebar'
+import StaffSidebar from '../components/StaffSidebar'
 import Navbar from '../components/Navbar'
 
 const StaffManagement = () => {
@@ -345,7 +345,7 @@ const StaffManagement = () => {
       <div className="h-screen font-['Montserrat'] flex" style={{background: 'linear-gradient(135deg,rgb(255, 255, 255) 0%,rgb(255, 255, 255) 100%)'}}>
       {/* Sidebar - Small when closed, overlay when open */}
       <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : 'w-0 overflow-hidden'}`}>
-        <Sidebar 
+        <StaffSidebar 
           isMobileOpen={isMobileSidebarOpen} 
           setIsMobileOpen={setIsMobileSidebarOpen}
           isCollapsed={isSidebarCollapsed}
@@ -356,7 +356,7 @@ const StaffManagement = () => {
       {/* Overlay Sidebar when expanded */}
       {!isSidebarCollapsed && (
         <div className="fixed inset-y-0 left-0 z-50 w-68 bg-white border-r border-gray-200 shadow-lg">
-          <Sidebar 
+          <StaffSidebar 
             isMobileOpen={isMobileSidebarOpen} 
             setIsMobileOpen={setIsMobileSidebarOpen}
             isCollapsed={isSidebarCollapsed}
