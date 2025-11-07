@@ -129,12 +129,12 @@ const AdminSidebar = ({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollaps
       )}
       
       {/* Sidebar */}
-      <div className="bg-blue-900 border-r border-blue-800 h-screen flex flex-col w-full">
+      <div className="bg-gradient-to-b from-white to-gray-50 border-r border-gray-200 h-screen flex flex-col w-full shadow-lg">
         {/* Header with Toggle */}
-        <div className="flex items-center p-4 border-b border-blue-800 h-16">
+        <div className="flex items-center p-4 border-b border-gray-200 h-16 bg-white">
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-2 rounded-lg hover:bg-blue-800 transition-colors cursor-pointer text-white"
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer text-gray-700"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -146,8 +146,8 @@ const AdminSidebar = ({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollaps
             <img src={sarthiLogo} alt="Sarthi Logo" className="w-10 h-12" />
             {!isCollapsed && (
               <div>
-                <h1 className="text-base font-semibold text-white">Sarthi Kotak POC</h1>
-                <p className="text-xs text-blue-200">Admin Dashboard</p>
+                <h1 className="text-base font-semibold text-gray-900">Sarthi Kotak POC</h1>
+                <p className="text-xs text-gray-500">Admin Dashboard</p>
               </div>
             )}
           </div>
@@ -155,7 +155,7 @@ const AdminSidebar = ({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollaps
           {/* Mobile Close Button */}
           <button
             onClick={() => setIsMobileOpen(false)}
-            className="absolute top-4 right-4 p-2 rounded-lg hover:bg-blue-800 transition-colors lg:hidden cursor-pointer text-white"
+            className="absolute top-4 right-4 p-2 rounded-lg hover:bg-gray-100 transition-colors lg:hidden cursor-pointer text-gray-700"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -171,18 +171,18 @@ const AdminSidebar = ({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollaps
                 <li key={index}>
                   <button
                     onClick={() => handleNavigation(item.path)}
-                    className={`w-full flex items-center rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                    className={`w-full flex items-center rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer ${
                       isCollapsed 
                         ? 'justify-center px-3 py-3' 
-                        : 'px-3 py-3'
+                        : 'px-4 py-3'
                     } ${
                       item.active
-                        ? 'bg-blue-700 text-white border border-blue-600'
-                        : 'text-blue-100 hover:bg-blue-800'
+                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md'
+                        : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'
                     }`}
                     title={isCollapsed ? item.name : ''}
                   >
-                    <span className={`${isCollapsed ? '' : 'mr-3'}`}>
+                    <span className={`${isCollapsed ? '' : 'mr-3'} ${item.active ? 'text-white' : 'text-gray-600'}`}>
                       {item.icon}
                     </span>
                     {!isCollapsed && (
@@ -196,8 +196,8 @@ const AdminSidebar = ({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollaps
         </nav>
 
         {/* Bottom Section */}
-        <div className="flex-shrink-0 p-4 border-t border-blue-800">
-          <div className="text-xs text-blue-300 text-center">
+        <div className="flex-shrink-0 p-4 border-t border-gray-200 bg-white">
+          <div className="text-xs text-gray-500 text-center font-medium">
             Admin Panel v1.0
           </div>
         </div>
@@ -207,4 +207,5 @@ const AdminSidebar = ({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollaps
 }
 
 export default AdminSidebar
+
 
