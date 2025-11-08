@@ -689,11 +689,526 @@ const Dashboard = () => {
     )
   }
 
+  // Helper function to render Product Summary table
+  const renderProductSummaryTable = () => {
+    const productData = [
+      { product: 'TW', total: 9275, dtr: 6334, agtl: 740, tc: 1445, ncm: 414, acm: 26, tce: 782, cm: 38, rcm: 0 },
+      { product: 'MSME', total: 1308, dtr: 194, agtl: 159, tc: 4, ncm: 921, acm: 79, tce: 0, cm: 8, rcm: 0 },
+      { product: 'EL', total: 1231, dtr: 655, agtl: 189, tc: 2, ncm: 132, acm: 253, tce: 0, cm: 0, rcm: 0 },
+      { product: 'ORL', total: 678, dtr: 9, agtl: 431, tc: 2, ncm: 280, acm: 7, tce: 0, cm: 11, rcm: 1 },
+      { product: 'PL', total: 634, dtr: 292, agtl: 264, tc: 0, ncm: 0, acm: 28, tce: 0, cm: 49, rcm: 1 },
+      { product: 'HL', total: 386, dtr: 259, agtl: 29, tc: 3, ncm: 61, acm: 28, tce: 0, cm: 6, rcm: 0 },
+      { product: 'LAP', total: 333, dtr: 168, agtl: 38, tc: 1, ncm: 72, acm: 33, tce: 0, cm: 21, rcm: 0 },
+      { product: 'AL', total: 77, dtr: 29, agtl: 11, tc: 0, ncm: 16, acm: 34, tce: 0, cm: 2, rcm: 0 },
+      { product: 'CV', total: 10, dtr: 5, agtl: 0, tc: 0, ncm: 2, acm: 1, tce: 0, cm: 2, rcm: 0 },
+      { product: 'CE', total: 4, dtr: 4, agtl: 0, tc: 0, ncm: 0, acm: 0, tce: 0, cm: 0, rcm: 0 }
+    ]
+    const totals = productData.reduce((acc, row) => ({
+      total: acc.total + row.total,
+      dtr: acc.dtr + row.dtr,
+      agtl: acc.agtl + row.agtl,
+      tc: acc.tc + row.tc,
+      ncm: acc.ncm + row.ncm,
+      acm: acc.acm + row.acm,
+      tce: acc.tce + row.tce,
+      cm: acc.cm + row.cm,
+      rcm: acc.rcm + row.rcm
+    }), { total: 0, dtr: 0, agtl: 0, tc: 0, ncm: 0, acm: 0, tce: 0, cm: 0, rcm: 0 })
+
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
+          <h3 className="text-sm font-semibold">Product Summary</h3>
+          <svg className="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+          </svg>
+        </div>
+        <div className="overflow-x-auto max-h-96 overflow-y-auto">
+          <table className="w-full text-xs">
+            <thead className="bg-red-600 text-white sticky top-0">
+              <tr>
+                <th className="text-left py-2 px-2 font-semibold border-r border-red-500">PRODUCT</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">TOTAL</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">DTR</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">AGTL</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">TC</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">NCM</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">ACM</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">TCE</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">CM</th>
+                <th className="text-right py-2 px-2 font-semibold">RCM</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {productData.map((row, idx) => (
+                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="py-2 px-2 text-gray-800 font-medium border-r border-gray-200">{row.product}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.total)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.dtr)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.agtl)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.tc)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.ncm)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.acm)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.tce)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.cm)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.rcm)}</td>
+                </tr>
+              ))}
+              <tr className="bg-red-600 text-white font-semibold">
+                <td className="py-2 px-2 border-r border-red-500">Totals</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.total)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.dtr)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.agtl)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.tc)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.ncm)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.acm)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.tce)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.cm)}</td>
+                <td className="py-2 px-2 text-right">{formatIndianNumber(totals.rcm)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  // Helper function to render Product Allocation Summary table
+  const renderProductAllocationTable = () => {
+    const allocationData = [
+      { product: 'TW', total: 9275, npa: 5631, sma0: 2241, sma1: 892, sma2: 511 },
+      { product: 'MSME', total: 1308, npa: 1187, sma0: 38, sma1: 22, sma2: 61 },
+      { product: 'EL', total: 1231, npa: 1183, sma0: 22, sma1: 12, sma2: 14 },
+      { product: 'ORL', total: 678, npa: 649, sma0: 12, sma1: 9, sma2: 8 },
+      { product: 'PL', total: 634, npa: 266, sma0: 264, sma1: 53, sma2: 51 },
+      { product: 'HL', total: 386, npa: 128, sma0: 87, sma1: 93, sma2: 78 },
+      { product: 'LAP', total: 333, npa: 118, sma0: 96, sma1: 61, sma2: 58 },
+      { product: 'AL', total: 77, npa: 28, sma0: 42, sma1: 4, sma2: 3 },
+      { product: 'CV', total: 10, npa: 9, sma0: 1, sma1: 0, sma2: 0 },
+      { product: 'CE', total: 4, npa: 4, sma0: 0, sma1: 0, sma2: 0 }
+    ]
+    const totals = allocationData.reduce((acc, row) => ({
+      total: acc.total + row.total,
+      npa: acc.npa + row.npa,
+      sma0: acc.sma0 + row.sma0,
+      sma1: acc.sma1 + row.sma1,
+      sma2: acc.sma2 + row.sma2
+    }), { total: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 })
+
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
+          <h3 className="text-sm font-semibold">Product Allocation Summary</h3>
+          <svg className="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+          </svg>
+        </div>
+        <div className="overflow-x-auto max-h-96 overflow-y-auto">
+          <table className="w-full text-xs">
+            <thead className="bg-red-600 text-white sticky top-0">
+              <tr>
+                <th className="text-left py-2 px-2 font-semibold border-r border-red-500">PRODUCT</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">TOTAL</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">NPA</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA0</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA1</th>
+                <th className="text-right py-2 px-2 font-semibold">SMA2</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {allocationData.map((row, idx) => (
+                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="py-2 px-2 text-gray-800 font-medium border-r border-gray-200">{row.product}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.total)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.npa)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma0)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma1)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2)}</td>
+                </tr>
+              ))}
+              <tr className="bg-red-600 text-white font-semibold">
+                <td className="py-2 px-2 border-r border-red-500">Totals</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.total)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.npa)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma0)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma1)}</td>
+                <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  // Helper function to render NCM Allocation Summary table
+  const renderNCMAllocationTable = () => {
+    const ncmData = [
+      { username: 'Francis', total: 1082, npa: 1034, sma0: 0, sma1: 4, sma2: 44 },
+      { username: 'MATHEW', total: 432, npa: 432, sma0: 0, sma1: 0, sma2: 0 },
+      { username: 'NAIMATULLAH', total: 280, npa: 271, sma0: 9, sma1: 0, sma2: 0 },
+      { username: 'Swapnil', total: 104, npa: 62, sma0: 29, sma1: 4, sma2: 9 }
+    ]
+    const totals = ncmData.reduce((acc, row) => ({
+      total: acc.total + row.total,
+      npa: acc.npa + row.npa,
+      sma0: acc.sma0 + row.sma0,
+      sma1: acc.sma1 + row.sma1,
+      sma2: acc.sma2 + row.sma2
+    }), { total: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 })
+
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
+          <h3 className="text-sm font-semibold">NCM Allocation Summary</h3>
+          <svg className="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+          </svg>
+        </div>
+        <div className="overflow-x-auto max-h-96 overflow-y-auto">
+          <table className="w-full text-xs">
+            <thead className="bg-red-600 text-white sticky top-0">
+              <tr>
+                <th className="text-left py-2 px-2 font-semibold border-r border-red-500">Username</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">TOTAL</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">NPA</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA0</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA1</th>
+                <th className="text-right py-2 px-2 font-semibold">SMA2</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {ncmData.map((row, idx) => (
+                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="py-2 px-2 text-gray-800 font-medium border-r border-gray-200">{row.username}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.total)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.npa)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma0)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma1)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2)}</td>
+                </tr>
+              ))}
+              <tr className="bg-red-600 text-white font-semibold">
+                <td className="py-2 px-2 border-r border-red-500">Totals</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.total)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.npa)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma0)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma1)}</td>
+                <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  // Helper function to render RCM Allocation Summary table
+  const renderRCMAllocationTable = () => {
+    const rcmData = [
+      { username: 'SATHEESH', total: 2, npa: 1, sma0: 0, sma1: 1, sma2: 0 }
+    ]
+    const totals = rcmData.reduce((acc, row) => ({
+      total: acc.total + row.total,
+      npa: acc.npa + row.npa,
+      sma0: acc.sma0 + row.sma0,
+      sma1: acc.sma1 + row.sma1,
+      sma2: acc.sma2 + row.sma2
+    }), { total: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 })
+
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
+          <h3 className="text-sm font-semibold">RCM Allocation Summary</h3>
+          <svg className="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+          </svg>
+        </div>
+        <div className="overflow-x-auto max-h-96 overflow-y-auto">
+          <table className="w-full text-xs">
+            <thead className="bg-red-600 text-white sticky top-0">
+              <tr>
+                <th className="text-left py-2 px-2 font-semibold border-r border-red-500">Username</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">TOTAL</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">NPA</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA0</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA1</th>
+                <th className="text-right py-2 px-2 font-semibold">SMA2</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {rcmData.map((row, idx) => (
+                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="py-2 px-2 text-gray-800 font-medium border-r border-gray-200">{row.username}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.total)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.npa)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma0)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma1)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2)}</td>
+                </tr>
+              ))}
+              <tr className="bg-red-600 text-white font-semibold">
+                <td className="py-2 px-2 border-r border-red-500">Totals</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.total)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.npa)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma0)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma1)}</td>
+                <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  // Helper function to render ACM Allocation Summary table
+  const renderACMAllocationTable = () => {
+    const acmData = [
+      { username: 'Kessavathamaraiselvan', total: 335, npa: 327, sma0: 3, sma1: 4, sma2: 1 },
+      { username: 'Nikitha', total: 64, npa: 0, sma0: 64, sma1: 0, sma2: 0 },
+      { username: 'Anand', total: 37, npa: 15, sma0: 17, sma1: 2, sma2: 3 },
+      { username: 'NISANTH', total: 12, npa: 11, sma0: 0, sma1: 1, sma2: 0 },
+      { username: 'Gousemohiddin', total: 11, npa: 11, sma0: 0, sma1: 0, sma2: 0 },
+      { username: 'Arumugam', total: 6, npa: 6, sma0: 0, sma1: 0, sma2: 0 },
+      { username: 'Gaurav Kumar', total: 6, npa: 2, sma0: 4, sma1: 0, sma2: 0 },
+      { username: 'JOSEPH', total: 4, npa: 1, sma0: 1, sma1: 0, sma2: 2 },
+      { username: 'Ashok', total: 4, npa: 3, sma0: 1, sma1: 0, sma2: 0 },
+      { username: 'JOHN', total: 3, npa: 0, sma0: 3, sma1: 0, sma2: 0 }
+    ]
+    const totals = acmData.reduce((acc, row) => ({
+      total: acc.total + row.total,
+      npa: acc.npa + row.npa,
+      sma0: acc.sma0 + row.sma0,
+      sma1: acc.sma1 + row.sma1,
+      sma2: acc.sma2 + row.sma2
+    }), { total: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 })
+
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
+          <h3 className="text-sm font-semibold">ACM Allocation Summary</h3>
+          <svg className="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+          </svg>
+        </div>
+        <div className="overflow-x-auto max-h-96 overflow-y-auto">
+          <table className="w-full text-xs">
+            <thead className="bg-red-600 text-white sticky top-0">
+              <tr>
+                <th className="text-left py-2 px-2 font-semibold border-r border-red-500">Username</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">TOTAL</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">NPA</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA0</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA1</th>
+                <th className="text-right py-2 px-2 font-semibold">SMA2</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {acmData.map((row, idx) => (
+                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="py-2 px-2 text-gray-800 font-medium border-r border-gray-200">{row.username}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.total)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.npa)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma0)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma1)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2)}</td>
+                </tr>
+              ))}
+              <tr className="bg-red-600 text-white font-semibold">
+                <td className="py-2 px-2 border-r border-red-500">Totals</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.total)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.npa)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma0)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma1)}</td>
+                <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  // Helper function to render CM Allocation Summary table
+  const renderCMAllocationTable = () => {
+    const cmData = [
+      { username: 'ALTHAF', total: 207, npa: 206, sma0: 0, sma1: 1, sma2: 0 },
+      { username: 'Vishnu', total: 142, npa: 139, sma0: 0, sma1: 1, sma2: 2 },
+      { username: 'Dipak', total: 83, npa: 10, sma0: 61, sma1: 9, sma2: 3 },
+      { username: 'Varun', total: 63, npa: 8, sma0: 44, sma1: 5, sma2: 6 },
+      { username: 'Girish', total: 60, npa: 31, sma0: 22, sma1: 3, sma2: 4 },
+      { username: 'Akash', total: 44, npa: 2, sma0: 42, sma1: 0, sma2: 0 },
+      { username: 'Manuprasad', total: 39, npa: 5, sma0: 24, sma1: 4, sma2: 6 },
+      { username: 'Vinoth', total: 36, npa: 33, sma0: 0, sma1: 0, sma2: 3 },
+      { username: 'SAI KUMAR', total: 33, npa: 15, sma0: 13, sma1: 4, sma2: 1 },
+      { username: 'MANTHA', total: 31, npa: 7, sma0: 15, sma1: 5, sma2: 4 }
+    ]
+    const totals = cmData.reduce((acc, row) => ({
+      total: acc.total + row.total,
+      npa: acc.npa + row.npa,
+      sma0: acc.sma0 + row.sma0,
+      sma1: acc.sma1 + row.sma1,
+      sma2: acc.sma2 + row.sma2
+    }), { total: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 })
+
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
+          <h3 className="text-sm font-semibold">CM Allocation Summary</h3>
+          <svg className="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+          </svg>
+        </div>
+        <div className="overflow-x-auto max-h-96 overflow-y-auto">
+          <table className="w-full text-xs">
+            <thead className="bg-red-600 text-white sticky top-0">
+              <tr>
+                <th className="text-left py-2 px-2 font-semibold border-r border-red-500">Username</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">TOTAL</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">NPA</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA0</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA1</th>
+                <th className="text-right py-2 px-2 font-semibold">SMA2</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {cmData.map((row, idx) => (
+                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="py-2 px-2 text-gray-800 font-medium border-r border-gray-200">{row.username}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.total)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.npa)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma0)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma1)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2)}</td>
+                </tr>
+              ))}
+              <tr className="bg-red-600 text-white font-semibold">
+                <td className="py-2 px-2 border-r border-red-500">Totals</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.total)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.npa)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma0)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma1)}</td>
+                <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  // Helper function to render AGTL Allocation Summary table
+  const renderAGTLAllocationTable = () => {
+    const agtlData = [
+      { username: 'NIKHIL', total: 279, npa: 270, sma0: 0, sma1: 4, sma2: 5 },
+      { username: 'JOBY', total: 194, npa: 139, sma0: 29, sma1: 13, sma2: 13 },
+      { username: 'N', total: 192, npa: 191, sma0: 0, sma1: 1, sma2: 0 },
+      { username: 'A', total: 186, npa: 89, sma0: 48, sma1: 30, sma2: 19 },
+      { username: 'SHINOJ', total: 184, npa: 184, sma0: 0, sma1: 0, sma2: 0 },
+      { username: 'VINOD', total: 151, npa: 131, sma0: 7, sma1: 9, sma2: 4 },
+      { username: 'NATARAJAN', total: 130, npa: 125, sma0: 0, sma1: 3, sma2: 2 },
+      { username: 'MUMMADI', total: 111, npa: 99, sma0: 4, sma1: 2, sma2: 6 },
+      { username: 'VENKATESH KUMAR', total: 110, npa: 109, sma0: 1, sma1: 0, sma2: 0 },
+      { username: 'SANOOP', total: 97, npa: 97, sma0: 0, sma1: 0, sma2: 0 }
+    ]
+    const totals = agtlData.reduce((acc, row) => ({
+      total: acc.total + row.total,
+      npa: acc.npa + row.npa,
+      sma0: acc.sma0 + row.sma0,
+      sma1: acc.sma1 + row.sma1,
+      sma2: acc.sma2 + row.sma2
+    }), { total: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 })
+
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
+          <h3 className="text-sm font-semibold">AGTL Allocation Summary</h3>
+          <svg className="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+          </svg>
+        </div>
+        <div className="overflow-x-auto max-h-96 overflow-y-auto">
+          <table className="w-full text-xs">
+            <thead className="bg-red-600 text-white sticky top-0">
+              <tr>
+                <th className="text-left py-2 px-2 font-semibold border-r border-red-500">Username</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">TOTAL</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">NPA</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA0</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA1</th>
+                <th className="text-right py-2 px-2 font-semibold">SMA2</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {agtlData.map((row, idx) => (
+                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="py-2 px-2 text-gray-800 font-medium border-r border-gray-200">{row.username}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.total)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.npa)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma0)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma1)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2)}</td>
+                </tr>
+              ))}
+              <tr className="bg-red-600 text-white font-semibold">
+                <td className="py-2 px-2 border-r border-red-500">Totals</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.total)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.npa)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma0)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma1)}</td>
+                <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
 
   console.log('dashboardData', dashboardData?.loan_data?.total_loans)
 
   return (
     <div className="h-screen font-['Montserrat'] flex" style={{background: 'linear-gradient(135deg,rgb(255, 255, 255) 0%,rgb(255, 255, 255) 100%)'}}>
+      <style>{`
+        .card-with-wave {
+          position: relative;
+          overflow: hidden;
+        }
+        .card-with-wave.expanded {
+          overflow: visible;
+          z-index: 40;
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .card-with-wave::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 15%;
+          border-radius: 0 0 0.5rem 0.5rem;
+        }
+        .card-with-wave.expanded::after {
+          height: 10%;
+        }
+        .card-with-wave-thin::after {
+          height: 8%;
+        }
+        .card-with-wave-thin.expanded::after {
+          height: 6%;
+        }
+        .card-wave-indigo::after { background-color: #003366; }
+        .card-wave-blue::after { background-color: #2196F3; }
+        .card-wave-green::after { background-color: #4CAF50; }
+        .card-wave-orange::after { background-color: #F04E23; }
+        .card-wave-red::after { background-color: #D32F2F; }
+        .card-wave-purple::after { background-color: #1976D2; }
+        .card-wave-gray::after { background-color: #333333; }
+        .card-wave-staff::after { background-color: #DC2626; }
+        .card-wave-engagement::after { background-color: #2196F3; }
+        .card-wave-payment::after { background-color: #003366; }
+      `}</style>
       {/* Sidebar - Small when closed, overlay when open */}
       <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : 'w-0 overflow-hidden'}`}>
         <Sidebar 
@@ -818,17 +1333,17 @@ const Dashboard = () => {
         {/* Main Content - Scrollable */}
         <main className="flex-1 overflow-y-auto">
           {/* Collection Dashboard Content */}
-          <div className="bg-white min-h-screen">
+          <div className="bg-gray-100 min-h-screen">
             <div className="flex gap-4 p-4">
               {/* Left Side - Filters and Delegation Tracking */}
               <div className="w-64 flex-shrink-0 space-y-4" ref={filtersRef}>
                 {/* Section 1: Filters */}
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 h-fit">
+                <div className="bg-gray-50 border-l-4 border-l-red-600 border-t border-r border-b border-gray-200 rounded-lg p-4 h-fit">
                   <div className="flex justify-between items-center mb-3">
-                    <h3 className="text-sm font-semibold text-gray-800">Filters</h3>
+                    <h3 className="text-sm font-semibold text-red-600">Filters</h3>
                     <button
                       onClick={resetFilters}
-                      className="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer p-1 hover:bg-gray-100 rounded"
+                      className="text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer p-1 rounded"
                       title="Reset all filters"
                       aria-label="Reset filters"
                     >
@@ -841,7 +1356,7 @@ const Dashboard = () => {
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">Type of Loan</label>
                       <select 
-                        className="w-full p-2 border border-gray-300 rounded text-xs"
+                        className="w-full p-2 border border-gray-300 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
                         value={filterLoanType}
                         onChange={(e) => setFilterLoanType(e.target.value)}
                       >
@@ -854,7 +1369,7 @@ const Dashboard = () => {
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">DPD Buckets</label>
                       <select 
-                        className="w-full p-2 border border-gray-300 rounded text-xs"
+                        className="w-full p-2 border border-gray-300 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
                         value={filterDPD}
                         onChange={(e) => setFilterDPD(e.target.value)}
                       >
@@ -870,7 +1385,7 @@ const Dashboard = () => {
                       <label className="block text-xs font-medium text-gray-600 mb-1">From Date</label>
                       <input 
                         type="date" 
-                        className="w-full p-2 border border-gray-300 rounded text-xs" 
+                        className="w-full p-2 border border-gray-300 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors" 
                         value={fromDate}
                         onChange={(e) => setFromDate(e.target.value)}
                       />
@@ -879,7 +1394,7 @@ const Dashboard = () => {
                       <label className="block text-xs font-medium text-gray-600 mb-1">To Date</label>
                       <input 
                         type="date" 
-                        className="w-full p-2 border border-gray-300 rounded text-xs" 
+                        className="w-full p-2 border border-gray-300 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors" 
                         value={toDate}
                         onChange={(e) => setToDate(e.target.value)}
                         max={new Date().toISOString().split('T')[0]}
@@ -889,7 +1404,7 @@ const Dashboard = () => {
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">Geography</label>
                       <select 
-                        className="w-full p-2 border border-gray-300 rounded text-xs"
+                        className="w-full p-2 border border-gray-300 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
                         value={filterGeography}
                         onChange={(e) => setFilterGeography(e.target.value)}
                       >
@@ -904,7 +1419,7 @@ const Dashboard = () => {
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">State</label>
                       <select 
-                        className="w-full p-2 border border-gray-300 rounded text-xs"
+                        className="w-full p-2 border border-gray-300 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
                         value={filterState}
                         onChange={(e) => setFilterState(e.target.value)}
                       >
@@ -922,7 +1437,7 @@ const Dashboard = () => {
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">District</label>
                       <select 
-                        className="w-full p-2 border border-gray-300 rounded text-xs"
+                        className="w-full p-2 border border-gray-300 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
                         value={filterDistrict}
                         onChange={(e) => setFilterDistrict(e.target.value)}
                       >
@@ -941,7 +1456,7 @@ const Dashboard = () => {
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">PI Code</label>
                       <select 
-                        className="w-full p-2 border border-gray-300 rounded text-xs"
+                        className="w-full p-2 border border-gray-300 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
                         value={filterPICode}
                         onChange={(e) => setFilterPICode(e.target.value)}
                       >
@@ -1002,8 +1517,8 @@ const Dashboard = () => {
               <div className="flex-1 min-w-0">
                 {/* Favorites Section */}
                 {favoriteCards.length > 0 && (
-                  <div className="mb-4">
-                    <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                  <div className="mb-8">
+                    <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                       ⭐ Favorites ({favoriteCards.length})
                     </h2>
                     <div className="grid grid-cols-5 gap-3">
@@ -1014,214 +1529,214 @@ const Dashboard = () => {
                         // Render different cards based on their ID
                         if (cardId === 'allocation') {
                           return (
-                            <div key={cardId} className="group bg-indigo-50 border-2 border-yellow-400 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg">
-                              <div className="text-indigo-600 text-xs">Allocation Summary</div>
-                              <div className="text-lg font-bold text-indigo-900">1,245</div>
+                            <div key={cardId} className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg card-with-wave card-wave-staff">
+                              <div className="text-xs text-gray-800 relative z-10">Allocation Summary</div>
+                              <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>1,245</div>
                               {renderFavoritePin('allocation')}
                             </div>
                           )
                         } else if (cardId === 'collection') {
                           return (
-                            <div key={cardId} className="group bg-blue-50 border-2 border-yellow-400 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg">
-                              <div className="text-blue-600 text-xs">Collection Efficiency (%)</div>
-                              <div className="text-lg font-bold text-blue-900">86.4%</div>
+                            <div key={cardId} className="group bg-white  rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg card-with-wave card-wave-staff">
+                              <div className="text-xs text-gray-800 relative z-10">Collection Efficiency (%)</div>
+                              <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>86.4%</div>
                               {renderFavoritePin('collection')}
                             </div>
                           )
                         } else if (cardId === 'ptp') {
                           return (
-                            <div key={cardId} className="group bg-green-50 border-2 border-yellow-400 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg">
-                              <div className="text-green-600 text-xs">PTP Conversion Rate (%)</div>
-                              <div className="text-lg font-bold text-green-900">72.3%</div>
+                            <div key={cardId} className="group bg-white  rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg card-with-wave card-wave-staff">
+                              <div className="text-xs text-gray-800 relative z-10">PTP Conversion Rate (%)</div>
+                              <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>72.3%</div>
                               {renderFavoritePin('ptp')}
                             </div>
                           )
                         } else if (cardId === 'productivity') {
                           return (
-                            <div key={cardId} className="group bg-orange-50 border-2 border-yellow-400 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg">
-                              <div className="text-orange-600 text-xs">Staff Productivity Index</div>
-                              <div className="text-lg font-bold text-orange-900">156</div>
+                            <div key={cardId} className="group bg-white  rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg card-with-wave card-wave-staff">
+                              <div className="text-xs text-gray-800 relative z-10">Staff Productivity Index</div>
+                              <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>156</div>
                               {renderFavoritePin('productivity')}
                             </div>
                           )
                         } else if (cardId === 'inactive') {
                           return (
-                            <div key={cardId} className="group bg-red-50 border-2 border-yellow-400 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg">
-                              <div className="text-red-600 text-xs">Inactive/Non-performing Staff</div>
-                              <div className="text-lg font-bold text-red-900">3</div>
+                            <div key={cardId} className="group bg-white  rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg card-with-wave card-wave-staff">
+                              <div className="text-xs text-gray-800 relative z-10">Inactive/Non-performing Staff</div>
+                              <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>3</div>
                               {renderFavoritePin('inactive')}
                             </div>
                           )
                         } else if (cardId === 'whatsapp') {
                           return (
-                            <div key={cardId} className="group bg-green-50 border-2 border-yellow-400 rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-green-100 shadow-lg relative">
+                            <div key={cardId} className="group bg-white  rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md shadow-lg relative card-with-wave card-wave-engagement">
                               {renderFavoritePin('whatsapp')}
-                              <h3 className="text-sm font-semibold text-green-800 mb-2">WhatsApp Engagements</h3>
-                              <div className="space-y-1">
-                                <div className="flex justify-between text-xs">
-                                  <span className="text-green-600">Messages Sent</span>
-                                  <span className="font-semibold text-green-800">1,245</span>
+                              <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">WhatsApp Engagements</h3>
+                              <div className="space-y-1 relative z-10">
+                                <div className="flex justify-between text-xs text-gray-800">
+                                  <span>Messages Sent</span>
+                                  <span className="font-semibold" style={{color: '#2196F3'}}>1,245</span>
                                 </div>
-                                <div className="flex justify-between text-xs">
-                                  <span className="text-green-600">Delivered</span>
-                                  <span className="font-semibold text-green-800">1,180</span>
+                                <div className="flex justify-between text-xs text-gray-800">
+                                  <span>Delivered</span>
+                                  <span className="font-semibold" style={{color: '#2196F3'}}>1,180</span>
                                 </div>
                               </div>
                             </div>
                           )
                         } else if (cardId === 'aiCalls') {
                           return (
-                            <div key={cardId} className="group bg-blue-50 border-2 border-yellow-400 rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-blue-100 shadow-lg relative">
+                            <div key={cardId} className="group bg-white  rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md shadow-lg relative card-with-wave card-wave-engagement">
                               {renderFavoritePin('aiCalls')}
-                              <h3 className="text-sm font-semibold text-blue-800 mb-2">AI Calls</h3>
-                              <div className="space-y-1">
-                                <div className="flex justify-between text-xs">
-                                  <span className="text-blue-600">Calls Triggered</span>
-                                  <span className="font-semibold text-blue-800">2,100</span>
+                              <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">AI Calls</h3>
+                              <div className="space-y-1 relative z-10">
+                                <div className="flex justify-between text-xs text-gray-800">
+                                  <span>Calls Triggered</span>
+                                  <span className="font-semibold" style={{color: '#2196F3'}}>2,100</span>
                                 </div>
-                                <div className="flex justify-between text-xs">
-                                  <span className="text-blue-600">Answered</span>
-                                  <span className="font-semibold text-blue-800">1,580</span>
+                                <div className="flex justify-between text-xs text-gray-800">
+                                  <span>Answered</span>
+                                  <span className="font-semibold" style={{color: '#2196F3'}}>1,580</span>
                                 </div>
                               </div>
                             </div>
                           )
                         } else if (cardId === 'dialler') {
                           return (
-                            <div key={cardId} className="group bg-purple-50 border-2 border-yellow-400 rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-purple-100 shadow-lg relative">
+                            <div key={cardId} className="group bg-white  rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md shadow-lg relative card-with-wave card-wave-engagement">
                               {renderFavoritePin('dialler')}
-                              <h3 className="text-sm font-semibold text-purple-800 mb-2">Dialler Calls</h3>
-                              <div className="space-y-1">
-                                <div className="flex justify-between text-xs">
-                                  <span className="text-purple-600">Total Calls</span>
-                                  <span className="font-semibold text-purple-800">1,850</span>
+                              <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Dialler Calls</h3>
+                              <div className="space-y-1 relative z-10">
+                                <div className="flex justify-between text-xs text-gray-800">
+                                  <span>Total Calls</span>
+                                  <span className="font-semibold" style={{color: '#2196F3'}}>1,850</span>
                                 </div>
-                                <div className="flex justify-between text-xs">
-                                  <span className="text-purple-600">Successful Connects</span>
-                                  <span className="font-semibold text-purple-800">1,340</span>
+                                <div className="flex justify-between text-xs text-gray-800">
+                                  <span>Successful Connects</span>
+                                  <span className="font-semibold" style={{color: '#2196F3'}}>1,340</span>
                                 </div>
                               </div>
                             </div>
                           )
                         } else if (cardId === 'fieldVisits') {
                           return (
-                            <div key={cardId} className="group bg-orange-50 border-2 border-yellow-400 rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-orange-100 shadow-lg relative">
+                            <div key={cardId} className="group bg-white  rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md shadow-lg relative card-with-wave card-wave-engagement">
                               {renderFavoritePin('fieldVisits')}
-                              <h3 className="text-sm font-semibold text-orange-800 mb-2">Field Visits</h3>
-                              <div className="space-y-1">
-                                <div className="flex justify-between text-xs">
-                                  <span className="text-orange-600">Planned Visits</span>
-                                  <span className="font-semibold text-orange-800">156</span>
+                              <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Field Visits</h3>
+                              <div className="space-y-1 relative z-10">
+                                <div className="flex justify-between text-xs text-gray-800">
+                                  <span>Planned Visits</span>
+                                  <span className="font-semibold" style={{color: '#2196F3'}}>156</span>
                                 </div>
-                                <div className="flex justify-between text-xs">
-                                  <span className="text-orange-600">Completed Visits</span>
-                                  <span className="font-semibold text-orange-800">122</span>
+                                <div className="flex justify-between text-xs text-gray-800">
+                                  <span>Completed Visits</span>
+                                  <span className="font-semibold" style={{color: '#2196F3'}}>122</span>
                                 </div>
                               </div>
                             </div>
                           )
                         } else if (cardId === 'overdue') {
                           return (
-                            <div key={cardId} className="bg-red-50 border-2 border-yellow-400 rounded-lg p-3 shadow-lg relative">
+                            <div key={cardId} className="bg-white  rounded-lg p-3 shadow-lg relative card-with-wave card-wave-payment">
                               {renderFavoritePin('overdue')}
-                              <h3 className="text-sm font-semibold text-red-800 mb-2">Overdue Accounts</h3>
-                              <div className="space-y-1">
-                                <div className="flex justify-between text-xs">
-                                  <span className="text-red-600">Customer Count</span>
-                                  <span className="font-semibold text-red-800">45</span>
+                              <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Overdue Accounts</h3>
+                              <div className="space-y-1 relative z-10">
+                                <div className="flex justify-between text-xs text-gray-800">
+                                  <span>Customer Count</span>
+                                  <span className="font-semibold" style={{color: '#003366'}}>45</span>
                                 </div>
-                                <div className="flex justify-between text-xs">
-                                  <span className="text-red-600">Amount</span>
-                                  <span className="font-semibold text-red-800">₹1.25Cr</span>
+                                <div className="flex justify-between text-xs text-gray-800">
+                                  <span>Amount</span>
+                                  <span className="font-semibold" style={{color: '#003366'}}>₹1.25Cr</span>
                                 </div>
                               </div>
                             </div>
                           )
                         } else if (cardId === 'promised') {
                           return (
-                            <div key={cardId} className="bg-green-50 border-2 border-yellow-400 rounded-lg p-3 shadow-lg relative col-span-2">
+                            <div key={cardId} className="bg-white  rounded-lg p-3 shadow-lg relative col-span-2 card-with-wave card-wave-payment">
                               {renderFavoritePin('promised')}
-                              <h3 className="text-sm font-semibold text-green-800 mb-2">Promised to Pay</h3>
-                              <div className="space-y-1">
-                                <div className="flex flex-row justify-between text-xs">
-                                  <span className="text-green-600"># Todays PTP</span>
-                                  <span className="font-semibold text-green-800">23</span>
-                                  <span className="text-green-600"># Future PTP</span>
-                                  <span className="font-semibold text-green-800">890</span>
+                              <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Promised to Pay</h3>
+                              <div className="space-y-1 relative z-10">
+                                <div className="flex flex-row justify-between text-xs text-gray-800">
+                                  <span># Todays PTP</span>
+                                  <span className="font-semibold" style={{color: '#003366'}}>23</span>
+                                  <span># Future PTP</span>
+                                  <span className="font-semibold" style={{color: '#003366'}}>890</span>
                                 </div>
-                                <div className="flex flex-row justify-between text-xs">
-                                  <span className="text-green-600"># Failed PTP</span>
-                                  <span className="font-semibold text-green-800">234</span>
-                                  <span className="text-green-600"># Total PTP</span>
-                                  <span className="font-semibold text-green-800">1120</span>
+                                <div className="flex flex-row justify-between text-xs text-gray-800">
+                                  <span># Failed PTP</span>
+                                  <span className="font-semibold" style={{color: '#003366'}}>234</span>
+                                  <span># Total PTP</span>
+                                  <span className="font-semibold" style={{color: '#003366'}}>1120</span>
                                 </div>
                               </div>
                             </div>
                           )
                         } else if (cardId === 'refused') {
                           return (
-                            <div key={cardId} className="bg-orange-50 border-2 border-yellow-400 rounded-lg p-3 shadow-lg relative">
+                            <div key={cardId} className="bg-white  rounded-lg p-3 shadow-lg relative card-with-wave card-wave-payment">
                               {renderFavoritePin('refused')}
-                              <h3 className="text-sm font-semibold text-orange-800 mb-2">Refused to Pay</h3>
-                              <div className="space-y-1">
-                                <div className="flex justify-between text-xs">
-                                  <span className="text-orange-600"># Customers</span>
-                                  <span className="font-semibold text-orange-800">67</span>
+                              <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Refused to Pay</h3>
+                              <div className="space-y-1 relative z-10">
+                                <div className="flex justify-between text-xs text-gray-800">
+                                  <span># Customers</span>
+                                  <span className="font-semibold" style={{color: '#003366'}}>67</span>
                                 </div>
-                                <div className="flex justify-between text-xs">
-                                  <span className="text-orange-600">Pending Amount</span>
-                                  <span className="font-semibold text-orange-800">₹34L</span>
+                                <div className="flex justify-between text-xs text-gray-800">
+                                  <span>Pending Amount</span>
+                                  <span className="font-semibold" style={{color: '#003366'}}>₹34L</span>
                                 </div>
                               </div>
                             </div>
                           )
                         } else if (cardId === 'paid') {
                           return (
-                            <div key={cardId} className="bg-blue-50 border-2 border-yellow-400 rounded-lg p-3 shadow-lg relative">
+                            <div key={cardId} className="bg-white  rounded-lg p-3 shadow-lg relative card-with-wave card-wave-payment">
                               {renderFavoritePin('paid')}
-                              <h3 className="text-sm font-semibold text-blue-800 mb-2">Already Paid</h3>
-                              <div className="space-y-1">
-                                <div className="flex justify-between text-xs">
-                                  <span className="text-blue-600"># Customers</span>
-                                  <span className="font-semibold text-blue-800">189</span>
+                              <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Already Paid</h3>
+                              <div className="space-y-1 relative z-10">
+                                <div className="flex justify-between text-xs text-gray-800">
+                                  <span># Customers</span>
+                                  <span className="font-semibold" style={{color: '#003366'}}>189</span>
                                 </div>
-                                <div className="flex justify-between text-xs">
-                                  <span className="text-blue-600">Collected Amount</span>
-                                  <span className="font-semibold text-blue-800">₹56L</span>
+                                <div className="flex justify-between text-xs text-gray-800">
+                                  <span>Collected Amount</span>
+                                  <span className="font-semibold" style={{color: '#003366'}}>₹56L</span>
                                 </div>
                               </div>
                             </div>
                           )
                         } else if (cardId === 'broken') {
                           return (
-                            <div key={cardId} className="bg-purple-50 border-2 border-yellow-400 rounded-lg p-3 shadow-lg relative">
+                            <div key={cardId} className="bg-white  rounded-lg p-3 shadow-lg relative card-with-wave card-wave-payment">
                               {renderFavoritePin('broken')}
-                              <h3 className="text-sm font-semibold text-purple-800 mb-2">Broken Promises</h3>
-                              <div className="space-y-1">
-                                <div className="flex justify-between text-xs">
-                                  <span className="text-purple-600"># Customers</span>
-                                  <span className="font-semibold text-purple-800">89</span>
+                              <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Broken Promises</h3>
+                              <div className="space-y-1 relative z-10">
+                                <div className="flex justify-between text-xs text-gray-800">
+                                  <span># Customers</span>
+                                  <span className="font-semibold" style={{color: '#003366'}}>89</span>
                                 </div>
-                                <div className="flex justify-between text-xs">
-                                  <span className="text-purple-600">Broken Amount</span>
-                                  <span className="font-semibold text-purple-800">₹28L</span>
+                                <div className="flex justify-between text-xs text-gray-800">
+                                  <span>Broken Amount</span>
+                                  <span className="font-semibold" style={{color: '#003366'}}>₹28L</span>
                                 </div>
                               </div>
                             </div>
                           )
                         } else if (cardId === 'wrong') {
                           return (
-                            <div key={cardId} className="bg-gray-50 border-2 border-yellow-400 rounded-lg p-3 shadow-lg relative">
+                            <div key={cardId} className="bg-white  rounded-lg p-3 shadow-lg relative card-with-wave card-wave-payment">
                               {renderFavoritePin('wrong')}
-                              <h3 className="text-sm font-semibold text-gray-800 mb-2">Wrong Numbers / Unreachable</h3>
-                              <div className="space-y-1">
-                                <div className="flex justify-between text-xs">
-                                  <span className="text-gray-600">Count of Invalid Contacts</span>
-                                  <span className="font-semibold text-gray-800">156</span>
+                              <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Wrong Numbers / Unreachable</h3>
+                              <div className="space-y-1 relative z-10">
+                                <div className="flex justify-between text-xs text-gray-800">
+                                  <span>Count of Invalid Contacts</span>
+                                  <span className="font-semibold" style={{color: '#003366'}}>156</span>
                                 </div>
-                                <div className="flex justify-between text-xs">
-                                  <span className="text-gray-600">Status</span>
-                                  <span className="font-semibold text-gray-800">Data Correction</span>
+                                <div className="flex justify-between text-xs text-gray-800">
+                                  <span>Status</span>
+                                  <span className="font-semibold" style={{color: '#003366'}}>Data Correction</span>
                                 </div>
                               </div>
                             </div>
@@ -1234,13 +1749,13 @@ const Dashboard = () => {
                 )}
 
                 {/* Staff Monitoring (Summary) */}
-                <div className="mb-4 w-full">
-                  <h2 className="text-lg font-semibold text-gray-800 mb-3">Staff Monitoring</h2>
+                <div className="mb-8 w-full">
+                  <h2 className="text-lg font-semibold text-gray-800 mb-4">Staff Monitoring</h2>
                   <div className="grid grid-cols-5 gap-3 relative w-full">
                     {/* Allocation Summary Card */}
                     <div 
                       data-staff-card
-                      className={`group bg-indigo-50 border border-indigo-200 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative ${selectedStaffMetric === 'allocation' ? 'ring-2 ring-indigo-500 shadow-lg' : ''}`}
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff ${expandedCard === 'allocation' ? 'expanded min-h-[170px] pb-4' : 'h-20'} ${selectedStaffMetric === 'allocation' ? 'ring-2 ring-red-600 shadow-lg' : ''}`}
                       onMouseEnter={() => setExpandedCard('allocation')}
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={(e) => {
@@ -1249,43 +1764,45 @@ const Dashboard = () => {
                       }}
                     >
                       {renderFavoritePin('allocation')}
-                      <div className="text-indigo-600 text-xs">Case Summary</div>
-                      <div className="text-lg font-bold text-indigo-900">{formatIndianNumber(dashboardData?.loan_data?.total_loans)}</div>
-                      {expandedCard === 'allocation' && (
-                        <div className="absolute top-0 left-0 right-0 bg-indigo-50 border border-indigo-200 rounded-lg p-3 z-50 shadow-lg">
-                          <div className="text-indigo-600 text-xs">Allocation Summary</div>
-                          <div className="text-lg font-bold text-indigo-900">{formatIndianNumber(dashboardData?.loan_data?.total_loans)}</div>
+                      {expandedCard === 'allocation' ? (
+                        <div className="relative z-10 mb-2">
+                          <div className="text-xs text-gray-800">Allocation Summary</div>
+                          <div className="text-lg font-bold" style={{color: '#DC2626'}}>{formatIndianNumber(dashboardData?.loan_data?.total_loans)}</div>
                           <div className="mt-2 space-y-1">
-                            <div className="flex justify-between text-xs text-indigo-700">
+                            <div className="flex justify-between text-xs text-gray-800">
                               <span>Active Accounts:</span>
-                              <span>{formatIndianNumber(dashboardData?.loan_data?.total_loans)}</span>
+                              <span style={{color: '#DC2626'}}>{formatIndianNumber(dashboardData?.loan_data?.total_loans)}</span>
                             </div>
-                            <div className="flex justify-between text-xs text-indigo-700">
+                            <div className="flex justify-between text-xs text-gray-800">
                               <span>Total Staff:</span>
-                              <span>{dashboardData?.loan_data?.unique_staff}</span>
+                              <span style={{color: '#DC2626'}}>{dashboardData?.loan_data?.unique_staff}</span>
                             </div>
-                            <div className="flex justify-between text-xs text-indigo-700">
+                            <div className="flex justify-between text-xs text-gray-800">
                               <span>Per Staff Avg:</span>
-                              <span>{dashboardData?.loan_data?.avg_loans_per_staff} %</span>
+                              <span style={{color: '#DC2626'}}>{dashboardData?.loan_data?.avg_loans_per_staff} %</span>
                             </div>
-
-                            <div className="flex justify-between text-xs text-indigo-700">
+                            <div className="flex justify-between text-xs text-gray-800">
                               <span>Outstanding Value:</span>
-                              <span>{dashboardData?.loan_data?.total_tos_in_cr} Cr</span>
+                              <span style={{color: '#DC2626'}}>{dashboardData?.loan_data?.total_tos_in_cr} Cr</span>
                             </div>
-                            <div className="flex justify-between text-xs text-indigo-700">
+                            <div className="flex justify-between text-xs text-gray-800">
                               <span>Unallocated Cases:</span>
-                              <span>23</span>
+                              <span style={{color: '#DC2626'}}>23</span>
                             </div>
                           </div>
                         </div>
+                      ) : (
+                        <>
+                          <div className="text-xs text-gray-800 relative z-10">Case Summary</div>
+                          <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>{formatIndianNumber(dashboardData?.loan_data?.total_loans)}</div>
+                        </>
                       )}
                     </div>
 
                     {/* Collection Efficiency Card */}
                     <div 
                       data-staff-card
-                      className={`group bg-blue-50 border border-blue-200 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative ${selectedStaffMetric === 'collection' ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff ${expandedCard === 'collection' ? 'expanded min-h-[160px] pb-4' : 'h-20'} ${selectedStaffMetric === 'collection' ? 'ring-2 ring-red-600 shadow-lg' : ''}`}
                       onMouseEnter={() => setExpandedCard('collection')}
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={(e) => {
@@ -1294,34 +1811,37 @@ const Dashboard = () => {
                       }}
                     >
                       {renderFavoritePin('collection')}
-                      <div className="text-blue-600 text-xs">Collection Efficiency (%)</div>
-                      <div className="text-lg font-bold text-blue-900">{dashboardData?.collection_data?.collection_percentage}%</div>
-                      {expandedCard === 'collection' && (
-                        <div className="absolute top-0 left-0 right-0 bg-blue-50 border border-blue-200 rounded-lg p-3 z-50 shadow-lg">
-                          <div className="text-blue-600 text-xs">Collection Efficiency (%)</div>
-                          <div className="text-lg font-bold text-blue-900">{dashboardData?.collection_data?.collection_percentage}%</div>
+                      {expandedCard === 'collection' ? (
+                        <div className="relative z-10 mb-2">
+                          <div className="text-xs text-gray-800">Collection Efficiency (%)</div>
+                          <div className="text-lg font-bold" style={{color: '#DC2626'}}>{dashboardData?.collection_data?.collection_percentage}%</div>
                           <div className="mt-2 space-y-1">
-                            <div className="flex justify-between text-xs text-blue-700">
+                            <div className="flex justify-between text-xs text-gray-800">
                               <span>Amount Collected:</span>
-                              <span>{dashboardData?.collection_data?.collection_amount_cr} Cr</span>
+                              <span style={{color: '#DC2626'}}>{dashboardData?.collection_data?.collection_amount_cr} Cr</span>
                             </div>
-                            <div className="flex justify-between text-xs text-blue-700">
+                            <div className="flex justify-between text-xs text-gray-800">
                               <span>Total Due:</span>
-                              <span>{dashboardData?.collection_data?.total_overdue_cr} Cr</span>
+                              <span style={{color: '#DC2626'}}>{dashboardData?.collection_data?.total_overdue_cr} Cr</span>
                             </div>
-                            <div className="flex justify-between text-xs text-blue-700">
+                            <div className="flex justify-between text-xs text-gray-800">
                               <span>Difference:</span>
-                              <span>{dashboardData?.collection_data?.collection_amount_cr - dashboardData?.collection_data?.total_overdue_cr} Cr</span>
+                              <span style={{color: '#DC2626'}}>{dashboardData?.collection_data?.collection_amount_cr - dashboardData?.collection_data?.total_overdue_cr} Cr</span>
                             </div>
                           </div>
                         </div>
+                      ) : (
+                        <>
+                          <div className="text-xs text-gray-800 relative z-10">Collection Efficiency (%)</div>
+                          <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>{dashboardData?.collection_data?.collection_percentage}%</div>
+                        </>
                       )}
                     </div>
 
                     {/* PTP Conversion Rate Card */}
                     <div 
                       data-staff-card
-                      className={`group bg-green-50 border border-green-200 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative ${selectedStaffMetric === 'ptp' ? 'ring-2 ring-green-500 shadow-lg' : ''}`}
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff ${expandedCard === 'ptp' ? 'expanded min-h-[160px] pb-4' : 'h-20'} ${selectedStaffMetric === 'ptp' ? 'ring-2 ring-red-600 shadow-lg' : ''}`}
                       onMouseEnter={() => setExpandedCard('ptp')}
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={(e) => {
@@ -1330,34 +1850,37 @@ const Dashboard = () => {
                       }}
                     >
                       {renderFavoritePin('ptp')}
-                      <div className="text-green-600 text-xs">PTP Conversion Rate (%)</div>
-                      <div className="text-lg font-bold text-green-900">72.3%</div>
-                      {expandedCard === 'ptp' && (
-                        <div className="absolute top-0 left-0 right-0 bg-green-50 border border-green-200 rounded-lg p-3 z-50 shadow-lg">
-                          <div className="text-green-600 text-xs">PTP Conversion Rate (%)</div>
-                          <div className="text-lg font-bold text-green-900">72.3%</div>
+                      {expandedCard === 'ptp' ? (
+                        <div className="relative z-10 mb-2">
+                          <div className="text-xs text-gray-800">PTP Conversion Rate (%)</div>
+                          <div className="text-lg font-bold" style={{color: '#DC2626'}}>72.3%</div>
                           <div className="mt-2 space-y-1">
-                            <div className="flex justify-between text-xs text-green-700">
+                            <div className="flex justify-between text-xs text-gray-800">
                               <span>PTPs Fulfilled:</span>
-                              <span>234</span>
+                              <span style={{color: '#DC2626'}}>234</span>
                             </div>
-                            <div className="flex justify-between text-xs text-green-700">
+                            <div className="flex justify-between text-xs text-gray-800">
                               <span>Total PTPs:</span>
-                              <span>324</span>
+                              <span style={{color: '#DC2626'}}>324</span>
                             </div>
-                            <div className="flex justify-between text-xs text-green-700">
+                            <div className="flex justify-between text-xs text-gray-800">
                               <span>Pending:</span>
-                              <span>90</span>
+                              <span style={{color: '#DC2626'}}>90</span>
                             </div>
                           </div>
                         </div>
+                      ) : (
+                        <>
+                          <div className="text-xs text-gray-800 relative z-10">PTP Conversion Rate (%)</div>
+                          <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>72.3%</div>
+                        </>
                       )}
                     </div>
 
                     {/* Staff Productivity Index Card */}
                     <div 
                       data-staff-card
-                      className={`group bg-orange-50 border border-orange-200 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative ${selectedStaffMetric === 'productivity' ? 'ring-2 ring-orange-500 shadow-lg' : ''}`}
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff ${expandedCard === 'productivity' ? 'expanded min-h-[160px] pb-4' : 'h-20'} ${selectedStaffMetric === 'productivity' ? 'ring-2 ring-red-600 shadow-lg' : ''}`}
                       onMouseEnter={() => setExpandedCard('productivity')}
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={(e) => {
@@ -1366,34 +1889,37 @@ const Dashboard = () => {
                       }}
                     >
                       {renderFavoritePin('productivity')}
-                      <div className="text-orange-600 text-xs">Staff Productivity Index</div>
-                      <div className="text-lg font-bold text-orange-900">156</div>
-                      {expandedCard === 'productivity' && (
-                        <div className="absolute top-0 left-0 right-0 bg-orange-50 border border-orange-200 rounded-lg p-3 z-50 shadow-lg">
-                          <div className="text-orange-600 text-xs">Staff Productivity Index</div>
-                          <div className="text-lg font-bold text-orange-900">156</div>
+                      {expandedCard === 'productivity' ? (
+                        <div className="relative z-10 mb-2">
+                          <div className="text-xs text-gray-800">Staff Productivity Index</div>
+                          <div className="text-lg font-bold" style={{color: '#DC2626'}}>156</div>
                           <div className="mt-2 space-y-1">
-                            <div className="flex justify-between text-xs text-orange-700">
+                            <div className="flex justify-between text-xs text-gray-800">
                               <span>Total Calls:</span>
-                              <span>1,245</span>
+                              <span style={{color: '#DC2626'}}>1,245</span>
                             </div>
-                            <div className="flex justify-between text-xs text-orange-700">
+                            <div className="flex justify-between text-xs text-gray-800">
                               <span>Total Visits:</span>
-                              <span>89</span>
+                              <span style={{color: '#DC2626'}}>89</span>
                             </div>
-                            <div className="flex justify-between text-xs text-orange-700">
+                            <div className="flex justify-between text-xs text-gray-800">
                               <span>Weight:</span>
-                              <span>1.2x</span>
+                              <span style={{color: '#DC2626'}}>1.2x</span>
                             </div>
                           </div>
                         </div>
+                      ) : (
+                        <>
+                          <div className="text-xs text-gray-800 relative z-10">Staff Productivity Index</div>
+                          <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>156</div>
+                        </>
                       )}
                     </div>
 
                     {/* Inactive/Non-performing Staff Card */}
                     <div 
                       data-staff-card
-                      className={`group bg-red-50 border border-red-200 rounded-lg p-3 relative cursor-pointer transition-all duration-300 h-20 ${selectedStaffMetric === 'inactive' ? 'ring-2 ring-red-500 shadow-lg' : ''}`}
+                      className={`group bg-white rounded-lg p-3 relative cursor-pointer transition-all duration-300 card-with-wave card-wave-staff ${expandedCard === 'inactive' ? 'expanded min-h-[190px] pb-4' : 'h-20'} ${selectedStaffMetric === 'inactive' ? 'ring-2 ring-red-600 shadow-lg' : ''}`}
                       onMouseEnter={() => setExpandedCard('inactive')}
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={(e) => {
@@ -1402,38 +1928,95 @@ const Dashboard = () => {
                       }}
                     >
                       {renderFavoritePin('inactive')}
-                      <div className="text-red-600 text-xs">Inactive/Non-performing Staff</div>
-                      <div className="text-lg font-bold text-red-900">3</div>
-                      <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">3</div>
-                      {expandedCard === 'inactive' && (
-                        <div className="absolute top-0 left-0 right-0 bg-red-50 border border-red-200 rounded-lg p-3 z-50 shadow-lg">
-                          <div className="text-red-600 text-xs">Inactive/Non-performing Staff</div>
-                          <div className="text-lg font-bold text-red-900">3</div>
-                          <div className="text-xs text-red-500">0 calls or 0 visits</div>
-                          <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">3</div>
+                      <div className="absolute top-0 right-0 bg-red-600 text-white text-xs rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center font-bold z-20 shadow-sm">3</div>
+                      {expandedCard === 'inactive' ? (
+                        <div className="relative z-10 mb-2">
+                          <div className="text-xs text-gray-800">Inactive/Non-performing Staff</div>
+                          <div className="text-lg font-bold" style={{color: '#DC2626'}}>3</div>
+                          <div className="text-xs text-gray-800">0 calls or 0 visits</div>
                           <div className="mt-2 space-y-1">
-                            <div className="flex justify-between text-xs text-red-700">
+                            <div className="flex justify-between text-xs text-gray-800">
                               <span>Ramesh K.</span>
-                              <span>(0 calls)</span>
+                              <span style={{color: '#DC2626'}}>(0 calls)</span>
                             </div>
-                            <div className="flex justify-between text-xs text-red-700">
+                            <div className="flex justify-between text-xs text-gray-800">
                               <span>Priya S.</span>
-                              <span>(0 visits)</span>
+                              <span style={{color: '#DC2626'}}>(0 visits)</span>
                             </div>
-                            <div className="flex justify-between text-xs text-red-700">
+                            <div className="flex justify-between text-xs text-gray-800">
                               <span>Ankit M.</span>
-                              <span>(0 both)</span>
+                              <span style={{color: '#DC2626'}}>(0 both)</span>
                             </div>
                           </div>
                         </div>
+                      ) : (
+                        <>
+                          <div className="text-xs text-gray-800 relative z-10">Inactive/Non-performing Staff</div>
+                          <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>3</div>
+                        </>
                       )}
                     </div>
                   </div>
                 </div>
 
-                {/* Staff Performance Leaderboard Table */}
-                {selectedStaffMetric && (
-                  <div ref={leaderboardTableRef} className="mb-4 bg-white border border-gray-200 rounded-lg p-6 shadow-sm w-full" style={{ maxWidth: '100%', overflow: 'hidden', boxSizing: 'border-box' }}>
+                {/* Allocation Tables - Show when allocation card is clicked */}
+                {selectedStaffMetric === 'allocation' && (
+                  <div ref={leaderboardTableRef} className="mb-8 w-full space-y-6">
+                    {/* Header with Title and Close Button */}
+                    <div className="flex justify-between items-center">
+                      <h2 className="text-xl font-semibold text-gray-900">Case Summary - Allocation Details</h2>
+                      <button
+                        onClick={() => setSelectedStaffMetric(null)}
+                        className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                        aria-label="Close allocation tables"
+                      >
+                        Close
+                      </button>
+                    </div>
+
+                    {/* Grid of Tables - 2 columns on large screens */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Product Summary Table */}
+                      <div className="lg:col-span-2">
+                        {renderProductSummaryTable()}
+                      </div>
+                      
+                      {/* Product Allocation Summary Table */}
+                      <div className="lg:col-span-2">
+                        {renderProductAllocationTable()}
+                      </div>
+                      
+                      {/* NCM Allocation Summary Table */}
+                      <div>
+                        {renderNCMAllocationTable()}
+                      </div>
+                      
+                      {/* RCM Allocation Summary Table */}
+                      <div>
+                        {renderRCMAllocationTable()}
+                      </div>
+                      
+                      {/* ACM Allocation Summary Table */}
+                      <div>
+                        {renderACMAllocationTable()}
+                      </div>
+                      
+                      {/* CM Allocation Summary Table */}
+                      <div>
+                        {renderCMAllocationTable()}
+                      </div>
+                      
+                      {/* AGTL Allocation Summary Table */}
+                      <div className="lg:col-span-2">
+                        {renderAGTLAllocationTable()}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Staff Performance Leaderboard Table - Show for other metrics */}
+                {selectedStaffMetric && selectedStaffMetric !== 'allocation' && (
+                  <div ref={leaderboardTableRef} className="mb-8 bg-white border border-gray-200 rounded-lg p-6 shadow-sm w-full" style={{ maxWidth: '100%', overflow: 'hidden', boxSizing: 'border-box' }}>
                     {/* Header with Title and Close Button */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                       <h2 className="text-xl font-semibold text-gray-900">{getCardName(selectedStaffMetric)}</h2>
@@ -1739,97 +2322,97 @@ const Dashboard = () => {
                 )}
 
                 {/* Customer Engagement */}
-                <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-gray-800 mb-3">Customer Engagement</h2>
+                <div className="mb-8">
+                  <h2 className="text-lg font-semibold text-gray-800 mb-4">Customer Engagement</h2>
                   <div className="grid grid-cols-4 gap-3">
                     <div 
-                      className="group bg-green-50 border border-green-200 rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-green-100 relative"
+                      className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement"
                       onClick={() => navigate('/customer-engagement')}
                     >
                       {renderFavoritePin('whatsapp')}
-                      <h3 className="text-sm font-semibold text-green-800 mb-2">WhatsApp Engagements</h3>
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-green-600">Messages Sent</span>
-                          <span className="font-semibold text-green-800">0</span>
+                      <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">WhatsApp Engagements</h3>
+                      <div className="space-y-1 relative z-10">
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Messages Sent</span>
+                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
                         </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-green-600">Delivered</span>
-                          <span className="font-semibold text-green-800">0</span>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Delivered</span>
+                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
                         </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-green-600">Read</span>
-                          <span className="font-semibold text-green-800">0</span>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Read</span>
+                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
                         </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-green-600">Responded</span>
-                          <span className="font-semibold text-green-800">0</span>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Responded</span>
+                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
                         </div>
                       </div>
                     </div>
 
                     <div 
-                      className="group bg-blue-50 border border-blue-200 rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-blue-100 relative"
+                      className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement"
                       onClick={() => navigate('/customer-engagement')}
                     >
                       {renderFavoritePin('aiCalls')}
-                      <h3 className="text-sm font-semibold text-blue-800 mb-2">AI Calls</h3>
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-blue-600">Calls Triggered</span>
-                          <span className="font-semibold text-blue-800">0</span>
+                      <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">AI Calls</h3>
+                      <div className="space-y-1 relative z-10">
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Calls Triggered</span>
+                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
                         </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-blue-600">Answered</span>
-                          <span className="font-semibold text-blue-800">0</span>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Answered</span>
+                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
                         </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-blue-600">Positive Response</span>
-                          <span className="font-semibold text-blue-800">0</span>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Positive Response</span>
+                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
                         </div>
                       </div>
                     </div>
 
                     <div 
-                      className="group bg-purple-50 border border-purple-200 rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-purple-100 relative"
+                      className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement"
                       onClick={() => navigate('/customer-engagement')}
                     >
                       {renderFavoritePin('dialler')}
-                      <h3 className="text-sm font-semibold text-purple-800 mb-2">Dialler Calls</h3>
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-purple-600">Total Calls</span>
-                          <span className="font-semibold text-purple-800">0</span>
+                      <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Dialler Calls</h3>
+                      <div className="space-y-1 relative z-10">
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Total Calls</span>
+                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
                         </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-purple-600">Successful Connects</span>
-                          <span className="font-semibold text-purple-800">0</span>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Successful Connects</span>
+                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
                         </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-purple-600">Follow-up Actions</span>
-                          <span className="font-semibold text-purple-800">0</span>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Follow-up Actions</span>
+                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
                         </div>
                     </div>
                   </div>
 
                     <div 
-                      className="group bg-orange-50 border border-orange-200 rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-orange-100 relative"
+                      className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement"
                       onClick={() => navigate('/customer-engagement')}
                     >
                       {renderFavoritePin('fieldVisits')}
-                      <h3 className="text-sm font-semibold text-orange-800 mb-2">Field Visits</h3>
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-orange-600">Planned Visits</span>
-                          <span className="font-semibold text-orange-800">0</span>
+                      <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Field Visits</h3>
+                      <div className="space-y-1 relative z-10">
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Planned Visits</span>
+                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
                         </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-orange-600">Completed Visits</span>
-                          <span className="font-semibold text-orange-800">0</span>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Completed Visits</span>
+                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
                         </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-orange-600">Geo-tagging Compliance</span>
-                          <span className="font-semibold text-orange-800">0</span>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Geo-tagging Compliance</span>
+                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
                         </div>
                   </div>
                 </div>
@@ -1837,105 +2420,105 @@ const Dashboard = () => {
             </div>
 
                 {/* Payment Intent & Behavior */}
-                <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-gray-800 mb-3">Payment Intent & Behavior</h2>
+                <div className="mb-8">
+                  <h2 className="text-lg font-semibold text-gray-800 mb-4">Payment Intent & Behavior</h2>
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="group bg-red-50 border border-red-200 rounded-lg p-3 relative">
+                    <div className="group bg-white rounded-lg p-3 relative card-with-wave card-with-wave-thin card-wave-payment">
                       {renderFavoritePin('overdue')}
-                      <h3 className="text-sm font-semibold text-red-800 mb-2">Overdue Accounts</h3>
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-red-600">Customer Count</span>
-                          <span className="font-semibold text-red-800">45</span>
+                      <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Overdue Accounts</h3>
+                      <div className="space-y-1 relative z-10">
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Customer Count</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>45</span>
                         </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-red-600">Amount</span>
-                          <span className="font-semibold text-red-800">₹1.25Cr</span>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Amount</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>₹1.25Cr</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="group bg-green-50 border border-green-200 rounded-lg p-3 relative">
+                    <div className="group bg-white rounded-lg p-3 relative card-with-wave card-with-wave-thin card-wave-payment">
                       {renderFavoritePin('promised')}
-                      <h3 className="text-sm font-semibold text-green-800 mb-2">Promised to Pay</h3>
-                      <div className="space-y-1">
-                        <div className="flex flex-row justify-between text-xs">
-                          <span className="text-green-600"># Todays PTP</span>
-                          <span className="font-semibold text-green-800">0</span>
+                      <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Promised to Pay</h3>
+                      <div className="space-y-1 relative z-10">
+                        <div className="flex flex-row justify-between text-xs text-gray-800">
+                          <span># Todays PTP</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
 
                           
-                          <span className="text-green-600"># Future PTP</span>
-                          <span className="font-semibold text-green-800">0</span>
+                          <span># Future PTP</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
                         
                         </div>
-                       <div className="flex flex-row justify-between text-xs">
-                          <span className="text-green-600"># Failed PTP</span>
-                          <span className="font-semibold text-green-800">0</span>
+                       <div className="flex flex-row justify-between text-xs text-gray-800">
+                          <span># Failed PTP</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
 
                           
-                          <span className="text-green-600"># Total PTP</span>
-                          <span className="font-semibold text-green-800">0</span>
+                          <span># Total PTP</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
                         
                         </div>
                       </div>
                     </div>
 
-                    <div className="group bg-orange-50 border border-orange-200 rounded-lg p-3 relative">
+                    <div className="group bg-white rounded-lg p-3 relative card-with-wave card-with-wave-thin card-wave-payment">
                       {renderFavoritePin('refused')}
-                      <h3 className="text-sm font-semibold text-orange-800 mb-2">Refused to Pay</h3>
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-orange-600"># Customers</span>
-                          <span className="font-semibold text-orange-800">0</span>
+                      <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Refused to Pay</h3>
+                      <div className="space-y-1 relative z-10">
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span># Customers</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
                         </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-orange-600">Pending Amount</span>
-                          <span className="font-semibold text-orange-800">0</span>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Pending Amount</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="group bg-blue-50 border border-blue-200 rounded-lg p-3 relative">
+                    <div className="group bg-white rounded-lg p-3 relative card-with-wave card-with-wave-thin card-wave-payment">
                       {renderFavoritePin('paid')}
-                      <h3 className="text-sm font-semibold text-blue-800 mb-2">Already Paid</h3>
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-blue-600"># Customers</span>
-                          <span className="font-semibold text-blue-800">0</span>
+                      <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Already Paid</h3>
+                      <div className="space-y-1 relative z-10">
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span># Customers</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
                         </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-blue-600">Collected Amount</span>
-                          <span className="font-semibold text-blue-800">0</span>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Collected Amount</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="group bg-purple-50 border border-purple-200 rounded-lg p-3 relative">
+                    <div className="group bg-white rounded-lg p-3 relative card-with-wave card-with-wave-thin card-wave-payment">
                       {renderFavoritePin('broken')}
-                      <h3 className="text-sm font-semibold text-purple-800 mb-2">Broken Promises</h3>
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-purple-600"># Customers</span>
-                          <span className="font-semibold text-purple-800">0</span>
+                      <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Broken Promises</h3>
+                      <div className="space-y-1 relative z-10">
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span># Customers</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
                         </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-purple-600">Broken Amount</span>
-                          <span className="font-semibold text-purple-800">0</span>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Broken Amount</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
                         </div>
                     </div>
                   </div>
 
-                    <div className="group bg-gray-50 border border-gray-200 rounded-lg p-3 relative">
+                    <div className="group bg-white rounded-lg p-3 relative card-with-wave card-with-wave-thin card-wave-payment">
                       {renderFavoritePin('wrong')}
-                      <h3 className="text-sm font-semibold text-gray-800 mb-2">Wrong Numbers / Unreachable</h3>
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-gray-600">Count of Invalid Contacts</span>
-                          <span className="font-semibold text-gray-800">0</span>
+                      <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Wrong Numbers / Unreachable</h3>
+                      <div className="space-y-1 relative z-10">
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Count of Invalid Contacts</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
                         </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-gray-600">Status</span>
-                          <span className="font-semibold text-gray-800">Data Correction</span>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Status</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>Data Correction</span>
                         </div>
                   </div>
                 </div>
@@ -1943,7 +2526,7 @@ const Dashboard = () => {
             </div>
 
                 {/* Charts and Right Panel Row */}
-                <div className="grid grid-cols-3 gap-4 mb-2">
+                <div className="grid grid-cols-3 gap-4 mb-8">
                   {/* Left Side - Charts */}
                   <div className="col-span-2 space-y-4">
                      {/* Collection Trend Chart */}
