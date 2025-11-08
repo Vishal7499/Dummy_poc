@@ -3,6 +3,7 @@ import { GoPin } from 'react-icons/go'
 import { LuPinOff } from 'react-icons/lu'
 import { useNavigate } from 'react-router-dom'
 import Chart from 'react-apexcharts'
+import * as XLSX from 'xlsx'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
 import { useAuth } from '../contexts/AuthContext'
@@ -20,6 +21,9 @@ const Dashboard = () => {
   const [selectedStaffMetric, setSelectedStaffMetric] = useState(null)
   const [chartFilter, setChartFilter] = useState('ftd')
   const leaderboardTableRef = useRef(null)
+  // Hierarchy drill-down state
+  const [hierarchyPath, setHierarchyPath] = useState([]) // Array to track hierarchy path: [{level, id, name}, ...]
+  const [currentHierarchyLevel, setCurrentHierarchyLevel] = useState(null) // Current hierarchy level being viewed
   const [staffSearchTerm, setStaffSearchTerm] = useState('')
   const [staffSortBy, setStaffSortBy] = useState('efficiency')
   const [staffSortOrder, setStaffSortOrder] = useState('desc')
@@ -229,20 +233,68 @@ const Dashboard = () => {
     wrongNumbers: { count: 156 }
   }
 
-  // Enhanced staff data for leaderboard - matching StaffManagement format with district, state, and PI Code
+  // Enhanced staff data for leaderboard with hierarchical relationships
+  // Hierarchy order: Supervisor (level 1) -> Senior Executive (level 2) -> Executive (level 3) -> Collection Officer (level 4)
   const staffLeaderboardBaseData = [
-    { id: 'EMP001', name: 'Ramesh Kumar', hierarchy: 'Supervisor', piCode: 'PI001', center: 'Mumbai', district: 'Mumbai', state: 'Maharashtra', loanType: 'Tractor', region: 'North', customers: 156, due: 3200000, overdue: 450000, calls: 45, visits: 12, collected: 2500000, efficiency: 92, escalations: 1 },
-    { id: 'EMP002', name: 'Ankit Sharma', hierarchy: 'Collection Officer', piCode: 'PI002', center: 'Bangalore', district: 'Bangalore', state: 'Karnataka', loanType: 'Commercial Vehicle', region: 'South', customers: 89, due: 2100000, overdue: 680000, calls: 38, visits: 8, collected: 1800000, efficiency: 67, escalations: 3 },
-    { id: 'EMP003', name: 'Priya Rao', hierarchy: 'Senior Executive', piCode: 'PI003', center: 'Chennai', district: 'Chennai', state: 'Tamil Nadu', loanType: 'Construction Equipment', region: 'East', customers: 134, due: 2800000, overdue: 320000, calls: 42, visits: 15, collected: 2200000, efficiency: 88, escalations: 0 },
-    { id: 'EMP004', name: 'Suresh Patel', hierarchy: 'Collection Officer', piCode: 'PI004', center: 'Pune', district: 'Pune', state: 'Maharashtra', loanType: 'Tractor', region: 'West', customers: 67, due: 1500000, overdue: 890000, calls: 35, visits: 6, collected: 1200000, efficiency: 54, escalations: 5 },
-    { id: 'EMP005', name: 'Meena Iyer', hierarchy: 'Executive', piCode: 'PI005', center: 'Mumbai', district: 'Mumbai', state: 'Maharashtra', loanType: 'Commercial Vehicle', region: 'Central', customers: 112, due: 2400000, overdue: 380000, calls: 40, visits: 10, collected: 1950000, efficiency: 80, escalations: 2 },
-    { id: 'EMP006', name: 'Rajesh Singh', hierarchy: 'Senior Executive', piCode: 'PI006', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 178, due: 3600000, overdue: 180000, calls: 48, visits: 14, collected: 2800000, efficiency: 95, escalations: 0 },
-    { id: 'EMP007', name: 'Sunita Verma', hierarchy: 'Collection Officer', piCode: 'PI007', center: 'Kolkata', district: 'Kolkata', state: 'West Bengal', loanType: 'Construction Equipment', region: 'East', customers: 78, due: 1800000, overdue: 720000, calls: 32, visits: 7, collected: 1500000, efficiency: 62, escalations: 4 },
-    { id: 'EMP008', name: 'Vikram Joshi', hierarchy: 'Executive', piCode: 'PI008', center: 'Ahmedabad', district: 'Ahmedabad', state: 'Gujarat', loanType: 'Commercial Vehicle', region: 'West', customers: 125, due: 2600000, overdue: 290000, calls: 44, visits: 11, collected: 2100000, efficiency: 85, escalations: 1 },
-    { id: 'EMP009', name: 'Deepa Nair', hierarchy: 'Collection Officer', piCode: 'PI009', center: 'Kochi', district: 'Kochi', state: 'Kerala', loanType: 'Tractor', region: 'South', customers: 95, due: 1900000, overdue: 420000, calls: 36, visits: 9, collected: 1650000, efficiency: 72, escalations: 2 },
-    { id: 'EMP010', name: 'Arjun Reddy', hierarchy: 'Senior Executive', piCode: 'PI010', center: 'Hyderabad', district: 'Hyderabad', state: 'Telangana', loanType: 'Construction Equipment', region: 'South', customers: 142, due: 3000000, overdue: 250000, calls: 41, visits: 13, collected: 2350000, efficiency: 89, escalations: 1 },
-    { id: 'EMP011', name: 'Kavita Desai', hierarchy: 'Collection Officer', piCode: 'PI011', center: 'Mumbai', district: 'Mumbai', state: 'Maharashtra', loanType: 'Commercial Vehicle', region: 'West', customers: 56, due: 1200000, overdue: 950000, calls: 29, visits: 5, collected: 950000, efficiency: 48, escalations: 6 },
-    { id: 'EMP012', name: 'Rohit Agarwal', hierarchy: 'Executive', piCode: 'PI012', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 165, due: 3400000, overdue: 195000, calls: 46, visits: 16, collected: 2650000, efficiency: 91, escalations: 0 }
+    // Supervisors (Top Level)
+    { id: 'EMP001', name: 'Ramesh Kumar', hierarchy: 'Supervisor', hierarchyLevel: 1, parentId: null, piCode: 'PI001', center: 'Mumbai', district: 'Mumbai', state: 'Maharashtra', loanType: 'Tractor', region: 'North', customers: 156, due: 3200000, overdue: 450000, calls: 45, visits: 12, collected: 2500000, efficiency: 92, escalations: 1 },
+    { id: 'EMP006', name: 'Rajesh Singh', hierarchy: 'Supervisor', hierarchyLevel: 1, parentId: null, piCode: 'PI006', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 178, due: 3600000, overdue: 180000, calls: 48, visits: 14, collected: 2800000, efficiency: 95, escalations: 0 },
+    
+    // Senior Executives (Level 2 - report to Supervisors)
+    { id: 'EMP003', name: 'Priya Rao', hierarchy: 'Senior Executive', hierarchyLevel: 2, parentId: 'EMP001', piCode: 'PI003', center: 'Chennai', district: 'Chennai', state: 'Tamil Nadu', loanType: 'Construction Equipment', region: 'East', customers: 134, due: 2800000, overdue: 320000, calls: 42, visits: 15, collected: 2200000, efficiency: 88, escalations: 0 },
+    { id: 'EMP010', name: 'Arjun Reddy', hierarchy: 'Senior Executive', hierarchyLevel: 2, parentId: 'EMP001', piCode: 'PI010', center: 'Hyderabad', district: 'Hyderabad', state: 'Telangana', loanType: 'Construction Equipment', region: 'South', customers: 142, due: 3000000, overdue: 250000, calls: 41, visits: 13, collected: 2350000, efficiency: 89, escalations: 1 },
+    { id: 'EMP013', name: 'Suresh Mehta', hierarchy: 'Senior Executive', hierarchyLevel: 2, parentId: 'EMP006', piCode: 'PI013', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 120, due: 2800000, overdue: 200000, calls: 43, visits: 13, collected: 2400000, efficiency: 87, escalations: 1 },
+    
+    // Executives (Level 3 - report to Senior Executives)
+    { id: 'EMP005', name: 'Meena Iyer', hierarchy: 'Executive', hierarchyLevel: 3, parentId: 'EMP003', piCode: 'PI005', center: 'Mumbai', district: 'Mumbai', state: 'Maharashtra', loanType: 'Commercial Vehicle', region: 'Central', customers: 112, due: 2400000, overdue: 380000, calls: 40, visits: 10, collected: 1950000, efficiency: 80, escalations: 2 },
+    { id: 'EMP008', name: 'Vikram Joshi', hierarchy: 'Executive', hierarchyLevel: 3, parentId: 'EMP003', piCode: 'PI008', center: 'Ahmedabad', district: 'Ahmedabad', state: 'Gujarat', loanType: 'Commercial Vehicle', region: 'West', customers: 125, due: 2600000, overdue: 290000, calls: 44, visits: 11, collected: 2100000, efficiency: 85, escalations: 1 },
+    { id: 'EMP012', name: 'Rohit Agarwal', hierarchy: 'Executive', hierarchyLevel: 3, parentId: 'EMP010', piCode: 'PI012', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 165, due: 3400000, overdue: 195000, calls: 46, visits: 16, collected: 2650000, efficiency: 91, escalations: 0 },
+    { id: 'EMP014', name: 'Neha Kapoor', hierarchy: 'Executive', hierarchyLevel: 3, parentId: 'EMP010', piCode: 'PI014', center: 'Hyderabad', district: 'Hyderabad', state: 'Telangana', loanType: 'Commercial Vehicle', region: 'South', customers: 98, due: 2200000, overdue: 320000, calls: 37, visits: 9, collected: 1800000, efficiency: 78, escalations: 2 },
+    { id: 'EMP015', name: 'Amit Verma', hierarchy: 'Executive', hierarchyLevel: 3, parentId: 'EMP013', piCode: 'PI015', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 110, due: 2500000, overdue: 280000, calls: 39, visits: 11, collected: 2000000, efficiency: 82, escalations: 1 },
+    
+    // Collection Officers (Level 4 - report to Executives)
+    { id: 'EMP002', name: 'Ankit Sharma', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP005', piCode: 'PI002', center: 'Bangalore', district: 'Bangalore', state: 'Karnataka', loanType: 'Commercial Vehicle', region: 'South', customers: 89, due: 2100000, overdue: 680000, calls: 38, visits: 8, collected: 1800000, efficiency: 67, escalations: 3 },
+    { id: 'EMP004', name: 'Suresh Patel', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP005', piCode: 'PI004', center: 'Pune', district: 'Pune', state: 'Maharashtra', loanType: 'Tractor', region: 'West', customers: 67, due: 1500000, overdue: 890000, calls: 35, visits: 6, collected: 1200000, efficiency: 54, escalations: 5 },
+    { id: 'EMP007', name: 'Sunita Verma', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP008', piCode: 'PI007', center: 'Kolkata', district: 'Kolkata', state: 'West Bengal', loanType: 'Construction Equipment', region: 'East', customers: 78, due: 1800000, overdue: 720000, calls: 32, visits: 7, collected: 1500000, efficiency: 62, escalations: 4 },
+    { id: 'EMP009', name: 'Deepa Nair', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP008', piCode: 'PI009', center: 'Kochi', district: 'Kochi', state: 'Kerala', loanType: 'Tractor', region: 'South', customers: 95, due: 1900000, overdue: 420000, calls: 36, visits: 9, collected: 1650000, efficiency: 72, escalations: 2 },
+    { id: 'EMP011', name: 'Kavita Desai', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP012', piCode: 'PI011', center: 'Mumbai', district: 'Mumbai', state: 'Maharashtra', loanType: 'Commercial Vehicle', region: 'West', customers: 56, due: 1200000, overdue: 950000, calls: 29, visits: 5, collected: 950000, efficiency: 48, escalations: 6 },
+    { id: 'EMP016', name: 'Ravi Kumar', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP012', piCode: 'PI016', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 72, due: 1600000, overdue: 380000, calls: 33, visits: 8, collected: 1400000, efficiency: 65, escalations: 3 },
+    { id: 'EMP017', name: 'Pooja Sharma', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP014', piCode: 'PI017', center: 'Hyderabad', district: 'Hyderabad', state: 'Telangana', loanType: 'Commercial Vehicle', region: 'South', customers: 64, due: 1400000, overdue: 450000, calls: 31, visits: 7, collected: 1300000, efficiency: 58, escalations: 4 },
+    { id: 'EMP018', name: 'Manoj Tiwari', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP014', piCode: 'PI018', center: 'Hyderabad', district: 'Hyderabad', state: 'Telangana', loanType: 'Construction Equipment', region: 'South', customers: 81, due: 1700000, overdue: 350000, calls: 34, visits: 9, collected: 1550000, efficiency: 70, escalations: 2 },
+    { id: 'EMP019', name: 'Anita Reddy', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP015', piCode: 'PI019', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 58, due: 1300000, overdue: 520000, calls: 30, visits: 6, collected: 1200000, efficiency: 55, escalations: 5 },
+    { id: 'EMP020', name: 'Kiran Patel', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP015', piCode: 'PI020', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Commercial Vehicle', region: 'North', customers: 75, due: 1500000, overdue: 400000, calls: 32, visits: 8, collected: 1450000, efficiency: 68, escalations: 3 },
+    
+    // Additional Supervisors
+    { id: 'EMP021', name: 'Vikram Malhotra', hierarchy: 'Supervisor', hierarchyLevel: 1, parentId: null, piCode: 'PI021', center: 'Bangalore', district: 'Bangalore Urban', state: 'Karnataka', loanType: 'Commercial Vehicle', region: 'South', customers: 145, due: 3100000, overdue: 220000, calls: 47, visits: 13, collected: 2600000, efficiency: 90, escalations: 1 },
+    { id: 'EMP022', name: 'Sunita Menon', hierarchy: 'Supervisor', hierarchyLevel: 1, parentId: null, piCode: 'PI022', center: 'Kolkata', district: 'Kolkata', state: 'West Bengal', loanType: 'Construction Equipment', region: 'East', customers: 132, due: 2900000, overdue: 380000, calls: 44, visits: 12, collected: 2300000, efficiency: 86, escalations: 2 },
+    { id: 'EMP023', name: 'Rajesh Iyer', hierarchy: 'Supervisor', hierarchyLevel: 1, parentId: null, piCode: 'PI023', center: 'Pune', district: 'Pune', state: 'Maharashtra', loanType: 'Tractor', region: 'West', customers: 168, due: 3500000, overdue: 195000, calls: 49, visits: 15, collected: 2900000, efficiency: 93, escalations: 0 },
+    
+    // Additional Senior Executives
+    { id: 'EMP024', name: 'Anjali Deshmukh', hierarchy: 'Senior Executive', hierarchyLevel: 2, parentId: 'EMP021', piCode: 'PI024', center: 'Bangalore', district: 'Bangalore Urban', state: 'Karnataka', loanType: 'Commercial Vehicle', region: 'South', customers: 128, due: 2700000, overdue: 280000, calls: 41, visits: 12, collected: 2250000, efficiency: 85, escalations: 1 },
+    { id: 'EMP025', name: 'Manoj Reddy', hierarchy: 'Senior Executive', hierarchyLevel: 2, parentId: 'EMP021', piCode: 'PI025', center: 'Mysore', district: 'Mysore', state: 'Karnataka', loanType: 'Tractor', region: 'South', customers: 115, due: 2600000, overdue: 310000, calls: 40, visits: 11, collected: 2150000, efficiency: 83, escalations: 2 },
+    { id: 'EMP026', name: 'Kavita Banerjee', hierarchy: 'Senior Executive', hierarchyLevel: 2, parentId: 'EMP022', piCode: 'PI026', center: 'Kolkata', district: 'Kolkata', state: 'West Bengal', loanType: 'Construction Equipment', region: 'East', customers: 122, due: 2650000, overdue: 340000, calls: 39, visits: 10, collected: 2200000, efficiency: 81, escalations: 2 },
+    { id: 'EMP027', name: 'Rohit Chatterjee', hierarchy: 'Senior Executive', hierarchyLevel: 2, parentId: 'EMP022', piCode: 'PI027', center: 'Howrah', district: 'Howrah', state: 'West Bengal', loanType: 'Commercial Vehicle', region: 'East', customers: 138, due: 2850000, overdue: 260000, calls: 42, visits: 13, collected: 2400000, efficiency: 87, escalations: 1 },
+    { id: 'EMP028', name: 'Priya Kulkarni', hierarchy: 'Senior Executive', hierarchyLevel: 2, parentId: 'EMP023', piCode: 'PI028', center: 'Pune', district: 'Pune', state: 'Maharashtra', loanType: 'Tractor', region: 'West', customers: 142, due: 2950000, overdue: 240000, calls: 43, visits: 14, collected: 2500000, efficiency: 88, escalations: 1 },
+    { id: 'EMP029', name: 'Amit Joshi', hierarchy: 'Senior Executive', hierarchyLevel: 2, parentId: 'EMP023', piCode: 'PI029', center: 'Nagpur', district: 'Nagpur', state: 'Maharashtra', loanType: 'Construction Equipment', region: 'West', customers: 135, due: 2750000, overdue: 300000, calls: 41, visits: 12, collected: 2300000, efficiency: 84, escalations: 2 },
+    
+    // Additional Executives
+    { id: 'EMP030', name: 'Deepa Shetty', hierarchy: 'Executive', hierarchyLevel: 3, parentId: 'EMP024', piCode: 'PI030', center: 'Bangalore', district: 'Bangalore Urban', state: 'Karnataka', loanType: 'Commercial Vehicle', region: 'South', customers: 105, due: 2300000, overdue: 350000, calls: 38, visits: 9, collected: 1900000, efficiency: 79, escalations: 2 },
+    { id: 'EMP031', name: 'Suresh Gowda', hierarchy: 'Executive', hierarchyLevel: 3, parentId: 'EMP024', piCode: 'PI031', center: 'Mangalore', district: 'Dakshina Kannada', state: 'Karnataka', loanType: 'Tractor', region: 'South', customers: 98, due: 2100000, overdue: 380000, calls: 36, visits: 8, collected: 1750000, efficiency: 76, escalations: 3 },
+    { id: 'EMP032', name: 'Meera Rao', hierarchy: 'Executive', hierarchyLevel: 3, parentId: 'EMP025', piCode: 'PI032', center: 'Mysore', district: 'Mysore', state: 'Karnataka', loanType: 'Commercial Vehicle', region: 'South', customers: 112, due: 2400000, overdue: 320000, calls: 39, visits: 10, collected: 2000000, efficiency: 81, escalations: 1 },
+    { id: 'EMP033', name: 'Vikram Das', hierarchy: 'Executive', hierarchyLevel: 3, parentId: 'EMP026', piCode: 'PI033', center: 'Kolkata', district: 'Kolkata', state: 'West Bengal', loanType: 'Construction Equipment', region: 'East', customers: 108, due: 2250000, overdue: 360000, calls: 37, visits: 9, collected: 1850000, efficiency: 77, escalations: 2 },
+    { id: 'EMP034', name: 'Anita Sen', hierarchy: 'Executive', hierarchyLevel: 3, parentId: 'EMP027', piCode: 'PI034', center: 'Howrah', district: 'Howrah', state: 'West Bengal', loanType: 'Commercial Vehicle', region: 'East', customers: 118, due: 2500000, overdue: 300000, calls: 40, visits: 11, collected: 2100000, efficiency: 82, escalations: 1 },
+    { id: 'EMP035', name: 'Ravi Patil', hierarchy: 'Executive', hierarchyLevel: 3, parentId: 'EMP028', piCode: 'PI035', center: 'Pune', district: 'Pune', state: 'Maharashtra', loanType: 'Tractor', region: 'West', customers: 125, due: 2600000, overdue: 280000, calls: 41, visits: 12, collected: 2200000, efficiency: 83, escalations: 1 },
+    { id: 'EMP036', name: 'Kiran Shinde', hierarchy: 'Executive', hierarchyLevel: 3, parentId: 'EMP029', piCode: 'PI036', center: 'Nagpur', district: 'Nagpur', state: 'Maharashtra', loanType: 'Construction Equipment', region: 'West', customers: 102, due: 2200000, overdue: 340000, calls: 38, visits: 9, collected: 1800000, efficiency: 78, escalations: 2 },
+    
+    // Additional Collection Officers
+    { id: 'EMP037', name: 'Pooja Nair', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP030', piCode: 'PI037', center: 'Bangalore', district: 'Bangalore Urban', state: 'Karnataka', loanType: 'Commercial Vehicle', region: 'South', customers: 68, due: 1450000, overdue: 480000, calls: 30, visits: 6, collected: 1250000, efficiency: 61, escalations: 4 },
+    { id: 'EMP038', name: 'Rajesh Kamath', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP030', piCode: 'PI038', center: 'Bangalore', district: 'Bangalore Urban', state: 'Karnataka', loanType: 'Tractor', region: 'South', customers: 73, due: 1550000, overdue: 420000, calls: 32, visits: 7, collected: 1350000, efficiency: 64, escalations: 3 },
+    { id: 'EMP039', name: 'Sunita Bhat', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP031', piCode: 'PI039', center: 'Mangalore', district: 'Dakshina Kannada', state: 'Karnataka', loanType: 'Commercial Vehicle', region: 'South', customers: 61, due: 1350000, overdue: 520000, calls: 28, visits: 5, collected: 1150000, efficiency: 57, escalations: 5 },
+    { id: 'EMP040', name: 'Amit Pai', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP032', piCode: 'PI040', center: 'Mysore', district: 'Mysore', state: 'Karnataka', loanType: 'Tractor', region: 'South', customers: 79, due: 1650000, overdue: 380000, calls: 33, visits: 8, collected: 1450000, efficiency: 66, escalations: 3 },
+    { id: 'EMP041', name: 'Priya Mukherjee', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP033', piCode: 'PI041', center: 'Kolkata', district: 'Kolkata', state: 'West Bengal', loanType: 'Construction Equipment', region: 'East', customers: 65, due: 1400000, overdue: 460000, calls: 29, visits: 6, collected: 1200000, efficiency: 59, escalations: 4 },
+    { id: 'EMP042', name: 'Vikram Ghosh', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP034', piCode: 'PI042', center: 'Howrah', district: 'Howrah', state: 'West Bengal', loanType: 'Commercial Vehicle', region: 'East', customers: 71, due: 1500000, overdue: 410000, calls: 31, visits: 7, collected: 1300000, efficiency: 63, escalations: 3 },
+    { id: 'EMP043', name: 'Kavita Thakur', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP035', piCode: 'PI043', center: 'Pune', district: 'Pune', state: 'Maharashtra', loanType: 'Tractor', region: 'West', customers: 77, due: 1600000, overdue: 370000, calls: 34, visits: 8, collected: 1400000, efficiency: 67, escalations: 2 },
+    { id: 'EMP044', name: 'Rohit Jadhav', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP036', piCode: 'PI044', center: 'Nagpur', district: 'Nagpur', state: 'Maharashtra', loanType: 'Construction Equipment', region: 'West', customers: 63, due: 1380000, overdue: 440000, calls: 30, visits: 6, collected: 1250000, efficiency: 60, escalations: 4 }
   ]
 
   // Mock customer data for each staff member
@@ -315,12 +367,157 @@ const Dashboard = () => {
       { id: 'C043', name: 'Vikram Reddy', phone: '9876543252', loanAmount: 600000, dueAmount: 150000, overdueAmount: 0, status: 'Active', lastPayment: '2024-02-08', nextDue: '2024-03-08' },
       { id: 'C044', name: 'Kavita Sharma', phone: '9876543253', loanAmount: 780000, dueAmount: 195000, overdueAmount: 0, status: 'Active', lastPayment: '2024-02-09', nextDue: '2024-03-09' },
       { id: 'C045', name: 'Rohit Desai', phone: '9876543254', loanAmount: 490000, dueAmount: 125000, overdueAmount: 5000, status: 'Active', lastPayment: '2024-02-10', nextDue: '2024-03-10' }
+    ],
+    'EMP013': [
+      { id: 'C046', name: 'Rajesh Mehta', phone: '9876543255', loanAmount: 550000, dueAmount: 140000, overdueAmount: 10000, status: 'Active', lastPayment: '2024-02-11', nextDue: '2024-03-11' },
+      { id: 'C047', name: 'Sunita Kapoor', phone: '9876543256', loanAmount: 680000, dueAmount: 170000, overdueAmount: 0, status: 'Active', lastPayment: '2024-02-12', nextDue: '2024-03-12' },
+      { id: 'C048', name: 'Amit Tiwari', phone: '9876543257', loanAmount: 420000, dueAmount: 105000, overdueAmount: 20000, status: 'Overdue', lastPayment: '2023-12-28', nextDue: '2024-01-28' }
+    ],
+    'EMP014': [
+      { id: 'C049', name: 'Priya Verma', phone: '9876543258', loanAmount: 590000, dueAmount: 150000, overdueAmount: 0, status: 'Active', lastPayment: '2024-02-13', nextDue: '2024-03-13' },
+      { id: 'C050', name: 'Vikram Kapoor', phone: '9876543259', loanAmount: 720000, dueAmount: 180000, overdueAmount: 0, status: 'Active', lastPayment: '2024-02-14', nextDue: '2024-03-14' }
+    ],
+    'EMP015': [
+      { id: 'C051', name: 'Kavita Tiwari', phone: '9876543260', loanAmount: 510000, dueAmount: 130000, overdueAmount: 15000, status: 'Active', lastPayment: '2024-02-15', nextDue: '2024-03-15' },
+      { id: 'C052', name: 'Rohit Mehta', phone: '9876543261', loanAmount: 650000, dueAmount: 165000, overdueAmount: 0, status: 'Active', lastPayment: '2024-02-16', nextDue: '2024-03-16' }
+    ],
+    'EMP016': [
+      { id: 'C053', name: 'Anjali Kumar', phone: '9876543262', loanAmount: 480000, dueAmount: 120000, overdueAmount: 25000, status: 'Overdue', lastPayment: '2023-12-30', nextDue: '2024-01-30' },
+      { id: 'C054', name: 'Suresh Verma', phone: '9876543263', loanAmount: 620000, dueAmount: 155000, overdueAmount: 0, status: 'Active', lastPayment: '2024-02-17', nextDue: '2024-03-17' }
+    ],
+    'EMP017': [
+      { id: 'C055', name: 'Deepa Kapoor', phone: '9876543264', loanAmount: 450000, dueAmount: 115000, overdueAmount: 30000, status: 'Overdue', lastPayment: '2023-12-25', nextDue: '2024-01-25' },
+      { id: 'C056', name: 'Manish Tiwari', phone: '9876543265', loanAmount: 580000, dueAmount: 145000, overdueAmount: 0, status: 'Active', lastPayment: '2024-02-18', nextDue: '2024-03-18' }
+    ],
+    'EMP018': [
+      { id: 'C057', name: 'Rajesh Verma', phone: '9876543266', loanAmount: 520000, dueAmount: 130000, overdueAmount: 5000, status: 'Active', lastPayment: '2024-02-19', nextDue: '2024-03-19' },
+      { id: 'C058', name: 'Sunita Mehta', phone: '9876543267', loanAmount: 690000, dueAmount: 175000, overdueAmount: 0, status: 'Active', lastPayment: '2024-02-20', nextDue: '2024-03-20' }
+    ],
+    'EMP019': [
+      { id: 'C059', name: 'Amit Kapoor', phone: '9876543268', loanAmount: 470000, dueAmount: 120000, overdueAmount: 20000, status: 'Overdue', lastPayment: '2023-12-22', nextDue: '2024-01-22' },
+      { id: 'C060', name: 'Priya Tiwari', phone: '9876543269', loanAmount: 610000, dueAmount: 155000, overdueAmount: 0, status: 'Active', lastPayment: '2024-02-21', nextDue: '2024-03-21' }
+    ],
+    'EMP020': [
+      { id: 'C061', name: 'Vikram Verma', phone: '9876543270', loanAmount: 540000, dueAmount: 135000, overdueAmount: 10000, status: 'Active', lastPayment: '2024-02-22', nextDue: '2024-03-22' },
+      { id: 'C062', name: 'Kavita Mehta', phone: '9876543271', loanAmount: 670000, dueAmount: 170000, overdueAmount: 0, status: 'Active', lastPayment: '2024-02-23', nextDue: '2024-03-23' }
+    ],
+    'EMP021': [
+      { id: 'C063', name: 'Ramesh Gowda', phone: '9876543272', loanAmount: 560000, dueAmount: 140000, overdueAmount: 15000, status: 'Active', lastPayment: '2024-02-24', nextDue: '2024-03-24' },
+      { id: 'C064', name: 'Lakshmi Shetty', phone: '9876543273', loanAmount: 690000, dueAmount: 175000, overdueAmount: 0, status: 'Active', lastPayment: '2024-02-25', nextDue: '2024-03-25' },
+      { id: 'C065', name: 'Suresh Kamath', phone: '9876543274', loanAmount: 510000, dueAmount: 130000, overdueAmount: 20000, status: 'Overdue', lastPayment: '2023-12-30', nextDue: '2024-01-30' }
+    ],
+    'EMP022': [
+      { id: 'C066', name: 'Priya Banerjee', phone: '9876543275', loanAmount: 580000, dueAmount: 145000, overdueAmount: 0, status: 'Active', lastPayment: '2024-02-26', nextDue: '2024-03-26' },
+      { id: 'C067', name: 'Amit Chatterjee', phone: '9876543276', loanAmount: 720000, dueAmount: 180000, overdueAmount: 0, status: 'Active', lastPayment: '2024-02-27', nextDue: '2024-03-27' }
+    ],
+    'EMP023': [
+      { id: 'C068', name: 'Kavita Kulkarni', phone: '9876543277', loanAmount: 550000, dueAmount: 140000, overdueAmount: 10000, status: 'Active', lastPayment: '2024-02-28', nextDue: '2024-03-28' },
+      { id: 'C069', name: 'Rohit Joshi', phone: '9876543278', loanAmount: 680000, dueAmount: 170000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-01', nextDue: '2024-04-01' }
+    ],
+    'EMP024': [
+      { id: 'C070', name: 'Deepa Deshmukh', phone: '9876543279', loanAmount: 590000, dueAmount: 150000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-02', nextDue: '2024-04-02' },
+      { id: 'C071', name: 'Manish Reddy', phone: '9876543280', loanAmount: 710000, dueAmount: 180000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-03', nextDue: '2024-04-03' }
+    ],
+    'EMP025': [
+      { id: 'C072', name: 'Anita Gowda', phone: '9876543281', loanAmount: 520000, dueAmount: 130000, overdueAmount: 15000, status: 'Active', lastPayment: '2024-03-04', nextDue: '2024-04-04' },
+      { id: 'C073', name: 'Vikram Rao', phone: '9876543282', loanAmount: 650000, dueAmount: 165000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-05', nextDue: '2024-04-05' }
+    ],
+    'EMP026': [
+      { id: 'C074', name: 'Sunita Das', phone: '9876543283', loanAmount: 570000, dueAmount: 145000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-06', nextDue: '2024-04-06' },
+      { id: 'C075', name: 'Rajesh Sen', phone: '9876543284', loanAmount: 700000, dueAmount: 175000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-07', nextDue: '2024-04-07' }
+    ],
+    'EMP027': [
+      { id: 'C076', name: 'Priya Patil', phone: '9876543285', loanAmount: 540000, dueAmount: 135000, overdueAmount: 10000, status: 'Active', lastPayment: '2024-03-08', nextDue: '2024-04-08' },
+      { id: 'C077', name: 'Amit Shinde', phone: '9876543286', loanAmount: 670000, dueAmount: 170000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-09', nextDue: '2024-04-09' }
+    ],
+    'EMP028': [
+      { id: 'C078', name: 'Kavita Nair', phone: '9876543287', loanAmount: 600000, dueAmount: 150000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-10', nextDue: '2024-04-10' },
+      { id: 'C079', name: 'Rohit Kamath', phone: '9876543288', loanAmount: 730000, dueAmount: 185000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-11', nextDue: '2024-04-11' }
+    ],
+    'EMP029': [
+      { id: 'C080', name: 'Deepa Bhat', phone: '9876543289', loanAmount: 530000, dueAmount: 135000, overdueAmount: 20000, status: 'Overdue', lastPayment: '2023-12-28', nextDue: '2024-01-28' },
+      { id: 'C081', name: 'Manish Pai', phone: '9876543290', loanAmount: 660000, dueAmount: 165000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-12', nextDue: '2024-04-12' }
+    ],
+    'EMP030': [
+      { id: 'C082', name: 'Anita Mukherjee', phone: '9876543291', loanAmount: 580000, dueAmount: 145000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-13', nextDue: '2024-04-13' },
+      { id: 'C083', name: 'Vikram Ghosh', phone: '9876543292', loanAmount: 710000, dueAmount: 180000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-14', nextDue: '2024-04-14' }
+    ],
+    'EMP031': [
+      { id: 'C084', name: 'Sunita Thakur', phone: '9876543293', loanAmount: 550000, dueAmount: 140000, overdueAmount: 15000, status: 'Active', lastPayment: '2024-03-15', nextDue: '2024-04-15' },
+      { id: 'C085', name: 'Rajesh Jadhav', phone: '9876543294', loanAmount: 680000, dueAmount: 170000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-16', nextDue: '2024-04-16' }
+    ],
+    'EMP032': [
+      { id: 'C086', name: 'Priya Shetty', phone: '9876543295', loanAmount: 600000, dueAmount: 150000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-17', nextDue: '2024-04-17' },
+      { id: 'C087', name: 'Amit Gowda', phone: '9876543296', loanAmount: 730000, dueAmount: 185000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-18', nextDue: '2024-04-18' }
+    ],
+    'EMP033': [
+      { id: 'C088', name: 'Kavita Rao', phone: '9876543297', loanAmount: 560000, dueAmount: 140000, overdueAmount: 10000, status: 'Active', lastPayment: '2024-03-19', nextDue: '2024-04-19' },
+      { id: 'C089', name: 'Rohit Das', phone: '9876543298', loanAmount: 690000, dueAmount: 175000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-20', nextDue: '2024-04-20' }
+    ],
+    'EMP034': [
+      { id: 'C090', name: 'Deepa Sen', phone: '9876543299', loanAmount: 610000, dueAmount: 155000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-21', nextDue: '2024-04-21' },
+      { id: 'C091', name: 'Manish Patil', phone: '9876543300', loanAmount: 740000, dueAmount: 185000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-22', nextDue: '2024-04-22' }
+    ],
+    'EMP035': [
+      { id: 'C092', name: 'Anita Shinde', phone: '9876543301', loanAmount: 570000, dueAmount: 145000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-23', nextDue: '2024-04-23' },
+      { id: 'C093', name: 'Vikram Nair', phone: '9876543302', loanAmount: 700000, dueAmount: 175000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-24', nextDue: '2024-04-24' }
+    ],
+    'EMP036': [
+      { id: 'C094', name: 'Sunita Kamath', phone: '9876543303', loanAmount: 590000, dueAmount: 150000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-25', nextDue: '2024-04-25' },
+      { id: 'C095', name: 'Rajesh Bhat', phone: '9876543304', loanAmount: 720000, dueAmount: 180000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-26', nextDue: '2024-04-26' }
+    ],
+    'EMP037': [
+      { id: 'C096', name: 'Priya Pai', phone: '9876543305', loanAmount: 480000, dueAmount: 120000, overdueAmount: 25000, status: 'Overdue', lastPayment: '2023-12-20', nextDue: '2024-01-20' },
+      { id: 'C097', name: 'Amit Mukherjee', phone: '9876543306', loanAmount: 620000, dueAmount: 155000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-27', nextDue: '2024-04-27' }
+    ],
+    'EMP038': [
+      { id: 'C098', name: 'Kavita Ghosh', phone: '9876543307', loanAmount: 510000, dueAmount: 130000, overdueAmount: 15000, status: 'Active', lastPayment: '2024-03-28', nextDue: '2024-04-28' },
+      { id: 'C099', name: 'Rohit Thakur', phone: '9876543308', loanAmount: 640000, dueAmount: 160000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-29', nextDue: '2024-04-29' }
+    ],
+    'EMP039': [
+      { id: 'C100', name: 'Deepa Jadhav', phone: '9876543309', loanAmount: 450000, dueAmount: 115000, overdueAmount: 30000, status: 'Overdue', lastPayment: '2023-12-15', nextDue: '2024-01-15' },
+      { id: 'C101', name: 'Manish Shetty', phone: '9876543310', loanAmount: 580000, dueAmount: 145000, overdueAmount: 0, status: 'Active', lastPayment: '2024-03-30', nextDue: '2024-04-30' }
+    ],
+    'EMP040': [
+      { id: 'C102', name: 'Anita Gowda', phone: '9876543311', loanAmount: 520000, dueAmount: 130000, overdueAmount: 5000, status: 'Active', lastPayment: '2024-03-31', nextDue: '2024-04-30' },
+      { id: 'C103', name: 'Vikram Rao', phone: '9876543312', loanAmount: 650000, dueAmount: 165000, overdueAmount: 0, status: 'Active', lastPayment: '2024-04-01', nextDue: '2024-05-01' }
+    ],
+    'EMP041': [
+      { id: 'C104', name: 'Sunita Das', phone: '9876543313', loanAmount: 490000, dueAmount: 125000, overdueAmount: 20000, status: 'Overdue', lastPayment: '2023-12-25', nextDue: '2024-01-25' },
+      { id: 'C105', name: 'Rajesh Sen', phone: '9876543314', loanAmount: 630000, dueAmount: 160000, overdueAmount: 0, status: 'Active', lastPayment: '2024-04-02', nextDue: '2024-05-02' }
+    ],
+    'EMP042': [
+      { id: 'C106', name: 'Priya Patil', phone: '9876543315', loanAmount: 540000, dueAmount: 135000, overdueAmount: 10000, status: 'Active', lastPayment: '2024-04-03', nextDue: '2024-05-03' },
+      { id: 'C107', name: 'Amit Shinde', phone: '9876543316', loanAmount: 670000, dueAmount: 170000, overdueAmount: 0, status: 'Active', lastPayment: '2024-04-04', nextDue: '2024-05-04' }
+    ],
+    'EMP043': [
+      { id: 'C108', name: 'Kavita Nair', phone: '9876543317', loanAmount: 560000, dueAmount: 140000, overdueAmount: 0, status: 'Active', lastPayment: '2024-04-05', nextDue: '2024-05-05' },
+      { id: 'C109', name: 'Rohit Kamath', phone: '9876543318', loanAmount: 690000, dueAmount: 175000, overdueAmount: 0, status: 'Active', lastPayment: '2024-04-06', nextDue: '2024-05-06' }
+    ],
+    'EMP044': [
+      { id: 'C110', name: 'Deepa Bhat', phone: '9876543319', loanAmount: 500000, dueAmount: 125000, overdueAmount: 22000, status: 'Overdue', lastPayment: '2023-12-18', nextDue: '2024-01-18' },
+      { id: 'C111', name: 'Manish Pai', phone: '9876543320', loanAmount: 640000, dueAmount: 160000, overdueAmount: 0, status: 'Active', lastPayment: '2024-04-07', nextDue: '2024-05-07' }
     ]
   }
 
-  // Filter and sort staff data based on search, metric, and filters
+  // Filter and sort staff data based on search, metric, filters, and hierarchy
   const getFilteredStaffData = (metric) => {
-    let filtered = staffLeaderboardBaseData.filter(staff => {
+    // Determine which staff to show based on hierarchy path
+    let baseFiltered = staffLeaderboardBaseData
+    
+    // If we're in a hierarchy drill-down, filter by parent
+    if (hierarchyPath.length > 0) {
+      const currentParent = hierarchyPath[hierarchyPath.length - 1]
+      baseFiltered = staffLeaderboardBaseData.filter(staff => staff.parentId === currentParent.id)
+    } else if (currentHierarchyLevel === 1) {
+      // Show only top level (Supervisors) when starting
+      baseFiltered = staffLeaderboardBaseData.filter(staff => staff.hierarchyLevel === 1)
+    } else if (currentHierarchyLevel) {
+      // Show staff at current hierarchy level
+      baseFiltered = staffLeaderboardBaseData.filter(staff => staff.hierarchyLevel === currentHierarchyLevel)
+    }
+    
+    let filtered = baseFiltered.filter(staff => {
       // Apply search filter
       const matchesSearch = staff.id.toLowerCase().includes(staffSearchTerm.toLowerCase()) ||
         staff.name.toLowerCase().includes(staffSearchTerm.toLowerCase()) ||
@@ -408,17 +605,102 @@ const Dashboard = () => {
   const staffStartIndex = (staffCurrentPage - 1) * staffItemsPerPage
   const paginatedStaffData = filteredStaffData.slice(staffStartIndex, staffStartIndex + staffItemsPerPage)
 
-  // Reset page when metric, search, or filters change
+  // Reset page when metric, search, filters, or hierarchy changes
   useEffect(() => {
     setStaffCurrentPage(1)
-  }, [selectedStaffMetric, staffSearchTerm, staffSortBy, staffSortOrder, filterLoanType, filterDPD, filterGeography, filterState, filterDistrict, filterPICode, fromDate, toDate])
+  }, [selectedStaffMetric, staffSearchTerm, staffSortBy, staffSortOrder, filterLoanType, filterDPD, filterGeography, filterState, filterDistrict, filterPICode, fromDate, toDate, hierarchyPath, currentHierarchyLevel])
 
   const handleStaffCardClick = (metric) => {
     if (selectedStaffMetric === metric) {
       setSelectedStaffMetric(null)
+      setHierarchyPath([])
+      setCurrentHierarchyLevel(null)
     } else {
       setSelectedStaffMetric(metric)
+      // Reset hierarchy to show top level (Supervisors)
+      setHierarchyPath([])
+      setCurrentHierarchyLevel(1) // Start with Supervisor level
     }
+  }
+
+  // Handle hierarchy drill-down - click on a row to see subordinates
+  const handleHierarchyDrillDown = (staff) => {
+    // Check if this staff member has subordinates
+    const hasSubordinates = staffLeaderboardBaseData.some(s => s.parentId === staff.id)
+    
+    if (hasSubordinates) {
+      // Add current staff to hierarchy path
+      setHierarchyPath(prev => [...prev, {
+        level: staff.hierarchyLevel,
+        id: staff.id,
+        name: staff.name,
+        hierarchy: staff.hierarchy
+      }])
+      // Set next hierarchy level
+      setCurrentHierarchyLevel(staff.hierarchyLevel + 1)
+      setStaffCurrentPage(1) // Reset pagination
+    }
+  }
+
+  // Handle going back up the hierarchy
+  const handleHierarchyBack = (targetLevel) => {
+    if (targetLevel === 0) {
+      // Go back to top level
+      setHierarchyPath([])
+      setCurrentHierarchyLevel(1)
+    } else {
+      // Go back to specific level
+      const newPath = hierarchyPath.slice(0, targetLevel)
+      setHierarchyPath(newPath)
+      if (newPath.length > 0) {
+        setCurrentHierarchyLevel(newPath[newPath.length - 1].level + 1)
+      } else {
+        setCurrentHierarchyLevel(1)
+      }
+    }
+    setStaffCurrentPage(1) // Reset pagination
+  }
+
+  // Export filtered data to Excel
+  const handleExportToExcel = () => {
+    if (!selectedStaffMetric || filteredStaffData.length === 0) {
+      alert('No data to export')
+      return
+    }
+
+    // Prepare data for export - include all filtered data (all pages)
+    const exportData = filteredStaffData.map(staff => ({
+      'Emp ID': staff.id,
+      'Name': staff.name,
+      'Hierarchy': staff.hierarchy,
+      'PI Code': staff.piCode,
+      'Center': staff.center,
+      'District': staff.district,
+      'State': staff.state,
+      'Loan Type': staff.loanType,
+      'Region': staff.region,
+      'Customers': staff.customers,
+      'Due (₹)': staff.due,
+      'Overdue (₹)': staff.overdue,
+      'Calls': staff.calls,
+      'Visits': staff.visits,
+      'Collected (₹)': staff.collected,
+      'Efficiency (%)': staff.efficiency,
+      'Escalations': staff.escalations
+    }))
+
+    // Create workbook and worksheet
+    const ws = XLSX.utils.json_to_sheet(exportData)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Staff Performance')
+
+    // Generate filename with current date and metric name
+    const dateStr = new Date().toISOString().split('T')[0]
+    const metricName = getCardName(selectedStaffMetric).replace(/\s+/g, '_')
+    const filename = `Staff_Performance_${metricName}_${dateStr}.xlsx`
+
+    // Write file
+    XLSX.writeFile(wb, filename)
   }
 
   // Handle customer count click
@@ -1766,7 +2048,7 @@ const Dashboard = () => {
                       {renderFavoritePin('allocation')}
                       {expandedCard === 'allocation' ? (
                         <div className="relative z-10 mb-2">
-                          <div className="text-xs text-gray-800">Allocation Summary</div>
+                          <div className="text-xs text-gray-800">Case Summary</div>
                           <div className="text-lg font-bold" style={{color: '#DC2626'}}>{formatIndianNumber(dashboardData?.loan_data?.total_loans)}</div>
                           <div className="mt-2 space-y-1">
                             <div className="flex justify-between text-xs text-gray-800">
@@ -2019,7 +2301,31 @@ const Dashboard = () => {
                   <div ref={leaderboardTableRef} className="mb-8 bg-white border border-gray-200 rounded-lg p-6 shadow-sm w-full" style={{ maxWidth: '100%', overflow: 'hidden', boxSizing: 'border-box' }}>
                     {/* Header with Title and Close Button */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                      <h2 className="text-xl font-semibold text-gray-900">{getCardName(selectedStaffMetric)}</h2>
+                      <div className="flex-1">
+                        <h2 className="text-xl font-semibold text-gray-900 mb-2">{getCardName(selectedStaffMetric)}</h2>
+                        {/* Breadcrumb Navigation */}
+                        {hierarchyPath.length > 0 && (
+                          <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
+                            <button
+                              onClick={() => handleHierarchyBack(0)}
+                              className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                            >
+                              All Supervisors
+                            </button>
+                            {hierarchyPath.map((item, index) => (
+                              <React.Fragment key={item.id}>
+                                <span className="text-gray-400">/</span>
+                                <button
+                                  onClick={() => handleHierarchyBack(index + 1)}
+                                  className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                                >
+                                  {item.name} ({item.hierarchy})
+                                </button>
+                              </React.Fragment>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                       
                       {/* Search and Filter Controls */}
                       <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
@@ -2054,11 +2360,29 @@ const Dashboard = () => {
                           <option value="asc">Ascending</option>
                         </select>
                         <button
-                          onClick={() => setSelectedStaffMetric(null)}
-                          className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer whitespace-nowrap"
-                          aria-label="Close leaderboard"
+                          onClick={handleExportToExcel}
+                          className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors cursor-pointer whitespace-nowrap flex items-center gap-2"
+                          aria-label="Export to Excel"
+                          title="Export all filtered data to Excel"
                         >
-                          Close
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          Export
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedStaffMetric(null)
+                            setHierarchyPath([])
+                            setCurrentHierarchyLevel(null)
+                          }}
+                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                          aria-label="Close leaderboard"
+                          title="Close table"
+                        >
+                          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
                         </button>
                       </div>
                     </div>
@@ -2096,9 +2420,29 @@ const Dashboard = () => {
                                 </td>
                               </tr>
                             ) : (
-                              paginatedStaffData.map((staff) => (
-                                <tr key={staff.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                                  <td className="py-3 px-3 font-mono text-xs text-left whitespace-nowrap">{staff.id}</td>
+                              paginatedStaffData.map((staff) => {
+                                const hasSubordinates = staffLeaderboardBaseData.some(s => s.parentId === staff.id)
+                                return (
+                                <tr 
+                                  key={staff.id} 
+                                  className={`border-b border-gray-100 transition-colors ${
+                                    hasSubordinates 
+                                      ? 'hover:bg-blue-50 cursor-pointer' 
+                                      : 'hover:bg-gray-50'
+                                  }`}
+                                  onClick={() => hasSubordinates && handleHierarchyDrillDown(staff)}
+                                  title={hasSubordinates ? `Click to view ${staff.name}'s subordinates` : ''}
+                                >
+                                  <td className="py-3 px-3 font-mono text-xs text-left whitespace-nowrap">
+                                    <div className="flex items-center gap-2">
+                                      {staff.id}
+                                      {hasSubordinates && (
+                                        <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                        </svg>
+                                      )}
+                                    </div>
+                                  </td>
                                   <td className="py-3 px-3 font-medium text-left whitespace-nowrap">{staff.name}</td>
                                   <td className="py-3 px-3 text-left whitespace-nowrap">
                                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${
@@ -2127,7 +2471,10 @@ const Dashboard = () => {
                                   <td className="py-3 px-3 text-right font-medium whitespace-nowrap">
                                     <button 
                                       data-customer-count-button
-                                      onClick={() => handleCustomerCountClick(staff)}
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleCustomerCountClick(staff)
+                                      }}
                                       className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
                                     >
                                       {staff.customers}
@@ -2157,7 +2504,8 @@ const Dashboard = () => {
                                     </span>
                                   </td>
                                 </tr>
-                              ))
+                                )
+                              })
                             )}
                           </tbody>
                         </table>
