@@ -123,6 +123,28 @@ export async function dashboardCollectionGraphApi(accessToken, fromDate, toDate)
   return res.json()
 }
 
+export async function dashboardDepositionApi(fromDate, toDate, page = 10, pageSize = 20) {
+  const url = `${API_BASE}/dashboarddeposition/`
+  
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from_date: fromDate,
+      to_date: toDate,
+      page: page,
+      page_size: pageSize,
+    }),
+  })
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    throw new Error(text || 'Failed to fetch deposition data')
+  }
+  return res.json()
+}
+
 // Admin API Functions
 export async function adminGetUsers(accessToken) {
   const url = `${API_BASE}/admin/users/`

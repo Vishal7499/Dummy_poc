@@ -7,7 +7,7 @@ import * as XLSX from 'xlsx'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
 import { useAuth } from '../contexts/AuthContext'
-import { dashboardApi, dashboardCollectionGraphApi } from '../utils/api'
+import { dashboardApi, dashboardCollectionGraphApi, dashboardDepositionApi } from '../utils/api'
 import { formatIndianNumber } from '../utils/formatters'
 
 const Dashboard = () => {
@@ -19,6 +19,7 @@ const Dashboard = () => {
   const [showAlerts, setShowAlerts] = useState(false)
   const [expandedCard, setExpandedCard] = useState(null)
   const [selectedStaffMetric, setSelectedStaffMetric] = useState(null)
+  const [selectedCaseMetric, setSelectedCaseMetric] = useState(null)
   const [chartFilter, setChartFilter] = useState('ftd')
   const leaderboardTableRef = useRef(null)
   // Hierarchy drill-down state
@@ -48,6 +49,11 @@ const Dashboard = () => {
   const [collectionGraphData, setCollectionGraphData] = useState(null)
   const [collectionGraphLoading, setCollectionGraphLoading] = useState(false)
   const [collectionGraphError, setCollectionGraphError] = useState(null)
+  const [depositionData, setDepositionData] = useState(null)
+  const [depositionLoading, setDepositionLoading] = useState(false)
+  const [depositionError, setDepositionError] = useState(null)
+  const [depositionCurrentPage, setDepositionCurrentPage] = useState(1)
+  const [depositionPageSize] = useState(10)
   // Initialize date filters - default to last 30 days
   const [fromDate, setFromDate] = useState(() => {
     const date = new Date()
@@ -139,6 +145,32 @@ const Dashboard = () => {
     fetchCollectionGraphData()
   }, [user?.accessToken, fromDate, toDate])
 
+  // Fetch deposition data - no authentication required
+  useEffect(() => {
+    const fetchDepositionData = async () => {
+      try {
+        setDepositionLoading(true)
+        setDepositionError(null)
+        
+        const fromDateStr = '2025-09-01'
+        const toDateStr = '2025-09-30'
+        
+        console.log('Fetching deposition data from:', fromDateStr, 'to:', toDateStr, 'page:', depositionCurrentPage, 'page_size:', depositionPageSize)
+        
+        const data = await dashboardDepositionApi(fromDateStr, toDateStr, depositionCurrentPage, depositionPageSize)
+        setDepositionData(data)
+        console.log('Deposition data fetched:', data)
+      } catch (error) {
+        console.error('Error fetching deposition data:', error)
+        setDepositionError(error.message || 'Failed to fetch deposition data')
+      } finally {
+        setDepositionLoading(false)
+      }
+    }
+
+    fetchDepositionData()
+  }, [depositionCurrentPage, depositionPageSize])
+
   // Click outside handler for alerts dropdown, sidebar, and leaderboard table
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -168,6 +200,28 @@ const Dashboard = () => {
         }
       }
       
+      // Close reposition section when clicking outside
+      if (selectedCaseMetric === 'reposition' && leaderboardTableRef.current && !leaderboardTableRef.current.contains(event.target)) {
+        // Check if click is on the reposition card
+        const repositionCard = event.target.closest('[data-case-card="reposition"]')
+        // Check if click is on filter elements
+        const isFilterElement = filtersRef.current && filtersRef.current.contains(event.target)
+        if (!repositionCard && !isFilterElement) {
+          setSelectedCaseMetric(null)
+        }
+      }
+
+      // Close deposition section when clicking outside
+      if (selectedCaseMetric === 'deposition' && leaderboardTableRef.current && !leaderboardTableRef.current.contains(event.target)) {
+        // Check if click is on the deposition card
+        const depositionCard = event.target.closest('[data-case-card="deposition"]')
+        // Check if click is on filter elements
+        const isFilterElement = filtersRef.current && filtersRef.current.contains(event.target)
+        if (!depositionCard && !isFilterElement) {
+          setSelectedCaseMetric(null)
+        }
+      }
+      
       // Close customer table when clicking outside
       if (showCustomerDetails && customerDetailsRef.current && !customerDetailsRef.current.contains(event.target)) {
         // Check if click is on the customer count button in the staff table
@@ -184,14 +238,14 @@ const Dashboard = () => {
       }
     }
 
-    if (showAlerts || !isSidebarCollapsed || selectedStaffMetric || showCustomerDetails) {
+    if (showAlerts || !isSidebarCollapsed || selectedStaffMetric || showCustomerDetails || selectedCaseMetric) {
       document.addEventListener('mousedown', handleClickOutside)
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [showAlerts, isSidebarCollapsed, selectedStaffMetric, showCustomerDetails])
+  }, [showAlerts, isSidebarCollapsed, selectedStaffMetric, showCustomerDetails, selectedCaseMetric])
 
   // Mock data for demonstration
   const staffData = {
@@ -935,6 +989,10 @@ const Dashboard = () => {
     { id: 'refused', name: 'Refused to Pay', category: 'Payment Intent' },
     { id: 'paid', name: 'Already Paid', category: 'Payment Intent' },
     { id: 'broken', name: 'Broken Promises', category: 'Payment Intent' },
+    { id: 'reposition', name: 'Reposition', category: 'Case Management' },
+    { id: 'deposition', name: 'Deposition', category: 'Case Management' },
+    { id: 'settlements', name: 'Settlements', category: 'Case Management' },
+    { id: 'bucketWiseDPD', name: 'Bucket Wise DPD', category: 'Case Management' },
     { id: 'wrong', name: 'Wrong Numbers / Unreachable', category: 'Payment Intent' }
   ]
 
@@ -1011,6 +1069,296 @@ const Dashboard = () => {
       console.error('Error exporting table:', error)
       alert('Failed to export table. Please try again.')
     }
+  }
+
+  // Helper function to render Portfolio-wise Summary table
+  const renderPortfolioWiseSummaryTable = () => {
+    const portfolioData = [
+      { portfolio: 'TFE', totalAccounts: 76852, totalRepossessions: 433, allocatedAccounts: 76542, totalNotSurrendered: 76843 },
+      { portfolio: 'CV', totalAccounts: 20509, totalRepossessions: 15248, allocatedAccounts: 4939, totalNotSurrendered: 20468 },
+      { portfolio: 'LCV', totalAccounts: 5298, totalRepossessions: 1, allocatedAccounts: 5296, totalNotSurrendered: 5297 },
+      { portfolio: 'SA', totalAccounts: 3341, totalRepossessions: 1, allocatedAccounts: 3339, totalNotSurrendered: 3341 },
+      { portfolio: 'CE', totalAccounts: 2908, totalRepossessions: 66, allocatedAccounts: 261, totalNotSurrendered: 2904 },
+      { portfolio: 'TW', totalAccounts: 105, totalRepossessions: 146, allocatedAccounts: 92, totalNotSurrendered: 105 }
+    ]
+    const totals = portfolioData.reduce((acc, row) => ({
+      totalAccounts: acc.totalAccounts + row.totalAccounts,
+      totalRepossessions: acc.totalRepossessions + row.totalRepossessions,
+      allocatedAccounts: acc.allocatedAccounts + row.allocatedAccounts,
+      totalNotSurrendered: acc.totalNotSurrendered + row.totalNotSurrendered
+    }), { totalAccounts: 0, totalRepossessions: 0, allocatedAccounts: 0, totalNotSurrendered: 0 })
+
+    const handleExport = () => {
+      const headers = [
+        { key: 'portfolio', label: 'Portfolio' },
+        { key: 'totalAccounts', label: 'Total Accounts' },
+        { key: 'totalRepossessions', label: 'Total Repossessions' },
+        { key: 'allocatedAccounts', label: 'Allocated Accounts' },
+        { key: 'totalNotSurrendered', label: 'Total Not Surrendered' }
+      ]
+      const exportData = [...portfolioData, totals]
+      exportTableToExcel(exportData, headers, 'Portfolio_Wise_Summary')
+    }
+
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-red-600 text-white p-3 text-lg font-semibold flex justify-between items-center">
+          <span>Portfolio-wise Summary</span>
+          <button
+            onClick={handleExport}
+            className="bg-white text-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            title="Export to Excel"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export
+          </button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Portfolio</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Accounts</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Repossessions</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Allocated Accounts</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Not Surrendered</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {portfolioData.map((row, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{row.portfolio}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-800 text-right">{row.totalAccounts.toLocaleString()}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-800 text-right">{row.totalRepossessions.toLocaleString()}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-800 text-right">{row.allocatedAccounts.toLocaleString()}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-800 text-right">{row.totalNotSurrendered.toLocaleString()}</td>
+                </tr>
+              ))}
+              <tr className="bg-gray-100 font-bold">
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">Summary</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">{totals.totalAccounts.toLocaleString()}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">{totals.totalRepossessions.toLocaleString()}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">{totals.allocatedAccounts.toLocaleString()}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">{totals.totalNotSurrendered.toLocaleString()}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  // Helper function to render DPD-wise Summary table
+  const renderDPDWiseSummaryTable = () => {
+    const dpdData = [
+      { dpdBucket: '0 DPD', totalAccounts: 361, totalRepossessions: 120, allocatedAccounts: 219, totalNotSurrendered: 339 },
+      { dpdBucket: '1-100', totalAccounts: 1128, totalRepossessions: 147, allocatedAccounts: 110, totalNotSurrendered: 1126 },
+      { dpdBucket: '101-300', totalAccounts: 1572, totalRepossessions: 168, allocatedAccounts: 43, totalNotSurrendered: 1571 },
+      { dpdBucket: '301-500', totalAccounts: 55707, totalRepossessions: 161, allocatedAccounts: 55177, totalNotSurrendered: 55696 },
+      { dpdBucket: '>500', totalAccounts: 49239, totalRepossessions: 15370, allocatedAccounts: 33236, totalNotSurrendered: 49215 }
+    ]
+    const totals = dpdData.reduce((acc, row) => ({
+      totalAccounts: acc.totalAccounts + row.totalAccounts,
+      totalRepossessions: acc.totalRepossessions + row.totalRepossessions,
+      allocatedAccounts: acc.allocatedAccounts + row.allocatedAccounts,
+      totalNotSurrendered: acc.totalNotSurrendered + row.totalNotSurrendered
+    }), { totalAccounts: 0, totalRepossessions: 0, allocatedAccounts: 0, totalNotSurrendered: 0 })
+
+    const handleExport = () => {
+      const headers = [
+        { key: 'dpdBucket', label: 'DPD Bucket' },
+        { key: 'totalAccounts', label: 'Total Accounts' },
+        { key: 'totalRepossessions', label: 'Total Repossessions' },
+        { key: 'allocatedAccounts', label: 'Allocated Accounts' },
+        { key: 'totalNotSurrendered', label: 'Total Not Surrendered' }
+      ]
+      const exportData = [...dpdData, totals]
+      exportTableToExcel(exportData, headers, 'DPD_Wise_Summary')
+    }
+
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-red-600 text-white p-3 text-lg font-semibold flex justify-between items-center">
+          <span>DPD-wise Summary</span>
+          <button
+            onClick={handleExport}
+            className="bg-white text-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            title="Export to Excel"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export
+          </button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DPD Bucket</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Accounts</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Repossessions</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Allocated Accounts</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Not Surrendered</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {dpdData.map((row, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{row.dpdBucket}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-800 text-right">{row.totalAccounts.toLocaleString()}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-800 text-right">{row.totalRepossessions.toLocaleString()}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-800 text-right">{row.allocatedAccounts.toLocaleString()}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-800 text-right">{row.totalNotSurrendered.toLocaleString()}</td>
+                </tr>
+              ))}
+              <tr className="bg-gray-100 font-bold">
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">Summary</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">{totals.totalAccounts.toLocaleString()}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">{totals.totalRepossessions.toLocaleString()}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">{totals.allocatedAccounts.toLocaleString()}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">{totals.totalNotSurrendered.toLocaleString()}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  // Helper function to render Application Status Summary table
+  const renderApplicationStatusSummaryTable = () => {
+    const applicationData = [
+      { status: 'Rejected', numberOfApplications: 399835 },
+      { status: 'Pending For Approval', numberOfApplications: 91690 },
+      { status: 'Approved', numberOfApplications: 664 },
+      { status: 'Pending to Initiate', numberOfApplications: 556 },
+      { status: 'More Info Required', numberOfApplications: 6 },
+      { status: 'Reassigned', numberOfApplications: 6 }
+    ]
+    const total = applicationData.reduce((acc, row) => acc + row.numberOfApplications, 0)
+
+    const handleExport = () => {
+      const headers = [
+        { key: 'status', label: 'Status' },
+        { key: 'numberOfApplications', label: 'Number of Applications' }
+      ]
+      const exportData = [...applicationData, { status: 'Summary', numberOfApplications: total }]
+      exportTableToExcel(exportData, headers, 'Application_Status_Summary')
+    }
+
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-red-600 text-white p-3 text-lg font-semibold flex justify-between items-center">
+          <span>Application Status Summary</span>
+          <button
+            onClick={handleExport}
+            className="bg-white text-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            title="Export to Excel"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export
+          </button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Number of Applications</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {applicationData.map((row, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{row.status}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-800 text-right">{row.numberOfApplications.toLocaleString()}</td>
+                </tr>
+              ))}
+              <tr className="bg-gray-100 font-bold">
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 flex items-center gap-2">
+                  <span>Summary</span>
+                  <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">{total.toLocaleString()}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  // Helper function to render Repossession Status Summary table
+  const renderRepossessionStatusSummaryTable = () => {
+    const repossessionData = [
+      { status: 'Rejected', numberOfCases: 15383 },
+      { status: 'Approved', numberOfCases: 563 },
+      { status: 'Pending For Approval', numberOfCases: 21 },
+      { status: 'Pending to Initiate', numberOfCases: 2 },
+      { status: 'More Info Required', numberOfCases: 1 }
+    ]
+    const total = repossessionData.reduce((acc, row) => acc + row.numberOfCases, 0)
+
+    const handleExport = () => {
+      const headers = [
+        { key: 'status', label: 'Status' },
+        { key: 'numberOfCases', label: 'Number of Cases' }
+      ]
+      const exportData = [...repossessionData, { status: 'Summary', numberOfCases: total }]
+      exportTableToExcel(exportData, headers, 'Repossession_Status_Summary')
+    }
+
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-red-600 text-white p-3 text-lg font-semibold flex justify-between items-center">
+          <span>Repossession Status Summary</span>
+          <button
+            onClick={handleExport}
+            className="bg-white text-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            title="Export to Excel"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export
+          </button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Number of Cases</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {repossessionData.map((row, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{row.status}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-800 text-right">{row.numberOfCases.toLocaleString()}</td>
+                </tr>
+              ))}
+              <tr className="bg-gray-100 font-bold">
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 flex items-center gap-2">
+                  <span>Summary</span>
+                  <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">{total.toLocaleString()}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
   }
 
   // Helper function to render Product Summary table
@@ -2736,11 +3084,328 @@ const Dashboard = () => {
     )
   }
 
+  // Render Deposition Table
+  const renderDepositionTable = () => {
+    if (!depositionData || !depositionData.deposition_data || depositionData.deposition_data.length === 0) {
+      return (
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 text-center text-gray-500">
+          {depositionLoading ? 'Loading deposition data...' : 'No deposition data available'}
+        </div>
+      )
+    }
+
+    const formatDate = (dateString) => {
+      if (!dateString || dateString === '1900-01-01T00:00:00') return '-'
+      try {
+        const date = new Date(dateString)
+        return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      } catch (e) {
+        return dateString
+      }
+    }
+
+    const formatDateTime = (dateString) => {
+      if (!dateString) return '-'
+      try {
+        const date = new Date(dateString)
+        return date.toLocaleString('en-GB', { 
+          day: '2-digit', 
+          month: '2-digit', 
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      } catch (e) {
+        return dateString
+      }
+    }
+
+    const formatAmount = (amount) => {
+      if (amount === null || amount === undefined) return '-'
+      return formatIndianNumber(amount)
+    }
+
+    const handleExport = () => {
+      const headers = [
+        { key: 'Deposition_Id', label: 'Deposition Id' },
+        { key: 'Receipt_number', label: 'Receipt Number' },
+        { key: 'APAC_Number', label: 'APAC Number' },
+        { key: 'vertical', label: 'Vertical' },
+        { key: 'Deposition_Payment_Mode', label: 'Payment Mode' },
+        { key: 'Consolidated_Amount', label: 'Consolidated Amount' },
+        { key: 'Collection_Date', label: 'Collection Date' },
+        { key: 'Deposition_Bank_Name', label: 'Bank Name' },
+        { key: 'Deposition_Branch_Name', label: 'Branch Name' },
+        { key: 'Agency_Name', label: 'Agency Name' },
+        { key: 'bnapac', label: 'BNAPAC' },
+        { key: 'Challan_Number', label: 'Challan Number' },
+        { key: 'Deposition_Status', label: 'Deposition Status' },
+        { key: 'Deposition_Status_Description', label: 'Status Description' },
+        { key: 'Deposition_Verified_By', label: 'Verified By' },
+        { key: 'Deposition_Approval_Date_Time', label: 'Approval Date Time' },
+        { key: 'Approval_Remark', label: 'Approval Remark' },
+        { key: 'Payslip_Number', label: 'Payslip Number' },
+        { key: 'utr', label: 'UTR' },
+        { key: 'Assigned_to_User', label: 'Assigned to User' },
+        { key: 'Assigned_DateTime', label: 'Assigned Date Time' },
+        { key: 'Collector_Username', label: 'Collector Username' },
+        { key: 'Collector_Name', label: 'Collector Name' },
+        { key: 'Collection_Status', label: 'Collection Status' },
+        { key: 'Collections_Submission_Date', label: 'Submission Date' },
+        { key: 'Assigned_From', label: 'Assigned From' },
+        { key: 'Supervisor_Name', label: 'Supervisor Name' },
+        { key: 'Supervisor_Employee_ID', label: 'Supervisor Employee ID' },
+        { key: 'Cheque_Number', label: 'Cheque Number' },
+        { key: 'Drawer_Account_Number', label: 'Drawer Account Number' },
+        { key: 'Cheque_Date', label: 'Cheque Date' },
+        { key: 'Cheque_Amount', label: 'Cheque Amount' },
+        { key: 'Bank_Name', label: 'Bank Name' },
+        { key: 'Branch', label: 'Branch' },
+        { key: 'MICR', label: 'MICR' },
+        { key: 'CCAPAC', label: 'CCAPAC' },
+      ]
+
+      exportTableToExcel(depositionData.deposition_data, headers, 'Deposition_Data')
+    }
+
+    const pagination = depositionData.pagination || {}
+    const totalPages = pagination.total_pages || 1
+    const currentPage = pagination.current_page || 1
+    const totalCount = pagination.total_count || 0
+    const hasNext = pagination.has_next || false
+    const hasPrevious = pagination.has_previous || false
+
+    const handlePageChange = (newPage) => {
+      if (newPage >= 1 && newPage <= totalPages) {
+        setDepositionCurrentPage(newPage)
+      }
+    }
+
+    const renderPaginationButtons = () => {
+      const buttons = []
+      const maxVisiblePages = 5
+      let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2))
+      let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
+
+      if (endPage - startPage < maxVisiblePages - 1) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1)
+      }
+
+      // Previous button
+      buttons.push(
+        <button
+          key="prev"
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={!hasPrevious}
+          className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+            hasPrevious
+              ? 'bg-white text-red-600 border border-red-600 hover:bg-red-50 cursor-pointer'
+              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+          }`}
+        >
+          Previous
+        </button>
+      )
+
+      // First page
+      if (startPage > 1) {
+        buttons.push(
+          <button
+            key={1}
+            onClick={() => handlePageChange(1)}
+            className="px-3 py-1 rounded text-sm font-medium bg-white text-red-600 border border-red-600 hover:bg-red-50 cursor-pointer transition-colors"
+          >
+            1
+          </button>
+        )
+        if (startPage > 2) {
+          buttons.push(
+            <span key="ellipsis1" className="px-2 text-gray-500">
+              ...
+            </span>
+          )
+        }
+      }
+
+      // Page number buttons
+      for (let i = startPage; i <= endPage; i++) {
+        buttons.push(
+          <button
+            key={i}
+            onClick={() => handlePageChange(i)}
+            className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+              i === currentPage
+                ? 'bg-red-600 text-white cursor-pointer'
+                : 'bg-white text-red-600 border border-red-600 hover:bg-red-50 cursor-pointer'
+            }`}
+          >
+            {i}
+          </button>
+        )
+      }
+
+      // Last page
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+          buttons.push(
+            <span key="ellipsis2" className="px-2 text-gray-500">
+              ...
+            </span>
+          )
+        }
+        buttons.push(
+          <button
+            key={totalPages}
+            onClick={() => handlePageChange(totalPages)}
+            className="px-3 py-1 rounded text-sm font-medium bg-white text-red-600 border border-red-600 hover:bg-red-50 cursor-pointer transition-colors"
+          >
+            {totalPages}
+          </button>
+        )
+      }
+
+      // Next button
+      buttons.push(
+        <button
+          key="next"
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={!hasNext}
+          className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+            hasNext
+              ? 'bg-white text-red-600 border border-red-600 hover:bg-red-50 cursor-pointer'
+              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+          }`}
+        >
+          Next
+        </button>
+      )
+
+      return buttons
+    }
+
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-red-600 text-white p-3 text-lg font-semibold flex justify-between items-center">
+          <span>Deposition Data</span>
+          <div className="flex items-center gap-4">
+            {pagination && (
+              <span className="text-sm">
+                Page {currentPage} of {totalPages} 
+                ({totalCount} total records)
+              </span>
+            )}
+            <button
+              onClick={handleExport}
+              className="bg-white text-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+              title="Export to Excel"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Export
+            </button>
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">APAC Number</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-blue-600 uppercase tracking-wider">Vertical</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Mode</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-green-600 uppercase tracking-wider">Amount</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Collection Date</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agency</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Challan Number</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Verified By</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Approval Date Time</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned to User</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned Date Time</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Collector Username</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Collector Name</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Collection Status</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submission Date</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned From</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supervisor Name</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supervisor Employee ID</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Branch</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {depositionData.deposition_data.map((row, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.APAC_Number || '-'}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-blue-600 font-semibold">{row.vertical || '-'}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.Deposition_Payment_Mode || '-'}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-green-600 font-semibold">{formatAmount(row.Consolidated_Amount)}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{formatDateTime(row.Collection_Date)}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.Agency_Name || '-'}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.Challan_Number || '-'}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.Deposition_Status || '-'}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.Deposition_Verified_By || '-'}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{formatDateTime(row.Deposition_Approval_Date_Time)}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.Assigned_to_User || '-'}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{formatDateTime(row.Assigned_DateTime)}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.Collector_Username || '-'}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.Collector_Name || '-'}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.Collection_Status || '-'}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{formatDateTime(row.Collections_Submission_Date)}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.Assigned_From || '-'}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.Supervisor_Name || '-'}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.Supervisor_Employee_ID || '-'}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.Branch || '-'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="bg-gray-50 px-4 py-3 flex items-center justify-between border-t border-gray-200">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-700">
+                Showing page {currentPage} of {totalPages} ({totalCount} total records)
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              {renderPaginationButtons()}
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
   console.log('dashboardData', dashboardData?.loan_data?.total_loans)
 
   return (
     <div className="h-screen font-['Montserrat'] flex" style={{background: 'linear-gradient(135deg,rgb(255, 255, 255) 0%,rgb(255, 255, 255) 100%)'}}>
       <style>{`
+        /* Custom Scrollbar Styles - Very Thin and Red */
+        * {
+          scrollbar-width: thin;
+          scrollbar-color: #DC2626 transparent;
+        }
+        *::-webkit-scrollbar {
+          width: 3px;
+          height: 3px;
+        }
+        *::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        *::-webkit-scrollbar-thumb {
+          background: #DC2626;
+          border-radius: 1.5px;
+          transition: background 0.2s ease;
+        }
+        *::-webkit-scrollbar-thumb:hover {
+          background: #B91C1C;
+        }
+        *::-webkit-scrollbar-corner {
+          background: transparent;
+        }
+        
         .card-with-wave {
           position: relative;
           overflow: hidden;
@@ -2778,6 +3443,7 @@ const Dashboard = () => {
         .card-wave-staff::after { background-color: #DC2626; }
         .card-wave-engagement::after { background-color: #2196F3; }
         .card-wave-payment::after { background-color: #003366; }
+        .card-wave-case::after { background-color: #7C3AED; }
       `}</style>
       {/* Sidebar - Small when closed, overlay when open */}
       <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : 'w-0 overflow-hidden'}`}>
@@ -2901,12 +3567,12 @@ const Dashboard = () => {
         )}
         
         {/* Main Content - Scrollable */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-hidden flex flex-col">
           {/* Collection Dashboard Content */}
-          <div className="bg-gray-100 min-h-screen">
-            <div className="flex gap-4 p-4">
+          <div className="bg-gray-100 flex-1 overflow-hidden flex">
+            <div className="flex gap-4 p-4 w-full h-full overflow-hidden">
               {/* Left Side - Filters and Delegation Tracking */}
-              <div className="w-64 flex-shrink-0 space-y-4" ref={filtersRef}>
+              <div className="w-64 flex-shrink-0 space-y-4 overflow-y-auto overflow-x-hidden pr-2" ref={filtersRef} style={{ maxHeight: '100%' }}>
                 {/* Section 1: Filters */}
                 <div className="bg-gray-50 border-l-4 border-l-red-600 border-t border-r border-b border-gray-200 rounded-lg p-4 h-fit">
                   <div className="flex justify-between items-center mb-3">
@@ -3051,8 +3717,8 @@ const Dashboard = () => {
                 
 
                 {/* Section 7: Delegation Tracking */}
-                <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-3">Delegation Tracking</h3>
+                <div className="bg-gray-50 border-l-4 border-t border-r border-b border-gray-200 rounded-lg p-4 shadow-sm" style={{ borderLeftColor: '#003366' }}>
+                  <h3 className="text-sm font-semibold mb-3" style={{ color: '#003366' }}>Delegation Tracking</h3>
                   <div className="space-y-2">
                     <div className="bg-purple-50 border border-purple-200 rounded-lg p-2">
                       <div className="text-purple-800 text-xs font-semibold">Delegation Summary</div>
@@ -3084,7 +3750,7 @@ const Dashboard = () => {
             </div>
 
               {/* Right Side - Main Content */}
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden h-full pr-6">
                 {/* Favorites Section */}
                 {favoriteCards.length > 0 && (
                   <div className="mb-8">
@@ -3137,70 +3803,78 @@ const Dashboard = () => {
                               {renderFavoritePin('inactive')}
                             </div>
                           )
+                        } else if (cardId === 'deposition') {
+                          return (
+                            <div key={cardId} className="group bg-white  rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg card-with-wave card-wave-staff">
+                              <div className="text-xs text-gray-800 relative z-10">Deposition</div>
+                              <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>{depositionData?.pagination?.total_count || 0}</div>
+                              {renderFavoritePin('deposition')}
+                            </div>
+                          )
                         } else if (cardId === 'whatsapp') {
                           return (
-                            <div key={cardId} className="group bg-white  rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md shadow-lg relative card-with-wave card-wave-engagement">
+                            <div key={cardId} className="group bg-white  rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md shadow-lg relative card-with-wave card-wave-payment">
                               {renderFavoritePin('whatsapp')}
                               <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">WhatsApp Engagements</h3>
                               <div className="space-y-1 relative z-10">
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Messages Sent</span>
-                                  <span className="font-semibold" style={{color: '#2196F3'}}>1,245</span>
+                                  <span className="font-semibold" style={{color: '#003366'}}>1,245</span>
                                 </div>
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Delivered</span>
-                                  <span className="font-semibold" style={{color: '#2196F3'}}>1,180</span>
+                                  <span className="font-semibold" style={{color: '#003366'}}>1,180</span>
                                 </div>
                               </div>
                             </div>
                           )
                         } else if (cardId === 'aiCalls') {
                           return (
-                            <div key={cardId} className="group bg-white  rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md shadow-lg relative card-with-wave card-wave-engagement">
+                            <div key={cardId} className="group bg-white  rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md shadow-lg relative card-with-wave card-wave-payment">
                               {renderFavoritePin('aiCalls')}
                               <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">AI Calls</h3>
                               <div className="space-y-1 relative z-10">
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Calls Triggered</span>
-                                  <span className="font-semibold" style={{color: '#2196F3'}}>2,100</span>
+                                  <span className="font-semibold" style={{color: '#003366'}}>2,100</span>
                                 </div>
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Answered</span>
-                                  <span className="font-semibold" style={{color: '#2196F3'}}>1,580</span>
+                                  <span className="font-semibold" style={{color: '#003366'}}>1,580</span>
                                 </div>
                               </div>
                             </div>
                           )
                         } else if (cardId === 'dialler') {
                           return (
-                            <div key={cardId} className="group bg-white  rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md shadow-lg relative card-with-wave card-wave-engagement">
+                            <div key={cardId} className="group bg-white  rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md shadow-lg relative card-with-wave card-wave-payment">
                               {renderFavoritePin('dialler')}
                               <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Dialler Calls</h3>
                               <div className="space-y-1 relative z-10">
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Total Calls</span>
-                                  <span className="font-semibold" style={{color: '#2196F3'}}>1,850</span>
+                                  <span className="font-semibold" style={{color: '#003366'}}>1,850</span>
                                 </div>
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Successful Connects</span>
-                                  <span className="font-semibold" style={{color: '#2196F3'}}>1,340</span>
+                                  <span className="font-semibold" style={{color: '#003366'}}>1,340</span>
                                 </div>
                               </div>
                             </div>
                           )
                         } else if (cardId === 'fieldVisits') {
                           return (
-                            <div key={cardId} className="group bg-white  rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md shadow-lg relative card-with-wave card-wave-engagement">
+                            <div key={cardId} className="group bg-white  rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md shadow-lg relative card-with-wave card-wave-payment">
                               {renderFavoritePin('fieldVisits')}
                               <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Field Visits</h3>
                               <div className="space-y-1 relative z-10">
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Planned Visits</span>
-                                  <span className="font-semibold" style={{color: '#2196F3'}}>156</span>
+                                  <span className="font-semibold" style={{color: '#003366'}}>156</span>
                                 </div>
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Completed Visits</span>
-                                  <span className="font-semibold" style={{color: '#2196F3'}}>122</span>
+                                  <span className="font-semibold" style={{color: '#003366'}}>122</span>
                                 </div>
                               </div>
                             </div>
@@ -4248,7 +4922,7 @@ const Dashboard = () => {
                   <h2 className="text-lg font-semibold text-gray-800 mb-4">Customer Engagement</h2>
                   <div className="grid grid-cols-4 gap-3">
                     <div 
-                      className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement"
+                      className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-payment"
                       onClick={() => navigate('/customer-engagement')}
                     >
                       {renderFavoritePin('whatsapp')}
@@ -4256,25 +4930,25 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Messages Sent</span>
-                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Delivered</span>
-                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Read</span>
-                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Responded</span>
-                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
                         </div>
                       </div>
                     </div>
 
                     <div 
-                      className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement"
+                      className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-payment"
                       onClick={() => navigate('/customer-engagement')}
                     >
                       {renderFavoritePin('aiCalls')}
@@ -4282,21 +4956,21 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Calls Triggered</span>
-                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Answered</span>
-                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Positive Response</span>
-                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
                         </div>
                       </div>
                     </div>
 
                     <div 
-                      className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement"
+                      className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-payment"
                       onClick={() => navigate('/customer-engagement')}
                     >
                       {renderFavoritePin('dialler')}
@@ -4304,21 +4978,21 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Total Calls</span>
-                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Successful Connects</span>
-                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Follow-up Actions</span>
-                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
                         </div>
                     </div>
                   </div>
 
                     <div 
-                      className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement"
+                      className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-payment"
                       onClick={() => navigate('/customer-engagement')}
                     >
                       {renderFavoritePin('fieldVisits')}
@@ -4326,15 +5000,15 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Planned Visits</span>
-                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Completed Visits</span>
-                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Geo-tagging Compliance</span>
-                          <span className="font-semibold" style={{color: '#2196F3'}}>0</span>
+                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
                         </div>
                   </div>
                 </div>
@@ -4446,6 +5120,196 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
+
+                {/* Case Management & DPD Analysis */}
+                <div className="mb-8">
+                  <h2 className="text-lg font-semibold text-gray-800 mb-4">Case Management & DPD Analysis</h2>
+                  <div className="grid grid-cols-4 gap-3">
+                    <div 
+                      data-case-card="reposition"
+                      className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-staff"
+                      onClick={() => {
+                        if (selectedCaseMetric === 'reposition') {
+                          setSelectedCaseMetric(null)
+                        } else {
+                          setSelectedCaseMetric('reposition')
+                        }
+                      }}
+                    >
+                      {renderFavoritePin('reposition')}
+                      <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Reposition</h3>
+                      <div className="space-y-1 relative z-10">
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Total Cases</span>
+                          <span className="font-semibold" style={{color: '#DC2626'}}>1,247</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Pending</span>
+                          <span className="font-semibold" style={{color: '#DC2626'}}>342</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Completed</span>
+                          <span className="font-semibold" style={{color: '#DC2626'}}>905</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Amount</span>
+                          <span className="font-semibold" style={{color: '#DC2626'}}>₹3.45Cr</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div 
+                      data-case-card="deposition"
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-staff ${selectedCaseMetric === 'deposition' ? 'ring-2 ring-red-600 shadow-lg' : ''}`}
+                      onClick={() => {
+                        if (selectedCaseMetric === 'deposition') {
+                          setSelectedCaseMetric(null)
+                        } else {
+                          setSelectedCaseMetric('deposition')
+                          setDepositionCurrentPage(1)
+                        }
+                      }}
+                    >
+                      {renderFavoritePin('deposition')}
+                      <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Deposition</h3>
+                      <div className="space-y-1 relative z-10">
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Total Records</span>
+                          <span className="font-semibold" style={{color: '#DC2626'}}>{depositionData?.pagination?.total_count || 0}</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Current Page</span>
+                          <span className="font-semibold" style={{color: '#DC2626'}}>{depositionData?.pagination?.current_page || 1}</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Total Pages</span>
+                          <span className="font-semibold" style={{color: '#DC2626'}}>{depositionData?.pagination?.total_pages || 1}</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Date Range</span>
+                          <span className="font-semibold text-xs" style={{color: '#DC2626'}}>
+                            {depositionData?.from_date || '-'} to {depositionData?.to_date || '-'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-staff">
+                      {renderFavoritePin('settlements')}
+                      <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Settlements</h3>
+                      <div className="space-y-1 relative z-10">
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Total Settlements</span>
+                          <span className="font-semibold" style={{color: '#DC2626'}}>567</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Pending Approval</span>
+                          <span className="font-semibold" style={{color: '#DC2626'}}>89</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Approved</span>
+                          <span className="font-semibold" style={{color: '#DC2626'}}>478</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Settlement Amount</span>
+                          <span className="font-semibold" style={{color: '#DC2626'}}>₹1.87Cr</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-staff">
+                      {renderFavoritePin('bucketWiseDPD')}
+                      <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Bucket Wise DPD</h3>
+                      <div className="space-y-1 relative z-10">
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>0-30 Days</span>
+                          <span className="font-semibold" style={{color: '#DC2626'}}>4,523</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>31-60 Days</span>
+                          <span className="font-semibold" style={{color: '#DC2626'}}>2,187</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>61-90 Days</span>
+                          <span className="font-semibold" style={{color: '#DC2626'}}>1,456</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>90+ Days</span>
+                          <span className="font-semibold" style={{color: '#DC2626'}}>892</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Reposition Expanded Section */}
+                {selectedCaseMetric === 'reposition' && (
+                  <div ref={leaderboardTableRef} className="mb-8 w-full space-y-6">
+                    <div className="flex justify-between items-center">
+                      <h2 className="text-xl font-semibold text-gray-900">Reposition - Details</h2>
+                      <button 
+                        onClick={() => setSelectedCaseMetric(null)} 
+                        className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                        aria-label="Close reposition tables"
+                      >
+                        Close
+                      </button>
+                    </div>
+
+                    {/* Summary Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Total Repo Cases</div>
+                        <div className="text-2xl font-bold text-gray-900">107,287</div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Total Outstanding Amount</div>
+                        <div className="text-2xl font-bold text-gray-900">₹489.46Cr</div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Vehicles Sold</div>
+                        <div className="text-2xl font-bold text-gray-900">24</div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Total Cases Allocated</div>
+                        <div className="text-2xl font-bold text-gray-900">88,712</div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Surrendered Cases</div>
+                        <div className="text-2xl font-bold text-gray-900">78</div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Total Reposition Cases</div>
+                        <div className="text-2xl font-bold text-gray-900">31</div>
+                      </div>
+                    </div>
+
+                    {/* Tables Grid */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div className="lg:col-span-2">{renderPortfolioWiseSummaryTable()}</div>
+                      <div className="lg:col-span-2">{renderDPDWiseSummaryTable()}</div>
+                      <div>{renderApplicationStatusSummaryTable()}</div>
+                      <div>{renderRepossessionStatusSummaryTable()}</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Deposition Table - Show when deposition card is clicked */}
+                {selectedCaseMetric === 'deposition' && (
+                  <div ref={leaderboardTableRef} className="mb-8 w-full space-y-6">
+                    <div className="flex justify-between items-center">
+                      <h2 className="text-xl font-semibold text-gray-900">Deposition Data</h2>
+                      <button
+                        onClick={() => setSelectedCaseMetric(null)}
+                        className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                        aria-label="Close deposition table"
+                      >
+                        Close
+                      </button>
+                    </div>
+                    {renderDepositionTable()}
+                  </div>
+                )}
 
                 {/* Charts and Right Panel Row */}
                 <div className="grid grid-cols-3 gap-4 mb-8">
@@ -4678,17 +5542,16 @@ const Dashboard = () => {
                              <div className="w-4 h-4 bg-red-500 rounded"></div>
                              <span className="text-gray-700 text-[12px] font-medium">90+ days (12%)</span>
                              <span className="text-gray-500 text-[12px]">4 cases</span>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
                   </div>
                 </div>
               </div>
             </div>
-                    </div>
-                    
-              </div>
-            </div>
           </div>
-        </div>
-      </main>
+        </main>
       </div>
     </div>
   )
