@@ -17,7 +17,27 @@ const Dashboard = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true)
   const [showAlerts, setShowAlerts] = useState(false)
   const [expandedCard, setExpandedCard] = useState(null)
+  const [selectedStaffMetric, setSelectedStaffMetric] = useState(null)
   const [chartFilter, setChartFilter] = useState('ftd')
+  const leaderboardTableRef = useRef(null)
+  const [staffSearchTerm, setStaffSearchTerm] = useState('')
+  const [staffSortBy, setStaffSortBy] = useState('efficiency')
+  const [staffSortOrder, setStaffSortOrder] = useState('desc')
+  const [staffCurrentPage, setStaffCurrentPage] = useState(1)
+  const staffItemsPerPage = 10
+  // Customer details state
+  const [selectedStaff, setSelectedStaff] = useState(null)
+  const [showCustomerDetails, setShowCustomerDetails] = useState(false)
+  const [customerCurrentPage, setCustomerCurrentPage] = useState(1)
+  const customerItemsPerPage = 10
+  const customerDetailsRef = useRef(null)
+  // Filter states
+  const [filterLoanType, setFilterLoanType] = useState('All Loans')
+  const [filterDPD, setFilterDPD] = useState('All Buckets')
+  const [filterGeography, setFilterGeography] = useState('All Regions')
+  const [filterState, setFilterState] = useState('All States')
+  const [filterDistrict, setFilterDistrict] = useState('All Districts')
+  const [filterPICode, setFilterPICode] = useState('All PI Codes')
   const [dashboardData, setDashboardData] = useState(null)
   const [dashboardLoading, setDashboardLoading] = useState(false)
   const [dashboardError, setDashboardError] = useState(null)
@@ -44,6 +64,7 @@ const Dashboard = () => {
   const alertsRef = useRef(null)
   const mainContentRef = useRef(null)
   const isFetchingRef = useRef(false)
+  const filtersRef = useRef(null)
 
   // Fetch dashboard data from API when component mounts
   useEffect(() => {
@@ -114,7 +135,7 @@ const Dashboard = () => {
     fetchCollectionGraphData()
   }, [user?.accessToken, fromDate, toDate])
 
-  // Click outside handler for alerts dropdown and sidebar
+  // Click outside handler for alerts dropdown, sidebar, and leaderboard table
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (alertsRef.current && !alertsRef.current.contains(event.target)) {
@@ -124,16 +145,49 @@ const Dashboard = () => {
       if (mainContentRef.current && mainContentRef.current.contains(event.target) && !isSidebarCollapsed) {
         setIsSidebarCollapsed(true)
       }
+      // Close leaderboard table when clicking outside
+      if (selectedStaffMetric && leaderboardTableRef.current && !leaderboardTableRef.current.contains(event.target)) {
+        // Check if click is not on any of the staff monitoring cards
+        const staffCards = document.querySelectorAll('[data-staff-card]')
+        let clickedOnCard = false
+        staffCards.forEach(card => {
+          if (card.contains(event.target)) {
+            clickedOnCard = true
+          }
+        })
+        // Check if click is on filter elements (don't close table when using filters)
+        const isFilterElement = filtersRef.current && filtersRef.current.contains(event.target)
+        // Check if click is on customer table (don't close staff table when clicking customer table)
+        const isCustomerTable = customerDetailsRef.current && customerDetailsRef.current.contains(event.target)
+        if (!clickedOnCard && !isFilterElement && !isCustomerTable) {
+          setSelectedStaffMetric(null)
+        }
+      }
+      
+      // Close customer table when clicking outside
+      if (showCustomerDetails && customerDetailsRef.current && !customerDetailsRef.current.contains(event.target)) {
+        // Check if click is on the customer count button in the staff table
+        const isCustomerCountButton = event.target.closest('[data-customer-count-button]')
+        // Check if click is on filter elements (don't close customer table when using filters)
+        const isFilterElement = filtersRef.current && filtersRef.current.contains(event.target)
+        // Check if click is on staff table (don't close customer table when clicking staff table)
+        const isStaffTable = leaderboardTableRef.current && leaderboardTableRef.current.contains(event.target)
+        if (!isCustomerCountButton && !isFilterElement && !isStaffTable) {
+          setShowCustomerDetails(false)
+          setSelectedStaff(null)
+          setCustomerCurrentPage(1)
+        }
+      }
     }
 
-    if (showAlerts || !isSidebarCollapsed) {
+    if (showAlerts || !isSidebarCollapsed || selectedStaffMetric || showCustomerDetails) {
       document.addEventListener('mousedown', handleClickOutside)
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [showAlerts, isSidebarCollapsed])
+  }, [showAlerts, isSidebarCollapsed, selectedStaffMetric, showCustomerDetails])
 
   // Mock data for demonstration
   const staffData = {
@@ -174,6 +228,255 @@ const Dashboard = () => {
     brokenPromises: { customers: 89, amount: 280000 },
     wrongNumbers: { count: 156 }
   }
+
+  // Enhanced staff data for leaderboard - matching StaffManagement format with district, state, and PI Code
+  const staffLeaderboardBaseData = [
+    { id: 'EMP001', name: 'Ramesh Kumar', hierarchy: 'Supervisor', piCode: 'PI001', center: 'Mumbai', district: 'Mumbai', state: 'Maharashtra', loanType: 'Tractor', region: 'North', customers: 156, due: 3200000, overdue: 450000, calls: 45, visits: 12, collected: 2500000, efficiency: 92, escalations: 1 },
+    { id: 'EMP002', name: 'Ankit Sharma', hierarchy: 'Collection Officer', piCode: 'PI002', center: 'Bangalore', district: 'Bangalore', state: 'Karnataka', loanType: 'Commercial Vehicle', region: 'South', customers: 89, due: 2100000, overdue: 680000, calls: 38, visits: 8, collected: 1800000, efficiency: 67, escalations: 3 },
+    { id: 'EMP003', name: 'Priya Rao', hierarchy: 'Senior Executive', piCode: 'PI003', center: 'Chennai', district: 'Chennai', state: 'Tamil Nadu', loanType: 'Construction Equipment', region: 'East', customers: 134, due: 2800000, overdue: 320000, calls: 42, visits: 15, collected: 2200000, efficiency: 88, escalations: 0 },
+    { id: 'EMP004', name: 'Suresh Patel', hierarchy: 'Collection Officer', piCode: 'PI004', center: 'Pune', district: 'Pune', state: 'Maharashtra', loanType: 'Tractor', region: 'West', customers: 67, due: 1500000, overdue: 890000, calls: 35, visits: 6, collected: 1200000, efficiency: 54, escalations: 5 },
+    { id: 'EMP005', name: 'Meena Iyer', hierarchy: 'Executive', piCode: 'PI005', center: 'Mumbai', district: 'Mumbai', state: 'Maharashtra', loanType: 'Commercial Vehicle', region: 'Central', customers: 112, due: 2400000, overdue: 380000, calls: 40, visits: 10, collected: 1950000, efficiency: 80, escalations: 2 },
+    { id: 'EMP006', name: 'Rajesh Singh', hierarchy: 'Senior Executive', piCode: 'PI006', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 178, due: 3600000, overdue: 180000, calls: 48, visits: 14, collected: 2800000, efficiency: 95, escalations: 0 },
+    { id: 'EMP007', name: 'Sunita Verma', hierarchy: 'Collection Officer', piCode: 'PI007', center: 'Kolkata', district: 'Kolkata', state: 'West Bengal', loanType: 'Construction Equipment', region: 'East', customers: 78, due: 1800000, overdue: 720000, calls: 32, visits: 7, collected: 1500000, efficiency: 62, escalations: 4 },
+    { id: 'EMP008', name: 'Vikram Joshi', hierarchy: 'Executive', piCode: 'PI008', center: 'Ahmedabad', district: 'Ahmedabad', state: 'Gujarat', loanType: 'Commercial Vehicle', region: 'West', customers: 125, due: 2600000, overdue: 290000, calls: 44, visits: 11, collected: 2100000, efficiency: 85, escalations: 1 },
+    { id: 'EMP009', name: 'Deepa Nair', hierarchy: 'Collection Officer', piCode: 'PI009', center: 'Kochi', district: 'Kochi', state: 'Kerala', loanType: 'Tractor', region: 'South', customers: 95, due: 1900000, overdue: 420000, calls: 36, visits: 9, collected: 1650000, efficiency: 72, escalations: 2 },
+    { id: 'EMP010', name: 'Arjun Reddy', hierarchy: 'Senior Executive', piCode: 'PI010', center: 'Hyderabad', district: 'Hyderabad', state: 'Telangana', loanType: 'Construction Equipment', region: 'South', customers: 142, due: 3000000, overdue: 250000, calls: 41, visits: 13, collected: 2350000, efficiency: 89, escalations: 1 },
+    { id: 'EMP011', name: 'Kavita Desai', hierarchy: 'Collection Officer', piCode: 'PI011', center: 'Mumbai', district: 'Mumbai', state: 'Maharashtra', loanType: 'Commercial Vehicle', region: 'West', customers: 56, due: 1200000, overdue: 950000, calls: 29, visits: 5, collected: 950000, efficiency: 48, escalations: 6 },
+    { id: 'EMP012', name: 'Rohit Agarwal', hierarchy: 'Executive', piCode: 'PI012', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 165, due: 3400000, overdue: 195000, calls: 46, visits: 16, collected: 2650000, efficiency: 91, escalations: 0 }
+  ]
+
+  // Mock customer data for each staff member
+  const customerData = {
+    'EMP001': [
+      { id: 'C001', name: 'Rajesh Kumar', phone: '9876543210', loanAmount: 500000, dueAmount: 150000, overdueAmount: 25000, status: 'Active', lastPayment: '2024-01-15', nextDue: '2024-02-15' },
+      { id: 'C002', name: 'Priya Sharma', phone: '9876543211', loanAmount: 750000, dueAmount: 200000, overdueAmount: 0, status: 'Active', lastPayment: '2024-01-20', nextDue: '2024-02-20' },
+      { id: 'C003', name: 'Amit Patel', phone: '9876543212', loanAmount: 300000, dueAmount: 75000, overdueAmount: 15000, status: 'Overdue', lastPayment: '2023-12-10', nextDue: '2024-01-10' },
+      { id: 'C004', name: 'Sunita Verma', phone: '9876543213', loanAmount: 400000, dueAmount: 100000, overdueAmount: 20000, status: 'Active', lastPayment: '2024-01-18', nextDue: '2024-02-18' },
+      { id: 'C005', name: 'Vikram Singh', phone: '9876543214', loanAmount: 600000, dueAmount: 180000, overdueAmount: 30000, status: 'Overdue', lastPayment: '2023-11-25', nextDue: '2023-12-25' },
+      { id: 'C006', name: 'Meera Joshi', phone: '9876543215', loanAmount: 800000, dueAmount: 250000, overdueAmount: 0, status: 'Active', lastPayment: '2024-01-22', nextDue: '2024-02-22' },
+      { id: 'C007', name: 'Ravi Kumar', phone: '9876543216', loanAmount: 350000, dueAmount: 90000, overdueAmount: 10000, status: 'Active', lastPayment: '2024-01-12', nextDue: '2024-02-12' },
+      { id: 'C008', name: 'Sneha Reddy', phone: '9876543217', loanAmount: 550000, dueAmount: 140000, overdueAmount: 5000, status: 'Active', lastPayment: '2024-01-08', nextDue: '2024-02-08' },
+      { id: 'C009', name: 'Kiran Desai', phone: '9876543218', loanAmount: 450000, dueAmount: 120000, overdueAmount: 35000, status: 'Overdue', lastPayment: '2023-10-15', nextDue: '2023-11-15' },
+      { id: 'C010', name: 'Prakash Rao', phone: '9876543219', loanAmount: 320000, dueAmount: 80000, overdueAmount: 0, status: 'Active', lastPayment: '2024-01-25', nextDue: '2024-02-25' },
+      { id: 'C011', name: 'Anita Iyer', phone: '9876543220', loanAmount: 680000, dueAmount: 180000, overdueAmount: 15000, status: 'Active', lastPayment: '2024-01-14', nextDue: '2024-02-14' },
+      { id: 'C012', name: 'Suresh Nair', phone: '9876543221', loanAmount: 420000, dueAmount: 110000, overdueAmount: 0, status: 'Active', lastPayment: '2024-01-19', nextDue: '2024-02-19' },
+      { id: 'C013', name: 'Lakshmi Menon', phone: '9876543222', loanAmount: 580000, dueAmount: 150000, overdueAmount: 20000, status: 'Overdue', lastPayment: '2023-12-05', nextDue: '2024-01-05' },
+      { id: 'C014', name: 'Vijay Kumar', phone: '9876543223', loanAmount: 720000, dueAmount: 200000, overdueAmount: 0, status: 'Active', lastPayment: '2024-01-21', nextDue: '2024-02-21' },
+      { id: 'C015', name: 'Geeta Sharma', phone: '9876543224', loanAmount: 380000, dueAmount: 95000, overdueAmount: 0, status: 'Active', lastPayment: '2024-01-16', nextDue: '2024-02-16' },
+      { id: 'C016', name: 'Manoj Gupta', phone: '9876543225', loanAmount: 650000, dueAmount: 170000, overdueAmount: 0, status: 'Active', lastPayment: '2024-01-11', nextDue: '2024-02-11' }
+    ],
+    'EMP002': [
+      { id: 'C017', name: 'Ramesh Patel', phone: '9876543226', loanAmount: 520000, dueAmount: 130000, overdueAmount: 15000, status: 'Active', lastPayment: '2024-01-17', nextDue: '2024-02-17' },
+      { id: 'C018', name: 'Sunita Iyer', phone: '9876543227', loanAmount: 680000, dueAmount: 170000, overdueAmount: 0, status: 'Active', lastPayment: '2024-01-23', nextDue: '2024-02-23' },
+      { id: 'C019', name: 'Amit Kumar', phone: '9876543228', loanAmount: 420000, dueAmount: 105000, overdueAmount: 25000, status: 'Overdue', lastPayment: '2023-12-20', nextDue: '2024-01-20' }
+    ],
+    'EMP003': [
+      { id: 'C020', name: 'Priya Reddy', phone: '9876543229', loanAmount: 580000, dueAmount: 145000, overdueAmount: 0, status: 'Active', lastPayment: '2024-01-19', nextDue: '2024-02-19' },
+      { id: 'C021', name: 'Vikram Sharma', phone: '9876543230', loanAmount: 750000, dueAmount: 190000, overdueAmount: 0, status: 'Active', lastPayment: '2024-01-24', nextDue: '2024-02-24' },
+      { id: 'C022', name: 'Kavita Nair', phone: '9876543231', loanAmount: 480000, dueAmount: 120000, overdueAmount: 10000, status: 'Active', lastPayment: '2024-01-13', nextDue: '2024-02-13' }
+    ],
+    'EMP004': [
+      { id: 'C023', name: 'Rohit Desai', phone: '9876543232', loanAmount: 350000, dueAmount: 90000, overdueAmount: 20000, status: 'Overdue', lastPayment: '2023-12-15', nextDue: '2024-01-15' },
+      { id: 'C024', name: 'Anjali Mehta', phone: '9876543233', loanAmount: 620000, dueAmount: 155000, overdueAmount: 0, status: 'Active', lastPayment: '2024-01-26', nextDue: '2024-02-26' }
+    ],
+    'EMP005': [
+      { id: 'C025', name: 'Suresh Rao', phone: '9876543234', loanAmount: 540000, dueAmount: 135000, overdueAmount: 5000, status: 'Active', lastPayment: '2024-01-10', nextDue: '2024-02-10' },
+      { id: 'C026', name: 'Deepa Iyer', phone: '9876543235', loanAmount: 710000, dueAmount: 180000, overdueAmount: 0, status: 'Active', lastPayment: '2024-01-27', nextDue: '2024-02-27' },
+      { id: 'C027', name: 'Manish Gupta', phone: '9876543236', loanAmount: 430000, dueAmount: 110000, overdueAmount: 15000, status: 'Overdue', lastPayment: '2023-12-18', nextDue: '2024-01-18' }
+    ],
+    'EMP006': [
+      { id: 'C028', name: 'Rajesh Verma', phone: '9876543237', loanAmount: 590000, dueAmount: 150000, overdueAmount: 0, status: 'Active', lastPayment: '2024-01-28', nextDue: '2024-02-28' },
+      { id: 'C029', name: 'Priya Joshi', phone: '9876543238', loanAmount: 760000, dueAmount: 190000, overdueAmount: 0, status: 'Active', lastPayment: '2024-01-29', nextDue: '2024-02-29' },
+      { id: 'C030', name: 'Amit Singh', phone: '9876543239', loanAmount: 440000, dueAmount: 110000, overdueAmount: 10000, status: 'Active', lastPayment: '2024-01-09', nextDue: '2024-02-09' }
+    ],
+    'EMP007': [
+      { id: 'C031', name: 'Sunita Patel', phone: '9876543240', loanAmount: 370000, dueAmount: 95000, overdueAmount: 25000, status: 'Overdue', lastPayment: '2023-12-12', nextDue: '2024-01-12' },
+      { id: 'C032', name: 'Vikram Nair', phone: '9876543241', loanAmount: 630000, dueAmount: 160000, overdueAmount: 0, status: 'Active', lastPayment: '2024-01-30', nextDue: '2024-02-29' }
+    ],
+    'EMP008': [
+      { id: 'C033', name: 'Kavita Reddy', phone: '9876543242', loanAmount: 550000, dueAmount: 140000, overdueAmount: 5000, status: 'Active', lastPayment: '2024-01-31', nextDue: '2024-02-28' },
+      { id: 'C034', name: 'Rohit Sharma', phone: '9876543243', loanAmount: 720000, dueAmount: 180000, overdueAmount: 0, status: 'Active', lastPayment: '2024-02-01', nextDue: '2024-03-01' },
+      { id: 'C035', name: 'Anjali Desai', phone: '9876543244', loanAmount: 460000, dueAmount: 115000, overdueAmount: 20000, status: 'Overdue', lastPayment: '2023-12-22', nextDue: '2024-01-22' }
+    ],
+    'EMP009': [
+      { id: 'C036', name: 'Suresh Iyer', phone: '9876543245', loanAmount: 580000, dueAmount: 145000, overdueAmount: 0, status: 'Active', lastPayment: '2024-02-02', nextDue: '2024-03-02' },
+      { id: 'C037', name: 'Deepa Rao', phone: '9876543246', loanAmount: 690000, dueAmount: 175000, overdueAmount: 0, status: 'Active', lastPayment: '2024-02-03', nextDue: '2024-03-03' }
+    ],
+    'EMP010': [
+      { id: 'C038', name: 'Manish Verma', phone: '9876543247', loanAmount: 510000, dueAmount: 130000, overdueAmount: 15000, status: 'Active', lastPayment: '2024-02-04', nextDue: '2024-03-04' },
+      { id: 'C039', name: 'Rajesh Joshi', phone: '9876543248', loanAmount: 740000, dueAmount: 185000, overdueAmount: 0, status: 'Active', lastPayment: '2024-02-05', nextDue: '2024-03-05' },
+      { id: 'C040', name: 'Priya Singh', phone: '9876543249', loanAmount: 470000, dueAmount: 120000, overdueAmount: 10000, status: 'Active', lastPayment: '2024-02-06', nextDue: '2024-03-06' }
+    ],
+    'EMP011': [
+      { id: 'C041', name: 'Amit Patel', phone: '9876543250', loanAmount: 380000, dueAmount: 95000, overdueAmount: 30000, status: 'Overdue', lastPayment: '2023-12-25', nextDue: '2024-01-25' },
+      { id: 'C042', name: 'Sunita Nair', phone: '9876543251', loanAmount: 560000, dueAmount: 140000, overdueAmount: 0, status: 'Active', lastPayment: '2024-02-07', nextDue: '2024-03-07' }
+    ],
+    'EMP012': [
+      { id: 'C043', name: 'Vikram Reddy', phone: '9876543252', loanAmount: 600000, dueAmount: 150000, overdueAmount: 0, status: 'Active', lastPayment: '2024-02-08', nextDue: '2024-03-08' },
+      { id: 'C044', name: 'Kavita Sharma', phone: '9876543253', loanAmount: 780000, dueAmount: 195000, overdueAmount: 0, status: 'Active', lastPayment: '2024-02-09', nextDue: '2024-03-09' },
+      { id: 'C045', name: 'Rohit Desai', phone: '9876543254', loanAmount: 490000, dueAmount: 125000, overdueAmount: 5000, status: 'Active', lastPayment: '2024-02-10', nextDue: '2024-03-10' }
+    ]
+  }
+
+  // Filter and sort staff data based on search, metric, and filters
+  const getFilteredStaffData = (metric) => {
+    let filtered = staffLeaderboardBaseData.filter(staff => {
+      // Apply search filter
+      const matchesSearch = staff.id.toLowerCase().includes(staffSearchTerm.toLowerCase()) ||
+        staff.name.toLowerCase().includes(staffSearchTerm.toLowerCase()) ||
+        staff.piCode.toLowerCase().includes(staffSearchTerm.toLowerCase()) ||
+        staff.center.toLowerCase().includes(staffSearchTerm.toLowerCase()) ||
+        staff.district.toLowerCase().includes(staffSearchTerm.toLowerCase()) ||
+        staff.state.toLowerCase().includes(staffSearchTerm.toLowerCase()) ||
+        staff.loanType.toLowerCase().includes(staffSearchTerm.toLowerCase()) ||
+        staff.region.toLowerCase().includes(staffSearchTerm.toLowerCase()) ||
+        staff.customers.toString().includes(staffSearchTerm) ||
+        staff.due.toString().includes(staffSearchTerm) ||
+        staff.overdue.toString().includes(staffSearchTerm)
+      
+      // Apply loan type filter
+      const matchesLoanType = filterLoanType === 'All Loans' || 
+        (filterLoanType === 'Tractor Finance' && staff.loanType === 'Tractor') ||
+        (filterLoanType === 'Commercial Vehicle' && staff.loanType === 'Commercial Vehicle') ||
+        (filterLoanType === 'Construction Equipment' && staff.loanType === 'Construction Equipment')
+      
+      // Apply geography/region filter
+      const matchesGeography = filterGeography === 'All Regions' || 
+        staff.region === filterGeography
+      
+      // Apply state filter
+      const matchesState = filterState === 'All States' || 
+        staff.state === filterState
+      
+      // Apply district filter
+      const matchesDistrict = filterDistrict === 'All Districts' || 
+        staff.district === filterDistrict
+      
+      // Apply PI Code filter
+      const matchesPICode = filterPICode === 'All PI Codes' || 
+        staff.piCode === filterPICode
+      
+      // Apply metric-specific filter
+      let matchesMetric = true
+      if (metric === 'inactive') {
+        matchesMetric = staff.efficiency < 50
+      }
+      
+      return matchesSearch && matchesLoanType && matchesGeography && matchesState && matchesDistrict && matchesPICode && matchesMetric
+    })
+
+    // Sort based on selected metric and sort order
+    filtered.sort((a, b) => {
+      let aValue, bValue
+      
+      switch(metric) {
+        case 'allocation':
+          aValue = a.customers
+          bValue = b.customers
+          break
+        case 'collection':
+          aValue = a.efficiency
+          bValue = b.efficiency
+          break
+        case 'ptp':
+          // Using efficiency as proxy for PTP rate
+          aValue = a.efficiency
+          bValue = b.efficiency
+          break
+        case 'productivity':
+          // Using calls + visits as productivity
+          aValue = a.calls + a.visits
+          bValue = b.calls + b.visits
+          break
+        default:
+          aValue = a[staffSortBy] || a.efficiency
+          bValue = b[staffSortBy] || b.efficiency
+      }
+      
+      if (staffSortOrder === 'asc') {
+        return aValue > bValue ? 1 : -1
+      } else {
+        return aValue < bValue ? 1 : -1
+      }
+    })
+
+    return filtered
+  }
+
+  const filteredStaffData = selectedStaffMetric ? getFilteredStaffData(selectedStaffMetric) : []
+  const staffTotalPages = Math.ceil(filteredStaffData.length / staffItemsPerPage)
+  const staffStartIndex = (staffCurrentPage - 1) * staffItemsPerPage
+  const paginatedStaffData = filteredStaffData.slice(staffStartIndex, staffStartIndex + staffItemsPerPage)
+
+  // Reset page when metric, search, or filters change
+  useEffect(() => {
+    setStaffCurrentPage(1)
+  }, [selectedStaffMetric, staffSearchTerm, staffSortBy, staffSortOrder, filterLoanType, filterDPD, filterGeography, filterState, filterDistrict, filterPICode, fromDate, toDate])
+
+  const handleStaffCardClick = (metric) => {
+    if (selectedStaffMetric === metric) {
+      setSelectedStaffMetric(null)
+    } else {
+      setSelectedStaffMetric(metric)
+    }
+  }
+
+  // Handle customer count click
+  const handleCustomerCountClick = (staff) => {
+    setSelectedStaff(staff)
+    setShowCustomerDetails(true)
+    setCustomerCurrentPage(1)
+    
+    // Scroll to customer details table after a short delay to ensure it's rendered
+    setTimeout(() => {
+      if (customerDetailsRef.current) {
+        customerDetailsRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        })
+      }
+    }, 100)
+  }
+
+  // Close customer details
+  const closeCustomerDetails = () => {
+    setShowCustomerDetails(false)
+    setSelectedStaff(null)
+    setCustomerCurrentPage(1)
+  }
+
+  // Reset all filters to default
+  const resetFilters = () => {
+    setFilterLoanType('All Loans')
+    setFilterDPD('All Buckets')
+    setFilterGeography('All Regions')
+    setFilterState('All States')
+    setFilterDistrict('All Districts')
+    setFilterPICode('All PI Codes')
+    const date = new Date()
+    date.setDate(date.getDate() - 30)
+    setFromDate(date.toISOString().split('T')[0])
+    setToDate(new Date().toISOString().split('T')[0])
+  }
+
+  // Customer pagination
+  const currentCustomers = selectedStaff ? customerData[selectedStaff.id] || [] : []
+  const customerTotalPages = Math.ceil(currentCustomers.length / customerItemsPerPage)
+  const customerStartIndex = (customerCurrentPage - 1) * customerItemsPerPage
+  const paginatedCustomers = currentCustomers.slice(customerStartIndex, customerStartIndex + customerItemsPerPage)
+
+  // Get card name based on selected metric
+  const getCardName = (metric) => {
+    const cardNames = {
+      'allocation': 'Case Summary',
+      'collection': 'Collection Efficiency (%)',
+      'ptp': 'PTP Conversion Rate (%)',
+      'productivity': 'Staff Productivity Index',
+      'inactive': 'Inactive/Non-performing Staff'
+    }
+    return cardNames[metric] || 'Staff Performance Leaderboard'
+  }
+
 
   const currentData = staffData[activeTab]
 
@@ -518,14 +821,30 @@ const Dashboard = () => {
           <div className="bg-white min-h-screen">
             <div className="flex gap-4 p-4">
               {/* Left Side - Filters and Delegation Tracking */}
-              <div className="w-64 space-y-4">
+              <div className="w-64 flex-shrink-0 space-y-4" ref={filtersRef}>
                 {/* Section 1: Filters */}
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 h-fit">
-                  <h3 className="text-sm font-semibold text-gray-800 mb-3">Filters</h3>
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="text-sm font-semibold text-gray-800">Filters</h3>
+                    <button
+                      onClick={resetFilters}
+                      className="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer p-1 hover:bg-gray-100 rounded"
+                      title="Reset all filters"
+                      aria-label="Reset filters"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                    </button>
+                  </div>
                   <div className="space-y-3">
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">Type of Loan</label>
-                      <select className="w-full p-2 border border-gray-300 rounded text-xs">
+                      <select 
+                        className="w-full p-2 border border-gray-300 rounded text-xs"
+                        value={filterLoanType}
+                        onChange={(e) => setFilterLoanType(e.target.value)}
+                      >
                         <option>All Loans</option>
                         <option>Tractor Finance</option>
                         <option>Commercial Vehicle</option>
@@ -534,7 +853,11 @@ const Dashboard = () => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">DPD Buckets</label>
-                      <select className="w-full p-2 border border-gray-300 rounded text-xs">
+                      <select 
+                        className="w-full p-2 border border-gray-300 rounded text-xs"
+                        value={filterDPD}
+                        onChange={(e) => setFilterDPD(e.target.value)}
+                      >
                         <option>All Buckets</option>
                         <option>0-30 Days</option>
                         <option>31-60 Days</option>
@@ -565,7 +888,11 @@ const Dashboard = () => {
                     
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">Geography</label>
-                      <select className="w-full p-2 border border-gray-300 rounded text-xs">
+                      <select 
+                        className="w-full p-2 border border-gray-300 rounded text-xs"
+                        value={filterGeography}
+                        onChange={(e) => setFilterGeography(e.target.value)}
+                      >
                         <option>All Regions</option>
                         <option>North</option>
                         <option>South</option>
@@ -576,32 +903,61 @@ const Dashboard = () => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">State</label>
-                      <select className="w-full p-2 border border-gray-300 rounded text-xs">
+                      <select 
+                        className="w-full p-2 border border-gray-300 rounded text-xs"
+                        value={filterState}
+                        onChange={(e) => setFilterState(e.target.value)}
+                      >
                         <option>All States</option>
                         <option>Maharashtra</option>
                         <option>Karnataka</option>
                         <option>Tamil Nadu</option>
                         <option>Gujarat</option>
+                        <option>Delhi</option>
+                        <option>West Bengal</option>
+                        <option>Kerala</option>
+                        <option>Telangana</option>
                       </select>
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">District</label>
-                      <select className="w-full p-2 border border-gray-300 rounded text-xs">
+                      <select 
+                        className="w-full p-2 border border-gray-300 rounded text-xs"
+                        value={filterDistrict}
+                        onChange={(e) => setFilterDistrict(e.target.value)}
+                      >
                         <option>All Districts</option>
                         <option>Mumbai</option>
                         <option>Pune</option>
                         <option>Bangalore</option>
                         <option>Chennai</option>
+                        <option>Delhi</option>
+                        <option>Kolkata</option>
+                        <option>Ahmedabad</option>
+                        <option>Kochi</option>
+                        <option>Hyderabad</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Branch</label>
-                      <select className="w-full p-2 border border-gray-300 rounded text-xs">
-                        <option>All Branches</option>
-                        <option>Mumbai Central</option>
-                        <option>Pune IT Park</option>
-                        <option>Bangalore Whitefield</option>
-                        <option>Chennai T. Nagar</option>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">PI Code</label>
+                      <select 
+                        className="w-full p-2 border border-gray-300 rounded text-xs"
+                        value={filterPICode}
+                        onChange={(e) => setFilterPICode(e.target.value)}
+                      >
+                        <option>All PI Codes</option>
+                        <option>PI001</option>
+                        <option>PI002</option>
+                        <option>PI003</option>
+                        <option>PI004</option>
+                        <option>PI005</option>
+                        <option>PI006</option>
+                        <option>PI007</option>
+                        <option>PI008</option>
+                        <option>PI009</option>
+                        <option>PI010</option>
+                        <option>PI011</option>
+                        <option>PI012</option>
                       </select>
                     </div>
             </div>
@@ -632,10 +988,18 @@ const Dashboard = () => {
                   </div>
                 </div>
               </div>
+                              <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+
+               <div className="bg-green-50 border border-green-200 rounded-lg p-2">
+                          <div className="text-green-800 text-xs font-semibold">Outstanding Value per Collector</div>
+                          <div className="text-green-600 text-xs mt-1">Avg: ₹2.1Cr</div>
+                          <div className="text-green-600 text-xs">Max: ₹3.2Cr</div>
+                          </div>
+                          </div>
             </div>
 
               {/* Right Side - Main Content */}
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 {/* Favorites Section */}
                 {favoriteCards.length > 0 && (
                   <div className="mb-4">
@@ -870,18 +1234,22 @@ const Dashboard = () => {
                 )}
 
                 {/* Staff Monitoring (Summary) */}
-                <div className="mb-4">
+                <div className="mb-4 w-full">
                   <h2 className="text-lg font-semibold text-gray-800 mb-3">Staff Monitoring</h2>
-                  <div className="grid grid-cols-5 gap-3 relative">
+                  <div className="grid grid-cols-5 gap-3 relative w-full">
                     {/* Allocation Summary Card */}
                     <div 
-                      className="group bg-indigo-50 border border-indigo-200 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative"
+                      data-staff-card
+                      className={`group bg-indigo-50 border border-indigo-200 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative ${selectedStaffMetric === 'allocation' ? 'ring-2 ring-indigo-500 shadow-lg' : ''}`}
                       onMouseEnter={() => setExpandedCard('allocation')}
                       onMouseLeave={() => setExpandedCard(null)}
-                      onClick={() => navigate('/staff?metric=allocation')}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleStaffCardClick('allocation')
+                      }}
                     >
                       {renderFavoritePin('allocation')}
-                      <div className="text-indigo-600 text-xs">Allocation Summary</div>
+                      <div className="text-indigo-600 text-xs">Case Summary</div>
                       <div className="text-lg font-bold text-indigo-900">{formatIndianNumber(dashboardData?.loan_data?.total_loans)}</div>
                       {expandedCard === 'allocation' && (
                         <div className="absolute top-0 left-0 right-0 bg-indigo-50 border border-indigo-200 rounded-lg p-3 z-50 shadow-lg">
@@ -916,10 +1284,14 @@ const Dashboard = () => {
 
                     {/* Collection Efficiency Card */}
                     <div 
-                      className="group bg-blue-50 border border-blue-200 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative"
+                      data-staff-card
+                      className={`group bg-blue-50 border border-blue-200 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative ${selectedStaffMetric === 'collection' ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}
                       onMouseEnter={() => setExpandedCard('collection')}
                       onMouseLeave={() => setExpandedCard(null)}
-                      onClick={() => navigate('/staff?metric=collection')}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleStaffCardClick('collection')
+                      }}
                     >
                       {renderFavoritePin('collection')}
                       <div className="text-blue-600 text-xs">Collection Efficiency (%)</div>
@@ -948,10 +1320,14 @@ const Dashboard = () => {
 
                     {/* PTP Conversion Rate Card */}
                     <div 
-                      className="group bg-green-50 border border-green-200 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative"
+                      data-staff-card
+                      className={`group bg-green-50 border border-green-200 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative ${selectedStaffMetric === 'ptp' ? 'ring-2 ring-green-500 shadow-lg' : ''}`}
                       onMouseEnter={() => setExpandedCard('ptp')}
                       onMouseLeave={() => setExpandedCard(null)}
-                      onClick={() => navigate('/staff?metric=ptp')}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleStaffCardClick('ptp')
+                      }}
                     >
                       {renderFavoritePin('ptp')}
                       <div className="text-green-600 text-xs">PTP Conversion Rate (%)</div>
@@ -980,10 +1356,14 @@ const Dashboard = () => {
 
                     {/* Staff Productivity Index Card */}
                     <div 
-                      className="group bg-orange-50 border border-orange-200 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative"
+                      data-staff-card
+                      className={`group bg-orange-50 border border-orange-200 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative ${selectedStaffMetric === 'productivity' ? 'ring-2 ring-orange-500 shadow-lg' : ''}`}
                       onMouseEnter={() => setExpandedCard('productivity')}
                       onMouseLeave={() => setExpandedCard(null)}
-                      onClick={() => navigate('/staff?metric=productivity')}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleStaffCardClick('productivity')
+                      }}
                     >
                       {renderFavoritePin('productivity')}
                       <div className="text-orange-600 text-xs">Staff Productivity Index</div>
@@ -1012,10 +1392,14 @@ const Dashboard = () => {
 
                     {/* Inactive/Non-performing Staff Card */}
                     <div 
-                      className="group bg-red-50 border border-red-200 rounded-lg p-3 relative cursor-pointer transition-all duration-300 h-20"
+                      data-staff-card
+                      className={`group bg-red-50 border border-red-200 rounded-lg p-3 relative cursor-pointer transition-all duration-300 h-20 ${selectedStaffMetric === 'inactive' ? 'ring-2 ring-red-500 shadow-lg' : ''}`}
                       onMouseEnter={() => setExpandedCard('inactive')}
                       onMouseLeave={() => setExpandedCard(null)}
-                      onClick={() => navigate('/staff?metric=inactive')}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleStaffCardClick('inactive')
+                      }}
                     >
                       {renderFavoritePin('inactive')}
                       <div className="text-red-600 text-xs">Inactive/Non-performing Staff</div>
@@ -1046,6 +1430,313 @@ const Dashboard = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Staff Performance Leaderboard Table */}
+                {selectedStaffMetric && (
+                  <div ref={leaderboardTableRef} className="mb-4 bg-white border border-gray-200 rounded-lg p-6 shadow-sm w-full" style={{ maxWidth: '100%', overflow: 'hidden', boxSizing: 'border-box' }}>
+                    {/* Header with Title and Close Button */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                      <h2 className="text-xl font-semibold text-gray-900">{getCardName(selectedStaffMetric)}</h2>
+                      
+                      {/* Search and Filter Controls */}
+                      <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        <input
+                          type="text"
+                          placeholder="Search by ID, Name, PI Code, Center, District, State, Loan Type, Customers, Due, Overdue..."
+                          value={staffSearchTerm}
+                          onChange={(e) => setStaffSearchTerm(e.target.value)}
+                          className="px-4 py-2 border border-gray-300 rounded-lg text-sm w-full sm:w-80 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                        <select
+                          value={staffSortBy}
+                          onChange={(e) => setStaffSortBy(e.target.value)}
+                          className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="efficiency">Sort by Efficiency</option>
+                          <option value="collected">Sort by Collected Amount</option>
+                          <option value="customers">Sort by Customers</option>
+                          <option value="due">Sort by Due Amount</option>
+                          <option value="overdue">Sort by Overdue Amount</option>
+                          <option value="calls">Sort by Calls</option>
+                          <option value="visits">Sort by Visits</option>
+                          <option value="name">Sort by Name</option>
+                          <option value="hierarchy">Sort by Hierarchy</option>
+                        </select>
+                        <select
+                          value={staffSortOrder}
+                          onChange={(e) => setStaffSortOrder(e.target.value)}
+                          className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="desc">Descending</option>
+                          <option value="asc">Ascending</option>
+                        </select>
+                        <button
+                          onClick={() => setSelectedStaffMetric(null)}
+                          className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer whitespace-nowrap"
+                          aria-label="Close leaderboard"
+                        >
+                          Close
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Scrollable Table Container - Horizontal Scroll Only */}
+                    <div className="border border-gray-200 rounded-lg overflow-hidden" style={{ maxWidth: '100%' }}>
+                      <div className="overflow-x-auto" style={{ maxWidth: '100%' }}>
+                        <table className="w-full text-sm" style={{ tableLayout: 'auto', width: '100%' }}>
+                          <thead>
+                            <tr className="text-gray-600 border-b border-gray-200 bg-gray-50">
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Emp ID</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Name</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Hierarchy</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">PI Code</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Center</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">District</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">State</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Loan Type</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Region</th>
+                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Customers</th>
+                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Due</th>
+                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Overdue</th>
+                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Calls</th>
+                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Visits</th>
+                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Collected</th>
+                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Efficiency</th>
+                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Escalations</th>
+                            </tr>
+                          </thead>
+                          <tbody className="text-gray-700">
+                            {paginatedStaffData.length === 0 ? (
+                              <tr>
+                                <td colSpan="16" className="py-8 text-center text-gray-500">
+                                  No staff data found
+                                </td>
+                              </tr>
+                            ) : (
+                              paginatedStaffData.map((staff) => (
+                                <tr key={staff.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                  <td className="py-3 px-3 font-mono text-xs text-left whitespace-nowrap">{staff.id}</td>
+                                  <td className="py-3 px-3 font-medium text-left whitespace-nowrap">{staff.name}</td>
+                                  <td className="py-3 px-3 text-left whitespace-nowrap">
+                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                      staff.hierarchy === 'Supervisor' ? 'bg-purple-100 text-purple-800' :
+                                      staff.hierarchy === 'Senior Executive' ? 'bg-blue-100 text-blue-800' :
+                                      staff.hierarchy === 'Executive' ? 'bg-green-100 text-green-800' :
+                                      'bg-gray-100 text-gray-800'
+                                    }`}>
+                                      {staff.hierarchy}
+                                    </span>
+                                  </td>
+                                  <td className="py-3 px-3 text-left whitespace-nowrap font-mono text-xs">{staff.piCode}</td>
+                                  <td className="py-3 px-3 text-left whitespace-nowrap">{staff.center}</td>
+                                  <td className="py-3 px-3 text-left whitespace-nowrap">{staff.district}</td>
+                                  <td className="py-3 px-3 text-left whitespace-nowrap">{staff.state}</td>
+                                  <td className="py-3 px-3 text-left whitespace-nowrap">
+                                    <span className={`px-3 py-1 rounded text-xs font-medium ${
+                                      staff.loanType === 'Tractor' ? 'bg-orange-100 text-orange-800' :
+                                      staff.loanType === 'Commercial Vehicle' ? 'bg-blue-100 text-blue-800' :
+                                      'bg-green-100 text-green-800'
+                                    }`}>
+                                      {staff.loanType}
+                                    </span>
+                                  </td>
+                                  <td className="py-3 px-3 text-left whitespace-nowrap">{staff.region}</td>
+                                  <td className="py-3 px-3 text-right font-medium whitespace-nowrap">
+                                    <button 
+                                      data-customer-count-button
+                                      onClick={() => handleCustomerCountClick(staff)}
+                                      className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                                    >
+                                      {staff.customers}
+                                    </button>
+                                  </td>
+                                  <td className="py-3 px-3 text-right font-medium whitespace-nowrap">₹{(staff.due / 100000).toFixed(1)}L</td>
+                                  <td className="py-3 px-3 text-right font-medium whitespace-nowrap">₹{(staff.overdue / 100000).toFixed(1)}L</td>
+                                  <td className="py-3 px-3 text-right whitespace-nowrap">{staff.calls}</td>
+                                  <td className="py-3 px-3 text-right whitespace-nowrap">{staff.visits}</td>
+                                  <td className="py-3 px-3 text-right font-medium whitespace-nowrap">₹{(staff.collected / 100000).toFixed(1)}L</td>
+                                  <td className="py-3 px-3 text-right whitespace-nowrap">
+                                    <span className={`font-semibold ${
+                                      staff.efficiency >= 90 ? 'text-green-600' :
+                                      staff.efficiency >= 70 ? 'text-orange-600' :
+                                      'text-red-600'
+                                    }`}>
+                                      {staff.efficiency}%
+                                    </span>
+                                  </td>
+                                  <td className="py-3 px-3 text-right whitespace-nowrap">
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                      staff.escalations === 0 ? 'bg-green-100 text-green-800' :
+                                      staff.escalations <= 2 ? 'bg-yellow-100 text-yellow-800' :
+                                      'bg-red-100 text-red-800'
+                                    }`}>
+                                      {staff.escalations}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    
+                    {/* Pagination */}
+                    <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
+                      <div className="text-sm text-gray-600">
+                        Showing {staffStartIndex + 1} to {Math.min(staffStartIndex + staffItemsPerPage, filteredStaffData.length)} of {filteredStaffData.length} entries
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => setStaffCurrentPage(Math.max(1, staffCurrentPage - 1))}
+                          disabled={staffCurrentPage === 1}
+                          className="px-4 py-2 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors cursor-pointer"
+                        >
+                          Previous
+                        </button>
+                        {Array.from({ length: staffTotalPages }, (_, i) => i + 1).map(page => (
+                          <button
+                            key={page}
+                            onClick={() => setStaffCurrentPage(page)}
+                            className={`px-4 py-2 border rounded-lg text-sm transition-colors cursor-pointer ${
+                              staffCurrentPage === page
+                                ? 'bg-blue-600 text-white border-blue-600'
+                                : 'border-gray-300 hover:bg-gray-50'
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        ))}
+                        <button
+                          onClick={() => setStaffCurrentPage(Math.min(staffTotalPages, staffCurrentPage + 1))}
+                          disabled={staffCurrentPage === staffTotalPages}
+                          className="px-4 py-2 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors cursor-pointer"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Customer Details Table */}
+                {showCustomerDetails && selectedStaff && (
+                  <div 
+                    ref={customerDetailsRef} 
+                    className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm mt-6 w-full"
+                    style={{
+                      animation: 'fadeIn 0.3s ease-in-out',
+                      maxWidth: '100%',
+                      overflow: 'hidden',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <div className="flex justify-between items-center mb-6">
+                      <h2 className="text-xl font-semibold text-gray-900">
+                        Customer Details - {selectedStaff.name} ({selectedStaff.id})
+                      </h2>
+                      <button
+                        onClick={closeCustomerDetails}
+                        className="text-gray-500 hover:text-gray-700 text-2xl font-bold cursor-pointer"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm min-w-max">
+                        <thead>
+                          <tr className="text-gray-600 border-b border-gray-200 bg-gray-50">
+                            <th className="text-left py-4 px-3 font-semibold">Customer ID</th>
+                            <th className="text-left py-4 px-3 font-semibold">Name</th>
+                            <th className="text-left py-4 px-3 font-semibold">Phone</th>
+                            <th className="text-right py-4 px-3 font-semibold">Loan Amount</th>
+                            <th className="text-right py-4 px-3 font-semibold">Due Amount</th>
+                            <th className="text-right py-4 px-3 font-semibold">Overdue Amount</th>
+                            <th className="text-left py-4 px-3 font-semibold">Status</th>
+                            <th className="text-left py-4 px-3 font-semibold">Last Payment</th>
+                            <th className="text-left py-4 px-3 font-semibold">Next Due</th>
+                          </tr>
+                        </thead>
+                        <tbody className="text-gray-700">
+                          {paginatedCustomers.length > 0 ? (
+                            paginatedCustomers.map((customer, index) => (
+                              <tr key={customer.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                <td className="py-3 px-3 font-mono text-xs text-left">{customer.id}</td>
+                                <td className="py-3 px-3 font-medium text-left">{customer.name}</td>
+                                <td className="py-3 px-3 text-left">{customer.phone}</td>
+                                <td className="py-3 px-3 text-right font-medium">₹{(customer.loanAmount / 100000).toFixed(1)}L</td>
+                                <td className="py-3 px-3 text-right font-medium">₹{(customer.dueAmount / 100000).toFixed(1)}L</td>
+                                <td className="py-3 px-3 text-right font-medium">₹{(customer.overdueAmount / 100000).toFixed(1)}L</td>
+                                <td className="py-3 px-3 text-left">
+                                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                    customer.status === 'Active' ? 'bg-green-100 text-green-800' :
+                                    customer.status === 'Overdue' ? 'bg-red-100 text-red-800' :
+                                    'bg-gray-100 text-gray-800'
+                                  }`}>
+                                    {customer.status}
+                                  </span>
+                                </td>
+                                <td className="py-3 px-3 text-left">{customer.lastPayment}</td>
+                                <td className="py-3 px-3 text-left">{customer.nextDue}</td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan="9" className="py-12 px-3 text-center text-gray-500">
+                                <div className="flex flex-col items-center justify-center">
+                                  <div className="text-4xl mb-4">📋</div>
+                                  <div className="text-lg font-medium text-gray-600 mb-2">No Customer Data Available</div>
+                                  <div className="text-sm text-gray-500">
+                                    This staff member currently has no customers assigned.
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                    
+                    {/* Customer Pagination */}
+                    {customerTotalPages > 1 && (
+                      <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
+                        <div className="text-sm text-gray-600">
+                          Showing {customerStartIndex + 1} to {Math.min(customerStartIndex + customerItemsPerPage, currentCustomers.length)} of {currentCustomers.length} customers
+                        </div>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => setCustomerCurrentPage(Math.max(1, customerCurrentPage - 1))}
+                            disabled={customerCurrentPage === 1}
+                            className="px-4 py-2 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors cursor-pointer"
+                          >
+                            Previous
+                          </button>
+                          {Array.from({ length: customerTotalPages }, (_, i) => i + 1).map(page => (
+                            <button
+                              key={page}
+                              onClick={() => setCustomerCurrentPage(page)}
+                              className={`px-4 py-2 border rounded-lg text-sm transition-colors cursor-pointer ${
+                                customerCurrentPage === page
+                                  ? 'bg-blue-600 text-white border-blue-600'
+                                  : 'border-gray-300 hover:bg-gray-50'
+                              }`}
+                            >
+                              {page}
+                            </button>
+                          ))}
+                          <button
+                            onClick={() => setCustomerCurrentPage(Math.min(customerTotalPages, customerCurrentPage + 1))}
+                            disabled={customerCurrentPage === customerTotalPages}
+                            className="px-4 py-2 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors cursor-pointer"
+                          >
+                            Next
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Customer Engagement */}
                 <div className="mb-4">
@@ -1252,11 +1943,11 @@ const Dashboard = () => {
             </div>
 
                 {/* Charts and Right Panel Row */}
-                <div className="grid grid-cols-3 gap-4 mb-4">
+                <div className="grid grid-cols-3 gap-4 mb-2">
                   {/* Left Side - Charts */}
                   <div className="col-span-2 space-y-4">
                      {/* Collection Trend Chart */}
-                     <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mt-2 relative">
+                     <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mt-1 relative">
                        <div className="flex justify-between items-center mb-4">
                          <h3 className="text-sm font-semibold text-gray-900">{currentChartData.title}</h3>
                          <select 
@@ -1412,7 +2103,28 @@ const Dashboard = () => {
                        </div>
                      </div>
 
-                     {/* DPD Distribution Chart */}
+                    
+          </div>
+
+                  {/* Right Side - Alerts and Actions */}
+                  <div className="space-y-4">
+                    {/* Section 5: Allocation Monitoring */}
+                    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mt-3">
+                      <h3 className="text-sm font-semibold text-gray-900 mb-2">Allocation Monitoring</h3>
+                      <div className="space-y-2">
+                      
+                       
+                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-2">
+                          <div className="text-orange-800 text-xs font-semibold">Unallocated Cases</div>
+                          <div className="text-orange-600 text-xs mt-1">Pending: 23</div>
+                          <button className="mt-1 bg-orange-600 hover:bg-orange-700 text-white px-2 py-1 rounded text-xs transition-colors cursor-pointer">
+                            Auto Allocate
+                          </button>
+                          </div>
+                        </div>
+                        
+                      </div>
+                      {/* DPD Distribution Chart */}
                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                        <h3 className="text-sm font-semibold text-gray-900 mb-3">DPD Distribution</h3>
                        <div className="flex items-center space-x-6">
@@ -1444,55 +2156,29 @@ const Dashboard = () => {
                          <div className="space-y-3">
                            <div className="flex items-center space-x-3">
                              <div className="w-4 h-4 bg-green-500 rounded"></div>
-                             <span className="text-gray-700 text-sm font-medium">0-30 days (45%)</span>
-                             <span className="text-gray-500 text-sm">17 cases</span>
+                             <span className="text-gray-700 text-[12px] font-medium">0-30 days (45%)</span>
+                             <span className="text-gray-500 text-[12px]">17 cases</span>
                            </div>
                            <div className="flex items-center space-x-3">
                              <div className="w-4 h-4 bg-orange-500 rounded"></div>
-                             <span className="text-gray-700 text-sm font-medium">31-60 days (25%)</span>
-                             <span className="text-gray-500 text-sm">10 cases</span>
+                             <span className="text-gray-700 text-[12px] font-medium">31-60 days (25%)</span>
+                             <span className="text-gray-500 text-[12px]">10 cases</span>
                            </div>
                            <div className="flex items-center space-x-3">
                              <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                             <span className="text-gray-700 text-sm font-medium">61-90 days (18%)</span>
-                             <span className="text-gray-500 text-sm">7 cases</span>
+                             <span className="text-gray-700 text-[12px] font-medium">61-90 days (18%)</span>
+                             <span className="text-gray-500 text-[12px]">7 cases</span>
                            </div>
                            <div className="flex items-center space-x-3">
                              <div className="w-4 h-4 bg-red-500 rounded"></div>
-                             <span className="text-gray-700 text-sm font-medium">90+ days (12%)</span>
-                             <span className="text-gray-500 text-sm">4 cases</span>
+                             <span className="text-gray-700 text-[12px] font-medium">90+ days (12%)</span>
+                             <span className="text-gray-500 text-[12px]">4 cases</span>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-
-                  {/* Right Side - Alerts and Actions */}
-                  <div className="space-y-4">
-                    {/* Section 5: Allocation Monitoring */}
-                    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mt-3">
-                      <h3 className="text-sm font-semibold text-gray-900 mb-2">Allocation Monitoring</h3>
-                      <div className="space-y-2">
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
-                          <div className="text-blue-800 text-xs font-semibold">Allocation Summary</div>
-                          <div className="text-blue-600 text-xs mt-1">Active Accounts: 1,245</div>
-                          <div className="text-blue-600 text-xs">Per Staff Avg: 249</div>
-                        </div>
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-2">
-                          <div className="text-green-800 text-xs font-semibold">Outstanding Value per Collector</div>
-                          <div className="text-green-600 text-xs mt-1">Avg: ₹2.1Cr</div>
-                          <div className="text-green-600 text-xs">Max: ₹3.2Cr</div>
-                          </div>
-                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-2">
-                          <div className="text-orange-800 text-xs font-semibold">Unallocated Cases</div>
-                          <div className="text-orange-600 text-xs mt-1">Pending: 23</div>
-                          <button className="mt-1 bg-orange-600 hover:bg-orange-700 text-white px-2 py-1 rounded text-xs transition-colors cursor-pointer">
-                            Auto Allocate
-                          </button>
-                          </div>
-                        </div>
-                      </div>
                     </div>
+                    
               </div>
             </div>
           </div>

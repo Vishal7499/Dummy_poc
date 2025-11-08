@@ -601,7 +601,7 @@ const StaffDashboard = () => {
                         if (cardId === 'allocation') {
                           return (
                             <div key={cardId} className="group bg-indigo-50 border-2 border-yellow-400 rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg">
-                              <div className="text-indigo-600 text-xs">Allocation Summary</div>
+                              <div className="text-indigo-600 text-xs">Case Summary</div>
                               <div className="text-lg font-bold text-indigo-900">1,245</div>
                               {renderFavoritePin('allocation')}
                             </div>
