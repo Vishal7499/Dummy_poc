@@ -971,6 +971,48 @@ const Dashboard = () => {
     )
   }
 
+  // Helper function to export table data to Excel
+  const exportTableToExcel = (data, headers, filename) => {
+    try {
+      // Prepare header row (extract labels from header objects)
+      const headerRow = headers.map(header => header.label || header)
+      
+      // Prepare data rows
+      const dataRows = data.map(row => 
+        headers.map(header => {
+          const key = header.key || header
+          const value = row[key]
+          return value !== undefined && value !== null ? String(value) : ''
+        })
+      )
+
+      // Combine headers and data
+      const exportData = [headerRow, ...dataRows]
+
+      // Create workbook and worksheet
+      const ws = XLSX.utils.aoa_to_sheet(exportData)
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, ws, 'Sheet1')
+
+      // Set column widths
+      const colWidths = headers.map((header, index) => {
+        const label = header.label || header
+        const maxLength = Math.max(
+          label.length,
+          ...dataRows.map(row => String(row[index] || '').length)
+        )
+        return { wch: Math.min(Math.max(maxLength + 2, 10), 50) }
+      })
+      ws['!cols'] = colWidths
+
+      // Export to file
+      XLSX.writeFile(wb, `${filename}.xlsx`)
+    } catch (error) {
+      console.error('Error exporting table:', error)
+      alert('Failed to export table. Please try again.')
+    }
+  }
+
   // Helper function to render Product Summary table
   const renderProductSummaryTable = () => {
     const productData = [
@@ -997,13 +1039,49 @@ const Dashboard = () => {
       rcm: acc.rcm + row.rcm
     }), { total: 0, dtr: 0, agtl: 0, tc: 0, ncm: 0, acm: 0, tce: 0, cm: 0, rcm: 0 })
 
+    const headers = [
+      { key: 'product', label: 'PRODUCT' },
+      { key: 'total', label: 'TOTAL' },
+      { key: 'dtr', label: 'DTR' },
+      { key: 'agtl', label: 'AGTL' },
+      { key: 'tc', label: 'TC' },
+      { key: 'ncm', label: 'NCM' },
+      { key: 'acm', label: 'ACM' },
+      { key: 'tce', label: 'TCE' },
+      { key: 'cm', label: 'CM' },
+      { key: 'rcm', label: 'RCM' },
+    ]
+
+    const handleExport = () => {
+      const exportData = [...productData, { 
+        product: 'Total', 
+        total: totals.total, 
+        dtr: totals.dtr, 
+        agtl: totals.agtl, 
+        tc: totals.tc, 
+        ncm: totals.ncm, 
+        acm: totals.acm, 
+        tce: totals.tce, 
+        cm: totals.cm, 
+        rcm: totals.rcm 
+      }]
+      exportTableToExcel(exportData, headers, 'Product_Summary')
+    }
+
     return (
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
         <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
           <h3 className="text-sm font-semibold">Product Summary</h3>
-          <svg className="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-          </svg>
+          <button
+            onClick={handleExport}
+            className="bg-white text-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            title="Export to Excel"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export
+          </button>
         </div>
         <div className="overflow-x-auto max-h-96 overflow-y-auto">
           <table className="w-full text-xs">
@@ -1077,13 +1155,41 @@ const Dashboard = () => {
       sma2: acc.sma2 + row.sma2
     }), { total: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 })
 
+    const headers = [
+      { key: 'product', label: 'PRODUCT' },
+      { key: 'total', label: 'TOTAL' },
+      { key: 'npa', label: 'NPA' },
+      { key: 'sma0', label: 'SMA0' },
+      { key: 'sma1', label: 'SMA1' },
+      { key: 'sma2', label: 'SMA2' },
+    ]
+
+    const handleExport = () => {
+      const exportData = [...allocationData, { 
+        product: 'Total', 
+        total: totals.total, 
+        npa: totals.npa, 
+        sma0: totals.sma0, 
+        sma1: totals.sma1, 
+        sma2: totals.sma2 
+      }]
+      exportTableToExcel(exportData, headers, 'Product_Allocation_Summary')
+    }
+
     return (
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
         <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
           <h3 className="text-sm font-semibold">Product Allocation Summary</h3>
-          <svg className="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-          </svg>
+          <button
+            onClick={handleExport}
+            className="bg-white text-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            title="Export to Excel"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export
+          </button>
         </div>
         <div className="overflow-x-auto max-h-96 overflow-y-auto">
           <table className="w-full text-xs">
@@ -1139,13 +1245,41 @@ const Dashboard = () => {
       sma2: acc.sma2 + row.sma2
     }), { total: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 })
 
+    const headers = [
+      { key: 'username', label: 'Username' },
+      { key: 'total', label: 'TOTAL' },
+      { key: 'npa', label: 'NPA' },
+      { key: 'sma0', label: 'SMA0' },
+      { key: 'sma1', label: 'SMA1' },
+      { key: 'sma2', label: 'SMA2' },
+    ]
+
+    const handleExport = () => {
+      const exportData = [...ncmData, { 
+        username: 'Total', 
+        total: totals.total, 
+        npa: totals.npa, 
+        sma0: totals.sma0, 
+        sma1: totals.sma1, 
+        sma2: totals.sma2 
+      }]
+      exportTableToExcel(exportData, headers, 'NCM_Allocation_Summary')
+    }
+
     return (
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
         <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
           <h3 className="text-sm font-semibold">NCM Allocation Summary</h3>
-          <svg className="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-          </svg>
+          <button
+            onClick={handleExport}
+            className="bg-white text-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            title="Export to Excel"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export
+          </button>
         </div>
         <div className="overflow-x-auto max-h-96 overflow-y-auto">
           <table className="w-full text-xs">
@@ -1198,13 +1332,41 @@ const Dashboard = () => {
       sma2: acc.sma2 + row.sma2
     }), { total: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 })
 
+    const headers = [
+      { key: 'username', label: 'Username' },
+      { key: 'total', label: 'TOTAL' },
+      { key: 'npa', label: 'NPA' },
+      { key: 'sma0', label: 'SMA0' },
+      { key: 'sma1', label: 'SMA1' },
+      { key: 'sma2', label: 'SMA2' },
+    ]
+
+    const handleExport = () => {
+      const exportData = [...rcmData, { 
+        username: 'Total', 
+        total: totals.total, 
+        npa: totals.npa, 
+        sma0: totals.sma0, 
+        sma1: totals.sma1, 
+        sma2: totals.sma2 
+      }]
+      exportTableToExcel(exportData, headers, 'RCM_Allocation_Summary')
+    }
+
     return (
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
         <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
           <h3 className="text-sm font-semibold">RCM Allocation Summary</h3>
-          <svg className="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-          </svg>
+          <button
+            onClick={handleExport}
+            className="bg-white text-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            title="Export to Excel"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export
+          </button>
         </div>
         <div className="overflow-x-auto max-h-96 overflow-y-auto">
           <table className="w-full text-xs">
@@ -1266,13 +1428,41 @@ const Dashboard = () => {
       sma2: acc.sma2 + row.sma2
     }), { total: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 })
 
+    const headers = [
+      { key: 'username', label: 'Username' },
+      { key: 'total', label: 'TOTAL' },
+      { key: 'npa', label: 'NPA' },
+      { key: 'sma0', label: 'SMA0' },
+      { key: 'sma1', label: 'SMA1' },
+      { key: 'sma2', label: 'SMA2' },
+    ]
+
+    const handleExport = () => {
+      const exportData = [...acmData, { 
+        username: 'Total', 
+        total: totals.total, 
+        npa: totals.npa, 
+        sma0: totals.sma0, 
+        sma1: totals.sma1, 
+        sma2: totals.sma2 
+      }]
+      exportTableToExcel(exportData, headers, 'ACM_Allocation_Summary')
+    }
+
     return (
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
         <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
           <h3 className="text-sm font-semibold">ACM Allocation Summary</h3>
-          <svg className="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-          </svg>
+          <button
+            onClick={handleExport}
+            className="bg-white text-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            title="Export to Excel"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export
+          </button>
         </div>
         <div className="overflow-x-auto max-h-96 overflow-y-auto">
           <table className="w-full text-xs">
@@ -1334,13 +1524,41 @@ const Dashboard = () => {
       sma2: acc.sma2 + row.sma2
     }), { total: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 })
 
+    const headers = [
+      { key: 'username', label: 'Username' },
+      { key: 'total', label: 'TOTAL' },
+      { key: 'npa', label: 'NPA' },
+      { key: 'sma0', label: 'SMA0' },
+      { key: 'sma1', label: 'SMA1' },
+      { key: 'sma2', label: 'SMA2' },
+    ]
+
+    const handleExport = () => {
+      const exportData = [...cmData, { 
+        username: 'Total', 
+        total: totals.total, 
+        npa: totals.npa, 
+        sma0: totals.sma0, 
+        sma1: totals.sma1, 
+        sma2: totals.sma2 
+      }]
+      exportTableToExcel(exportData, headers, 'CM_Allocation_Summary')
+    }
+
     return (
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
         <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
           <h3 className="text-sm font-semibold">CM Allocation Summary</h3>
-          <svg className="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-          </svg>
+          <button
+            onClick={handleExport}
+            className="bg-white text-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            title="Export to Excel"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export
+          </button>
         </div>
         <div className="overflow-x-auto max-h-96 overflow-y-auto">
           <table className="w-full text-xs">
@@ -1402,13 +1620,41 @@ const Dashboard = () => {
       sma2: acc.sma2 + row.sma2
     }), { total: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 })
 
+    const headers = [
+      { key: 'username', label: 'Username' },
+      { key: 'total', label: 'TOTAL' },
+      { key: 'npa', label: 'NPA' },
+      { key: 'sma0', label: 'SMA0' },
+      { key: 'sma1', label: 'SMA1' },
+      { key: 'sma2', label: 'SMA2' },
+    ]
+
+    const handleExport = () => {
+      const exportData = [...agtlData, { 
+        username: 'Total', 
+        total: totals.total, 
+        npa: totals.npa, 
+        sma0: totals.sma0, 
+        sma1: totals.sma1, 
+        sma2: totals.sma2 
+      }]
+      exportTableToExcel(exportData, headers, 'AGTL_Allocation_Summary')
+    }
+
     return (
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
         <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
           <h3 className="text-sm font-semibold">AGTL Allocation Summary</h3>
-          <svg className="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-          </svg>
+          <button
+            onClick={handleExport}
+            className="bg-white text-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            title="Export to Excel"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export
+          </button>
         </div>
         <div className="overflow-x-auto max-h-96 overflow-y-auto">
           <table className="w-full text-xs">
@@ -1440,6 +1686,1048 @@ const Dashboard = () => {
                 <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma0)}</td>
                 <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma1)}</td>
                 <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  // Helper function to render State Wise Summary table
+  const renderStateWiseSummaryTable = () => {
+    const stateData = [
+      { state: 'N/A', totalCases: 181986, outstandingBalance: 12, resolutionCount: 326, resolutionCountPercent: 0.18, resolutionAmount: 0, resolutionAmountPercent: 0.09 },
+      { state: 'Kerala', totalCases: 21740, outstandingBalance: 25, resolutionCount: 1787, resolutionCountPercent: 8.22, resolutionAmount: 6, resolutionAmountPercent: 2.43 },
+      { state: 'Tamil Nadu', totalCases: 9289, outstandingBalance: 39, resolutionCount: 1505, resolutionCountPercent: 16.20, resolutionAmount: 1, resolutionAmountPercent: 0.13 },
+      { state: 'Maharashtra', totalCases: 3554, outstandingBalance: 135, resolutionCount: 619, resolutionCountPercent: 17.42, resolutionAmount: 4, resolutionAmountPercent: 0.27 },
+      { state: 'Andhra Pradesh', totalCases: 3063, outstandingBalance: 4, resolutionCount: 323, resolutionCountPercent: 10.55, resolutionAmount: 0, resolutionAmountPercent: 0.85 },
+      { state: 'Karnataka', totalCases: 2220, outstandingBalance: 6, resolutionCount: 483, resolutionCountPercent: 21.76, resolutionAmount: 2, resolutionAmountPercent: 3.88 },
+      { state: 'Telangana', totalCases: 751, outstandingBalance: 5, resolutionCount: 190, resolutionCountPercent: 25.30, resolutionAmount: 0, resolutionAmountPercent: 0.03 },
+      { state: 'Gujarat', totalCases: 419, outstandingBalance: 6, resolutionCount: 143, resolutionCountPercent: 34.13, resolutionAmount: 1, resolutionAmountPercent: 0.87 },
+      { state: 'Rajasthan', totalCases: 394, outstandingBalance: 16, resolutionCount: 63, resolutionCountPercent: 15.99, resolutionAmount: 0, resolutionAmountPercent: 0.00 }
+    ]
+    const totals = stateData.reduce((acc, row) => ({
+      totalCases: acc.totalCases + row.totalCases,
+      outstandingBalance: acc.outstandingBalance + row.outstandingBalance,
+      resolutionCount: acc.resolutionCount + row.resolutionCount,
+      resolutionAmount: acc.resolutionAmount + row.resolutionAmount
+    }), { totalCases: 0, outstandingBalance: 0, resolutionCount: 0, resolutionAmount: 0 })
+    const totalResolutionCountPercent = totals.totalCases > 0 ? ((totals.resolutionCount / totals.totalCases) * 100).toFixed(2) : 0
+    const totalResolutionAmountPercent = totals.outstandingBalance > 0 ? ((totals.resolutionAmount / totals.outstandingBalance) * 100).toFixed(2) : 0
+
+    const headers = [
+      { key: 'state', label: 'State' },
+      { key: 'totalCases', label: 'Total Cases' },
+      { key: 'outstandingBalance', label: 'Outstanding Balance (in Cr.)' },
+      { key: 'resolutionCount', label: 'Resolution Count' },
+      { key: 'resolutionCountPercent', label: 'Resolution Count%' },
+      { key: 'resolutionAmount', label: 'Resolution Amount' },
+      { key: 'resolutionAmountPercent', label: 'Resolution Amount %' },
+    ]
+
+    const handleExport = () => {
+      const exportData = [...stateData, { 
+        state: 'Total', 
+        totalCases: totals.totalCases, 
+        outstandingBalance: totals.outstandingBalance, 
+        resolutionCount: totals.resolutionCount, 
+        resolutionCountPercent: totalResolutionCountPercent, 
+        resolutionAmount: totals.resolutionAmount, 
+        resolutionAmountPercent: totalResolutionAmountPercent 
+      }]
+      exportTableToExcel(exportData, headers, 'State_Wise_Summary')
+    }
+
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
+          <h3 className="text-sm font-semibold">State Wise Summary</h3>
+          <button
+            onClick={handleExport}
+            className="bg-white text-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            title="Export to Excel"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export
+          </button>
+        </div>
+        <div className="overflow-x-auto max-h-96 overflow-y-auto">
+          <table className="w-full text-xs">
+            <thead className="bg-red-600 text-white sticky top-0">
+              <tr>
+                <th className="text-left py-2 px-2 font-semibold border-r border-red-500">State</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Total Cases</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Outstanding Balance (in Cr.)</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Resolution Count</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Resolution Count%</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Resolution Amount</th>
+                <th className="text-right py-2 px-2 font-semibold">Resolution Amount %</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {stateData.map((row, idx) => (
+                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="py-2 px-2 text-gray-800 font-medium border-r border-gray-200">{row.state}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.totalCases)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{row.outstandingBalance}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.resolutionCount)}</td>
+                  <td className="py-2 px-2 text-right border-r border-gray-200">
+                    <div className="flex items-center justify-end gap-2">
+                      <div className="flex-1 max-w-[100px] bg-gray-200 rounded-full h-4 relative">
+                        <div 
+                          className="bg-green-500 h-4 rounded-full" 
+                          style={{ width: `${Math.min(row.resolutionCountPercent, 100)}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-gray-700 min-w-[50px] text-right">{row.resolutionCountPercent.toFixed(2)}%</span>
+                    </div>
+                  </td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{row.resolutionAmount}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{row.resolutionAmountPercent.toFixed(2)}%</td>
+                </tr>
+              ))}
+              <tr className="bg-red-600 text-white font-semibold">
+                <td className="py-2 px-2 border-r border-red-500">Totals</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.totalCases)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{totals.outstandingBalance}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.resolutionCount)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{totalResolutionCountPercent}%</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{totals.resolutionAmount}</td>
+                <td className="py-2 px-2 text-right">{totalResolutionAmountPercent}%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  // Helper function to render Region Wise Summary table
+  const renderRegionWiseSummaryTable = () => {
+    const regionData = [
+      { region: 'Thrissur Zone', cases: 4840, outstandingBalance: 10, resolutionCount: 363, resolutionCountPercent: 7.50, resolutionAmount: 0, resolutionAmountPercent: 0.00 },
+      { region: 'APT Zone', cases: 2836, outstandingBalance: 7, resolutionCount: 382, resolutionCountPercent: 13.47, resolutionAmount: 0, resolutionAmountPercent: 0.49 },
+      { region: 'Chennai Zone', cases: 2744, outstandingBalance: 32, resolutionCount: 492, resolutionCountPercent: 17.93, resolutionAmount: 0, resolutionAmountPercent: 0.01 },
+      { region: 'Karnataka Zone', cases: 2268, outstandingBalance: 6, resolutionCount: 470, resolutionCountPercent: 20.72, resolutionAmount: 2, resolutionAmountPercent: 3.60 },
+      { region: 'West-2-Zone', cases: 1996, outstandingBalance: 18, resolutionCount: 156, resolutionCountPercent: 7.82, resolutionAmount: 0, resolutionAmountPercent: 0.00 },
+      { region: 'West-1-Zone', cases: 1503, outstandingBalance: 117, resolutionCount: 407, resolutionCountPercent: 27.08, resolutionAmount: 3, resolutionAmountPercent: 0.27 },
+      { region: 'North Zone', cases: 1296, outstandingBalance: 16, resolutionCount: 370, resolutionCountPercent: 28.55, resolutionAmount: 0, resolutionAmountPercent: 0.00 },
+      { region: 'AP ZONE', cases: 955, outstandingBalance: 2, resolutionCount: 77, resolutionCountPercent: 8.06, resolutionAmount: 0, resolutionAmountPercent: 0.00 }
+    ]
+    const totals = regionData.reduce((acc, row) => ({
+      cases: acc.cases + row.cases,
+      outstandingBalance: acc.outstandingBalance + row.outstandingBalance,
+      resolutionCount: acc.resolutionCount + row.resolutionCount,
+      resolutionAmount: acc.resolutionAmount + row.resolutionAmount
+    }), { cases: 0, outstandingBalance: 0, resolutionCount: 0, resolutionAmount: 0 })
+    const totalResolutionCountPercent = totals.cases > 0 ? ((totals.resolutionCount / totals.cases) * 100).toFixed(2) : 0
+    const totalResolutionAmountPercent = totals.outstandingBalance > 0 ? ((totals.resolutionAmount / totals.outstandingBalance) * 100).toFixed(2) : 0
+
+    const headers = [
+      { key: 'region', label: 'Region' },
+      { key: 'cases', label: 'Cases' },
+      { key: 'outstandingBalance', label: 'Outstanding balance' },
+      { key: 'resolutionCount', label: 'Resolution count' },
+      { key: 'resolutionCountPercent', label: 'Resolution Count%' },
+      { key: 'resolutionAmount', label: 'Resolution amount' },
+      { key: 'resolutionAmountPercent', label: 'Resolution Amount %' },
+    ]
+
+    const handleExport = () => {
+      const exportData = [...regionData, { 
+        region: 'Total', 
+        cases: totals.cases, 
+        outstandingBalance: totals.outstandingBalance, 
+        resolutionCount: totals.resolutionCount, 
+        resolutionCountPercent: totalResolutionCountPercent, 
+        resolutionAmount: totals.resolutionAmount, 
+        resolutionAmountPercent: totalResolutionAmountPercent 
+      }]
+      exportTableToExcel(exportData, headers, 'Region_Wise_Summary')
+    }
+
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
+          <h3 className="text-sm font-semibold">Region Wise Summary</h3>
+          <button
+            onClick={handleExport}
+            className="bg-white text-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            title="Export to Excel"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export
+          </button>
+        </div>
+        <div className="overflow-x-auto max-h-96 overflow-y-auto">
+          <table className="w-full text-xs">
+            <thead className="bg-red-600 text-white sticky top-0">
+              <tr>
+                <th className="text-left py-2 px-2 font-semibold border-r border-red-500">Region</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Cases</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Outstanding balance</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Resolution count</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Resolution Count%</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Resolution amount</th>
+                <th className="text-right py-2 px-2 font-semibold">Resolution Amount%</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {regionData.map((row, idx) => (
+                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="py-2 px-2 text-gray-800 font-medium border-r border-gray-200">{row.region}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.cases)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{row.outstandingBalance}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.resolutionCount)}</td>
+                  <td className="py-2 px-2 text-right border-r border-gray-200">
+                    <div className="flex items-center justify-end gap-2">
+                      <div className="flex-1 max-w-[100px] bg-gray-200 rounded-full h-4 relative">
+                        <div 
+                          className="bg-green-500 h-4 rounded-full" 
+                          style={{ width: `${Math.min(row.resolutionCountPercent, 100)}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-gray-700 min-w-[50px] text-right">{row.resolutionCountPercent.toFixed(2)}%</span>
+                    </div>
+                  </td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{row.resolutionAmount}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{row.resolutionAmountPercent.toFixed(2)}%</td>
+                </tr>
+              ))}
+              <tr className="bg-red-600 text-white font-semibold">
+                <td className="py-2 px-2 border-r border-red-500">Totals</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.cases)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{totals.outstandingBalance}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.resolutionCount)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{totalResolutionCountPercent}%</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{totals.resolutionAmount}</td>
+                <td className="py-2 px-2 text-right">{totalResolutionAmountPercent}%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  // Helper function to render Bucket Wise Summary table
+  const renderBucketWiseSummaryTable = () => {
+    const bucketData = [
+      { bucket: 'X bucket = 1-30', cases: 91498, outstandingBalance: 38, resolutionCount: 1544, resolutionCountPercent: 1.69, resolutionAmount: 6, resolutionAmountPercent: 1.49 },
+      { bucket: '>180', cases: 58742, outstandingBalance: 77, resolutionCount: 1577, resolutionCountPercent: 2.68, resolutionAmount: 3, resolutionAmountPercent: 0.40 },
+      { bucket: 'Current = 0 DPD', cases: 28971, outstandingBalance: 1, resolutionCount: 632, resolutionCountPercent: 2.18, resolutionAmount: 0, resolutionAmountPercent: 0.00 },
+      { bucket: '91-120', cases: 15597, outstandingBalance: 30, resolutionCount: 590, resolutionCountPercent: 3.78, resolutionAmount: 0, resolutionAmountPercent: 0.08 },
+      { bucket: '31-60', cases: 11336, outstandingBalance: 38, resolutionCount: 636, resolutionCountPercent: 5.61, resolutionAmount: 2, resolutionAmountPercent: 0.63 },
+      { bucket: '121-180', cases: 10342, outstandingBalance: 53, resolutionCount: 540, resolutionCountPercent: 5.22, resolutionAmount: 0, resolutionAmountPercent: 0.02 },
+      { bucket: '61-90', cases: 8446, outstandingBalance: 21, resolutionCount: 422, resolutionCountPercent: 5.00, resolutionAmount: 2, resolutionAmountPercent: 0.91 }
+    ]
+    const totals = bucketData.reduce((acc, row) => ({
+      cases: acc.cases + row.cases,
+      outstandingBalance: acc.outstandingBalance + row.outstandingBalance,
+      resolutionCount: acc.resolutionCount + row.resolutionCount,
+      resolutionAmount: acc.resolutionAmount + row.resolutionAmount
+    }), { cases: 0, outstandingBalance: 0, resolutionCount: 0, resolutionAmount: 0 })
+    const totalResolutionCountPercent = totals.cases > 0 ? ((totals.resolutionCount / totals.cases) * 100).toFixed(2) : 0
+    const totalResolutionAmountPercent = totals.outstandingBalance > 0 ? ((totals.resolutionAmount / totals.outstandingBalance) * 100).toFixed(2) : 0
+
+    const headers = [
+      { key: 'bucket', label: 'Bucket' },
+      { key: 'cases', label: 'Cases' },
+      { key: 'outstandingBalance', label: 'Outstanding balance' },
+      { key: 'resolutionCount', label: 'Resolution count' },
+      { key: 'resolutionCountPercent', label: 'Resolution Count%' },
+      { key: 'resolutionAmount', label: 'Resolution amount' },
+      { key: 'resolutionAmountPercent', label: 'Resolution Amount %' },
+    ]
+
+    const handleExport = () => {
+      const exportData = [...bucketData, { 
+        bucket: 'Total', 
+        cases: totals.cases, 
+        outstandingBalance: totals.outstandingBalance, 
+        resolutionCount: totals.resolutionCount, 
+        resolutionCountPercent: totalResolutionCountPercent, 
+        resolutionAmount: totals.resolutionAmount, 
+        resolutionAmountPercent: totalResolutionAmountPercent 
+      }]
+      exportTableToExcel(exportData, headers, 'Bucket_Wise_Summary')
+    }
+
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
+          <h3 className="text-sm font-semibold">Bucket Wise Summary</h3>
+          <button
+            onClick={handleExport}
+            className="bg-white text-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            title="Export to Excel"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export
+          </button>
+        </div>
+        <div className="overflow-x-auto max-h-96 overflow-y-auto">
+          <table className="w-full text-xs">
+            <thead className="bg-red-600 text-white sticky top-0">
+              <tr>
+                <th className="text-left py-2 px-2 font-semibold border-r border-red-500">Bucket</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Cases</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Outstanding balance</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Resolution count</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Resolution Count%</th>
+                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Resolution amount</th>
+                <th className="text-right py-2 px-2 font-semibold">Resolution Amount%</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {bucketData.map((row, idx) => (
+                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : (row.bucket === 'X bucket = 1-30' || row.bucket === '>180' ? 'bg-yellow-50' : 'bg-gray-50')}>
+                  <td className="py-2 px-2 text-gray-800 font-medium border-r border-gray-200">{row.bucket}</td>
+                  <td className={`py-2 px-2 text-right border-r border-gray-200 ${row.bucket === 'X bucket = 1-30' || row.bucket === '>180' ? 'bg-yellow-100 font-semibold' : 'text-gray-700'}`}>{formatIndianNumber(row.cases)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{row.outstandingBalance}</td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.resolutionCount)}</td>
+                  <td className="py-2 px-2 text-right border-r border-gray-200">
+                    <div className="flex items-center justify-end gap-2">
+                      <div className="flex-1 max-w-[100px] bg-gray-200 rounded-full h-4 relative">
+                        <div 
+                          className="bg-green-500 h-4 rounded-full" 
+                          style={{ width: `${Math.min(row.resolutionCountPercent, 100)}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-gray-700 min-w-[50px] text-right">{row.resolutionCountPercent.toFixed(2)}%</span>
+                    </div>
+                  </td>
+                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{row.resolutionAmount}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{row.resolutionAmountPercent.toFixed(2)}%</td>
+                </tr>
+              ))}
+              <tr className="bg-red-600 text-white font-semibold">
+                <td className="py-2 px-2 border-r border-red-500">Totals</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.cases)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{totals.outstandingBalance}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.resolutionCount)}</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{totalResolutionCountPercent}%</td>
+                <td className="py-2 px-2 text-right border-r border-red-500">{totals.resolutionAmount}</td>
+                <td className="py-2 px-2 text-right">{totalResolutionAmountPercent}%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  // Helper function to render MTD Productivity Report table
+  const renderMTDProductivityReportTable = () => {
+    const data = [
+      { smartCollId: 'SSAHAREESH', name: 'HAREESH', agency: 'SS Associates', role: 'DTR', totalAllocated: 225, visitsWeb: 458, visitsField: 471, visitsAccounts: 225, avgIntensity: 13.56, numPaid: 0, efficiency: 0, paidPercent: 0, numPTP: 222, numDL: 221 },
+      { smartCollId: 'MDAANOOP', name: 'ANOOP', agency: 'MD ASSOCIATES', role: 'DTR', totalAllocated: 210, visitsWeb: 137, visitsField: 223, visitsAccounts: 196, avgIntensity: 16.18, numPaid: 12, efficiency: 0, paidPercent: 0.05, numPTP: 181, numDL: 102 },
+      { smartCollId: 'ENHVEENA', name: 'VEENA', agency: 'ENHANCE MANAGEMENT SERVICES', role: 'DTR', totalAllocated: 205, visitsWeb: 443, visitsField: 42, visitsAccounts: 204, avgIntensity: 19.69, numPaid: 2, efficiency: 0, paidPercent: 0, numPTP: 165, numDL: 203 },
+      { smartCollId: 'SKAAJEESH', name: 'Ajeesh', agency: 'Skyline Associates', role: 'DTR', totalAllocated: 200, visitsWeb: 454, visitsField: 11, visitsAccounts: 200, avgIntensity: 26.6, numPaid: 41, efficiency: 0, paidPercent: 0.2, numPTP: 167, numDL: 197 },
+      { smartCollId: 'GENGANGA', name: 'GANGA', agency: 'GENEROUS ASSOCIATES', role: 'DTR', totalAllocated: 194, visitsWeb: 278, visitsField: 245, visitsAccounts: 194, avgIntensity: 13.62, numPaid: 5, efficiency: 0, paidPercent: 0.02, numPTP: 168, numDL: 190 },
+      { smartCollId: 'SSAPAVITHRAN', name: 'PAVITHRAN', agency: 'SS Associates', role: 'DTR', totalAllocated: 190, visitsWeb: 435, visitsField: 486, visitsAccounts: 190, avgIntensity: 30.44, numPaid: 3, efficiency: 0, paidPercent: 0.01, numPTP: 187, numDL: 188 },
+      { smartCollId: 'SKAAKHIL', name: 'AKHIL', agency: 'Skyline Associates', role: 'DTR', totalAllocated: 173, visitsWeb: 226, visitsField: 2, visitsAccounts: 173, avgIntensity: 5.27, numPaid: 35, efficiency: 0.03, paidPercent: 0.2, numPTP: 133, numDL: 156 },
+      { smartCollId: 'MDAJINS', name: 'JINS', agency: 'MD ASSOCIATES', role: 'DTR', totalAllocated: 166, visitsWeb: 21, visitsField: 256, visitsAccounts: 166, avgIntensity: 5.39, numPaid: 2, efficiency: 0, paidPercent: 0.01, numPTP: 166, numDL: 66 },
+    ]
+
+    const totals = {
+      totalAllocated: 7699,
+      visitsWeb: 11544,
+      visitsField: 13311,
+      visitsAccounts: 7623,
+      avgIntensity: 25.18,
+      numPaid: 504,
+      efficiency: 0,
+      paidPercent: 0.06,
+      numPTP: 7041,
+      numDL: 6870,
+    }
+
+    const headers = [
+      { key: 'smartCollId', label: 'SMART COLL ID' },
+      { key: 'name', label: 'NAME' },
+      { key: 'agency', label: 'AGENCY' },
+      { key: 'role', label: 'Role' },
+      { key: 'totalAllocated', label: 'Total Allocated' },
+      { key: 'visitsWeb', label: '# of visits via Web' },
+      { key: 'visitsField', label: '# of visits via Field' },
+      { key: 'visitsAccounts', label: '# of visits (Accounts)' },
+      { key: 'avgIntensity', label: 'Average Intensity' },
+      { key: 'numPaid', label: '# of Paid' },
+      { key: 'efficiency', label: 'Efficiency%' },
+      { key: 'paidPercent', label: 'Paid %' },
+      { key: 'numPTP', label: '# of PTP' },
+      { key: 'numDL', label: '# of DL' },
+    ]
+
+    const handleExport = () => {
+      const exportData = [...data, { 
+        smartCollId: 'Totals', 
+        name: '', 
+        agency: '', 
+        role: '', 
+        totalAllocated: totals.totalAllocated, 
+        visitsWeb: totals.visitsWeb, 
+        visitsField: totals.visitsField, 
+        visitsAccounts: totals.visitsAccounts, 
+        avgIntensity: totals.avgIntensity, 
+        numPaid: totals.numPaid, 
+        efficiency: totals.efficiency, 
+        paidPercent: totals.paidPercent, 
+        numPTP: totals.numPTP, 
+        numDL: totals.numDL 
+      }]
+      exportTableToExcel(exportData, headers, 'MTD_Productivity_Report')
+    }
+
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-red-600 text-white p-3 text-lg font-semibold flex justify-between items-center">
+          <span>MTD Productivity Report</span>
+          <button
+            onClick={handleExport}
+            className="bg-white text-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            title="Export to Excel"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export
+          </button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SMART COLL ID</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NAME</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">AGENCY</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Allocated</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># of visits via Web</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># of visits via Field</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># of visits (Accounts)</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Average Intensity</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># of Paid</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Efficiency%</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paid %</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># of PTP</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># of DL</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {data.map((row, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{row.smartCollId}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.name}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.agency}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.role}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.totalAllocated}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.visitsWeb}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.visitsField}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.visitsAccounts}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.avgIntensity}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.numPaid}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.efficiency}%</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.paidPercent}%</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.numPTP}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.numDL}</td>
+                </tr>
+              ))}
+              <tr className="bg-gray-100 font-bold">
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900" colSpan="4">Totals</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.totalAllocated}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.visitsWeb}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.visitsField}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.visitsAccounts}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.avgIntensity}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.numPaid}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.efficiency}%</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.paidPercent}%</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.numPTP}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.numDL}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  // Helper function to render FTD Productivity Report table
+  const renderFTDProductivityReportTable = () => {
+    const ftdData = [
+      { smartCollId: 'AKMDINESH', name: 'DINESH', agency: 'A K Credit Management', webVisits: 0, visitsAccounts: 11, fieldVisits: 11, ptp: 11, paid: 0, ptpPercent: 1, avgIntensity: 1, paidPercent: 0 },
+      { smartCollId: 'AKMDINOY', name: 'DINOY', agency: 'A K Credit Management', webVisits: 0, visitsAccounts: 8, fieldVisits: 8, ptp: 8, paid: 0, ptpPercent: 1, avgIntensity: 1, paidPercent: 0 },
+      { smartCollId: 'AKMREJITH', name: 'REJITH P', agency: 'A K Credit Management', webVisits: 0, visitsAccounts: 1, fieldVisits: 1, ptp: 0, paid: 0, ptpPercent: 0, avgIntensity: 1, paidPercent: 0 },
+      { smartCollId: 'AKMRESMA', name: 'RESMA', agency: 'A K Credit Management', webVisits: 0, visitsAccounts: 2, fieldVisits: 2, ptp: 2, paid: 0, ptpPercent: 1, avgIntensity: 1, paidPercent: 0 },
+      { smartCollId: 'AKMSIJOY', name: 'SIJOY', agency: 'A K Credit Management', webVisits: 0, visitsAccounts: 4, fieldVisits: 4, ptp: 4, paid: 0, ptpPercent: 1, avgIntensity: 1, paidPercent: 0 },
+      { smartCollId: 'DNSABHINAND', name: 'ABHINAND', agency: 'THE DN BUSINESS SOLUTIONS', webVisits: 0, visitsAccounts: 5, fieldVisits: 5, ptp: 5, paid: 0, ptpPercent: 1, avgIntensity: 1, paidPercent: 0 },
+      { smartCollId: 'DNSPRAPHUL', name: 'PRAPHUL', agency: 'THE DN BUSINESS SOLUTIONS', webVisits: 0, visitsAccounts: 1, fieldVisits: 1, ptp: 1, paid: 0, ptpPercent: 1, avgIntensity: 1, paidPercent: 0 },
+      { smartCollId: 'DNSVISHNU', name: 'VISHNU', agency: 'THE DN BUSINESS SOLUTIONS', webVisits: 0, visitsAccounts: 9, fieldVisits: 9, ptp: 9, paid: 0, ptpPercent: 1, avgIntensity: 1, paidPercent: 0 },
+      { smartCollId: 'DNSVISHNUPRASAD', name: 'VISHNUPRASAD', agency: 'THE DN BUSINESS SOLUTIONS', webVisits: 0, visitsAccounts: 4, fieldVisits: 4, ptp: 4, paid: 0, ptpPercent: 1, avgIntensity: 1, paidPercent: 0 },
+      { smartCollId: 'GBSSRINATH', name: 'K', agency: 'GANPAT BUSINESS SOLUTIONS', webVisits: 0, visitsAccounts: 5, fieldVisits: 5, ptp: 5, paid: 0, ptpPercent: 1, avgIntensity: 1, paidPercent: 0 },
+    ]
+
+    const totals = {
+      webVisits: 0,
+      visitsAccounts: 272,
+      fieldVisits: 280,
+      ptp: 195,
+      paid: 5,
+      ptpPercent: 0.71,
+      avgIntensity: 1.03,
+      paidPercent: 0.01,
+    }
+
+    const headers = [
+      { key: 'smartCollId', label: 'SMART COLL ID' },
+      { key: 'name', label: 'NAME' },
+      { key: 'agency', label: 'AGENCY' },
+      { key: 'webVisits', label: '# of web Visits' },
+      { key: 'visitsAccounts', label: '# of visits(Accounts)' },
+      { key: 'fieldVisits', label: '# of field visits' },
+      { key: 'ptp', label: '# of PTP' },
+      { key: 'paid', label: '# of Paid' },
+      { key: 'ptpPercent', label: 'PTP%' },
+      { key: 'avgIntensity', label: 'Avg Intensity' },
+      { key: 'paidPercent', label: 'Paid%' },
+    ]
+
+    const handleExport = () => {
+      const exportData = [...ftdData, { 
+        smartCollId: 'Totals', 
+        name: '', 
+        agency: '', 
+        webVisits: totals.webVisits, 
+        visitsAccounts: totals.visitsAccounts, 
+        fieldVisits: totals.fieldVisits, 
+        ptp: totals.ptp, 
+        paid: totals.paid, 
+        ptpPercent: totals.ptpPercent, 
+        avgIntensity: totals.avgIntensity, 
+        paidPercent: totals.paidPercent 
+      }]
+      exportTableToExcel(exportData, headers, 'FTD_Productivity_Report')
+    }
+
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-red-600 text-white p-3 text-lg font-semibold flex justify-between items-center">
+          <span>FTD Productivity Report</span>
+          <button
+            onClick={handleExport}
+            className="bg-white text-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            title="Export to Excel"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export
+          </button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SMART COLL ID</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NAME</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">AGENCY</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># of web Visits</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># of visits(Accounts)</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># of field visits</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># of PTP</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># of Paid</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PTP%</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Intensity</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paid%</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {ftdData.map((row, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{row.smartCollId}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.name}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.agency}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.webVisits}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.visitsAccounts}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.fieldVisits}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.ptp}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.paid}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.ptpPercent}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.avgIntensity}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.paidPercent}</td>
+                </tr>
+              ))}
+              <tr className="bg-gray-100 font-bold">
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900" colSpan="3">Totals</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.webVisits}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.visitsAccounts}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.fieldVisits}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.ptp}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.paid}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.ptpPercent}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.avgIntensity}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.paidPercent}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  // Helper function to render MTD Collector Summary Report table
+  const renderMTDCollectorSummaryReportTable = () => {
+    const mtdData = [
+      { smartCollId: 'SVGSUNIL', name: 'SUNIL', agency: 'SVG Associates', visits: 5585, visitsAccounts: 113, ptp: 784, rtp: 6, nc: 0, dl: 4795, positive: 784, negative: 4801, tos: 710.93 },
+      { smartCollId: 'SSAPAVITHRAN', name: 'PAVITHRAN', agency: 'SS Associates', visits: 3112, visitsAccounts: 190, ptp: 546, rtp: 0, nc: 0, dl: 2566, positive: 546, negative: 2566, tos: 214.98 },
+      { smartCollId: 'SKAAJEESH', name: 'Ajeesh', agency: 'Skyline Associates', visits: 3048, visitsAccounts: 200, ptp: 561, rtp: 0, nc: 0, dl: 2487, positive: 561, negative: 2487, tos: 191.86 },
+      { smartCollId: 'SKAUNNIKRISHNAN', name: 'UNNIKRISHNAN', agency: 'Skyline Associates', visits: 3009, visitsAccounts: 62, ptp: 273, rtp: 1, nc: 0, dl: 2735, positive: 273, negative: 2736, tos: 152.50 },
+      { smartCollId: 'AKMREJITH', name: 'REJITH P', agency: 'A K Credit Management', visits: 2864, visitsAccounts: 135, ptp: 449, rtp: 0, nc: 0, dl: 2415, positive: 449, negative: 2415, tos: 151.91 },
+      { smartCollId: 'RFCFAIYAZ', name: 'FAIYAZ', agency: 'Shree Raghavendra Financial Consultancy Pvt Ltd', visits: 2793, visitsAccounts: 62, ptp: 676, rtp: 0, nc: 0, dl: 2117, positive: 676, negative: 2117, tos: 304.37 },
+      { smartCollId: 'AKMDINESH', name: 'DINESH', agency: 'A K Credit Management', visits: 2791, visitsAccounts: 87, ptp: 428, rtp: 1, nc: 0, dl: 2362, positive: 428, negative: 2363, tos: 79.65 },
+      { smartCollId: 'STAPETER', name: 'PETER', agency: 'M/s. Star Associates', visits: 2567, visitsAccounts: 147, ptp: 535, rtp: 0, nc: 0, dl: 2032, positive: 535, negative: 2032, tos: 109.74 },
+      { smartCollId: 'SSASUBEESH', name: 'SUBEESH', agency: 'SS Associates', visits: 2484, visitsAccounts: 92, ptp: 453, rtp: 0, nc: 0, dl: 2031, positive: 453, negative: 2031, tos: 131.35 },
+    ]
+
+    const headers = [
+      { key: 'smartCollId', label: 'SMART COLL ID' },
+      { key: 'name', label: 'NAME' },
+      { key: 'agency', label: 'AGENCY' },
+      { key: 'visits', label: '# of Visits' },
+      { key: 'visitsAccounts', label: '# of visits(Accounts)' },
+      { key: 'ptp', label: 'PTP' },
+      { key: 'rtp', label: 'RTP' },
+      { key: 'nc', label: 'NC' },
+      { key: 'dl', label: 'DL' },
+      { key: 'positive', label: 'POSITIVE' },
+      { key: 'negative', label: 'NEGATIVE' },
+      { key: 'tos', label: 'TOS' },
+    ]
+
+    const handleExport = () => {
+      exportTableToExcel(mtdData, headers, 'MTD_Collector_Summary_Report')
+    }
+
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-red-600 text-white p-3 text-lg font-semibold flex justify-between items-center">
+          <span>MTD Collector Summary Report</span>
+          <button
+            onClick={handleExport}
+            className="bg-white text-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            title="Export to Excel"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export
+          </button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SMART COLL ID</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NAME</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">AGENCY</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># of Visits</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># of visits(Accounts)</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PTP</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RTP</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NC</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DL</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">POSITIVE</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NEGATIVE</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TOS</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {mtdData.map((row, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{row.smartCollId}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.name}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.agency}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.visits}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.visitsAccounts}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.ptp}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.rtp}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.nc}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.dl}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.positive}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.negative}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.tos}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  // Helper function to render FTD Collector Summary Report table
+  const renderFTDCollectorSummaryReportTable = () => {
+    const ftdData = [
+      { smartCollId: 'HARMANSOOR', name: 'MANSOOR', agency: 'Harshan Associates', visits: 63, visitsAccounts: 62, ptp: 55, rtp: 0, nc: 0, dl: 8, negative: 8, positive: 55, tos: '330M' },
+      { smartCollId: 'SKTSASINIVASH', name: 'E', agency: 'Shakthidaran Associates', visits: 17, visitsAccounts: 16, ptp: 0, rtp: 0, nc: 0, dl: 17, negative: 17, positive: 0, tos: '1.77M' },
+      { smartCollId: 'HARKAMALASH', name: 'KAMALASH', agency: 'Harshan Associates', visits: 16, visitsAccounts: 15, ptp: 0, rtp: 0, nc: 0, dl: 16, negative: 16, positive: 0, tos: '7.06M' },
+      { smartCollId: 'SBAASHWINI', name: 'ASHWINI', agency: 'Shri Sai Baba Agency', visits: 15, visitsAccounts: 14, ptp: 14, rtp: 0, nc: 0, dl: 1, negative: 1, positive: 14, tos: '362k' },
+      { smartCollId: 'MDALOVEJO', name: 'LOVEJO', agency: 'MD ASSOCIATES', visits: 14, visitsAccounts: 13, ptp: 13, rtp: 0, nc: 0, dl: 1, negative: 1, positive: 13, tos: '1.12M' },
+      { smartCollId: 'AKMDINESH', name: 'DINESH', agency: 'A K Credit Management', visits: 11, visitsAccounts: 11, ptp: 11, rtp: 0, nc: 0, dl: 0, negative: 0, positive: 11, tos: '79.65k' },
+      { smartCollId: 'DNSVISHNU', name: 'VISHNU', agency: 'THE DN BUSINESS SOLUTIONS', visits: 9, visitsAccounts: 9, ptp: 9, rtp: 0, nc: 0, dl: 0, negative: 0, positive: 9, tos: '1.05M' },
+      { smartCollId: 'SKTSATHYARAJ', name: 'SATHYARAJ', agency: 'Shakthidaran Associates', visits: 9, visitsAccounts: 8, ptp: 0, rtp: 0, nc: 0, dl: 9, negative: 9, positive: 0, tos: '1.77M' },
+      { smartCollId: 'MDASARATH', name: 'SARATH', agency: 'MD ASSOCIATES', visits: 8, visitsAccounts: 7, ptp: 7, rtp: 0, nc: 0, dl: 1, negative: 1, positive: 7, tos: '362k' },
+      { smartCollId: 'SKTTHIRUMOORTHI', name: 'THIRUMOORTHI', agency: 'Shakthidaran Associates', visits: 8, visitsAccounts: 8, ptp: 8, rtp: 0, nc: 0, dl: 0, negative: 0, positive: 8, tos: '1.77M' },
+    ]
+
+    const totals = {
+      visits: 281,
+      visitsAccounts: 272,
+      ptp: 195,
+      rtp: 5,
+      nc: 0,
+      dl: 81,
+      negative: 86,
+      positive: 195,
+      tos: '965M',
+    }
+
+    const headers = [
+      { key: 'smartCollId', label: 'SMART COLL ID' },
+      { key: 'name', label: 'NAME' },
+      { key: 'agency', label: 'AGENCY' },
+      { key: 'visits', label: '# of Visits' },
+      { key: 'visitsAccounts', label: '# of visits(Accounts)' },
+      { key: 'ptp', label: 'PTP' },
+      { key: 'rtp', label: 'RTP' },
+      { key: 'nc', label: 'NC' },
+      { key: 'dl', label: 'DL' },
+      { key: 'negative', label: 'NEGATIVE' },
+      { key: 'positive', label: 'POSITIVE' },
+      { key: 'tos', label: 'TOS' },
+    ]
+
+    const handleExport = () => {
+      const exportData = [...ftdData, { 
+        smartCollId: 'Totals', 
+        name: '', 
+        agency: '', 
+        visits: totals.visits, 
+        visitsAccounts: totals.visitsAccounts, 
+        ptp: totals.ptp, 
+        rtp: totals.rtp, 
+        nc: totals.nc, 
+        dl: totals.dl, 
+        negative: totals.negative, 
+        positive: totals.positive, 
+        tos: totals.tos 
+      }]
+      exportTableToExcel(exportData, headers, 'FTD_Collector_Summary_Report')
+    }
+
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-red-600 text-white p-3 text-lg font-semibold flex justify-between items-center">
+          <span>FTD Collector Summary Report</span>
+          <button
+            onClick={handleExport}
+            className="bg-white text-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            title="Export to Excel"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export
+          </button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SMART COLL ID</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NAME</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">AGENCY</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># of Visits</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># of visits(Accounts)</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PTP</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RTP</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NC</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DL</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NEGATIVE</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">POSITIVE</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TOS</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {ftdData.map((row, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{row.smartCollId}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.name}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.agency}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.visits}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.visitsAccounts}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.ptp}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.rtp}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.nc}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.dl}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.negative}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.positive}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.tos}</td>
+                </tr>
+              ))}
+              <tr className="bg-gray-100 font-bold">
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900" colSpan="3">Totals</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.visits}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.visitsAccounts}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.ptp}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.rtp}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.nc}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.dl}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.negative}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.positive}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.tos}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  // Helper function to render MTD Time-Wise Visit Report table
+  const renderMTDTimeWiseVisitReportTable = () => {
+    const mtdData = [
+      { smartCollId: 'SVGSUNIL', name: 'SUNIL', agency: 'SVG Associates', visits: '5.59k', visitsAccounts: 113, time10_12: '4.57k', time12_2: 883, time2_4: 12, time4_6: 24, time6_7: 5 },
+      { smartCollId: 'SSAPAVITHRAN', name: 'PAVITHRAN', agency: 'SS Associates', visits: '3.11k', visitsAccounts: 190, time10_12: '2.54k', time12_2: 486, time2_4: 8, time4_6: 15, time6_7: 3 },
+      { smartCollId: 'SKAAJEESH', name: 'Ajeesh', agency: 'Skyline Associates', visits: '3.05k', visitsAccounts: 200, time10_12: '2.49k', time12_2: 454, time2_4: 7, time4_6: 12, time6_7: 2 },
+      { smartCollId: 'SKAUNNIKRISHNAN', name: 'UNNIKRISHNAN', agency: 'Skyline Associates', visits: '3.01k', visitsAccounts: 62, time10_12: '2.46k', time12_2: 423, time2_4: 6, time4_6: 10, time6_7: 2 },
+      { smartCollId: 'AKMREJITH', name: 'REJITH P', agency: 'A K Credit Management', visits: '2.86k', visitsAccounts: 135, time10_12: '2.34k', time12_2: 401, time2_4: 5, time4_6: 9, time6_7: 1 },
+      { smartCollId: 'RFCFAIYAZ', name: 'FAIYAZ', agency: 'Shree Raghavendra Financial Consultancy Pvt Ltd', visits: '2.79k', visitsAccounts: 62, time10_12: '2.28k', time12_2: 392, time2_4: 5, time4_6: 8, time6_7: 1 },
+      { smartCollId: 'AKMDINESH', name: 'DINESH', agency: 'A K Credit Management', visits: '2.79k', visitsAccounts: 87, time10_12: '2.28k', time12_2: 391, time2_4: 5, time4_6: 8, time6_7: 1 },
+      { smartCollId: 'STAPETER', name: 'PETER', agency: 'M/s. Star Associates', visits: '2.57k', visitsAccounts: 147, time10_12: '2.10k', time12_2: 360, time2_4: 4, time4_6: 7, time6_7: 1 },
+      { smartCollId: 'SSASUBEESH', name: 'SUBEESH', agency: 'SS Associates', visits: '2.48k', visitsAccounts: 92, time10_12: '2.03k', time12_2: 348, time2_4: 4, time4_6: 7, time6_7: 1 },
+    ]
+
+    const totals = {
+      visits: '104k',
+      visitsAccounts: '7.09k',
+      time10_12: '53.7k',
+      time12_2: '32.3k',
+      time2_4: '1.3k',
+      time4_6: '6.48k',
+      time6_7: 386,
+    }
+
+    const headers = [
+      { key: 'smartCollId', label: 'SMART COLL ID' },
+      { key: 'name', label: 'NAME' },
+      { key: 'agency', label: 'AGENCY' },
+      { key: 'visits', label: '# of Visits' },
+      { key: 'visitsAccounts', label: '# of visits (Accounts)' },
+      { key: 'time10_12', label: '10-12 am' },
+      { key: 'time12_2', label: '12-2 pm' },
+      { key: 'time2_4', label: '2-4 pm' },
+      { key: 'time4_6', label: '4-6 pm' },
+      { key: 'time6_7', label: '6-7 pm' },
+    ]
+
+    const handleExport = () => {
+      const exportData = [...mtdData, { 
+        smartCollId: 'Totals', 
+        name: '', 
+        agency: '', 
+        visits: totals.visits, 
+        visitsAccounts: totals.visitsAccounts, 
+        time10_12: totals.time10_12, 
+        time12_2: totals.time12_2, 
+        time2_4: totals.time2_4, 
+        time4_6: totals.time4_6, 
+        time6_7: totals.time6_7 
+      }]
+      exportTableToExcel(exportData, headers, 'MTD_Time_Wise_Visit_Report')
+    }
+
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-red-600 text-white p-3 text-lg font-semibold flex justify-between items-center">
+          <span>MTD Time-Wise Visit Report</span>
+          <button
+            onClick={handleExport}
+            className="bg-white text-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            title="Export to Excel"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export
+          </button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SMART COLL ID</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NAME</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">AGENCY</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># of Visits</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># of visits (Accounts)</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">10-12 am</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">12-2 pm</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">2-4 pm</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">4-6 pm</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">6-7 pm</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {mtdData.map((row, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{row.smartCollId}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.name}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.agency}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.visits}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.visitsAccounts}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.time10_12}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.time12_2}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.time2_4}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.time4_6}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.time6_7}</td>
+                </tr>
+              ))}
+              <tr className="bg-gray-100 font-bold">
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900" colSpan="3">Totals</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.visits}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.visitsAccounts}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.time10_12}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.time12_2}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.time2_4}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.time4_6}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.time6_7}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  // Helper function to render FTD Time-Wise Visit Report table
+  const renderFTDTimeWiseVisitReportTable = () => {
+    const ftdData = [
+      { smartCollId: 'HARMANSOOR', name: 'MANSOOR', agency: 'Harshan Associates', visits: 63, visitsAccounts: 62, time10_12: 55, time12_2: 8, time2_4: 0, time4_6: 0, time6_7: 0 },
+      { smartCollId: 'SKTSASINIVASH', name: 'E', agency: 'Shakthidaran Associates', visits: 17, visitsAccounts: 16, time10_12: 0, time12_2: 0, time2_4: 0, time4_6: 17, time6_7: 0 },
+      { smartCollId: 'HARKAMALASH', name: 'KAMALASH', agency: 'Harshan Associates', visits: 16, visitsAccounts: 15, time10_12: 0, time12_2: 0, time2_4: 0, time4_6: 16, time6_7: 0 },
+      { smartCollId: 'SBAASHWINI', name: 'ASHWINI', agency: 'Shri Sai Baba Agency', visits: 15, visitsAccounts: 14, time10_12: 0, time12_2: 0, time2_4: 0, time4_6: 15, time6_7: 0 },
+      { smartCollId: 'MDALOVEJO', name: 'LOVEJO', agency: 'MD ASSOCIATES', visits: 14, visitsAccounts: 13, time10_12: 0, time12_2: 0, time2_4: 0, time4_6: 14, time6_7: 0 },
+      { smartCollId: 'AKMDINESH', name: 'DINESH', agency: 'A K Credit Management', visits: 11, visitsAccounts: 11, time10_12: 0, time12_2: 0, time2_4: 0, time4_6: 11, time6_7: 0 },
+      { smartCollId: 'DNSVISHNU', name: 'VISHNU', agency: 'THE DN BUSINESS SOLUTIONS', visits: 9, visitsAccounts: 9, time10_12: 0, time12_2: 0, time2_4: 0, time4_6: 9, time6_7: 0 },
+      { smartCollId: 'SKTSATHYARAJ', name: 'SATHYARAJ', agency: 'Shakthidaran Associates', visits: 9, visitsAccounts: 8, time10_12: 0, time12_2: 0, time2_4: 0, time4_6: 9, time6_7: 0 },
+      { smartCollId: 'MDASARATH', name: 'SARATH', agency: 'MD ASSOCIATES', visits: 8, visitsAccounts: 7, time10_12: 0, time12_2: 0, time2_4: 0, time4_6: 8, time6_7: 0 },
+      { smartCollId: 'SKTTHIRUMOORTHI', name: 'THIRUMOORTHI', agency: 'Shakthidaran Associates', visits: 8, visitsAccounts: 8, time10_12: 0, time12_2: 0, time2_4: 0, time4_6: 8, time6_7: 0 },
+    ]
+
+    const totals = {
+      visits: 251,
+      visitsAccounts: 244,
+      time10_12: 69,
+      time12_2: 54,
+      time2_4: 32,
+      time4_6: 73,
+      time6_7: 5,
+    }
+
+    const headers = [
+      { key: 'smartCollId', label: 'SMART COLL ID' },
+      { key: 'name', label: 'NAME' },
+      { key: 'agency', label: 'AGENCY' },
+      { key: 'visits', label: '# of Visits' },
+      { key: 'visitsAccounts', label: '# of visits(Accounts)' },
+      { key: 'time10_12', label: '10-12 am' },
+      { key: 'time12_2', label: '12-2 pm' },
+      { key: 'time2_4', label: '2-4 pm' },
+      { key: 'time4_6', label: '4-6 pm' },
+      { key: 'time6_7', label: '6-7 pm' },
+    ]
+
+    const handleExport = () => {
+      const exportData = [...ftdData, { 
+        smartCollId: 'Totals', 
+        name: '', 
+        agency: '', 
+        visits: totals.visits, 
+        visitsAccounts: totals.visitsAccounts, 
+        time10_12: totals.time10_12, 
+        time12_2: totals.time12_2, 
+        time2_4: totals.time2_4, 
+        time4_6: totals.time4_6, 
+        time6_7: totals.time6_7 
+      }]
+      exportTableToExcel(exportData, headers, 'FTD_Time_Wise_Visit_Report')
+    }
+
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-red-600 text-white p-3 text-lg font-semibold flex justify-between items-center">
+          <span>FTD Time-Wise Visit Report</span>
+          <button
+            onClick={handleExport}
+            className="bg-white text-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            title="Export to Excel"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export
+          </button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SMART COLL ID</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NAME</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">AGENCY</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># of Visits</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># of visits(Accounts)</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">10-12 am</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">12-2 pm</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">2-4 pm</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">4-6 pm</th>
+                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">6-7 pm</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {ftdData.map((row, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{row.smartCollId}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.name}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.agency}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.visits}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.visitsAccounts}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.time10_12}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.time12_2}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.time2_4}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.time4_6}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">{row.time6_7}</td>
+                </tr>
+              ))}
+              <tr className="bg-gray-100 font-bold">
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900" colSpan="3">Totals</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.visits}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.visitsAccounts}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.time10_12}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.time12_2}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.time2_4}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.time4_6}</td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{totals.time6_7}</td>
               </tr>
             </tbody>
           </table>
@@ -2296,8 +3584,294 @@ const Dashboard = () => {
                   </div>
                 )}
 
-                {/* Staff Performance Leaderboard Table - Show for other metrics */}
-                {selectedStaffMetric && selectedStaffMetric !== 'allocation' && (
+                {/* Collection Summary Tables - Show when collection card is clicked */}
+                {selectedStaffMetric === 'collection' && (
+                  <div ref={leaderboardTableRef} className="mb-8 w-full space-y-6">
+                    {/* Header with Title and Close Button */}
+                    <div className="flex justify-between items-center">
+                      <h2 className="text-xl font-semibold text-gray-900">Collection Efficiency - Summary Details</h2>
+                      <button
+                        onClick={() => setSelectedStaffMetric(null)}
+                        className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                        aria-label="Close collection tables"
+                      >
+                        Close
+                      </button>
+                    </div>
+
+                    {/* Grid of Summary Tables */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* State Wise Summary Table */}
+                      <div className="lg:col-span-2">
+                        {renderStateWiseSummaryTable()}
+                      </div>
+                      
+                      {/* Region Wise Summary Table */}
+                      <div className="lg:col-span-2">
+                        {renderRegionWiseSummaryTable()}
+                      </div>
+                      
+                      {/* Bucket Wise Summary Table */}
+                      <div className="lg:col-span-2">
+                        {renderBucketWiseSummaryTable()}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Staff Productivity Index Tables - Show when productivity card is clicked */}
+                {selectedStaffMetric === 'productivity' && (
+                  <div ref={leaderboardTableRef} className="mb-8 w-full space-y-6">
+                    {/* Header with Title and Close Button */}
+                    <div className="flex justify-between items-center">
+                      <h2 className="text-xl font-semibold text-gray-900">Staff Productivity Index - Details</h2>
+                      <button
+                        onClick={() => setSelectedStaffMetric(null)}
+                        className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                        aria-label="Close productivity tables"
+                      >
+                        Close
+                      </button>
+                    </div>
+
+                    {/* Summary Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Total Users</div>
+                        <div className="text-2xl font-bold text-gray-900">323</div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Total Users (Collectors)</div>
+                        <div className="text-2xl font-bold text-gray-900">111</div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Total Logged-in (Collectors)</div>
+                        <div className="text-2xl font-bold text-gray-900">38</div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Total Not Logged-in (Collectors)</div>
+                        <div className="text-2xl font-bold text-gray-900">73</div>
+                      </div>
+                    </div>
+
+                    {/* Grid of Productivity Tables */}
+                    <div className="space-y-6">
+                      {/* MTD Productivity Report */}
+                      <div>
+                        {renderMTDProductivityReportTable()}
+                      </div>
+                      
+                      {/* FTD Productivity Report */}
+                      <div>
+                        {renderFTDProductivityReportTable()}
+                      </div>
+                      
+                      {/* MTD Collector Summary Report */}
+                      <div>
+                        {renderMTDCollectorSummaryReportTable()}
+                      </div>
+                      
+                      {/* FTD Collector Summary Report */}
+                      <div>
+                        {renderFTDCollectorSummaryReportTable()}
+                      </div>
+                      
+                      {/* MTD Time-Wise Visit Report */}
+                      <div>
+                        {renderMTDTimeWiseVisitReportTable()}
+                      </div>
+                      
+                      {/* FTD Time-Wise Visit Report */}
+                      <div>
+                        {renderFTDTimeWiseVisitReportTable()}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Staff Performance Leaderboard Table - Show for collection and other metrics (but not allocation) */}
+                {selectedStaffMetric === 'collection' && (
+                  <div ref={leaderboardTableRef} className="mb-8 bg-white border border-gray-200 rounded-lg p-6 shadow-sm w-full" style={{ maxWidth: '100%', overflow: 'hidden', boxSizing: 'border-box' }}>
+                    {/* Header with Title and Close Button */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                      <h2 className="text-xl font-semibold text-gray-900">{getCardName(selectedStaffMetric)}</h2>
+                      
+                      {/* Search and Filter Controls */}
+                      <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        <input
+                          type="text"
+                          placeholder="Search by ID, Name, PI Code, Center, District, State, Loan Type, Customers, Due, Overdue..."
+                          value={staffSearchTerm}
+                          onChange={(e) => setStaffSearchTerm(e.target.value)}
+                          className="px-4 py-2 border border-gray-300 rounded-lg text-sm w-full sm:w-80 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                        <select
+                          value={staffSortBy}
+                          onChange={(e) => setStaffSortBy(e.target.value)}
+                          className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="efficiency">Sort by Efficiency</option>
+                          <option value="collected">Sort by Collected Amount</option>
+                          <option value="customers">Sort by Customers</option>
+                          <option value="due">Sort by Due Amount</option>
+                          <option value="overdue">Sort by Overdue Amount</option>
+                          <option value="calls">Sort by Calls</option>
+                          <option value="visits">Sort by Visits</option>
+                          <option value="name">Sort by Name</option>
+                          <option value="hierarchy">Sort by Hierarchy</option>
+                        </select>
+                        <select
+                          value={staffSortOrder}
+                          onChange={(e) => setStaffSortOrder(e.target.value)}
+                          className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="desc">Descending</option>
+                          <option value="asc">Ascending</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    {/* Scrollable Table Container - Horizontal Scroll Only */}
+                    <div className="border border-gray-200 rounded-lg overflow-hidden" style={{ maxWidth: '100%' }}>
+                      <div className="overflow-x-auto" style={{ maxWidth: '100%' }}>
+                        <table className="w-full text-sm" style={{ tableLayout: 'auto', width: '100%' }}>
+                          <thead>
+                            <tr className="text-gray-600 border-b border-gray-200 bg-gray-50">
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Emp ID</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Name</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Hierarchy</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">PI Code</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Center</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">District</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">State</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Loan Type</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Region</th>
+                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Customers</th>
+                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Due</th>
+                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Overdue</th>
+                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Calls</th>
+                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Visits</th>
+                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Collected</th>
+                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Efficiency</th>
+                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Escalations</th>
+                            </tr>
+                          </thead>
+                          <tbody className="text-gray-700">
+                            {paginatedStaffData.length === 0 ? (
+                              <tr>
+                                <td colSpan="16" className="py-8 text-center text-gray-500">
+                                  No staff data found
+                                </td>
+                              </tr>
+                            ) : (
+                              paginatedStaffData.map((staff) => (
+                                <tr key={staff.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                  <td className="py-3 px-3 font-mono text-xs text-left whitespace-nowrap">{staff.id}</td>
+                                  <td className="py-3 px-3 font-medium text-left whitespace-nowrap">{staff.name}</td>
+                                  <td className="py-3 px-3 text-left whitespace-nowrap">
+                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                      staff.hierarchy === 'Supervisor' ? 'bg-purple-100 text-purple-800' :
+                                      staff.hierarchy === 'Senior Executive' ? 'bg-blue-100 text-blue-800' :
+                                      staff.hierarchy === 'Executive' ? 'bg-green-100 text-green-800' :
+                                      'bg-gray-100 text-gray-800'
+                                    }`}>
+                                      {staff.hierarchy}
+                                    </span>
+                                  </td>
+                                  <td className="py-3 px-3 text-left whitespace-nowrap font-mono text-xs">{staff.piCode}</td>
+                                  <td className="py-3 px-3 text-left whitespace-nowrap">{staff.center}</td>
+                                  <td className="py-3 px-3 text-left whitespace-nowrap">{staff.district}</td>
+                                  <td className="py-3 px-3 text-left whitespace-nowrap">{staff.state}</td>
+                                  <td className="py-3 px-3 text-left whitespace-nowrap">
+                                    <span className={`px-3 py-1 rounded text-xs font-medium ${
+                                      staff.loanType === 'Tractor' ? 'bg-orange-100 text-orange-800' :
+                                      staff.loanType === 'Commercial Vehicle' ? 'bg-blue-100 text-blue-800' :
+                                      'bg-green-100 text-green-800'
+                                    }`}>
+                                      {staff.loanType}
+                                    </span>
+                                  </td>
+                                  <td className="py-3 px-3 text-left whitespace-nowrap">{staff.region}</td>
+                                  <td className="py-3 px-3 text-right font-medium whitespace-nowrap">
+                                    <button 
+                                      data-customer-count-button
+                                      onClick={() => handleCustomerCountClick(staff)}
+                                      className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                                    >
+                                      {staff.customers}
+                                    </button>
+                                  </td>
+                                  <td className="py-3 px-3 text-right font-medium whitespace-nowrap">₹{(staff.due / 100000).toFixed(1)}L</td>
+                                  <td className="py-3 px-3 text-right font-medium whitespace-nowrap">₹{(staff.overdue / 100000).toFixed(1)}L</td>
+                                  <td className="py-3 px-3 text-right whitespace-nowrap">{staff.calls}</td>
+                                  <td className="py-3 px-3 text-right whitespace-nowrap">{staff.visits}</td>
+                                  <td className="py-3 px-3 text-right font-medium whitespace-nowrap">₹{(staff.collected / 100000).toFixed(1)}L</td>
+                                  <td className="py-3 px-3 text-right whitespace-nowrap">
+                                    <span className={`font-semibold ${
+                                      staff.efficiency >= 90 ? 'text-green-600' :
+                                      staff.efficiency >= 70 ? 'text-orange-600' :
+                                      'text-red-600'
+                                    }`}>
+                                      {staff.efficiency}%
+                                    </span>
+                                  </td>
+                                  <td className="py-3 px-3 text-right whitespace-nowrap">
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                      staff.escalations === 0 ? 'bg-green-100 text-green-800' :
+                                      staff.escalations <= 2 ? 'bg-yellow-100 text-yellow-800' :
+                                      'bg-red-100 text-red-800'
+                                    }`}>
+                                      {staff.escalations}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    
+                    {/* Pagination */}
+                    <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
+                      <div className="text-sm text-gray-600">
+                        Showing {staffStartIndex + 1} to {Math.min(staffStartIndex + staffItemsPerPage, filteredStaffData.length)} of {filteredStaffData.length} entries
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => setStaffCurrentPage(Math.max(1, staffCurrentPage - 1))}
+                          disabled={staffCurrentPage === 1}
+                          className="px-4 py-2 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors cursor-pointer"
+                        >
+                          Previous
+                        </button>
+                        {Array.from({ length: staffTotalPages }, (_, i) => i + 1).map(page => (
+                          <button
+                            key={page}
+                            onClick={() => setStaffCurrentPage(page)}
+                            className={`px-4 py-2 border rounded-lg text-sm transition-colors cursor-pointer ${
+                              staffCurrentPage === page
+                                ? 'bg-blue-600 text-white border-blue-600'
+                                : 'border-gray-300 hover:bg-gray-50'
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        ))}
+                        <button
+                          onClick={() => setStaffCurrentPage(Math.min(staffTotalPages, staffCurrentPage + 1))}
+                          disabled={staffCurrentPage === staffTotalPages}
+                          className="px-4 py-2 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors cursor-pointer"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Staff Performance Leaderboard Table - Show for other metrics (but not allocation or collection) */}
+                {selectedStaffMetric && selectedStaffMetric !== 'allocation' && selectedStaffMetric !== 'collection' && selectedStaffMetric !== 'productivity' && (
                   <div ref={leaderboardTableRef} className="mb-8 bg-white border border-gray-200 rounded-lg p-6 shadow-sm w-full" style={{ maxWidth: '100%', overflow: 'hidden', boxSizing: 'border-box' }}>
                     {/* Header with Title and Close Button */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
