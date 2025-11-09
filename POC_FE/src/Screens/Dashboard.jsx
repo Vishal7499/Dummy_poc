@@ -9,6 +9,7 @@ import Navbar from '../components/Navbar'
 import { useAuth } from '../contexts/AuthContext'
 import { dashboardApi, dashboardCollectionGraphApi, dashboardDepositionApi } from '../utils/api'
 import { formatIndianNumber } from '../utils/formatters'
+import tractorFinanceImage from 'C:/Users/visha/Sonata_POC/SONATA_KOTAK_POC_FE/POC_FE/src/assets/Images/tractor_finance.png'
 
 const Dashboard = () => {
   const navigate = useNavigate()
@@ -20,6 +21,7 @@ const Dashboard = () => {
   const [expandedCard, setExpandedCard] = useState(null)
   const [selectedStaffMetric, setSelectedStaffMetric] = useState(null)
   const [selectedCaseMetric, setSelectedCaseMetric] = useState(null)
+  const [selectedLoanType, setSelectedLoanType] = useState(null) // Track selected loan type for Case Summary
   const [chartFilter, setChartFilter] = useState('ftd')
   const leaderboardTableRef = useRef(null)
   // Hierarchy drill-down state
@@ -36,6 +38,9 @@ const Dashboard = () => {
   const [customerCurrentPage, setCustomerCurrentPage] = useState(1)
   const customerItemsPerPage = 10
   const customerDetailsRef = useRef(null)
+  // Customer Engagement state
+  const [selectedEngagementCard, setSelectedEngagementCard] = useState(null)
+  const engagementSectionRef = useRef(null)
   // Filter states
   const [filterLoanType, setFilterLoanType] = useState('All Loans')
   const [filterDPD, setFilterDPD] = useState('All Buckets')
@@ -236,16 +241,25 @@ const Dashboard = () => {
           setCustomerCurrentPage(1)
         }
       }
+      
+      // Close engagement section when clicking outside
+      if (selectedEngagementCard && engagementSectionRef.current && !engagementSectionRef.current.contains(event.target)) {
+        // Check if click is on engagement cards (don't close when clicking cards)
+        const isEngagementCard = event.target.closest('[data-engagement-card]')
+        if (!isEngagementCard) {
+          setSelectedEngagementCard(null)
+        }
+      }
     }
 
-    if (showAlerts || !isSidebarCollapsed || selectedStaffMetric || showCustomerDetails || selectedCaseMetric) {
+    if (showAlerts || !isSidebarCollapsed || selectedStaffMetric || showCustomerDetails || selectedEngagementCard) {
       document.addEventListener('mousedown', handleClickOutside)
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [showAlerts, isSidebarCollapsed, selectedStaffMetric, showCustomerDetails, selectedCaseMetric])
+  }, [showAlerts, isSidebarCollapsed, selectedStaffMetric, showCustomerDetails, selectedEngagementCard])
 
   // Mock data for demonstration
   const staffData = {
@@ -277,6 +291,88 @@ const Dashboard = () => {
     aiCalls: { total: 2100, connected: 1580, rate: 75.2 },
     diallerCalls: { total: 1850, successful: 1340, rate: 72.4 }
   }
+
+  // Customer Engagement detailed data
+  const customerEngagementData = {
+    totalEngagement: 764081,
+    engagementBreakdown: {
+      whatsapp: 349550,
+      blaster: 217159,
+      aiCalls: 196693,
+      dialers: 679
+    },
+    customerMetrics: {
+      totalCustomers: 27739,
+      connectedCustomers: 23150,
+      amountPromised: 39167071.00,
+      amountCollected: 169887205.56
+    },
+    statusCards: {
+      promisedToPay: { accounts: 1587, amount: 39167071.00 },
+      refusedToPay: { accounts: 170 },
+      alreadyPaid: { accounts: 636, amount: 6487485.00 },
+      wrongNumber: { accounts: 1010 }
+    },
+    chartData: {
+      dates: ['15-10-2025', '16-10-2025', '17-10-2025', '18-10-2025', '19-10-2025', '20-10-2025', '21-10-2025', '22-10-2025', '23-10-2025', '24-10-2025', '25-10-2025', '26-10-2025', '27-10-2025', '28-10-2025', '29-10-2025'],
+      values: [3, 4, 2, 5, 0, 0, 0, 0, 0, 1, 0, 0, 8, 0, 0]
+    }
+  }
+
+  // Chart configuration for Customer Engagement
+  const engagementChartOptions = {
+    chart: {
+      type: 'bar',
+      height: 260,
+      toolbar: { show: false },
+      animations: { enabled: false }
+    },
+    plotOptions: {
+      bar: {
+        columnWidth: '20px',
+        borderRadius: 4,
+        dataLabels: { position: 'top' }
+      }
+    },
+    dataLabels: {
+      enabled: false
+    },
+    xaxis: {
+      categories: customerEngagementData.chartData.dates,
+      labels: {
+        style: {
+          colors: '#407BFF',
+          fontSize: '10px',
+          fontWeight: 500
+        },
+        rotate: -45
+      }
+    },
+    yaxis: {
+      min: 0,
+      max: 30,
+      tickAmount: 6,
+      labels: {
+        style: {
+          colors: '#407BFF',
+          fontSize: '10px'
+        }
+      }
+    },
+    colors: ['#407BFF'],
+    grid: {
+      borderColor: '#E5E7EB',
+      strokeDashArray: 3
+    },
+    tooltip: {
+      enabled: false
+    }
+  }
+
+  const engagementChartSeries = [{
+    name: 'Engagement',
+    data: customerEngagementData.chartData.values
+  }]
 
   const paymentData = {
     topOverdue: { count: 45, amount: 1250000 },
@@ -669,11 +765,16 @@ const Dashboard = () => {
       setSelectedStaffMetric(null)
       setHierarchyPath([])
       setCurrentHierarchyLevel(null)
+      setSelectedLoanType(null) // Reset loan type when closing
     } else {
       setSelectedStaffMetric(metric)
       // Reset hierarchy to show top level (Supervisors)
       setHierarchyPath([])
       setCurrentHierarchyLevel(1) // Start with Supervisor level
+      // Reset loan type when switching to allocation
+      if (metric === 'allocation') {
+        setSelectedLoanType(null) // Show loan type cards first
+      }
     }
   }
 
@@ -755,6 +856,15 @@ const Dashboard = () => {
 
     // Write file
     XLSX.writeFile(wb, filename)
+  }
+
+  // Handle engagement card click
+  const handleEngagementCardClick = (cardType) => {
+    if (selectedEngagementCard === cardType) {
+      setSelectedEngagementCard(null)
+    } else {
+      setSelectedEngagementCard(cardType)
+    }
   }
 
   // Handle customer count click
@@ -1418,11 +1528,11 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
+        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 flex justify-between items-center">
           <h3 className="text-sm font-semibold">Product Summary</h3>
           <button
             onClick={handleExport}
-            className="bg-white text-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            className="bg-white text-red-600 border border-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
             title="Export to Excel"
           >
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1526,11 +1636,11 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
+        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 flex justify-between items-center">
           <h3 className="text-sm font-semibold">Product Allocation Summary</h3>
           <button
             onClick={handleExport}
-            className="bg-white text-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            className="bg-white text-red-600 border border-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
             title="Export to Excel"
           >
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1616,11 +1726,11 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
+        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 flex justify-between items-center">
           <h3 className="text-sm font-semibold">NCM Allocation Summary</h3>
           <button
             onClick={handleExport}
-            className="bg-white text-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            className="bg-white text-red-600 border border-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
             title="Export to Excel"
           >
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1703,11 +1813,11 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
+        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 flex justify-between items-center">
           <h3 className="text-sm font-semibold">RCM Allocation Summary</h3>
           <button
             onClick={handleExport}
-            className="bg-white text-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            className="bg-white text-red-600 border border-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
             title="Export to Excel"
           >
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1799,11 +1909,11 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
+        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 flex justify-between items-center">
           <h3 className="text-sm font-semibold">ACM Allocation Summary</h3>
           <button
             onClick={handleExport}
-            className="bg-white text-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            className="bg-white text-red-600 border border-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
             title="Export to Excel"
           >
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1895,11 +2005,11 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
+        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 flex justify-between items-center">
           <h3 className="text-sm font-semibold">CM Allocation Summary</h3>
           <button
             onClick={handleExport}
-            className="bg-white text-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            className="bg-white text-red-600 border border-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
             title="Export to Excel"
           >
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1991,11 +2101,11 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
+        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 flex justify-between items-center">
           <h3 className="text-sm font-semibold">AGTL Allocation Summary</h3>
           <button
             onClick={handleExport}
-            className="bg-white text-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            className="bg-white text-red-600 border border-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
             title="Export to Excel"
           >
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2089,11 +2199,11 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
+        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 flex justify-between items-center">
           <h3 className="text-sm font-semibold">State Wise Summary</h3>
           <button
             onClick={handleExport}
-            className="bg-white text-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            className="bg-white text-red-600 border border-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
             title="Export to Excel"
           >
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2199,11 +2309,11 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
+        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 flex justify-between items-center">
           <h3 className="text-sm font-semibold">Region Wise Summary</h3>
           <button
             onClick={handleExport}
-            className="bg-white text-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            className="bg-white text-red-600 border border-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
             title="Export to Excel"
           >
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2308,11 +2418,11 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="bg-red-600 text-white px-4 py-2 flex justify-between items-center">
+        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 flex justify-between items-center">
           <h3 className="text-sm font-semibold">Bucket Wise Summary</h3>
           <button
             onClick={handleExport}
-            className="bg-white text-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            className="bg-white text-red-600 border border-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
             title="Export to Excel"
           >
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2437,11 +2547,11 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="bg-red-600 text-white p-3 text-lg font-semibold flex justify-between items-center">
+        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
           <span>MTD Productivity Report</span>
           <button
             onClick={handleExport}
-            className="bg-white text-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            className="bg-white text-red-600 border border-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
             title="Export to Excel"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2568,11 +2678,11 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="bg-red-600 text-white p-3 text-lg font-semibold flex justify-between items-center">
+        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
           <span>FTD Productivity Report</span>
           <button
             onClick={handleExport}
-            className="bg-white text-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            className="bg-white text-red-600 border border-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
             title="Export to Excel"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2667,11 +2777,11 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="bg-red-600 text-white p-3 text-lg font-semibold flex justify-between items-center">
+        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
           <span>MTD Collector Summary Report</span>
           <button
             onClick={handleExport}
-            className="bg-white text-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            className="bg-white text-red-600 border border-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
             title="Export to Excel"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2784,11 +2894,11 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="bg-red-600 text-white p-3 text-lg font-semibold flex justify-between items-center">
+        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
           <span>FTD Collector Summary Report</span>
           <button
             onClick={handleExport}
-            className="bg-white text-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            className="bg-white text-red-600 border border-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
             title="Export to Excel"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2906,11 +3016,11 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="bg-red-600 text-white p-3 text-lg font-semibold flex justify-between items-center">
+        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
           <span>MTD Time-Wise Visit Report</span>
           <button
             onClick={handleExport}
-            className="bg-white text-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            className="bg-white text-red-600 border border-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
             title="Export to Excel"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3023,11 +3133,11 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="bg-red-600 text-white p-3 text-lg font-semibold flex justify-between items-center">
+        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
           <span>FTD Time-Wise Visit Report</span>
           <button
             onClick={handleExport}
-            className="bg-white text-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            className="bg-white text-red-600 border border-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
             title="Export to Excel"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3590,7 +3700,7 @@ const Dashboard = () => {
                   </div>
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Type of Loan</label>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Type of Loan <span className="text-gray-400 font-normal">(4)</span></label>
                       <select 
                         className="w-full p-2 border border-gray-300 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
                         value={filterLoanType}
@@ -3603,7 +3713,7 @@ const Dashboard = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">DPD Buckets</label>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">DPD Buckets <span className="text-gray-400 font-normal">(6)</span></label>
                       <select 
                         className="w-full p-2 border border-gray-300 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
                         value={filterDPD}
@@ -3638,7 +3748,7 @@ const Dashboard = () => {
                     </div>
                     
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Geography</label>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Geography <span className="text-gray-400 font-normal">(6)</span></label>
                       <select 
                         className="w-full p-2 border border-gray-300 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
                         value={filterGeography}
@@ -3653,7 +3763,7 @@ const Dashboard = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">State</label>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">State <span className="text-gray-400 font-normal">(9)</span></label>
                       <select 
                         className="w-full p-2 border border-gray-300 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
                         value={filterState}
@@ -3671,7 +3781,7 @@ const Dashboard = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">District</label>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">District <span className="text-gray-400 font-normal">(10)</span></label>
                       <select 
                         className="w-full p-2 border border-gray-300 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
                         value={filterDistrict}
@@ -3690,7 +3800,7 @@ const Dashboard = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">PI Code</label>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">PI Code <span className="text-gray-400 font-normal">(13)</span></label>
                       <select 
                         className="w-full p-2 border border-gray-300 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
                         value={filterPICode}
@@ -4203,14 +4313,17 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Allocation Tables - Show when allocation card is clicked */}
+                {/* Allocation Section - Show when allocation card is clicked */}
                 {selectedStaffMetric === 'allocation' && (
                   <div ref={leaderboardTableRef} className="mb-8 w-full space-y-6">
                     {/* Header with Title and Close Button */}
                     <div className="flex justify-between items-center">
                       <h2 className="text-xl font-semibold text-gray-900">Case Summary - Allocation Details</h2>
                       <button
-                        onClick={() => setSelectedStaffMetric(null)}
+                        onClick={() => {
+                          setSelectedStaffMetric(null)
+                          setSelectedLoanType(null)
+                        }}
                         className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
                         aria-label="Close allocation tables"
                       >
@@ -4218,7 +4331,295 @@ const Dashboard = () => {
                       </button>
                     </div>
 
-                    {/* Grid of Tables - 2 columns on large screens */}
+                    {/* Loan Type Cards - Always show on top */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {/* Tractor Finance Card */}
+                        <div
+                          onClick={() => setSelectedLoanType('tractor')}
+                          className={`group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border ${selectedLoanType === 'tractor' ? 'border-red-600 ring-2 ring-red-600' : 'border-gray-200 hover:border-red-600'}`}
+                          style={{
+                            backgroundImage: `url(${tractorFinanceImage})`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'right center',
+                            backgroundRepeat: 'no-repeat'
+                          }}
+                        >
+                          {/* Overlay for text readability */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-transparent z-0"></div>
+                          <div className="flex h-32 relative z-10">
+                            {/* Left Side - Text Content */}
+                            <div className="flex-1 flex flex-col justify-center px-3 py-2 z-10 relative">
+                              <h3 className="text-base font-bold text-gray-900 mb-1">Tractor Finance</h3>
+                              <p className="text-xs text-gray-600 mb-2 line-clamp-2">Agricultural equipment financing solutions</p>
+                              <div className="flex items-center text-red-600 font-semibold text-xs">
+                                <span>View Details</span>
+                                <svg className="w-3 h-3 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                              </div>
+                            </div>
+                            {/* Right Side - Image with Blur Effect on Left */}
+                            <div className="relative w-32 flex-shrink-0 overflow-hidden">
+                              {/* Blurred left side overlay */}
+                              <div className="absolute inset-0 z-20 pointer-events-none">
+                                <div 
+                                  className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white via-white/95 to-transparent"
+                                  style={{
+                                    backdropFilter: 'blur(2px)',
+                                    WebkitBackdropFilter: 'blur(2px)'
+                                  }}
+                                ></div>
+                              </div>
+                              {/* Image with blur mask on left */}
+                              <div className="relative w-full h-full z-0">
+                                <img
+                                  src={tractorFinanceImage}
+                                  alt="Tractor Finance"
+                                  className="w-full h-full object-cover relative z-10"
+                                  style={{
+                                    maskImage: 'linear-gradient(to right, transparent 0%, transparent 20%, black 40%, black 100%)',
+                                    WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 20%, black 40%, black 100%)',
+                                    filter: 'blur(0px)',
+                                  }}
+                                  onError={(e) => {
+                                    e.target.style.display = 'none'
+                                  }}
+                                />
+                                {/* Blurred version for left side */}
+                                <img
+                                  src={tractorFinanceImage}
+                                  alt="Tractor Finance"
+                                  className="absolute inset-0 w-full h-full object-cover z-10"
+                                  style={{
+                                    maskImage: 'linear-gradient(to right, black 0%, black 40%, transparent 60%, transparent 100%)',
+                                    WebkitMaskImage: 'linear-gradient(to right, black 0%, black 40%, transparent 60%, transparent 100%)',
+                                    filter: 'blur(3px)',
+                                  }}
+                                  onError={(e) => {
+                                    e.target.style.display = 'none'
+                                  }}
+                                />
+                              </div>
+                              {/* Placeholder if image doesn't exist */}
+                              <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center z-0">
+                                <svg className="w-16 h-16 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Commercial Vehicle Card */}
+                        <div
+                          onClick={() => setSelectedLoanType('vehicle')}
+                          className={`group relative bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border ${selectedLoanType === 'vehicle' ? 'border-red-600 ring-2 ring-red-600' : 'border-gray-200 hover:border-red-600'}`}
+                        >
+                          <div className="flex h-32">
+                            {/* Left Side - Text Content */}
+                            <div className="flex-1 flex flex-col justify-center px-3 py-2 z-10 relative">
+                              <h3 className="text-base font-bold text-gray-900 mb-1">Commercial Vehicle</h3>
+                              <p className="text-xs text-gray-600 mb-2 line-clamp-2">Vehicle financing for commercial purposes</p>
+                              <div className="flex items-center text-red-600 font-semibold text-xs">
+                                <span>View Details</span>
+                                <svg className="w-3 h-3 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                              </div>
+                            </div>
+                            {/* Right Side - Image with Blur Effect on Left */}
+                            <div className="relative w-32 flex-shrink-0 overflow-hidden">
+                              {/* Blurred left side overlay */}
+                              <div className="absolute inset-0 z-20 pointer-events-none">
+                                <div 
+                                  className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white via-white/95 to-transparent"
+                                  style={{
+                                    backdropFilter: 'blur(2px)',
+                                    WebkitBackdropFilter: 'blur(2px)'
+                                  }}
+                                ></div>
+                              </div>
+                              {/* Image with blur mask on left */}
+                              <div className="relative w-full h-full z-0">
+                                <img
+                                  src="/src/assets/Images/vehicle.png"
+                                  alt="Commercial Vehicle"
+                                  className="w-full h-full object-cover relative z-10"
+                                  style={{
+                                    maskImage: 'linear-gradient(to right, transparent 0%, transparent 20%, black 40%, black 100%)',
+                                    WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 20%, black 40%, black 100%)',
+                                    filter: 'blur(0px)',
+                                  }}
+                                  onError={(e) => {
+                                    e.target.style.display = 'none'
+                                  }}
+                                />
+                                {/* Blurred version for left side */}
+                                <img
+                                  src="/src/assets/Images/vehicle.png"
+                                  alt="Commercial Vehicle"
+                                  className="absolute inset-0 w-full h-full object-cover z-10"
+                                  style={{
+                                    maskImage: 'linear-gradient(to right, black 0%, black 40%, transparent 60%, transparent 100%)',
+                                    WebkitMaskImage: 'linear-gradient(to right, black 0%, black 40%, transparent 60%, transparent 100%)',
+                                    filter: 'blur(3px)',
+                                  }}
+                                  onError={(e) => {
+                                    e.target.style.display = 'none'
+                                  }}
+                                />
+                              </div>
+                              {/* Placeholder if image doesn't exist */}
+                              <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center z-0">
+                                <svg className="w-16 h-16 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Construction Equipment Card */}
+                        <div
+                          onClick={() => setSelectedLoanType('construction')}
+                          className={`group relative bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border ${selectedLoanType === 'construction' ? 'border-red-600 ring-2 ring-red-600' : 'border-gray-200 hover:border-red-600'}`}
+                        >
+                          <div className="flex h-32">
+                            {/* Left Side - Text Content */}
+                            <div className="flex-1 flex flex-col justify-center px-3 py-2 z-10 relative">
+                              <h3 className="text-base font-bold text-gray-900 mb-1">Construction Equipment</h3>
+                              <p className="text-xs text-gray-600 mb-2 line-clamp-2">Heavy machinery and equipment financing</p>
+                              <div className="flex items-center text-red-600 font-semibold text-xs">
+                                <span>View Details</span>
+                                <svg className="w-3 h-3 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                              </div>
+                            </div>
+                            {/* Right Side - Image with Blur Effect on Left */}
+                            <div className="relative w-32 flex-shrink-0 overflow-hidden">
+                              {/* Blurred left side overlay */}
+                              <div className="absolute inset-0 z-20 pointer-events-none">
+                                <div 
+                                  className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white via-white/95 to-transparent"
+                                  style={{
+                                    backdropFilter: 'blur(2px)',
+                                    WebkitBackdropFilter: 'blur(2px)'
+                                  }}
+                                ></div>
+                              </div>
+                              {/* Image with blur mask on left */}
+                              <div className="relative w-full h-full z-0">
+                                <img
+                                  src="/src/assets/Images/construction.png"
+                                  alt="Construction Equipment"
+                                  className="w-full h-full object-cover relative z-10"
+                                  style={{
+                                    maskImage: 'linear-gradient(to right, transparent 0%, transparent 20%, black 40%, black 100%)',
+                                    WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 20%, black 40%, black 100%)',
+                                    filter: 'blur(0px)',
+                                  }}
+                                  onError={(e) => {
+                                    e.target.style.display = 'none'
+                                  }}
+                                />
+                                {/* Blurred version for left side */}
+                                <img
+                                  src="/src/assets/Images/construction.png"
+                                  alt="Construction Equipment"
+                                  className="absolute inset-0 w-full h-full object-cover z-10"
+                                  style={{
+                                    maskImage: 'linear-gradient(to right, black 0%, black 40%, transparent 60%, transparent 100%)',
+                                    WebkitMaskImage: 'linear-gradient(to right, black 0%, black 40%, transparent 60%, transparent 100%)',
+                                    filter: 'blur(3px)',
+                                  }}
+                                  onError={(e) => {
+                                    e.target.style.display = 'none'
+                                  }}
+                                />
+                              </div>
+                              {/* Placeholder if image doesn't exist */}
+                              <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center z-0">
+                                <svg className="w-16 h-16 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Home Loan Card */}
+                        <div
+                          onClick={() => setSelectedLoanType('home')}
+                          className={`group relative bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border ${selectedLoanType === 'home' ? 'border-red-600 ring-2 ring-red-600' : 'border-gray-200 hover:border-red-600'}`}
+                        >
+                          <div className="flex h-32">
+                            {/* Left Side - Text Content */}
+                            <div className="flex-1 flex flex-col justify-center px-3 py-2 z-10 relative">
+                              <h3 className="text-base font-bold text-gray-900 mb-1">Home Loan</h3>
+                              <p className="text-xs text-gray-600 mb-2 line-clamp-2">Residential property financing solutions</p>
+                              <div className="flex items-center text-red-600 font-semibold text-xs">
+                                <span>View Details</span>
+                                <svg className="w-3 h-3 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                              </div>
+                            </div>
+                            {/* Right Side - Image with Blur Effect on Left */}
+                            <div className="relative w-32 flex-shrink-0 overflow-hidden">
+                              {/* Blurred left side overlay */}
+                              <div className="absolute inset-0 z-20 pointer-events-none">
+                                <div 
+                                  className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white via-white/95 to-transparent"
+                                  style={{
+                                    backdropFilter: 'blur(2px)',
+                                    WebkitBackdropFilter: 'blur(2px)'
+                                  }}
+                                ></div>
+                              </div>
+                              {/* Image with blur mask on left */}
+                              <div className="relative w-full h-full z-0">
+                                <img
+                                  src="/src/assets/Images/home-loan.png"
+                                  alt="Home Loan"
+                                  className="w-full h-full object-cover relative z-10"
+                                  style={{
+                                    maskImage: 'linear-gradient(to right, transparent 0%, transparent 20%, black 40%, black 100%)',
+                                    WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 20%, black 40%, black 100%)',
+                                    filter: 'blur(0px)',
+                                  }}
+                                  onError={(e) => {
+                                    e.target.style.display = 'none'
+                                  }}
+                                />
+                                {/* Blurred version for left side */}
+                                <img
+                                  src="/src/assets/Images/home-loan.png"
+                                  alt="Home Loan"
+                                  className="absolute inset-0 w-full h-full object-cover z-10"
+                                  style={{
+                                    maskImage: 'linear-gradient(to right, black 0%, black 40%, transparent 60%, transparent 100%)',
+                                    WebkitMaskImage: 'linear-gradient(to right, black 0%, black 40%, transparent 60%, transparent 100%)',
+                                    filter: 'blur(3px)',
+                                  }}
+                                  onError={(e) => {
+                                    e.target.style.display = 'none'
+                                  }}
+                                />
+                              </div>
+                              {/* Placeholder if image doesn't exist */}
+                              <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center z-0">
+                                <svg className="w-16 h-16 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                    {/* Grid of Tables - Always show below cards */}
+                    <div className="mt-6">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       {/* Product Summary Table */}
                       <div className="lg:col-span-2">
@@ -4253,6 +4654,7 @@ const Dashboard = () => {
                       {/* AGTL Allocation Summary Table */}
                       <div className="lg:col-span-2">
                         {renderAGTLAllocationTable()}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -4918,12 +5320,16 @@ const Dashboard = () => {
                 )}
 
                 {/* Customer Engagement */}
-                <div className="mb-8">
+                <div className="mb-8 border bg-[] border-red-400 rounded-lg p-4" style={{borderColor: '#e5e7eb'}}>
                   <h2 className="text-lg font-semibold text-gray-800 mb-4">Customer Engagement</h2>
                   <div className="grid grid-cols-4 gap-3">
                     <div 
-                      className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-payment"
-                      onClick={() => navigate('/customer-engagement')}
+                      data-engagement-card
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement ${selectedEngagementCard === 'whatsapp' ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleEngagementCardClick('whatsapp')
+                      }}
                     >
                       {renderFavoritePin('whatsapp')}
                       <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">WhatsApp Engagements</h3>
@@ -4948,8 +5354,12 @@ const Dashboard = () => {
                     </div>
 
                     <div 
-                      className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-payment"
-                      onClick={() => navigate('/customer-engagement')}
+                      data-engagement-card
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement ${selectedEngagementCard === 'aiCalls' ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleEngagementCardClick('aiCalls')
+                      }}
                     >
                       {renderFavoritePin('aiCalls')}
                       <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">AI Calls</h3>
@@ -4970,8 +5380,12 @@ const Dashboard = () => {
                     </div>
 
                     <div 
-                      className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-payment"
-                      onClick={() => navigate('/customer-engagement')}
+                      data-engagement-card
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement ${selectedEngagementCard === 'dialler' ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleEngagementCardClick('dialler')
+                      }}
                     >
                       {renderFavoritePin('dialler')}
                       <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Dialler Calls</h3>
@@ -4992,8 +5406,12 @@ const Dashboard = () => {
                   </div>
 
                     <div 
-                      className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-payment"
-                      onClick={() => navigate('/customer-engagement')}
+                      data-engagement-card
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement ${selectedEngagementCard === 'fieldVisits' ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleEngagementCardClick('fieldVisits')
+                      }}
                     >
                       {renderFavoritePin('fieldVisits')}
                       <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Field Visits</h3>
@@ -5013,6 +5431,130 @@ const Dashboard = () => {
                   </div>
                 </div>
               </div>
+
+                {/* Customer Engagement Detailed Section */}
+                {selectedEngagementCard && (
+                  <div ref={engagementSectionRef} className="mb-8 bg-white border border-gray-200 rounded-lg p-6 shadow-sm mt-6">
+                    {/* Header with Close Button */}
+                    <div className="flex justify-between items-center mb-6">
+                      <h2 className="text-xl font-semibold text-gray-900">Customer Engagement Details</h2>
+                      <button
+                        onClick={() => setSelectedEngagementCard(null)}
+                        className="p-2 rounded-lg transition-colors cursor-pointer hover:bg-gray-100"
+                        aria-label="Close engagement section"
+                        title="Close"
+                      >
+                        <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                      {/* Total Engagement + Breakdown */}
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="text-sm font-semibold text-gray-900">Total Customers Engagement</div>
+                          <div className="text-2xl font-bold text-gray-800">{customerEngagementData.totalEngagement.toLocaleString()}</div>
+                        </div>
+                        <div className="grid grid-cols-4 gap-3 mb-4">
+                          <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                            <div className="text-2xl">💬</div>
+                            <div className="text-sm font-semibold text-green-800">{customerEngagementData.engagementBreakdown.whatsapp.toLocaleString()}</div>
+                            <div className="text-xs text-green-700">WhatsApp</div>
+                          </div>
+                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+                            <div className="text-2xl">🔊</div>
+                            <div className="text-sm font-semibold text-blue-800">{customerEngagementData.engagementBreakdown.blaster.toLocaleString()}</div>
+                            <div className="text-xs text-blue-700">Blaster</div>
+                          </div>
+                          <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
+                            <div className="text-2xl">🤖</div>
+                            <div className="text-sm font-semibold text-purple-800">{customerEngagementData.engagementBreakdown.aiCalls.toLocaleString()}</div>
+                            <div className="text-xs text-purple-700">AI Calls</div>
+                          </div>
+                          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 text-center">
+                            <div className="text-2xl">📞</div>
+                            <div className="text-sm font-semibold text-orange-800">{customerEngagementData.engagementBreakdown.dialers.toLocaleString()}</div>
+                            <div className="text-xs text-orange-700">Dialers</div>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-4 gap-3">
+                          <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
+                            <div className="text-2xl">👤</div>
+                            <div className="text-base font-semibold text-gray-800">{customerEngagementData.customerMetrics.totalCustomers.toLocaleString()}</div>
+                            <div className="text-xs text-gray-600">Total Customers</div>
+                          </div>
+                          <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
+                            <div className="text-2xl">👥</div>
+                            <div className="text-base font-semibold text-gray-800">{customerEngagementData.customerMetrics.connectedCustomers.toLocaleString()}</div>
+                            <div className="text-xs text-gray-600">Connected</div>
+                          </div>
+                          <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
+                            <div className="text-2xl">💰</div>
+                            <div className="text-base font-semibold text-gray-800">₹{customerEngagementData.customerMetrics.amountPromised.toLocaleString()}</div>
+                            <div className="text-xs text-gray-600">Amount Promised</div>
+                          </div>
+                          <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
+                            <div className="text-2xl">💳</div>
+                            <div className="text-base font-semibold text-gray-800">₹{customerEngagementData.customerMetrics.amountCollected.toLocaleString()}</div>
+                            <div className="text-xs text-gray-600">Amount Collected</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Chart */}
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="text-sm font-semibold text-gray-900">Customers Engagement</h4>
+                          <select 
+                            defaultValue="Last 15 days"
+                            className="px-3 py-1 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                          >
+                            <option value="Last 7 days">Last 7 days</option>
+                            <option value="Last 15 days">Last 15 days</option>
+                            <option value="Last 30 days">Last 30 days</option>
+                          </select>
+                        </div>
+                        <Chart options={engagementChartOptions} series={engagementChartSeries} type="bar" height={260} />
+                      </div>
+                    </div>
+
+                    {/* Status Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between border-b border-green-200 pb-2 mb-2">
+                          <h4 className="text-sm font-semibold text-green-800">Promised to Pay</h4>
+                        </div>
+                        <div className="text-2xl font-bold text-green-900">{customerEngagementData.statusCards.promisedToPay.accounts}</div>
+                        <div className="text-xs text-green-700 mt-1">Accounts</div>
+                        <div className="text-sm font-semibold text-green-800 mt-2">₹{customerEngagementData.statusCards.promisedToPay.amount.toLocaleString()}</div>
+                      </div>
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between border-b border-red-200 pb-2 mb-2">
+                          <h4 className="text-sm font-semibold text-red-800">Refused to Pay</h4>
+                        </div>
+                        <div className="text-2xl font-bold text-red-900">{customerEngagementData.statusCards.refusedToPay.accounts}</div>
+                        <div className="text-xs text-red-700 mt-1">Accounts</div>
+                      </div>
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between border-b border-blue-200 pb-2 mb-2">
+                          <h4 className="text-sm font-semibold text-blue-800">Already Paid</h4>
+                        </div>
+                        <div className="text-2xl font-bold text-blue-900">{customerEngagementData.statusCards.alreadyPaid.accounts}</div>
+                        <div className="text-xs text-blue-700 mt-1">Accounts</div>
+                        <div className="text-sm font-semibold text-blue-800 mt-2">₹{customerEngagementData.statusCards.alreadyPaid.amount.toLocaleString()}</div>
+                      </div>
+                      <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between border-b border-orange-200 pb-2 mb-2">
+                          <h4 className="text-sm font-semibold text-orange-800">Wrong Number</h4>
+                        </div>
+                        <div className="text-2xl font-bold text-orange-900">{customerEngagementData.statusCards.wrongNumber.accounts}</div>
+                        <div className="text-xs text-orange-700 mt-1">Accounts</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
             </div>
 
                 {/* Payment Intent & Behavior */}
@@ -5542,16 +6084,16 @@ const Dashboard = () => {
                              <div className="w-4 h-4 bg-red-500 rounded"></div>
                              <span className="text-gray-700 text-[12px] font-medium">90+ days (12%)</span>
                              <span className="text-gray-500 text-[12px]">4 cases</span>
-                           </div>
-                         </div>
-                       </div>
-                     </div>
                   </div>
                 </div>
               </div>
             </div>
+                    </div>
+              </div>
+            </div>
           </div>
-        </main>
+        </div>
+      </main>
       </div>
     </div>
   )

@@ -153,9 +153,9 @@ const Login = () => {
               type="submit"
               disabled={loading}
               className="text-white border border-transparent rounded-lg font-semibold uppercase cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{backgroundColor: 'orange', fontSize: '12px', padding: '10px 45px', letterSpacing: '0.5px', marginTop: '10px'}}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#00a1ff'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = 'orange'}
+              style={{backgroundColor: '#FA1432', fontSize: '12px', padding: '10px 45px', letterSpacing: '0.5px', marginTop: '10px'}}
+              onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = '#00005A')}
+              onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = '#FA1432')}
             >
               {loading ? (
                 <div className="flex items-center">

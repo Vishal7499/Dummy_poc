@@ -90,14 +90,17 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollapsed })
       )}
       
        {/* Sidebar */}
-       <div className="bg-white border-r border-gray-200 h-screen flex flex-col w-full">
+       <div className="bg-white border-r border-gray-200 h-screen flex flex-col w-full" style={{borderRightColor: '#e5e7eb'}}>
          {/* Header with Toggle */}
-         <div className="flex items-center p-4 border-b border-gray-200 h-16">
+         <div className="flex items-center p-4 border-b border-gray-200 h-16" style={{borderBottomColor: '#e5e7eb'}}>
            <button
              onClick={() => setIsCollapsed(!isCollapsed)}
-             className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+             className="p-2 rounded-lg transition-colors cursor-pointer"
+             style={{color: '#00005A'}}
+             onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
+             onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
            >
-             <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
              </svg>
            </button>
@@ -107,8 +110,8 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollapsed })
                     <img src={sarthiLogo} alt="Sarthi Logo" className="w-10 h-12" />
                     {!isCollapsed && (
                       <div>
-                        <h1 className="text-base font-semibold text-gray-900">Sarthi Kotak POC</h1>
-                        <p className="text-xs text-gray-600">Supervisor Dashboard</p>
+                        <h1 className="text-base font-semibold" style={{color: '#FA1432'}}>Kotak</h1>
+                        <p className="text-[10px]" style={{color: '#00005A'}}>Sarthi Collection Kotak Bank</p>
                       </div>
                     )}
                   </div>
@@ -116,9 +119,12 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollapsed })
            {/* Mobile Close Button */}
            <button
              onClick={() => setIsMobileOpen(false)}
-             className="absolute top-4 right-4 p-2 rounded-lg hover:bg-gray-100 transition-colors lg:hidden cursor-pointer"
+             className="absolute top-4 right-4 p-2 rounded-lg transition-colors lg:hidden cursor-pointer"
+             style={{color: '#00005A'}}
+             onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
+             onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
            >
-             <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
              </svg>
            </button>
@@ -136,14 +142,30 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollapsed })
                               isCollapsed 
                                 ? 'justify-center px-3 py-3' 
                                 : 'px-3 py-3'
-                            } ${
-                              item.active
-                                ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                                : 'text-gray-700 hover:bg-gray-50'
                             }`}
+                            style={item.active ? {
+                              backgroundColor: '#ffffff',
+                              color: '#FA1432',
+                              border: '1px solid #FA1432',
+                              fontWeight: '600'
+                            } : {
+                              color: '#374151'
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!item.active) {
+                                e.target.style.backgroundColor = '#f9fafb'
+                                e.target.style.color = '#00005A'
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!item.active) {
+                                e.target.style.backgroundColor = 'transparent'
+                                e.target.style.color = '#374151'
+                              }
+                            }}
                   title={isCollapsed ? item.name : ''}
                 >
-                  <span className={`${isCollapsed ? '' : 'mr-3'}`}>
+                  <span className={`${isCollapsed ? '' : 'mr-3'}`} style={item.active ? {color: '#FA1432'} : {}}>
                     {item.icon}
                   </span>
                   {!isCollapsed && (
@@ -157,8 +179,8 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollapsed })
       </nav>
 
        {/* Bottom Section */}
-       <div className="flex-shrink-0 p-4 border-t border-gray-200">
-         <div className="text-xs text-gray-500 text-center">
+       <div className="flex-shrink-0 p-4 border-t border-gray-200" style={{borderTopColor: '#e5e7eb'}}>
+         <div className="text-xs text-center" style={{color: '#6b7280'}}>
          Sarthi Kotak POC v1.0
          </div>
        </div>
