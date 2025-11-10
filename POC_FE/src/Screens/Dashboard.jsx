@@ -9,7 +9,10 @@ import Navbar from '../components/Navbar'
 import { useAuth } from '../contexts/AuthContext'
 import { dashboardApi, dashboardCollectionGraphApi, dashboardDepositionApi } from '../utils/api'
 import { formatIndianNumber } from '../utils/formatters'
-import tractorFinanceImage from 'C:/Users/visha/Sonata_POC/SONATA_KOTAK_POC_FE/POC_FE/src/assets/Images/tractor_finance.png'
+import tractorFinanceImage from '../assets/Images/tractor_finance.png'
+import commercialVehicleImage from '../assets/Images/commercial_vehicle.png'
+import constructionEquipmentImage from '../assets/Images/construction_equipment.png'
+import homeLoanImage from '../assets/Images/home_loan.jpg'
 
 const Dashboard = () => {
   const navigate = useNavigate()
@@ -24,6 +27,8 @@ const Dashboard = () => {
   const [selectedLoanType, setSelectedLoanType] = useState(null) // Track selected loan type for Case Summary
   const [chartFilter, setChartFilter] = useState('ftd')
   const leaderboardTableRef = useRef(null)
+  const [selectedDate, setSelectedDate] = useState("01-10-2025");
+
   // Hierarchy drill-down state
   const [hierarchyPath, setHierarchyPath] = useState([]) // Array to track hierarchy path: [{level, id, name}, ...]
   const [currentHierarchyLevel, setCurrentHierarchyLevel] = useState(null) // Current hierarchy level being viewed
@@ -59,6 +64,18 @@ const Dashboard = () => {
   const [depositionError, setDepositionError] = useState(null)
   const [depositionCurrentPage, setDepositionCurrentPage] = useState(1)
   const [depositionPageSize] = useState(10)
+  // Pagination state for all tables
+  const [productSummaryPage, setProductSummaryPage] = useState(1)
+  const [productAllocationPage, setProductAllocationPage] = useState(1)
+  const [ncmAllocationPage, setNCMAllocationPage] = useState(1)
+  const [rcmAllocationPage, setRCMAllocationPage] = useState(1)
+  const [acmAllocationPage, setACMAllocationPage] = useState(1)
+  const [cmAllocationPage, setCMAllocationPage] = useState(1)
+  const [agtlAllocationPage, setAGTLAllocationPage] = useState(1)
+  const [stateWisePage, setStateWisePage] = useState(1)
+  const [regionWisePage, setRegionWisePage] = useState(1)
+  const [bucketWisePage, setBucketWisePage] = useState(1)
+  const itemsPerPage = 10
   // Initialize date filters - default to last 30 days
   const [fromDate, setFromDate] = useState(() => {
     const date = new Date()
@@ -1212,7 +1229,7 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="bg-red-600 text-white p-3 text-lg font-semibold flex justify-between items-center">
+        <div className="bg-gray-100 text-[#003366] p-3 text-lg font-semibold flex justify-between items-center">
           <span>Portfolio-wise Summary</span>
           <button
             onClick={handleExport}
@@ -1226,7 +1243,7 @@ const Dashboard = () => {
           </button>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200 border border-[#003366]">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Portfolio</th>
@@ -1290,7 +1307,7 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="bg-red-600 text-white p-3 text-lg font-semibold flex justify-between items-center">
+        <div className="bg-gray-100 text-[#003366] p-3 text-lg font-semibold flex justify-between items-center">
           <span>DPD-wise Summary</span>
           <button
             onClick={handleExport}
@@ -1304,7 +1321,7 @@ const Dashboard = () => {
           </button>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200 border border-[#003366]">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DPD Bucket</th>
@@ -1361,7 +1378,7 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="bg-red-600 text-white p-3 text-lg font-semibold flex justify-between items-center">
+        <div className="bg-gray-100 text-[#003366] p-3 text-lg font-semibold flex justify-between items-center">
           <span>Application Status Summary</span>
           <button
             onClick={handleExport}
@@ -1375,7 +1392,7 @@ const Dashboard = () => {
           </button>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200 border border-[#003366]">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -1427,7 +1444,7 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="bg-red-600 text-white p-3 text-lg font-semibold flex justify-between items-center">
+        <div className="bg-gray-100 text-[#003366] p-3 text-lg font-semibold flex justify-between items-center">
           <span>Repossession Status Summary</span>
           <button
             onClick={handleExport}
@@ -1441,7 +1458,7 @@ const Dashboard = () => {
           </button>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200 border border-[#003366]">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -1472,6 +1489,68 @@ const Dashboard = () => {
   }
 
   // Helper function to render Product Summary table
+  // Reusable pagination component
+  const renderPagination = (currentPage, setCurrentPage, totalItems, itemsPerPage) => {
+    const totalPages = Math.ceil(totalItems / itemsPerPage)
+    if (totalPages <= 1) return null
+
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = Math.min(startIndex + itemsPerPage, totalItems)
+
+    const handlePageChange = (newPage) => {
+      if (newPage >= 1 && newPage <= totalPages) {
+        setCurrentPage(newPage)
+      }
+    }
+
+    return (
+      <div className="bg-gray-50 px-4 py-3 flex items-center justify-between border-t border-gray-200">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-700">
+            Showing {startIndex + 1} to {endIndex} of {totalItems} entries
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+              currentPage === 1
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-white text-red-600 border border-red-600 hover:bg-red-50 cursor-pointer'
+            }`}
+          >
+            Previous
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                page === currentPage
+                  ? 'bg-red-600 text-white cursor-pointer'
+                  : 'bg-white text-red-600 border border-red-600 hover:bg-red-50 cursor-pointer'
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+              currentPage === totalPages
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-white text-red-600 border border-red-600 hover:bg-red-50 cursor-pointer'
+            }`}
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   const renderProductSummaryTable = () => {
     const productData = [
       { product: 'TW', total: 9275, dtr: 6334, agtl: 740, tc: 1445, ncm: 414, acm: 26, tce: 782, cm: 38, rcm: 0 },
@@ -1526,9 +1605,15 @@ const Dashboard = () => {
       exportTableToExcel(exportData, headers, 'Product_Summary')
     }
 
+    // Pagination logic
+    const startIndex = (productSummaryPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const paginatedData = productData.slice(startIndex, endIndex)
+    const totalPages = Math.ceil(productData.length / itemsPerPage)
+
     return (
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 flex justify-between items-center">
+      <div className="bg-white border border-[#003366] rounded-lg overflow-hidden">
+        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">
           <h3 className="text-sm font-semibold">Product Summary</h3>
           <button
             onClick={handleExport}
@@ -1541,52 +1626,55 @@ const Dashboard = () => {
             Export
           </button>
         </div>
-        <div className="overflow-x-auto max-h-96 overflow-y-auto">
-          <table className="w-full text-xs">
-            <thead className="bg-red-600 text-white sticky top-0">
+        <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
+          <table className="w-full text-xs border border-[#003366]">
+            <thead className="bg-gray-100 text-[#003366] sticky top-0">
               <tr>
-                <th className="text-left py-2 px-2 font-semibold border-r border-red-500">PRODUCT</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">TOTAL</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">DTR</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">AGTL</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">TC</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">NCM</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">ACM</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">TCE</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">CM</th>
+                <th className="text-left py-2 px-2 font-semibold">PRODUCT</th>
+                <th className="text-right py-2 px-2 font-semibold">TOTAL</th>
+                <th className="text-right py-2 px-2 font-semibold">DTR</th>
+                <th className="text-right py-2 px-2 font-semibold">AGTL</th>
+                <th className="text-right py-2 px-2 font-semibold">TC</th>
+                <th className="text-right py-2 px-2 font-semibold">NCM</th>
+                <th className="text-right py-2 px-2 font-semibold">ACM</th>
+                <th className="text-right py-2 px-2 font-semibold">TCE</th>
+                <th className="text-right py-2 px-2 font-semibold">CM</th>
                 <th className="text-right py-2 px-2 font-semibold">RCM</th>
               </tr>
             </thead>
             <tbody className="bg-white">
-              {productData.map((row, idx) => (
+              {paginatedData.map((row, idx) => (
                 <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="py-2 px-2 text-gray-800 font-medium border-r border-gray-200">{row.product}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.total)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.dtr)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.agtl)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.tc)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.ncm)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.acm)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.tce)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.cm)}</td>
+                  <td className="py-2 px-2 text-gray-800 font-medium">{row.product}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.total)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.dtr)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.agtl)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.tc)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.ncm)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.acm)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.tce)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.cm)}</td>
                   <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.rcm)}</td>
                 </tr>
               ))}
-              <tr className="bg-red-600 text-white font-semibold">
-                <td className="py-2 px-2 border-r border-red-500">Totals</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.total)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.dtr)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.agtl)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.tc)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.ncm)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.acm)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.tce)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.cm)}</td>
+              {endIndex >= productData.length && (
+                <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
+                  <td className="py-2 px-2">Totals</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.total)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.dtr)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.agtl)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.tc)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.ncm)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.acm)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.tce)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.cm)}</td>
                 <td className="py-2 px-2 text-right">{formatIndianNumber(totals.rcm)}</td>
               </tr>
+              )}
             </tbody>
           </table>
         </div>
+        {renderPagination(productSummaryPage, setProductSummaryPage, productData.length, itemsPerPage)}
       </div>
     )
   }
@@ -1634,9 +1722,14 @@ const Dashboard = () => {
       exportTableToExcel(exportData, headers, 'Product_Allocation_Summary')
     }
 
+    // Pagination logic
+    const startIndex = (productAllocationPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const paginatedData = allocationData.slice(startIndex, endIndex)
+
     return (
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 flex justify-between items-center">
+      <div className="bg-white border border-[#003366] rounded-lg overflow-hidden">
+        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">
           <h3 className="text-sm font-semibold">Product Allocation Summary</h3>
           <button
             onClick={handleExport}
@@ -1649,40 +1742,43 @@ const Dashboard = () => {
             Export
           </button>
         </div>
-        <div className="overflow-x-auto max-h-96 overflow-y-auto">
-          <table className="w-full text-xs">
-            <thead className="bg-red-600 text-white sticky top-0">
+        <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
+          <table className="w-full text-xs border border-[#003366]">
+            <thead className="bg-gray-100 text-[#003366] sticky top-0">
               <tr>
-                <th className="text-left py-2 px-2 font-semibold border-r border-red-500">PRODUCT</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">TOTAL</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">NPA</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA0</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA1</th>
+                <th className="text-left py-2 px-2 font-semibold">PRODUCT</th>
+                <th className="text-right py-2 px-2 font-semibold">TOTAL</th>
+                <th className="text-right py-2 px-2 font-semibold">NPA</th>
+                <th className="text-right py-2 px-2 font-semibold">SMA0</th>
+                <th className="text-right py-2 px-2 font-semibold">SMA1</th>
                 <th className="text-right py-2 px-2 font-semibold">SMA2</th>
               </tr>
             </thead>
             <tbody className="bg-white">
-              {allocationData.map((row, idx) => (
+              {paginatedData.map((row, idx) => (
                 <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="py-2 px-2 text-gray-800 font-medium border-r border-gray-200">{row.product}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.total)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.npa)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma0)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma1)}</td>
+                  <td className="py-2 px-2 text-gray-800 font-medium">{row.product}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.total)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.npa)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma0)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma1)}</td>
                   <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2)}</td>
                 </tr>
               ))}
-              <tr className="bg-red-600 text-white font-semibold">
-                <td className="py-2 px-2 border-r border-red-500">Totals</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.total)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.npa)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma0)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma1)}</td>
+              {endIndex >= allocationData.length && (
+                <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
+                  <td className="py-2 px-2">Totals</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.total)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.npa)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma0)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma1)}</td>
                 <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
               </tr>
+              )}
             </tbody>
           </table>
         </div>
+        {renderPagination(productAllocationPage, setProductAllocationPage, allocationData.length, itemsPerPage)}
       </div>
     )
   }
@@ -1724,9 +1820,14 @@ const Dashboard = () => {
       exportTableToExcel(exportData, headers, 'NCM_Allocation_Summary')
     }
 
+    // Pagination logic
+    const startIndex = (ncmAllocationPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const paginatedData = ncmData.slice(startIndex, endIndex)
+
     return (
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 flex justify-between items-center">
+      <div className="bg-white border border-[#003366] rounded-lg overflow-hidden">
+        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">
           <h3 className="text-sm font-semibold">NCM Allocation Summary</h3>
           <button
             onClick={handleExport}
@@ -1739,40 +1840,43 @@ const Dashboard = () => {
             Export
           </button>
         </div>
-        <div className="overflow-x-auto max-h-96 overflow-y-auto">
-          <table className="w-full text-xs">
-            <thead className="bg-red-600 text-white sticky top-0">
+        <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
+          <table className="w-full text-xs border border-[#003366]">
+            <thead className="bg-gray-100 text-[#003366] sticky top-0">
               <tr>
-                <th className="text-left py-2 px-2 font-semibold border-r border-red-500">Username</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">TOTAL</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">NPA</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA0</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA1</th>
+                <th className="text-left py-2 px-2 font-semibold">Username</th>
+                <th className="text-right py-2 px-2 font-semibold">TOTAL</th>
+                <th className="text-right py-2 px-2 font-semibold">NPA</th>
+                <th className="text-right py-2 px-2 font-semibold">SMA0</th>
+                <th className="text-right py-2 px-2 font-semibold">SMA1</th>
                 <th className="text-right py-2 px-2 font-semibold">SMA2</th>
               </tr>
             </thead>
             <tbody className="bg-white">
-              {ncmData.map((row, idx) => (
+              {paginatedData.map((row, idx) => (
                 <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="py-2 px-2 text-gray-800 font-medium border-r border-gray-200">{row.username}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.total)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.npa)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma0)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma1)}</td>
+                  <td className="py-2 px-2 text-gray-800 font-medium">{row.username}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.total)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.npa)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma0)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma1)}</td>
                   <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2)}</td>
                 </tr>
               ))}
-              <tr className="bg-red-600 text-white font-semibold">
-                <td className="py-2 px-2 border-r border-red-500">Totals</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.total)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.npa)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma0)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma1)}</td>
+              {endIndex >= ncmData.length && (
+                <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
+                  <td className="py-2 px-2">Totals</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.total)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.npa)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma0)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma1)}</td>
                 <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
               </tr>
+              )}
             </tbody>
           </table>
         </div>
+        {renderPagination(ncmAllocationPage, setNCMAllocationPage, ncmData.length, itemsPerPage)}
       </div>
     )
   }
@@ -1811,9 +1915,14 @@ const Dashboard = () => {
       exportTableToExcel(exportData, headers, 'RCM_Allocation_Summary')
     }
 
+    // Pagination logic
+    const startIndex = (rcmAllocationPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const paginatedData = rcmData.slice(startIndex, endIndex)
+
     return (
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 flex justify-between items-center">
+      <div className="bg-white border border-[#003366] rounded-lg overflow-hidden">
+        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">
           <h3 className="text-sm font-semibold">RCM Allocation Summary</h3>
           <button
             onClick={handleExport}
@@ -1826,40 +1935,43 @@ const Dashboard = () => {
             Export
           </button>
         </div>
-        <div className="overflow-x-auto max-h-96 overflow-y-auto">
-          <table className="w-full text-xs">
-            <thead className="bg-red-600 text-white sticky top-0">
+        <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
+          <table className="w-full text-xs border border-[#003366]">
+            <thead className="bg-gray-100 text-[#003366] sticky top-0">
               <tr>
-                <th className="text-left py-2 px-2 font-semibold border-r border-red-500">Username</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">TOTAL</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">NPA</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA0</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA1</th>
+                <th className="text-left py-2 px-2 font-semibold">Username</th>
+                <th className="text-right py-2 px-2 font-semibold">TOTAL</th>
+                <th className="text-right py-2 px-2 font-semibold">NPA</th>
+                <th className="text-right py-2 px-2 font-semibold">SMA0</th>
+                <th className="text-right py-2 px-2 font-semibold">SMA1</th>
                 <th className="text-right py-2 px-2 font-semibold">SMA2</th>
               </tr>
             </thead>
             <tbody className="bg-white">
-              {rcmData.map((row, idx) => (
+              {paginatedData.map((row, idx) => (
                 <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="py-2 px-2 text-gray-800 font-medium border-r border-gray-200">{row.username}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.total)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.npa)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma0)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma1)}</td>
+                  <td className="py-2 px-2 text-gray-800 font-medium">{row.username}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.total)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.npa)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma0)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma1)}</td>
                   <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2)}</td>
                 </tr>
               ))}
-              <tr className="bg-red-600 text-white font-semibold">
-                <td className="py-2 px-2 border-r border-red-500">Totals</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.total)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.npa)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma0)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma1)}</td>
+              {endIndex >= rcmData.length && (
+                <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
+                  <td className="py-2 px-2">Totals</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.total)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.npa)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma0)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma1)}</td>
                 <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
               </tr>
+              )}
             </tbody>
           </table>
         </div>
+        {renderPagination(rcmAllocationPage, setRCMAllocationPage, rcmData.length, itemsPerPage)}
       </div>
     )
   }
@@ -1907,9 +2019,14 @@ const Dashboard = () => {
       exportTableToExcel(exportData, headers, 'ACM_Allocation_Summary')
     }
 
+    // Pagination logic
+    const startIndex = (acmAllocationPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const paginatedData = acmData.slice(startIndex, endIndex)
+
     return (
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 flex justify-between items-center">
+      <div className="bg-white border border-[#003366] rounded-lg overflow-hidden">
+        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">
           <h3 className="text-sm font-semibold">ACM Allocation Summary</h3>
           <button
             onClick={handleExport}
@@ -1922,40 +2039,43 @@ const Dashboard = () => {
             Export
           </button>
         </div>
-        <div className="overflow-x-auto max-h-96 overflow-y-auto">
-          <table className="w-full text-xs">
-            <thead className="bg-red-600 text-white sticky top-0">
+        <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
+          <table className="w-full text-xs border border-[#003366]">
+            <thead className="bg-gray-100 text-[#003366] sticky top-0">
               <tr>
-                <th className="text-left py-2 px-2 font-semibold border-r border-red-500">Username</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">TOTAL</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">NPA</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA0</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA1</th>
+                <th className="text-left py-2 px-2 font-semibold">Username</th>
+                <th className="text-right py-2 px-2 font-semibold">TOTAL</th>
+                <th className="text-right py-2 px-2 font-semibold">NPA</th>
+                <th className="text-right py-2 px-2 font-semibold">SMA0</th>
+                <th className="text-right py-2 px-2 font-semibold">SMA1</th>
                 <th className="text-right py-2 px-2 font-semibold">SMA2</th>
               </tr>
             </thead>
             <tbody className="bg-white">
-              {acmData.map((row, idx) => (
+              {paginatedData.map((row, idx) => (
                 <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="py-2 px-2 text-gray-800 font-medium border-r border-gray-200">{row.username}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.total)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.npa)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma0)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma1)}</td>
+                  <td className="py-2 px-2 text-gray-800 font-medium">{row.username}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.total)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.npa)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma0)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma1)}</td>
                   <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2)}</td>
                 </tr>
               ))}
-              <tr className="bg-red-600 text-white font-semibold">
-                <td className="py-2 px-2 border-r border-red-500">Totals</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.total)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.npa)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma0)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma1)}</td>
+              {endIndex >= acmData.length && (
+                <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
+                  <td className="py-2 px-2">Totals</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.total)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.npa)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma0)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma1)}</td>
                 <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
               </tr>
+              )}
             </tbody>
           </table>
         </div>
+        {renderPagination(acmAllocationPage, setACMAllocationPage, acmData.length, itemsPerPage)}
       </div>
     )
   }
@@ -2003,9 +2123,14 @@ const Dashboard = () => {
       exportTableToExcel(exportData, headers, 'CM_Allocation_Summary')
     }
 
+    // Pagination logic
+    const startIndex = (cmAllocationPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const paginatedData = cmData.slice(startIndex, endIndex)
+
     return (
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 flex justify-between items-center">
+      <div className="bg-white border border-[#003366] rounded-lg overflow-hidden">
+        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">
           <h3 className="text-sm font-semibold">CM Allocation Summary</h3>
           <button
             onClick={handleExport}
@@ -2018,40 +2143,43 @@ const Dashboard = () => {
             Export
           </button>
         </div>
-        <div className="overflow-x-auto max-h-96 overflow-y-auto">
-          <table className="w-full text-xs">
-            <thead className="bg-red-600 text-white sticky top-0">
+        <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
+          <table className="w-full text-xs border border-[#003366]">
+            <thead className="bg-gray-100 text-[#003366] sticky top-0">
               <tr>
-                <th className="text-left py-2 px-2 font-semibold border-r border-red-500">Username</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">TOTAL</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">NPA</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA0</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA1</th>
+                <th className="text-left py-2 px-2 font-semibold">Username</th>
+                <th className="text-right py-2 px-2 font-semibold">TOTAL</th>
+                <th className="text-right py-2 px-2 font-semibold">NPA</th>
+                <th className="text-right py-2 px-2 font-semibold">SMA0</th>
+                <th className="text-right py-2 px-2 font-semibold">SMA1</th>
                 <th className="text-right py-2 px-2 font-semibold">SMA2</th>
               </tr>
             </thead>
             <tbody className="bg-white">
-              {cmData.map((row, idx) => (
+              {paginatedData.map((row, idx) => (
                 <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="py-2 px-2 text-gray-800 font-medium border-r border-gray-200">{row.username}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.total)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.npa)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma0)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma1)}</td>
+                  <td className="py-2 px-2 text-gray-800 font-medium">{row.username}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.total)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.npa)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma0)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma1)}</td>
                   <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2)}</td>
                 </tr>
               ))}
-              <tr className="bg-red-600 text-white font-semibold">
-                <td className="py-2 px-2 border-r border-red-500">Totals</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.total)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.npa)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma0)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma1)}</td>
+              {endIndex >= cmData.length && (
+                <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
+                  <td className="py-2 px-2">Totals</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.total)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.npa)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma0)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma1)}</td>
                 <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
               </tr>
+              )}
             </tbody>
           </table>
         </div>
+        {renderPagination(cmAllocationPage, setCMAllocationPage, cmData.length, itemsPerPage)}
       </div>
     )
   }
@@ -2099,9 +2227,14 @@ const Dashboard = () => {
       exportTableToExcel(exportData, headers, 'AGTL_Allocation_Summary')
     }
 
+    // Pagination logic
+    const startIndex = (agtlAllocationPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const paginatedData = agtlData.slice(startIndex, endIndex)
+
     return (
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 flex justify-between items-center">
+      <div className="bg-white border border-[#003366] rounded-lg overflow-hidden">
+        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">
           <h3 className="text-sm font-semibold">AGTL Allocation Summary</h3>
           <button
             onClick={handleExport}
@@ -2114,40 +2247,43 @@ const Dashboard = () => {
             Export
           </button>
         </div>
-        <div className="overflow-x-auto max-h-96 overflow-y-auto">
-          <table className="w-full text-xs">
-            <thead className="bg-red-600 text-white sticky top-0">
+        <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
+          <table className="w-full text-xs border border-[#003366]">
+            <thead className="bg-gray-100 text-[#003366] sticky top-0">
               <tr>
-                <th className="text-left py-2 px-2 font-semibold border-r border-red-500">Username</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">TOTAL</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">NPA</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA0</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">SMA1</th>
+                <th className="text-left py-2 px-2 font-semibold">Username</th>
+                <th className="text-right py-2 px-2 font-semibold">TOTAL</th>
+                <th className="text-right py-2 px-2 font-semibold">NPA</th>
+                <th className="text-right py-2 px-2 font-semibold">SMA0</th>
+                <th className="text-right py-2 px-2 font-semibold">SMA1</th>
                 <th className="text-right py-2 px-2 font-semibold">SMA2</th>
               </tr>
             </thead>
             <tbody className="bg-white">
-              {agtlData.map((row, idx) => (
+              {paginatedData.map((row, idx) => (
                 <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="py-2 px-2 text-gray-800 font-medium border-r border-gray-200">{row.username}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.total)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.npa)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma0)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.sma1)}</td>
+                  <td className="py-2 px-2 text-gray-800 font-medium">{row.username}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.total)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.npa)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma0)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma1)}</td>
                   <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2)}</td>
                 </tr>
               ))}
-              <tr className="bg-red-600 text-white font-semibold">
-                <td className="py-2 px-2 border-r border-red-500">Totals</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.total)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.npa)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma0)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.sma1)}</td>
+              {endIndex >= agtlData.length && (
+                <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
+                  <td className="py-2 px-2">Totals</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.total)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.npa)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma0)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma1)}</td>
                 <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
               </tr>
+              )}
             </tbody>
           </table>
         </div>
+        {renderPagination(agtlAllocationPage, setAGTLAllocationPage, agtlData.length, itemsPerPage)}
       </div>
     )
   }
@@ -2197,9 +2333,14 @@ const Dashboard = () => {
       exportTableToExcel(exportData, headers, 'State_Wise_Summary')
     }
 
+    // Pagination logic
+    const startIndex = (stateWisePage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const paginatedData = stateData.slice(startIndex, endIndex)
+
     return (
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 flex justify-between items-center">
+      <div className="bg-white border border-[#003366] rounded-lg overflow-hidden">
+        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">
           <h3 className="text-sm font-semibold">State Wise Summary</h3>
           <button
             onClick={handleExport}
@@ -2212,27 +2353,27 @@ const Dashboard = () => {
             Export
           </button>
         </div>
-        <div className="overflow-x-auto max-h-96 overflow-y-auto">
-          <table className="w-full text-xs">
-            <thead className="bg-red-600 text-white sticky top-0">
+        <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
+          <table className="w-full text-xs border border-[#003366]">
+            <thead className="bg-gray-100 text-[#003366] sticky top-0">
               <tr>
-                <th className="text-left py-2 px-2 font-semibold border-r border-red-500">State</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Total Cases</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Outstanding Balance (in Cr.)</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Resolution Count</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Resolution Count%</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Resolution Amount</th>
+                <th className="text-left py-2 px-2 font-semibold">State</th>
+                <th className="text-right py-2 px-2 font-semibold">Total Cases</th>
+                <th className="text-right py-2 px-2 font-semibold">Outstanding Balance (in Cr.)</th>
+                <th className="text-right py-2 px-2 font-semibold">Resolution Count</th>
+                <th className="text-right py-2 px-2 font-semibold">Resolution Count%</th>
+                <th className="text-right py-2 px-2 font-semibold">Resolution Amount</th>
                 <th className="text-right py-2 px-2 font-semibold">Resolution Amount %</th>
               </tr>
             </thead>
             <tbody className="bg-white">
-              {stateData.map((row, idx) => (
+              {paginatedData.map((row, idx) => (
                 <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="py-2 px-2 text-gray-800 font-medium border-r border-gray-200">{row.state}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.totalCases)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{row.outstandingBalance}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.resolutionCount)}</td>
-                  <td className="py-2 px-2 text-right border-r border-gray-200">
+                  <td className="py-2 px-2 text-gray-800 font-medium">{row.state}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.totalCases)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{row.outstandingBalance}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.resolutionCount)}</td>
+                  <td className="py-2 px-2 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <div className="flex-1 max-w-[100px] bg-gray-200 rounded-full h-4 relative">
                         <div 
@@ -2243,22 +2384,25 @@ const Dashboard = () => {
                       <span className="text-gray-700 min-w-[50px] text-right">{row.resolutionCountPercent.toFixed(2)}%</span>
                     </div>
                   </td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{row.resolutionAmount}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{row.resolutionAmount}</td>
                   <td className="py-2 px-2 text-right text-gray-700">{row.resolutionAmountPercent.toFixed(2)}%</td>
                 </tr>
               ))}
-              <tr className="bg-red-600 text-white font-semibold">
-                <td className="py-2 px-2 border-r border-red-500">Totals</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.totalCases)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{totals.outstandingBalance}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.resolutionCount)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{totalResolutionCountPercent}%</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{totals.resolutionAmount}</td>
+              {endIndex >= stateData.length && (
+                <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
+                  <td className="py-2 px-2">Totals</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.totalCases)}</td>
+                  <td className="py-2 px-2 text-right">{totals.outstandingBalance}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionCount)}</td>
+                  <td className="py-2 px-2 text-right">{totalResolutionCountPercent}%</td>
+                  <td className="py-2 px-2 text-right">{totals.resolutionAmount}</td>
                 <td className="py-2 px-2 text-right">{totalResolutionAmountPercent}%</td>
               </tr>
+              )}
             </tbody>
           </table>
         </div>
+        {renderPagination(stateWisePage, setStateWisePage, stateData.length, itemsPerPage)}
       </div>
     )
   }
@@ -2307,9 +2451,14 @@ const Dashboard = () => {
       exportTableToExcel(exportData, headers, 'Region_Wise_Summary')
     }
 
+    // Pagination logic
+    const startIndex = (regionWisePage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const paginatedData = regionData.slice(startIndex, endIndex)
+
     return (
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 flex justify-between items-center">
+      <div className="bg-white border border-[#003366] rounded-lg overflow-hidden">
+        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">
           <h3 className="text-sm font-semibold">Region Wise Summary</h3>
           <button
             onClick={handleExport}
@@ -2322,27 +2471,27 @@ const Dashboard = () => {
             Export
           </button>
         </div>
-        <div className="overflow-x-auto max-h-96 overflow-y-auto">
-          <table className="w-full text-xs">
-            <thead className="bg-red-600 text-white sticky top-0">
+        <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
+          <table className="w-full text-xs border border-[#003366]">
+            <thead className="bg-gray-100 text-[#003366] sticky top-0">
               <tr>
-                <th className="text-left py-2 px-2 font-semibold border-r border-red-500">Region</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Cases</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Outstanding balance</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Resolution count</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Resolution Count%</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Resolution amount</th>
+                <th className="text-left py-2 px-2 font-semibold">Region</th>
+                <th className="text-right py-2 px-2 font-semibold">Cases</th>
+                <th className="text-right py-2 px-2 font-semibold">Outstanding balance</th>
+                <th className="text-right py-2 px-2 font-semibold">Resolution count</th>
+                <th className="text-right py-2 px-2 font-semibold">Resolution Count%</th>
+                <th className="text-right py-2 px-2 font-semibold">Resolution amount</th>
                 <th className="text-right py-2 px-2 font-semibold">Resolution Amount%</th>
               </tr>
             </thead>
             <tbody className="bg-white">
-              {regionData.map((row, idx) => (
+              {paginatedData.map((row, idx) => (
                 <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="py-2 px-2 text-gray-800 font-medium border-r border-gray-200">{row.region}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.cases)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{row.outstandingBalance}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.resolutionCount)}</td>
-                  <td className="py-2 px-2 text-right border-r border-gray-200">
+                  <td className="py-2 px-2 text-gray-800 font-medium">{row.region}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.cases)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{row.outstandingBalance}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.resolutionCount)}</td>
+                  <td className="py-2 px-2 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <div className="flex-1 max-w-[100px] bg-gray-200 rounded-full h-4 relative">
                         <div 
@@ -2353,22 +2502,25 @@ const Dashboard = () => {
                       <span className="text-gray-700 min-w-[50px] text-right">{row.resolutionCountPercent.toFixed(2)}%</span>
                     </div>
                   </td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{row.resolutionAmount}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{row.resolutionAmount}</td>
                   <td className="py-2 px-2 text-right text-gray-700">{row.resolutionAmountPercent.toFixed(2)}%</td>
                 </tr>
               ))}
-              <tr className="bg-red-600 text-white font-semibold">
-                <td className="py-2 px-2 border-r border-red-500">Totals</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.cases)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{totals.outstandingBalance}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.resolutionCount)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{totalResolutionCountPercent}%</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{totals.resolutionAmount}</td>
+              {endIndex >= regionData.length && (
+                <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
+                  <td className="py-2 px-2">Totals</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.cases)}</td>
+                  <td className="py-2 px-2 text-right">{totals.outstandingBalance}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionCount)}</td>
+                  <td className="py-2 px-2 text-right">{totalResolutionCountPercent}%</td>
+                  <td className="py-2 px-2 text-right">{totals.resolutionAmount}</td>
                 <td className="py-2 px-2 text-right">{totalResolutionAmountPercent}%</td>
               </tr>
+              )}
             </tbody>
           </table>
         </div>
+        {renderPagination(regionWisePage, setRegionWisePage, regionData.length, itemsPerPage)}
       </div>
     )
   }
@@ -2416,9 +2568,14 @@ const Dashboard = () => {
       exportTableToExcel(exportData, headers, 'Bucket_Wise_Summary')
     }
 
+    // Pagination logic
+    const startIndex = (bucketWisePage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const paginatedData = bucketData.slice(startIndex, endIndex)
+
     return (
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 flex justify-between items-center">
+      <div className="bg-white border border-[#003366] rounded-lg overflow-hidden">
+        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">
           <h3 className="text-sm font-semibold">Bucket Wise Summary</h3>
           <button
             onClick={handleExport}
@@ -2431,27 +2588,27 @@ const Dashboard = () => {
             Export
           </button>
         </div>
-        <div className="overflow-x-auto max-h-96 overflow-y-auto">
-          <table className="w-full text-xs">
-            <thead className="bg-red-600 text-white sticky top-0">
+        <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
+          <table className="w-full text-xs border border-[#003366]">
+            <thead className="bg-gray-100 text-[#003366] sticky top-0">
               <tr>
-                <th className="text-left py-2 px-2 font-semibold border-r border-red-500">Bucket</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Cases</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Outstanding balance</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Resolution count</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Resolution Count%</th>
-                <th className="text-right py-2 px-2 font-semibold border-r border-red-500">Resolution amount</th>
+                <th className="text-left py-2 px-2 font-semibold">Bucket</th>
+                <th className="text-right py-2 px-2 font-semibold">Cases</th>
+                <th className="text-right py-2 px-2 font-semibold">Outstanding balance</th>
+                <th className="text-right py-2 px-2 font-semibold">Resolution count</th>
+                <th className="text-right py-2 px-2 font-semibold">Resolution Count%</th>
+                <th className="text-right py-2 px-2 font-semibold">Resolution amount</th>
                 <th className="text-right py-2 px-2 font-semibold">Resolution Amount%</th>
               </tr>
             </thead>
             <tbody className="bg-white">
-              {bucketData.map((row, idx) => (
+              {paginatedData.map((row, idx) => (
                 <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : (row.bucket === 'X bucket = 1-30' || row.bucket === '>180' ? 'bg-yellow-50' : 'bg-gray-50')}>
-                  <td className="py-2 px-2 text-gray-800 font-medium border-r border-gray-200">{row.bucket}</td>
-                  <td className={`py-2 px-2 text-right border-r border-gray-200 ${row.bucket === 'X bucket = 1-30' || row.bucket === '>180' ? 'bg-yellow-100 font-semibold' : 'text-gray-700'}`}>{formatIndianNumber(row.cases)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{row.outstandingBalance}</td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{formatIndianNumber(row.resolutionCount)}</td>
-                  <td className="py-2 px-2 text-right border-r border-gray-200">
+                  <td className="py-2 px-2 text-gray-800 font-medium">{row.bucket}</td>
+                  <td className={`py-2 px-2 text-right ${row.bucket === 'X bucket = 1-30' || row.bucket === '>180' ? 'bg-yellow-100 font-semibold' : 'text-gray-700'}`}>{formatIndianNumber(row.cases)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{row.outstandingBalance}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.resolutionCount)}</td>
+                  <td className="py-2 px-2 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <div className="flex-1 max-w-[100px] bg-gray-200 rounded-full h-4 relative">
                         <div 
@@ -2462,22 +2619,25 @@ const Dashboard = () => {
                       <span className="text-gray-700 min-w-[50px] text-right">{row.resolutionCountPercent.toFixed(2)}%</span>
                     </div>
                   </td>
-                  <td className="py-2 px-2 text-right text-gray-700 border-r border-gray-200">{row.resolutionAmount}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{row.resolutionAmount}</td>
                   <td className="py-2 px-2 text-right text-gray-700">{row.resolutionAmountPercent.toFixed(2)}%</td>
                 </tr>
               ))}
-              <tr className="bg-red-600 text-white font-semibold">
-                <td className="py-2 px-2 border-r border-red-500">Totals</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.cases)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{totals.outstandingBalance}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{formatIndianNumber(totals.resolutionCount)}</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{totalResolutionCountPercent}%</td>
-                <td className="py-2 px-2 text-right border-r border-red-500">{totals.resolutionAmount}</td>
+              {endIndex >= bucketData.length && (
+                <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
+                  <td className="py-2 px-2">Totals</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.cases)}</td>
+                  <td className="py-2 px-2 text-right">{totals.outstandingBalance}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionCount)}</td>
+                  <td className="py-2 px-2 text-right">{totalResolutionCountPercent}%</td>
+                  <td className="py-2 px-2 text-right">{totals.resolutionAmount}</td>
                 <td className="py-2 px-2 text-right">{totalResolutionAmountPercent}%</td>
               </tr>
+              )}
             </tbody>
           </table>
         </div>
+        {renderPagination(bucketWisePage, setBucketWisePage, bucketData.length, itemsPerPage)}
       </div>
     )
   }
@@ -2547,7 +2707,7 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
+        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
           <span>MTD Productivity Report</span>
           <button
             onClick={handleExport}
@@ -2561,7 +2721,7 @@ const Dashboard = () => {
           </button>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200 border border-[#003366]">
             <thead className="bg-gray-50">
               <tr>
                 <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SMART COLL ID</th>
@@ -2678,7 +2838,7 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
+        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
           <span>FTD Productivity Report</span>
           <button
             onClick={handleExport}
@@ -2692,7 +2852,7 @@ const Dashboard = () => {
           </button>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200 border border-[#003366]">
             <thead className="bg-gray-50">
               <tr>
                 <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SMART COLL ID</th>
@@ -2777,7 +2937,7 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
+        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
           <span>MTD Collector Summary Report</span>
           <button
             onClick={handleExport}
@@ -2791,7 +2951,7 @@ const Dashboard = () => {
           </button>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200 border border-[#003366]">
             <thead className="bg-gray-50">
               <tr>
                 <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SMART COLL ID</th>
@@ -2894,7 +3054,7 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
+        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
           <span>FTD Collector Summary Report</span>
           <button
             onClick={handleExport}
@@ -2908,7 +3068,7 @@ const Dashboard = () => {
           </button>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200 border border-[#003366]">
             <thead className="bg-gray-50">
               <tr>
                 <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SMART COLL ID</th>
@@ -3016,7 +3176,7 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
+        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
           <span>MTD Time-Wise Visit Report</span>
           <button
             onClick={handleExport}
@@ -3030,7 +3190,7 @@ const Dashboard = () => {
           </button>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200 border border-[#003366]">
             <thead className="bg-gray-50">
               <tr>
                 <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SMART COLL ID</th>
@@ -3133,7 +3293,7 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="bg-white text-red-600 border border-red-600 rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
+        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
           <span>FTD Time-Wise Visit Report</span>
           <button
             onClick={handleExport}
@@ -3147,7 +3307,7 @@ const Dashboard = () => {
           </button>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200 border border-[#003366]">
             <thead className="bg-gray-50">
               <tr>
                 <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SMART COLL ID</th>
@@ -3395,7 +3555,7 @@ const Dashboard = () => {
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="bg-red-600 text-white p-3 text-lg font-semibold flex justify-between items-center">
+        <div className="bg-gray-100 text-[#003366] p-3 text-lg font-semibold flex justify-between items-center">
           <span>Deposition Data</span>
           <div className="flex items-center gap-4">
             {pagination && (
@@ -3417,7 +3577,7 @@ const Dashboard = () => {
           </div>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200 border border-[#003366]">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">APAC Number</th>
@@ -3495,22 +3655,38 @@ const Dashboard = () => {
         /* Custom Scrollbar Styles - Very Thin and Red */
         * {
           scrollbar-width: thin;
-          scrollbar-color: #DC2626 transparent;
+          scrollbar-color: #003366 transparent;
         }
         *::-webkit-scrollbar {
-          width: 3px;
-          height: 3px;
+          width: 4px;
+          height: 4px;
         }
         *::-webkit-scrollbar-track {
           background: transparent;
         }
         *::-webkit-scrollbar-thumb {
-          background: #DC2626;
-          border-radius: 1.5px;
+          background: #003366;
+          border-radius: 2px;
           transition: background 0.2s ease;
         }
         *::-webkit-scrollbar-thumb:hover {
-          background: #B91C1C;
+          background: #002244;
+        }
+        /* Table scrollbar styling */
+        .table-scroll-container::-webkit-scrollbar {
+          width: 4px;
+          height: 4px;
+        }
+        .table-scroll-container::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 2px;
+        }
+        .table-scroll-container::-webkit-scrollbar-thumb {
+          background: #003366;
+          border-radius: 2px;
+        }
+        .table-scroll-container::-webkit-scrollbar-thumb:hover {
+          background: #002244;
         }
         *::-webkit-scrollbar-corner {
           background: transparent;
@@ -3522,8 +3698,21 @@ const Dashboard = () => {
         }
         .card-with-wave.expanded {
           overflow: visible;
-          z-index: 40;
+          z-index: 50;
           box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .card-expanded-content {
+          position: absolute;
+          top: 100%;
+          left: 0;
+          right: 0;
+          background: white;
+          border-radius: 0.5rem;
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+          z-index: 50;
+          margin-top: 0.25rem;
+          padding: 0.75rem;
+          min-width: 100%;
         }
         .card-with-wave::after {
           content: '';
@@ -3531,25 +3720,28 @@ const Dashboard = () => {
           bottom: 0;
           left: 0;
           right: 0;
-          height: 15%;
+          height: 3px;
           border-radius: 0 0 0.5rem 0.5rem;
         }
         .card-with-wave.expanded::after {
-          height: 10%;
+          height: 3px;
+          border-radius: 0 0 0.5rem 0.5rem;
         }
         .card-with-wave-thin::after {
-          height: 8%;
+          height: 3px;
+          border-radius: 0 0 0.5rem 0.5rem;
         }
         .card-with-wave-thin.expanded::after {
-          height: 6%;
+          height: 3px;
+          border-radius: 0 0 0.5rem 0.5rem;
         }
         .card-wave-indigo::after { background-color: #003366; }
         .card-wave-blue::after { background-color: #2196F3; }
         .card-wave-green::after { background-color: #4CAF50; }
         .card-wave-orange::after { background-color: #F04E23; }
-        .card-wave-red::after { background-color: #D32F2F; }
+        .card-wave-red::after { background-color: #DC2626; }
         .card-wave-purple::after { background-color: #1976D2; }
-        .card-wave-gray::after { background-color: #333333; }
+        .card-wave-gray::after { background-color: #6B7280; }
         .card-wave-staff::after { background-color: #DC2626; }
         .card-wave-engagement::after { background-color: #2196F3; }
         .card-wave-payment::after { background-color: #003366; }
@@ -4109,7 +4301,7 @@ const Dashboard = () => {
                     {/* Allocation Summary Card */}
                     <div 
                       data-staff-card
-                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff ${expandedCard === 'allocation' ? 'expanded min-h-[170px] pb-4' : 'h-20'} ${selectedStaffMetric === 'allocation' ? 'ring-2 ring-red-600 shadow-lg' : ''}`}
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'allocation' ? 'expanded' : ''} ${selectedStaffMetric === 'allocation' ? 'scale-[1.03] shadow-lg' : ''}`}
                       onMouseEnter={() => setExpandedCard('allocation')}
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={(e) => {
@@ -4118,11 +4310,13 @@ const Dashboard = () => {
                       }}
                     >
                       {renderFavoritePin('allocation')}
-                      {expandedCard === 'allocation' ? (
-                        <div className="relative z-10 mb-2">
-                          <div className="text-xs text-gray-800">Case Summary</div>
-                          <div className="text-lg font-bold" style={{color: '#DC2626'}}>{formatIndianNumber(dashboardData?.loan_data?.total_loans)}</div>
-                          <div className="mt-2 space-y-1">
+                      <div className="text-xs text-gray-800 relative z-10">Case Summary</div>
+                      <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>{formatIndianNumber(dashboardData?.loan_data?.total_loans)}</div>
+                      {expandedCard === 'allocation' && (
+                        <div className="card-expanded-content">
+                          <div className="text-xs text-gray-800 mb-1">Case Summary</div>
+                          <div className="text-lg font-bold mb-2" style={{color: '#DC2626'}}>{formatIndianNumber(dashboardData?.loan_data?.total_loans)}</div>
+                          <div className="space-y-1">
                             <div className="flex justify-between text-xs text-gray-800">
                               <span>Active Accounts:</span>
                               <span style={{color: '#DC2626'}}>{formatIndianNumber(dashboardData?.loan_data?.total_loans)}</span>
@@ -4145,18 +4339,13 @@ const Dashboard = () => {
                             </div>
                           </div>
                         </div>
-                      ) : (
-                        <>
-                          <div className="text-xs text-gray-800 relative z-10">Case Summary</div>
-                          <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>{formatIndianNumber(dashboardData?.loan_data?.total_loans)}</div>
-                        </>
                       )}
                     </div>
 
                     {/* Collection Efficiency Card */}
                     <div 
                       data-staff-card
-                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff ${expandedCard === 'collection' ? 'expanded min-h-[160px] pb-4' : 'h-20'} ${selectedStaffMetric === 'collection' ? 'ring-2 ring-red-600 shadow-lg' : ''}`}
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'collection' ? 'expanded' : ''} ${selectedStaffMetric === 'collection' ? 'scale-[1.03] shadow-lg' : ''}`}
                       onMouseEnter={() => setExpandedCard('collection')}
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={(e) => {
@@ -4165,11 +4354,13 @@ const Dashboard = () => {
                       }}
                     >
                       {renderFavoritePin('collection')}
-                      {expandedCard === 'collection' ? (
-                        <div className="relative z-10 mb-2">
-                          <div className="text-xs text-gray-800">Collection Efficiency (%)</div>
-                          <div className="text-lg font-bold" style={{color: '#DC2626'}}>{dashboardData?.collection_data?.collection_percentage}%</div>
-                          <div className="mt-2 space-y-1">
+                      <div className="text-xs text-gray-800 relative z-10">Collection Efficiency (%)</div>
+                      <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>{dashboardData?.collection_data?.collection_percentage}%</div>
+                      {expandedCard === 'collection' && (
+                        <div className="card-expanded-content">
+                          <div className="text-xs text-gray-800 mb-1">Collection Efficiency (%)</div>
+                          <div className="text-lg font-bold mb-2" style={{color: '#DC2626'}}>{dashboardData?.collection_data?.collection_percentage}%</div>
+                          <div className="space-y-1">
                             <div className="flex justify-between text-xs text-gray-800">
                               <span>Amount Collected:</span>
                               <span style={{color: '#DC2626'}}>{dashboardData?.collection_data?.collection_amount_cr} Cr</span>
@@ -4184,18 +4375,13 @@ const Dashboard = () => {
                             </div>
                           </div>
                         </div>
-                      ) : (
-                        <>
-                          <div className="text-xs text-gray-800 relative z-10">Collection Efficiency (%)</div>
-                          <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>{dashboardData?.collection_data?.collection_percentage}%</div>
-                        </>
                       )}
                     </div>
 
                     {/* PTP Conversion Rate Card */}
                     <div 
                       data-staff-card
-                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff ${expandedCard === 'ptp' ? 'expanded min-h-[160px] pb-4' : 'h-20'} ${selectedStaffMetric === 'ptp' ? 'ring-2 ring-red-600 shadow-lg' : ''}`}
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'ptp' ? 'expanded' : ''} ${selectedStaffMetric === 'ptp' ? 'scale-[1.03] shadow-lg' : ''}`}
                       onMouseEnter={() => setExpandedCard('ptp')}
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={(e) => {
@@ -4204,11 +4390,13 @@ const Dashboard = () => {
                       }}
                     >
                       {renderFavoritePin('ptp')}
-                      {expandedCard === 'ptp' ? (
-                        <div className="relative z-10 mb-2">
-                          <div className="text-xs text-gray-800">PTP Conversion Rate (%)</div>
-                          <div className="text-lg font-bold" style={{color: '#DC2626'}}>72.3%</div>
-                          <div className="mt-2 space-y-1">
+                      <div className="text-xs text-gray-800 relative z-10">PTP Conversion Rate (%)</div>
+                      <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>72.3%</div>
+                      {expandedCard === 'ptp' && (
+                        <div className="card-expanded-content">
+                          <div className="text-xs text-gray-800 mb-1">PTP Conversion Rate (%)</div>
+                          <div className="text-lg font-bold mb-2" style={{color: '#DC2626'}}>72.3%</div>
+                          <div className="space-y-1">
                             <div className="flex justify-between text-xs text-gray-800">
                               <span>PTPs Fulfilled:</span>
                               <span style={{color: '#DC2626'}}>234</span>
@@ -4223,18 +4411,13 @@ const Dashboard = () => {
                             </div>
                           </div>
                         </div>
-                      ) : (
-                        <>
-                          <div className="text-xs text-gray-800 relative z-10">PTP Conversion Rate (%)</div>
-                          <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>72.3%</div>
-                        </>
                       )}
                     </div>
 
                     {/* Staff Productivity Index Card */}
                     <div 
                       data-staff-card
-                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff ${expandedCard === 'productivity' ? 'expanded min-h-[160px] pb-4' : 'h-20'} ${selectedStaffMetric === 'productivity' ? 'ring-2 ring-red-600 shadow-lg' : ''}`}
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'productivity' ? 'expanded' : ''} ${selectedStaffMetric === 'productivity' ? 'scale-[1.03] shadow-lg' : ''}`}
                       onMouseEnter={() => setExpandedCard('productivity')}
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={(e) => {
@@ -4243,11 +4426,13 @@ const Dashboard = () => {
                       }}
                     >
                       {renderFavoritePin('productivity')}
-                      {expandedCard === 'productivity' ? (
-                        <div className="relative z-10 mb-2">
-                          <div className="text-xs text-gray-800">Staff Productivity Index</div>
-                          <div className="text-lg font-bold" style={{color: '#DC2626'}}>156</div>
-                          <div className="mt-2 space-y-1">
+                      <div className="text-xs text-gray-800 relative z-10">Staff Productivity Index</div>
+                      <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>156</div>
+                      {expandedCard === 'productivity' && (
+                        <div className="card-expanded-content">
+                          <div className="text-xs text-gray-800 mb-1">Staff Productivity Index</div>
+                          <div className="text-lg font-bold mb-2" style={{color: '#DC2626'}}>156</div>
+                          <div className="space-y-1">
                             <div className="flex justify-between text-xs text-gray-800">
                               <span>Total Calls:</span>
                               <span style={{color: '#DC2626'}}>1,245</span>
@@ -4262,18 +4447,13 @@ const Dashboard = () => {
                             </div>
                           </div>
                         </div>
-                      ) : (
-                        <>
-                          <div className="text-xs text-gray-800 relative z-10">Staff Productivity Index</div>
-                          <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>156</div>
-                        </>
                       )}
                     </div>
 
                     {/* Inactive/Non-performing Staff Card */}
                     <div 
                       data-staff-card
-                      className={`group bg-white rounded-lg p-3 relative cursor-pointer transition-all duration-300 card-with-wave card-wave-staff ${expandedCard === 'inactive' ? 'expanded min-h-[190px] pb-4' : 'h-20'} ${selectedStaffMetric === 'inactive' ? 'ring-2 ring-red-600 shadow-lg' : ''}`}
+                      className={`group bg-white rounded-lg p-3 relative cursor-pointer transition-all duration-300 card-with-wave card-wave-staff h-20 ${expandedCard === 'inactive' ? 'expanded' : ''} ${selectedStaffMetric === 'inactive' ? 'scale-[1.03] shadow-lg' : ''}`}
                       onMouseEnter={() => setExpandedCard('inactive')}
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={(e) => {
@@ -4283,12 +4463,14 @@ const Dashboard = () => {
                     >
                       {renderFavoritePin('inactive')}
                       <div className="absolute top-0 right-0 bg-red-600 text-white text-xs rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center font-bold z-20 shadow-sm">3</div>
-                      {expandedCard === 'inactive' ? (
-                        <div className="relative z-10 mb-2">
-                          <div className="text-xs text-gray-800">Inactive/Non-performing Staff</div>
-                          <div className="text-lg font-bold" style={{color: '#DC2626'}}>3</div>
-                          <div className="text-xs text-gray-800">0 calls or 0 visits</div>
-                          <div className="mt-2 space-y-1">
+                      <div className="text-xs text-gray-800 relative z-10">Inactive/Non-performing Staff</div>
+                      <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>3</div>
+                      {expandedCard === 'inactive' && (
+                        <div className="card-expanded-content">
+                          <div className="text-xs text-gray-800 mb-1">Inactive/Non-performing Staff</div>
+                          <div className="text-lg font-bold mb-1" style={{color: '#DC2626'}}>3</div>
+                          <div className="text-xs text-gray-800 mb-2">0 calls or 0 visits</div>
+                          <div className="space-y-1">
                             <div className="flex justify-between text-xs text-gray-800">
                               <span>Ramesh K.</span>
                               <span style={{color: '#DC2626'}}>(0 calls)</span>
@@ -4303,11 +4485,6 @@ const Dashboard = () => {
                             </div>
                           </div>
                         </div>
-                      ) : (
-                        <>
-                          <div className="text-xs text-gray-800 relative z-10">Inactive/Non-performing Staff</div>
-                          <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>3</div>
-                        </>
                       )}
                     </div>
                   </div>
@@ -4338,14 +4515,13 @@ const Dashboard = () => {
                           onClick={() => setSelectedLoanType('tractor')}
                           className={`group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border ${selectedLoanType === 'tractor' ? 'border-red-600 ring-2 ring-red-600' : 'border-gray-200 hover:border-red-600'}`}
                           style={{
-                            backgroundImage: `url(${tractorFinanceImage})`,
+                            backgroundImage: tractorFinanceImage ? `url("${tractorFinanceImage}")` : 'none',
                             backgroundSize: 'cover',
                             backgroundPosition: 'right center',
                             backgroundRepeat: 'no-repeat'
                           }}
                         >
-                          {/* Overlay for text readability */}
-                          <div className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-transparent z-0"></div>
+                          {/* Removed overlay/blur to show full tractor image clearly */}
                           <div className="flex h-32 relative z-10">
                             {/* Left Side - Text Content */}
                             <div className="flex-1 flex flex-col justify-center px-3 py-2 z-10 relative">
@@ -4358,64 +4534,24 @@ const Dashboard = () => {
                                 </svg>
                               </div>
                             </div>
-                            {/* Right Side - Image with Blur Effect on Left */}
-                            <div className="relative w-32 flex-shrink-0 overflow-hidden">
-                              {/* Blurred left side overlay */}
-                              <div className="absolute inset-0 z-20 pointer-events-none">
-                                <div 
-                                  className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white via-white/95 to-transparent"
-                                  style={{
-                                    backdropFilter: 'blur(2px)',
-                                    WebkitBackdropFilter: 'blur(2px)'
-                                  }}
-                                ></div>
-                              </div>
-                              {/* Image with blur mask on left */}
-                              <div className="relative w-full h-full z-0">
-                                <img
-                                  src={tractorFinanceImage}
-                                  alt="Tractor Finance"
-                                  className="w-full h-full object-cover relative z-10"
-                                  style={{
-                                    maskImage: 'linear-gradient(to right, transparent 0%, transparent 20%, black 40%, black 100%)',
-                                    WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 20%, black 40%, black 100%)',
-                                    filter: 'blur(0px)',
-                                  }}
-                                  onError={(e) => {
-                                    e.target.style.display = 'none'
-                                  }}
-                                />
-                                {/* Blurred version for left side */}
-                                <img
-                                  src={tractorFinanceImage}
-                                  alt="Tractor Finance"
-                                  className="absolute inset-0 w-full h-full object-cover z-10"
-                                  style={{
-                                    maskImage: 'linear-gradient(to right, black 0%, black 40%, transparent 60%, transparent 100%)',
-                                    WebkitMaskImage: 'linear-gradient(to right, black 0%, black 40%, transparent 60%, transparent 100%)',
-                                    filter: 'blur(3px)',
-                                  }}
-                                  onError={(e) => {
-                                    e.target.style.display = 'none'
-                                  }}
-                                />
-                              </div>
-                              {/* Placeholder if image doesn't exist */}
-                              <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center z-0">
-                                <svg className="w-16 h-16 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                              </div>
-                            </div>
+                            {/* Right Side spacer only; background image on container shows the tractor without blur */}
+                            <div className="relative w-32 flex-shrink-0 overflow-hidden"></div>
                           </div>
                         </div>
 
                         {/* Commercial Vehicle Card */}
                         <div
                           onClick={() => setSelectedLoanType('vehicle')}
-                          className={`group relative bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border ${selectedLoanType === 'vehicle' ? 'border-red-600 ring-2 ring-red-600' : 'border-gray-200 hover:border-red-600'}`}
+                          className={`group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border ${selectedLoanType === 'vehicle' ? 'border-red-600 ring-2 ring-red-600' : 'border-gray-200 hover:border-red-600'}`}
+                          style={{
+                            backgroundImage: commercialVehicleImage ? `url("${commercialVehicleImage}")` : 'none',
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'right center',
+                            backgroundRepeat: 'no-repeat'
+                          }}
                         >
-                          <div className="flex h-32">
+                          {/* Removed overlay/blur to show full vehicle image clearly */}
+                          <div className="flex h-32 relative z-10">
                             {/* Left Side - Text Content */}
                             <div className="flex-1 flex flex-col justify-center px-3 py-2 z-10 relative">
                               <h3 className="text-base font-bold text-gray-900 mb-1">Commercial Vehicle</h3>
@@ -4427,64 +4563,24 @@ const Dashboard = () => {
                                 </svg>
                               </div>
                             </div>
-                            {/* Right Side - Image with Blur Effect on Left */}
-                            <div className="relative w-32 flex-shrink-0 overflow-hidden">
-                              {/* Blurred left side overlay */}
-                              <div className="absolute inset-0 z-20 pointer-events-none">
-                                <div 
-                                  className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white via-white/95 to-transparent"
-                                  style={{
-                                    backdropFilter: 'blur(2px)',
-                                    WebkitBackdropFilter: 'blur(2px)'
-                                  }}
-                                ></div>
-                              </div>
-                              {/* Image with blur mask on left */}
-                              <div className="relative w-full h-full z-0">
-                                <img
-                                  src="/src/assets/Images/vehicle.png"
-                                  alt="Commercial Vehicle"
-                                  className="w-full h-full object-cover relative z-10"
-                                  style={{
-                                    maskImage: 'linear-gradient(to right, transparent 0%, transparent 20%, black 40%, black 100%)',
-                                    WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 20%, black 40%, black 100%)',
-                                    filter: 'blur(0px)',
-                                  }}
-                                  onError={(e) => {
-                                    e.target.style.display = 'none'
-                                  }}
-                                />
-                                {/* Blurred version for left side */}
-                                <img
-                                  src="/src/assets/Images/vehicle.png"
-                                  alt="Commercial Vehicle"
-                                  className="absolute inset-0 w-full h-full object-cover z-10"
-                                  style={{
-                                    maskImage: 'linear-gradient(to right, black 0%, black 40%, transparent 60%, transparent 100%)',
-                                    WebkitMaskImage: 'linear-gradient(to right, black 0%, black 40%, transparent 60%, transparent 100%)',
-                                    filter: 'blur(3px)',
-                                  }}
-                                  onError={(e) => {
-                                    e.target.style.display = 'none'
-                                  }}
-                                />
-                              </div>
-                              {/* Placeholder if image doesn't exist */}
-                              <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center z-0">
-                                <svg className="w-16 h-16 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                              </div>
-                            </div>
+                            {/* Right Side spacer only; background image on container shows the vehicle without blur */}
+                            <div className="relative w-32 flex-shrink-0 overflow-hidden"></div>
                           </div>
                         </div>
 
                         {/* Construction Equipment Card */}
                         <div
                           onClick={() => setSelectedLoanType('construction')}
-                          className={`group relative bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border ${selectedLoanType === 'construction' ? 'border-red-600 ring-2 ring-red-600' : 'border-gray-200 hover:border-red-600'}`}
+                          className={`group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border ${selectedLoanType === 'construction' ? 'border-red-600 ring-2 ring-red-600' : 'border-gray-200 hover:border-red-600'}`}
+                          style={{
+                            backgroundImage: constructionEquipmentImage ? `url("${constructionEquipmentImage}")` : 'none',
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'right center',
+                            backgroundRepeat: 'no-repeat'
+                          }}
                         >
-                          <div className="flex h-32">
+                          {/* Removed overlay/blur to show full construction image clearly */}
+                          <div className="flex h-32 relative z-10">
                             {/* Left Side - Text Content */}
                             <div className="flex-1 flex flex-col justify-center px-3 py-2 z-10 relative">
                               <h3 className="text-base font-bold text-gray-900 mb-1">Construction Equipment</h3>
@@ -4496,64 +4592,24 @@ const Dashboard = () => {
                                 </svg>
                               </div>
                             </div>
-                            {/* Right Side - Image with Blur Effect on Left */}
-                            <div className="relative w-32 flex-shrink-0 overflow-hidden">
-                              {/* Blurred left side overlay */}
-                              <div className="absolute inset-0 z-20 pointer-events-none">
-                                <div 
-                                  className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white via-white/95 to-transparent"
-                                  style={{
-                                    backdropFilter: 'blur(2px)',
-                                    WebkitBackdropFilter: 'blur(2px)'
-                                  }}
-                                ></div>
-                              </div>
-                              {/* Image with blur mask on left */}
-                              <div className="relative w-full h-full z-0">
-                                <img
-                                  src="/src/assets/Images/construction.png"
-                                  alt="Construction Equipment"
-                                  className="w-full h-full object-cover relative z-10"
-                                  style={{
-                                    maskImage: 'linear-gradient(to right, transparent 0%, transparent 20%, black 40%, black 100%)',
-                                    WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 20%, black 40%, black 100%)',
-                                    filter: 'blur(0px)',
-                                  }}
-                                  onError={(e) => {
-                                    e.target.style.display = 'none'
-                                  }}
-                                />
-                                {/* Blurred version for left side */}
-                                <img
-                                  src="/src/assets/Images/construction.png"
-                                  alt="Construction Equipment"
-                                  className="absolute inset-0 w-full h-full object-cover z-10"
-                                  style={{
-                                    maskImage: 'linear-gradient(to right, black 0%, black 40%, transparent 60%, transparent 100%)',
-                                    WebkitMaskImage: 'linear-gradient(to right, black 0%, black 40%, transparent 60%, transparent 100%)',
-                                    filter: 'blur(3px)',
-                                  }}
-                                  onError={(e) => {
-                                    e.target.style.display = 'none'
-                                  }}
-                                />
-                              </div>
-                              {/* Placeholder if image doesn't exist */}
-                              <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center z-0">
-                                <svg className="w-16 h-16 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                              </div>
-                            </div>
+                            {/* Right Side spacer only; background image on container shows the construction image without blur */}
+                            <div className="relative w-32 flex-shrink-0 overflow-hidden"></div>
                           </div>
                         </div>
 
                         {/* Home Loan Card */}
                         <div
                           onClick={() => setSelectedLoanType('home')}
-                          className={`group relative bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border ${selectedLoanType === 'home' ? 'border-red-600 ring-2 ring-red-600' : 'border-gray-200 hover:border-red-600'}`}
+                          className={`group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border ${selectedLoanType === 'home' ? 'border-red-600 ring-2 ring-red-600' : 'border-gray-200 hover:border-red-600'}`}
+                          style={{
+                            backgroundImage: homeLoanImage ? `url("${homeLoanImage}")` : 'none',
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'right center',
+                            backgroundRepeat: 'no-repeat'
+                          }}
                         >
-                          <div className="flex h-32">
+                          {/* Removed overlay/blur to show full home loan image clearly */}
+                          <div className="flex h-32 relative z-10">
                             {/* Left Side - Text Content */}
                             <div className="flex-1 flex flex-col justify-center px-3 py-2 z-10 relative">
                               <h3 className="text-base font-bold text-gray-900 mb-1">Home Loan</h3>
@@ -4565,55 +4621,8 @@ const Dashboard = () => {
                                 </svg>
                               </div>
                             </div>
-                            {/* Right Side - Image with Blur Effect on Left */}
-                            <div className="relative w-32 flex-shrink-0 overflow-hidden">
-                              {/* Blurred left side overlay */}
-                              <div className="absolute inset-0 z-20 pointer-events-none">
-                                <div 
-                                  className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white via-white/95 to-transparent"
-                                  style={{
-                                    backdropFilter: 'blur(2px)',
-                                    WebkitBackdropFilter: 'blur(2px)'
-                                  }}
-                                ></div>
-                              </div>
-                              {/* Image with blur mask on left */}
-                              <div className="relative w-full h-full z-0">
-                                <img
-                                  src="/src/assets/Images/home-loan.png"
-                                  alt="Home Loan"
-                                  className="w-full h-full object-cover relative z-10"
-                                  style={{
-                                    maskImage: 'linear-gradient(to right, transparent 0%, transparent 20%, black 40%, black 100%)',
-                                    WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 20%, black 40%, black 100%)',
-                                    filter: 'blur(0px)',
-                                  }}
-                                  onError={(e) => {
-                                    e.target.style.display = 'none'
-                                  }}
-                                />
-                                {/* Blurred version for left side */}
-                                <img
-                                  src="/src/assets/Images/home-loan.png"
-                                  alt="Home Loan"
-                                  className="absolute inset-0 w-full h-full object-cover z-10"
-                                  style={{
-                                    maskImage: 'linear-gradient(to right, black 0%, black 40%, transparent 60%, transparent 100%)',
-                                    WebkitMaskImage: 'linear-gradient(to right, black 0%, black 40%, transparent 60%, transparent 100%)',
-                                    filter: 'blur(3px)',
-                                  }}
-                                  onError={(e) => {
-                                    e.target.style.display = 'none'
-                                  }}
-                                />
-                              </div>
-                              {/* Placeholder if image doesn't exist */}
-                              <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center z-0">
-                                <svg className="w-16 h-16 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                              </div>
-                            </div>
+                            {/* Right Side spacer only; background image on container shows the home loan image without blur */}
+                            <div className="relative w-32 flex-shrink-0 overflow-hidden"></div>
                           </div>
                         </div>
                       </div>
@@ -5322,7 +5331,7 @@ const Dashboard = () => {
                 {/* Customer Engagement */}
                 <div className="mb-8 border bg-[] border-red-400 rounded-lg p-4" style={{borderColor: '#e5e7eb'}}>
                   <h2 className="text-lg font-semibold text-gray-800 mb-4">Customer Engagement</h2>
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="grid grid-cols-4 gap-3 relative z-10">
                     <div 
                       data-engagement-card
                       className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement ${selectedEngagementCard === 'whatsapp' ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}
@@ -5435,125 +5444,176 @@ const Dashboard = () => {
                 {/* Customer Engagement Detailed Section */}
                 {selectedEngagementCard && (
                   <div ref={engagementSectionRef} className="mb-8 bg-white border border-gray-200 rounded-lg p-6 shadow-sm mt-6">
-                    {/* Header with Close Button */}
-                    <div className="flex justify-between items-center mb-6">
-                      <h2 className="text-xl font-semibold text-gray-900">Customer Engagement Details</h2>
-                      <button
-                        onClick={() => setSelectedEngagementCard(null)}
-                        className="p-2 rounded-lg transition-colors cursor-pointer hover:bg-gray-100"
-                        aria-label="Close engagement section"
-                        title="Close"
+                  {/* Header with Close Button */}
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-semibold text-gray-900">Customer Engagement Details</h2>
+                    <button
+                      onClick={() => setSelectedEngagementCard(null)}
+                      className="p-2 rounded-lg transition-colors cursor-pointer hover:bg-gray-100"
+                      aria-label="Close engagement section"
+                      title="Close"
+                    >
+                      <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                
+                  {/* 🔹 Timeline Section */}
+                  <div className="flex overflow-x-auto gap-3 pb-4 mb-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                    {[
+                      "01-10-2025", "02-10-2025", "03-10-2025", "04-10-2025", "05-10-2025",
+                      "06-10-2025", "07-10-2025", "08-10-2025", "09-10-2025", "10-10-2025",
+                      "11-10-2025", "12-10-2025", "13-10-2025", "14-10-2025"
+                    ].map((date, index) => (
+                      <div
+                        key={index}
+                        className={`min-w-[90px] text-center border rounded-lg py-2 shadow-sm cursor-pointer transition-all duration-200 ${
+                          selectedDate === date
+                            ? "bg-blue-100 border-blue-600 text-blue-800 font-semibold"
+                            : "bg-white border-gray-200 hover:bg-gray-50 text-gray-700"
+                        }`}
+                        onClick={() => setSelectedDate(date)}
                       >
-                        <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
+                        <div className="text-lg font-bold">0</div>
+                        <div className="text-xs">{date}</div>
+                      </div>
+                    ))}
+                  </div>
+                
+                  {/* Engagement Grid Section */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                    {/* Total Engagement + Breakdown */}
+                    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="text-sm font-semibold text-gray-900">Total Customers Engagement</div>
+                        <div className="text-2xl font-bold text-gray-800">
+                          {customerEngagementData.totalEngagement.toLocaleString()}
+                        </div>
+                      </div>
+                
+                      <div className="grid grid-cols-4 gap-3 mb-4">
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                          <div className="text-2xl">💬</div>
+                          <div className="text-sm font-semibold text-green-800">
+                            {customerEngagementData.engagementBreakdown.whatsapp.toLocaleString()}
+                          </div>
+                          <div className="text-xs text-green-700">WhatsApp</div>
+                        </div>
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+                          <div className="text-2xl">🔊</div>
+                          <div className="text-sm font-semibold text-blue-800">
+                            {customerEngagementData.engagementBreakdown.blaster.toLocaleString()}
+                          </div>
+                          <div className="text-xs text-blue-700">Blaster</div>
+                        </div>
+                        <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
+                          <div className="text-2xl">🤖</div>
+                          <div className="text-sm font-semibold text-purple-800">
+                            {customerEngagementData.engagementBreakdown.aiCalls.toLocaleString()}
+                          </div>
+                          <div className="text-xs text-purple-700">AI Calls</div>
+                        </div>
+                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 text-center">
+                          <div className="text-2xl">📞</div>
+                          <div className="text-sm font-semibold text-orange-800">
+                            {customerEngagementData.engagementBreakdown.dialers.toLocaleString()}
+                          </div>
+                          <div className="text-xs text-orange-700">Dialers</div>
+                        </div>
+                      </div>
+                
+                      <div className="grid grid-cols-4 gap-3">
+                        <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
+                          <div className="text-2xl">👤</div>
+                          <div className="text-base font-semibold text-gray-800">
+                            {customerEngagementData.customerMetrics.totalCustomers.toLocaleString()}
+                          </div>
+                          <div className="text-xs text-gray-600">Total Customers</div>
+                        </div>
+                        <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
+                          <div className="text-2xl">👥</div>
+                          <div className="text-base font-semibold text-gray-800">
+                            {customerEngagementData.customerMetrics.connectedCustomers.toLocaleString()}
+                          </div>
+                          <div className="text-xs text-gray-600">Connected</div>
+                        </div>
+                        <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
+                          <div className="text-2xl">💰</div>
+                          <div className="text-base font-semibold text-gray-800">
+                            ₹{customerEngagementData.customerMetrics.amountPromised.toLocaleString()}
+                          </div>
+                          <div className="text-xs text-gray-600">Amount Promised</div>
+                        </div>
+                        <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
+                          <div className="text-2xl">💳</div>
+                          <div className="text-base font-semibold text-gray-800">
+                            ₹{customerEngagementData.customerMetrics.amountCollected.toLocaleString()}
+                          </div>
+                          <div className="text-xs text-gray-600">Amount Collected</div>
+                        </div>
+                      </div>
                     </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-                      {/* Total Engagement + Breakdown */}
-                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="text-sm font-semibold text-gray-900">Total Customers Engagement</div>
-                          <div className="text-2xl font-bold text-gray-800">{customerEngagementData.totalEngagement.toLocaleString()}</div>
-                        </div>
-                        <div className="grid grid-cols-4 gap-3 mb-4">
-                          <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
-                            <div className="text-2xl">💬</div>
-                            <div className="text-sm font-semibold text-green-800">{customerEngagementData.engagementBreakdown.whatsapp.toLocaleString()}</div>
-                            <div className="text-xs text-green-700">WhatsApp</div>
-                          </div>
-                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
-                            <div className="text-2xl">🔊</div>
-                            <div className="text-sm font-semibold text-blue-800">{customerEngagementData.engagementBreakdown.blaster.toLocaleString()}</div>
-                            <div className="text-xs text-blue-700">Blaster</div>
-                          </div>
-                          <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
-                            <div className="text-2xl">🤖</div>
-                            <div className="text-sm font-semibold text-purple-800">{customerEngagementData.engagementBreakdown.aiCalls.toLocaleString()}</div>
-                            <div className="text-xs text-purple-700">AI Calls</div>
-                          </div>
-                          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 text-center">
-                            <div className="text-2xl">📞</div>
-                            <div className="text-sm font-semibold text-orange-800">{customerEngagementData.engagementBreakdown.dialers.toLocaleString()}</div>
-                            <div className="text-xs text-orange-700">Dialers</div>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-4 gap-3">
-                          <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
-                            <div className="text-2xl">👤</div>
-                            <div className="text-base font-semibold text-gray-800">{customerEngagementData.customerMetrics.totalCustomers.toLocaleString()}</div>
-                            <div className="text-xs text-gray-600">Total Customers</div>
-                          </div>
-                          <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
-                            <div className="text-2xl">👥</div>
-                            <div className="text-base font-semibold text-gray-800">{customerEngagementData.customerMetrics.connectedCustomers.toLocaleString()}</div>
-                            <div className="text-xs text-gray-600">Connected</div>
-                          </div>
-                          <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
-                            <div className="text-2xl">💰</div>
-                            <div className="text-base font-semibold text-gray-800">₹{customerEngagementData.customerMetrics.amountPromised.toLocaleString()}</div>
-                            <div className="text-xs text-gray-600">Amount Promised</div>
-                          </div>
-                          <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
-                            <div className="text-2xl">💳</div>
-                            <div className="text-base font-semibold text-gray-800">₹{customerEngagementData.customerMetrics.amountCollected.toLocaleString()}</div>
-                            <div className="text-xs text-gray-600">Amount Collected</div>
-                          </div>
-                        </div>
+                
+                    {/* Chart */}
+                    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-sm font-semibold text-gray-900">Customers Engagement</h4>
+                        <select
+                          defaultValue="Last 15 days"
+                          className="px-3 py-1 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                        >
+                          <option value="Last 7 days">Last 7 days</option>
+                          <option value="Last 15 days">Last 15 days</option>
+                          <option value="Last 30 days">Last 30 days</option>
+                        </select>
                       </div>
-
-                      {/* Chart */}
-                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="text-sm font-semibold text-gray-900">Customers Engagement</h4>
-                          <select 
-                            defaultValue="Last 15 days"
-                            className="px-3 py-1 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                          >
-                            <option value="Last 7 days">Last 7 days</option>
-                            <option value="Last 15 days">Last 15 days</option>
-                            <option value="Last 30 days">Last 30 days</option>
-                          </select>
-                        </div>
-                        <Chart options={engagementChartOptions} series={engagementChartSeries} type="bar" height={260} />
-                      </div>
-                    </div>
-
-                    {/* Status Cards */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                        <div className="flex items-center justify-between border-b border-green-200 pb-2 mb-2">
-                          <h4 className="text-sm font-semibold text-green-800">Promised to Pay</h4>
-                        </div>
-                        <div className="text-2xl font-bold text-green-900">{customerEngagementData.statusCards.promisedToPay.accounts}</div>
-                        <div className="text-xs text-green-700 mt-1">Accounts</div>
-                        <div className="text-sm font-semibold text-green-800 mt-2">₹{customerEngagementData.statusCards.promisedToPay.amount.toLocaleString()}</div>
-                      </div>
-                      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                        <div className="flex items-center justify-between border-b border-red-200 pb-2 mb-2">
-                          <h4 className="text-sm font-semibold text-red-800">Refused to Pay</h4>
-                        </div>
-                        <div className="text-2xl font-bold text-red-900">{customerEngagementData.statusCards.refusedToPay.accounts}</div>
-                        <div className="text-xs text-red-700 mt-1">Accounts</div>
-                      </div>
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <div className="flex items-center justify-between border-b border-blue-200 pb-2 mb-2">
-                          <h4 className="text-sm font-semibold text-blue-800">Already Paid</h4>
-                        </div>
-                        <div className="text-2xl font-bold text-blue-900">{customerEngagementData.statusCards.alreadyPaid.accounts}</div>
-                        <div className="text-xs text-blue-700 mt-1">Accounts</div>
-                        <div className="text-sm font-semibold text-blue-800 mt-2">₹{customerEngagementData.statusCards.alreadyPaid.amount.toLocaleString()}</div>
-                      </div>
-                      <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                        <div className="flex items-center justify-between border-b border-orange-200 pb-2 mb-2">
-                          <h4 className="text-sm font-semibold text-orange-800">Wrong Number</h4>
-                        </div>
-                        <div className="text-2xl font-bold text-orange-900">{customerEngagementData.statusCards.wrongNumber.accounts}</div>
-                        <div className="text-xs text-orange-700 mt-1">Accounts</div>
-                      </div>
+                      <Chart options={engagementChartOptions} series={engagementChartSeries} type="bar" height={260} />
                     </div>
                   </div>
+                
+                  {/* Status Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between border-b border-green-200 pb-2 mb-2">
+                        <h4 className="text-sm font-semibold text-green-800">Promised to Pay</h4>
+                      </div>
+                      <div className="text-2xl font-bold text-green-900">{customerEngagementData.statusCards.promisedToPay.accounts}</div>
+                      <div className="text-xs text-green-700 mt-1">Accounts</div>
+                      <div className="text-sm font-semibold text-green-800 mt-2">
+                        ₹{customerEngagementData.statusCards.promisedToPay.amount.toLocaleString()}
+                      </div>
+                    </div>
+                
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between border-b border-red-200 pb-2 mb-2">
+                        <h4 className="text-sm font-semibold text-red-800">Refused to Pay</h4>
+                      </div>
+                      <div className="text-2xl font-bold text-red-900">{customerEngagementData.statusCards.refusedToPay.accounts}</div>
+                      <div className="text-xs text-red-700 mt-1">Accounts</div>
+                    </div>
+                
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between border-b border-blue-200 pb-2 mb-2">
+                        <h4 className="text-sm font-semibold text-blue-800">Already Paid</h4>
+                      </div>
+                      <div className="text-2xl font-bold text-blue-900">{customerEngagementData.statusCards.alreadyPaid.accounts}</div>
+                      <div className="text-xs text-blue-700 mt-1">Accounts</div>
+                      <div className="text-sm font-semibold text-blue-800 mt-2">
+                        ₹{customerEngagementData.statusCards.alreadyPaid.amount.toLocaleString()}
+                      </div>
+                    </div>
+                
+                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between border-b border-orange-200 pb-2 mb-2">
+                        <h4 className="text-sm font-semibold text-orange-800">Wrong Number</h4>
+                      </div>
+                      <div className="text-2xl font-bold text-orange-900">{customerEngagementData.statusCards.wrongNumber.accounts}</div>
+                      <div className="text-xs text-orange-700 mt-1">Accounts</div>
+                    </div>
+                  </div>
+                </div>
+                
                 )}
             </div>
 
