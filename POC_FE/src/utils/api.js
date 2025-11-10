@@ -146,12 +146,12 @@ export async function dashboardDepositionApi(fromDate, toDate, page = 10, pageSi
 }
 
 // Admin API Functions
-export async function adminGetUsers(accessToken) {
-  const url = `${API_BASE}/admin/users/`
+export async function adminGetUsers(page = 1, pageSize = 50) {
+  const url = `${API_BASE}/admin/users/?page=${page}&page_size=${pageSize}`
   const res = await fetch(url, {
     method: 'GET',
+    credentials: 'include',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
   })
@@ -162,17 +162,16 @@ export async function adminGetUsers(accessToken) {
   return res.json()
 }
 
-export async function adminCreateUser(accessToken, userData) {
+export async function adminCreateUser(userData) {
   const url = `${API_BASE}/admin/users/create/`
-  const encryptedPayload = encryptData(userData)
   
   const res = await fetch(url, {
     method: 'POST',
+    credentials: 'include',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ payload: encryptedPayload }),
+    body: JSON.stringify(userData),
   })
   
   const responseText = await res.text()
@@ -192,17 +191,22 @@ export async function adminCreateUser(accessToken, userData) {
   }
 }
 
-export async function adminUpdateUser(accessToken, username, userData) {
+export async function adminUpdateUser(username, userData) {
   const url = `${API_BASE}/admin/users/${username}/`
-  const encryptedPayload = encryptData(userData)
+  
+  // Only include password if it's provided (not empty)
+  const payload = { ...userData }
+  if (!payload.password || payload.password.trim() === '') {
+    delete payload.password
+  }
   
   const res = await fetch(url, {
     method: 'PUT',
+    credentials: 'include',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ payload: encryptedPayload }),
+    body: JSON.stringify(payload),
   })
   
   const responseText = await res.text()
@@ -222,14 +226,17 @@ export async function adminUpdateUser(accessToken, username, userData) {
   }
 }
 
-export async function adminDeleteUser(accessToken, username) {
-  const url = `${API_BASE}/admin/users/${username}/delete/`
+export async function adminDeleteUser(username) {
+  // Soft delete: Set is_active to 0 instead of actually deleting
+  const url = `${API_BASE}/admin/users/${username}/`
+  
   const res = await fetch(url, {
-    method: 'DELETE',
+    method: 'PUT',
+    credentials: 'include',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
+    body: JSON.stringify({ is_active: 0 }),
   })
   
   const responseText = await res.text()
@@ -263,6 +270,27 @@ export async function adminGetActivityLogs(accessToken) {
     throw new Error(text || 'Failed to fetch activity logs')
   }
   return res.json()
+}
+
+export async function adminGetDashboardStats() {
+  const url = `${API_BASE}/admin/dashboard/stats/`
+  console.log('Making API call to:', url)
+  const res = await fetch(url, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+  console.log('API response status:', res.status, res.statusText)
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    console.error('API call failed:', res.status, text)
+    throw new Error(text || 'Failed to fetch dashboard stats')
+  }
+  const data = await res.json()
+  console.log('API call successful, data:', data)
+  return data
 }
 
 

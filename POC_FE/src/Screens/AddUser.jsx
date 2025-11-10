@@ -2,12 +2,10 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AdminSidebar from '../components/AdminSidebar'
 import Navbar from '../components/Navbar'
-import { useAuth } from '../contexts/AuthContext'
 import { adminCreateUser } from '../utils/api'
 
 const AddUser = () => {
   const navigate = useNavigate()
-  const { user } = useAuth()
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [error, setError] = useState('')
@@ -31,9 +29,7 @@ const AddUser = () => {
     setLoading(true)
 
     try {
-      if (user?.accessToken && user.accessToken !== 'dummy_admin_token') {
-        await adminCreateUser(user.accessToken, formData)
-      }
+      await adminCreateUser(formData)
       setSuccess('User created successfully!')
       setTimeout(() => {
         navigate('/admin/users')
@@ -46,7 +42,7 @@ const AddUser = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ backgroundColor: '#F8F8F8' }}>
       <div className="flex h-screen overflow-hidden">
         {/* Sidebar */}
         <div className={`${isMobileSidebarOpen ? 'block' : 'hidden'} lg:block ${isSidebarCollapsed ? 'lg:w-20' : 'lg:w-64'} transition-all duration-300 fixed lg:static inset-y-0 left-0 z-50`}>
@@ -71,111 +67,119 @@ const AddUser = () => {
               <div className="mb-6">
                 <button
                   onClick={() => navigate('/admin/users')}
-                  className="text-blue-600 hover:text-blue-700 mb-4 flex items-center"
+                  className="mb-4 flex items-center"
+                  style={{ color: '#6B7280' }}
                 >
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
                   Back to Users
                 </button>
-                <h1 className="text-3xl font-bold text-gray-900">Add New User</h1>
-                <p className="text-gray-600 mt-2">Create a new user account with appropriate permissions</p>
+                <h1 className="text-3xl font-bold mb-1 pb-2 border-b-2" style={{ color: '#1F2937', borderColor: '#EF4444' }}>Add New User</h1>
+                <p className="mt-2" style={{ color: '#6B7280' }}>Create a new user account with appropriate permissions</p>
               </div>
 
               {/* Messages */}
               {error && (
-                <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                <div className="mb-4 border px-4 py-3 rounded-lg" style={{ backgroundColor: '#FEF2F2', borderColor: '#FECACA', color: '#DC2626' }}>
                   {error}
                 </div>
               )}
               {success && (
-                <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+                <div className="mb-4 border px-4 py-3 rounded-lg" style={{ backgroundColor: '#F0FDF4', borderColor: '#BBF7D0', color: '#16A34A' }}>
                   {success}
                 </div>
               )}
 
               {/* Form */}
-              <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+              <div className="bg-white rounded-xl shadow-md border p-6" style={{ borderColor: '#E5E7EB' }}>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Username <span className="text-red-500">*</span>
+                      <label className="block text-sm font-medium mb-2" style={{ color: '#6B7280' }}>
+                        Username <span style={{ color: '#EF4444' }}>*</span>
                       </label>
                       <input
                         type="text"
                         required
                         value={formData.username}
                         onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        style={{ backgroundColor: '#FFFFFF', borderColor: '#D1D5DB', color: '#1F2937' }}
                         placeholder="Enter username"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Password <span className="text-red-500">*</span>
+                      <label className="block text-sm font-medium mb-2" style={{ color: '#6B7280' }}>
+                        Password <span style={{ color: '#EF4444' }}>*</span>
                       </label>
                       <input
                         type="password"
                         required
                         value={formData.password}
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        style={{ backgroundColor: '#FFFFFF', borderColor: '#D1D5DB', color: '#1F2937' }}
                         placeholder="Enter password"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                      <label className="block text-sm font-medium mb-2" style={{ color: '#6B7280' }}>First Name</label>
                       <input
                         type="text"
                         value={formData.first_name}
                         onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        style={{ backgroundColor: '#FFFFFF', borderColor: '#D1D5DB', color: '#1F2937' }}
                         placeholder="Enter first name"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                      <label className="block text-sm font-medium mb-2" style={{ color: '#6B7280' }}>Last Name</label>
                       <input
                         type="text"
                         value={formData.last_name}
                         onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        style={{ backgroundColor: '#FFFFFF', borderColor: '#D1D5DB', color: '#1F2937' }}
                         placeholder="Enter last name"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                      <label className="block text-sm font-medium mb-2" style={{ color: '#6B7280' }}>Email</label>
                       <input
                         type="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        style={{ backgroundColor: '#FFFFFF', borderColor: '#D1D5DB', color: '#1F2937' }}
                         placeholder="user@example.com"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Mobile Number</label>
+                      <label className="block text-sm font-medium mb-2" style={{ color: '#6B7280' }}>Mobile Number</label>
                       <input
                         type="tel"
                         value={formData.mobile_number}
                         onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        style={{ backgroundColor: '#FFFFFF', borderColor: '#D1D5DB', color: '#1F2937' }}
                         placeholder="+91 9876543210"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                      <label className="block text-sm font-medium mb-2" style={{ color: '#6B7280' }}>Role</label>
                       <select
                         value={formData.role}
                         onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        style={{ backgroundColor: '#FFFFFF', borderColor: '#D1D5DB', color: '#1F2937' }}
                       >
                         <option value="user">User</option>
                         <option value="admin">Admin</option>
@@ -185,11 +189,12 @@ const AddUser = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                      <label className="block text-sm font-medium mb-2" style={{ color: '#6B7280' }}>Status</label>
                       <select
                         value={formData.is_active ? 'active' : 'inactive'}
                         onChange={(e) => setFormData({ ...formData, is_active: e.target.value === 'active' })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        style={{ backgroundColor: '#FFFFFF', borderColor: '#D1D5DB', color: '#1F2937' }}
                       >
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
@@ -197,18 +202,20 @@ const AddUser = () => {
                     </div>
                   </div>
 
-                  <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                  <div className="flex justify-end space-x-3 pt-4 border-t" style={{ borderColor: '#E5E7EB' }}>
                     <button
                       type="button"
                       onClick={() => navigate('/admin/users')}
-                      className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+                      className="px-6 py-2 border rounded-lg transition-colors cursor-pointer"
+                      style={{ backgroundColor: '#FFFFFF', borderColor: '#D1D5DB', color: '#1F2937' }}
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={loading}
-                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                      className="px-6 py-2 text-white rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                      style={{ backgroundColor: '#EF4444' }}
                     >
                       {loading ? (
                         <>

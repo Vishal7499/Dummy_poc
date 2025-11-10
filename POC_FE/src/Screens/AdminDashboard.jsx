@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import AdminSidebar from '../components/AdminSidebar'
 import Navbar from '../components/Navbar'
 import { useAuth } from '../contexts/AuthContext'
-import { adminGetUsers, adminGetActivityLogs } from '../utils/api'
+import { adminGetDashboardStats } from '../utils/api'
 
 const AdminDashboard = () => {
   const navigate = useNavigate()
@@ -20,53 +20,25 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     const fetchStats = async () => {
-      // Dummy data for demo
-      if (!user?.accessToken || user.accessToken === 'dummy_admin_token') {
-        setStats({
-          totalUsers: 8,
-          activeUsers: 7,
-          inactiveUsers: 1,
-          recentLogins: 5
-        })
-        setLoading(false)
-        return
-      }
-
       try {
         setLoading(true)
-        const [usersData, logsData] = await Promise.all([
-          adminGetUsers(user.accessToken),
-          adminGetActivityLogs(user.accessToken)
-        ])
-
-        const users = usersData.users || []
-        const logs = logsData.logs || []
+        console.log('Fetching admin dashboard stats...')
+        const statsData = await adminGetDashboardStats()
+        console.log('Admin dashboard stats received:', statsData)
         
-        const activeUsers = users.filter(u => u.is_active).length
-        const inactiveUsers = users.filter(u => !u.is_active).length
-        
-        // Count recent logins (last 24 hours)
-        const now = new Date()
-        const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000)
-        const recentLogins = logs.filter(log => {
-          if (!log.login_time) return false
-          const loginDate = new Date(log.login_time)
-          return loginDate > yesterday
-        }).length
-
         setStats({
-          totalUsers: users.length,
-          activeUsers,
-          inactiveUsers,
-          recentLogins
+          totalUsers: statsData.total_users || 0,
+          activeUsers: statsData.active_users || 0,
+          inactiveUsers: statsData.inactive_users || 0,
+          recentLogins: statsData.recent_logins_24h || 0
         })
       } catch (error) {
-        // Fallback to dummy data
+        console.error('Failed to fetch dashboard stats:', error)
         setStats({
-          totalUsers: 8,
-          activeUsers: 7,
-          inactiveUsers: 1,
-          recentLogins: 5
+          totalUsers: 0,
+          activeUsers: 0,
+          inactiveUsers: 0,
+          recentLogins: 0
         })
       } finally {
         setLoading(false)
@@ -74,7 +46,7 @@ const AdminDashboard = () => {
     }
 
     fetchStats()
-  }, [user?.accessToken])
+  }, [])
 
   const statCards = [
     {
@@ -85,11 +57,8 @@ const AdminDashboard = () => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
         </svg>
       ),
-      bgGradient: 'from-blue-50 to-blue-100',
-      iconBg: 'bg-blue-100',
-      iconColor: 'text-blue-600',
-      textColor: 'text-blue-700',
-      borderColor: 'border-blue-200'
+      iconColor: 'text-gray-600',
+      textColor: 'text-gray-900'
     },
     {
       title: 'Active Users',
@@ -99,11 +68,8 @@ const AdminDashboard = () => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ),
-      bgGradient: 'from-green-50 to-emerald-50',
-      iconBg: 'bg-green-100',
-      iconColor: 'text-green-600',
-      textColor: 'text-green-700',
-      borderColor: 'border-green-200'
+      iconColor: 'text-gray-600',
+      textColor: 'text-gray-900'
     },
     {
       title: 'Inactive Users',
@@ -113,11 +79,8 @@ const AdminDashboard = () => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ),
-      bgGradient: 'from-amber-50 to-orange-50',
-      iconBg: 'bg-amber-100',
-      iconColor: 'text-amber-600',
-      textColor: 'text-amber-700',
-      borderColor: 'border-amber-200'
+      iconColor: 'text-red-500',
+      textColor: 'text-red-500'
     },
     {
       title: 'Recent Logins (24h)',
@@ -127,11 +90,8 @@ const AdminDashboard = () => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ),
-      bgGradient: 'from-purple-50 to-indigo-50',
-      iconBg: 'bg-purple-100',
-      iconColor: 'text-purple-600',
-      textColor: 'text-purple-700',
-      borderColor: 'border-purple-200'
+      iconColor: 'text-gray-600',
+      textColor: 'text-gray-900'
     }
   ]
 
@@ -188,7 +148,7 @@ const AdminDashboard = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/20">
+    <div className="min-h-screen" style={{ backgroundColor: '#F8F8F8' }}>
       <div className="flex h-screen overflow-hidden">
         {/* Sidebar */}
         <div className={`${isMobileSidebarOpen ? 'block' : 'hidden'} lg:block ${isSidebarCollapsed ? 'lg:w-20' : 'lg:w-64'} transition-all duration-300 fixed lg:static inset-y-0 left-0 z-50`}>
@@ -211,95 +171,103 @@ const AdminDashboard = () => {
             <div className="max-w-7xl mx-auto">
               {/* Header */}
               <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-                <p className="text-gray-600 mt-2">Welcome back, {user?.name || 'Admin'}. Manage your system from here.</p>
+                {/* <h1 className="text-3xl font-bold" style={{ color: '#1F2937' }}>Admin Dashboard</h1>
+                <p className="mt-2" style={{ color: '#6B7280' }}>Welcome back, {user?.name || 'Admin'}. Manage your system from here.</p> */}
               </div>
 
               {/* Stats Cards */}
               {loading ? (
                 <div className="flex justify-center items-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: '#EF4444' }}></div>
                 </div>
               ) : (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     {statCards.map((stat, index) => (
-                      <div key={index} className={`bg-gradient-to-br ${stat.bgGradient} rounded-xl shadow-lg p-6 border ${stat.borderColor} hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}>
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <p className="text-gray-600 text-sm font-medium mb-1">{stat.title}</p>
-                            <p className={`text-3xl font-bold ${stat.textColor}`}>{stat.value}</p>
-                          </div>
-                          <div className={`${stat.iconBg} p-3 rounded-xl ${stat.iconColor} shadow-sm`}>
-                            {stat.icon}
+                      <div key={index} className="bg-white rounded-xl shadow-md border overflow-hidden relative" style={{ borderColor: '#E5E7EB' }}>
+                        <div className="p-6">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <p className="text-sm font-medium mb-1" style={{ color: '#6B7280' }}>{stat.title}</p>
+                              <p className={`text-3xl font-bold ${stat.textColor}`}>{stat.value}</p>
+                            </div>
+                            <div className={`p-3 rounded-xl ${stat.iconColor}`}>
+                              {stat.icon}
+                            </div>
                           </div>
                         </div>
+                        <div className="h-1" style={{ backgroundColor: '#EF4444' }}></div>
                       </div>
                     ))}
                   </div>
 
                   {/* Quick Actions */}
-                  <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 mb-8">
-                    <h2 className="text-xl font-bold text-gray-900 mb-6">Quick Actions</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="bg-white rounded-xl shadow-md p-6 border mb-8" style={{ borderColor: '#E5E7EB' }}>
+                    <h2 className="text-xl font-bold mb-1 pb-2 border-b-2" style={{ color: '#1F2937', borderColor: '#EF4444' }}>Quick Actions</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
                       {quickActions.map((action, index) => (
                         <button
                           key={index}
                           onClick={action.action}
-                          className={`bg-gradient-to-br ${action.gradient} ${action.hoverGradient} text-white p-6 rounded-xl text-left transition-all duration-300 cursor-pointer shadow-md hover:shadow-xl transform hover:-translate-y-1`}
+                          className="bg-white border rounded-lg p-6 text-left transition-all duration-300 cursor-pointer hover:shadow-md"
+                          style={{ borderColor: '#E5E7EB' }}
                         >
-                          <div className="mb-3 text-white">{action.icon}</div>
-                          <h3 className="font-semibold text-lg mb-1 text-white">{action.title}</h3>
-                          <p className="text-sm text-white/90">{action.description}</p>
+                          <div className="mb-3" style={{ color: '#6B7280' }}>{action.icon}</div>
+                          <h3 className="font-semibold text-lg mb-1" style={{ color: '#1F2937' }}>{action.title}</h3>
+                          <p className="text-sm" style={{ color: '#6B7280' }}>{action.description}</p>
                         </button>
                       ))}
                     </div>
                   </div>
 
                   {/* Recent Activity Section */}
-                  <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                  <div className="bg-white rounded-xl shadow-md p-6 border" style={{ borderColor: '#E5E7EB' }}>
                     <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-xl font-bold text-gray-900">System Overview</h2>
+                      <h2 className="text-xl font-bold mb-1 pb-2 border-b-2" style={{ color: '#1F2937', borderColor: '#EF4444' }}>System Overview</h2>
                       <button
                         onClick={() => navigate('/admin/activity-logs')}
-                        className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors"
+                        className="text-sm font-medium transition-colors"
+                        style={{ color: '#6B7280' }}
                       >
                         View All →
                       </button>
                     </div>
                     <div className="space-y-3">
-                      <div className="flex items-center p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 hover:shadow-md transition-all duration-300">
+                      <div className="flex items-center p-5 bg-white rounded-lg border hover:shadow-md transition-all duration-300" style={{ borderColor: '#E5E7EB' }}>
                         <div className="flex-1">
-                          <p className="font-semibold text-gray-900 mb-1">User Management</p>
-                          <p className="text-sm text-gray-600">Manage user accounts, roles, and permissions</p>
+                          <p className="font-semibold mb-1" style={{ color: '#1F2937' }}>User Management</p>
+                          <p className="text-sm" style={{ color: '#6B7280' }}>Manage user accounts, roles, and permissions</p>
                         </div>
                         <button
                           onClick={() => navigate('/admin/users')}
-                          className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 cursor-pointer shadow-md hover:shadow-lg font-medium"
+                          className="px-5 py-2.5 text-white rounded-lg transition-all duration-300 cursor-pointer shadow-md hover:shadow-lg font-medium"
+                          style={{ backgroundColor: '#6B46C1' }}
                         >
                           Manage
                         </button>
                       </div>
-                      <div className="flex items-center p-5 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-100 hover:shadow-md transition-all duration-300">
+                      <div className="flex items-center p-5 bg-white rounded-lg border hover:shadow-md transition-all duration-300" style={{ borderColor: '#E5E7EB' }}>
                         <div className="flex-1">
-                          <p className="font-semibold text-gray-900 mb-1">Activity Monitoring</p>
-                          <p className="text-sm text-gray-600">Track user login history and system activities</p>
+                          <p className="font-semibold mb-1" style={{ color: '#1F2937' }}>Activity Monitoring</p>
+                          <p className="text-sm" style={{ color: '#6B7280' }}>Track user login history and system activities</p>
                         </div>
                         <button
                           onClick={() => navigate('/admin/activity-logs')}
-                          className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-300 cursor-pointer shadow-md hover:shadow-lg font-medium"
+                          className="px-5 py-2.5 text-white rounded-lg transition-all duration-300 cursor-pointer shadow-md hover:shadow-lg font-medium"
+                          style={{ backgroundColor: '#6B46C1' }}
                         >
                           View Logs
                         </button>
                       </div>
-                      <div className="flex items-center p-5 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-100 hover:shadow-md transition-all duration-300">
+                      <div className="flex items-center p-5 bg-white rounded-lg border hover:shadow-md transition-all duration-300" style={{ borderColor: '#E5E7EB' }}>
                         <div className="flex-1">
-                          <p className="font-semibold text-gray-900 mb-1">System Configuration</p>
-                          <p className="text-sm text-gray-600">Configure system settings and preferences</p>
+                          <p className="font-semibold mb-1" style={{ color: '#1F2937' }}>System Configuration</p>
+                          <p className="text-sm" style={{ color: '#6B7280' }}>Configure system settings and preferences</p>
                         </div>
                         <button
                           onClick={() => navigate('/admin/settings')}
-                          className="px-5 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg hover:from-amber-700 hover:to-orange-700 transition-all duration-300 cursor-pointer shadow-md hover:shadow-lg font-medium"
+                          className="px-5 py-2.5 text-white rounded-lg transition-all duration-300 cursor-pointer shadow-md hover:shadow-lg font-medium"
+                          style={{ backgroundColor: '#6B46C1' }}
                         >
                           Configure
                         </button>
