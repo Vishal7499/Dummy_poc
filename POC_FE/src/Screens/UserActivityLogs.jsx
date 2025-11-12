@@ -15,10 +15,10 @@ const UserActivityLogs = () => {
 
   useEffect(() => {
     fetchLogs()
-  }, [user?.accessToken])
+  }, [])
 
   const fetchLogs = async () => {
-    // Dummy data for demo
+    // Dummy data for demo fallback
     const dummyLogs = [
       { id: 1, username: 'adminkotak', login_time: '2025-11-07 11:00:00', logout_time: null, status: 'Active' },
       { id: 2, username: 'john.doe', login_time: '2025-11-07 10:30:00', logout_time: '2025-11-07 18:00:00', status: 'LoggedOut' },
@@ -29,20 +29,21 @@ const UserActivityLogs = () => {
       { id: 7, username: 'david.miller', login_time: '2025-11-04 16:00:00', logout_time: '2025-11-04 22:00:00', status: 'LoggedOut' }
     ]
 
-    if (!user?.accessToken || user.accessToken === 'dummy_admin_token') {
-      setLogs(dummyLogs)
-      setLoading(false)
-      return
-    }
-
     try {
       setLoading(true)
       setError('')
-      const data = await adminGetActivityLogs(user.accessToken)
-      setLogs(data.logs || [])
+      const data = await adminGetActivityLogs()
+      if (data && data.logs) {
+        setLogs(data.logs)
+      } else {
+        setLogs([])
+        setError('No activity logs data received')
+      }
     } catch (err) {
+      console.error('Error fetching activity logs:', err)
+      setError(err.message || 'Failed to fetch activity logs. Please try again.')
+      // Fallback to dummy data on error
       setLogs(dummyLogs)
-      setError('')
     } finally {
       setLoading(false)
     }

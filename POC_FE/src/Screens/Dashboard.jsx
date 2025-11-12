@@ -1355,6 +1355,381 @@ const Dashboard = () => {
     )
   }
 
+  // Helper function to render DPD Collection Efficiency Table (Top Table)
+  const renderDPDCollectionEfficiencyTable = () => {
+    const dpdData = [
+      { 
+        dpd: '0 DPD',
+        casesAllocated: 30000,
+        totalOutstandingPOS: 85000000,
+        odAmountCurrentDue: 1200000,
+        collectedAccounts: 8500,
+        clientsVisited: 12000,
+        p2pReceived: 350,
+        collectedAmount: 420000,
+        clientsNotVisited: 18000,
+        p2pConverted: 25
+      },
+      { 
+        dpd: '01-30 days',
+        casesAllocated: 20000,
+        totalOutstandingPOS: 100000000,
+        odAmountCurrentDue: 3000000,
+        collectedAccounts: 5000,
+        clientsVisited: 6000,
+        p2pReceived: 200,
+        collectedAmount: 250000,
+        clientsNotVisited: 14000,
+        p2pConverted: 10
+      },
+      { 
+        dpd: '31-60 days',
+        casesAllocated: 18000,
+        totalOutstandingPOS: 95000000,
+        odAmountCurrentDue: 2800000,
+        collectedAccounts: 4200,
+        clientsVisited: 5500,
+        p2pReceived: 180,
+        collectedAmount: 220000,
+        clientsNotVisited: 12500,
+        p2pConverted: 8
+      },
+      { 
+        dpd: '61-90 days',
+        casesAllocated: 15000,
+        totalOutstandingPOS: 88000000,
+        odAmountCurrentDue: 2500000,
+        collectedAccounts: 3800,
+        clientsVisited: 4800,
+        p2pReceived: 150,
+        collectedAmount: 190000,
+        clientsNotVisited: 10200,
+        p2pConverted: 6
+      },
+      { 
+        dpd: '90-120 Days',
+        casesAllocated: 12000,
+        totalOutstandingPOS: 72000000,
+        odAmountCurrentDue: 2100000,
+        collectedAccounts: 3100,
+        clientsVisited: 3900,
+        p2pReceived: 120,
+        collectedAmount: 160000,
+        clientsNotVisited: 8100,
+        p2pConverted: 5
+      },
+      { 
+        dpd: '121-180 days',
+        casesAllocated: 10000,
+        totalOutstandingPOS: 65000000,
+        odAmountCurrentDue: 1800000,
+        collectedAccounts: 2600,
+        clientsVisited: 3200,
+        p2pReceived: 95,
+        collectedAmount: 135000,
+        clientsNotVisited: 6800,
+        p2pConverted: 4
+      },
+      { 
+        dpd: '180-365 Days',
+        casesAllocated: 8500,
+        totalOutstandingPOS: 55000000,
+        odAmountCurrentDue: 1500000,
+        collectedAccounts: 2100,
+        clientsVisited: 2700,
+        p2pReceived: 75,
+        collectedAmount: 110000,
+        clientsNotVisited: 5800,
+        p2pConverted: 3
+      },
+      { 
+        dpd: '>365',
+        casesAllocated: 6000,
+        totalOutstandingPOS: 42000000,
+        odAmountCurrentDue: 1100000,
+        collectedAccounts: 1500,
+        clientsVisited: 2000,
+        p2pReceived: 55,
+        collectedAmount: 85000,
+        clientsNotVisited: 4000,
+        p2pConverted: 2
+      }
+    ]
+
+    const formatNumber = (value) => {
+      if (value === '' || value === null || value === undefined) return ''
+      return value.toLocaleString('en-IN')
+    }
+
+    const handleExport = () => {
+      const headers = [
+        { key: 'dpd', label: 'DPD' },
+        { key: 'casesAllocated', label: 'Cases Allocated' },
+        { key: 'totalOutstandingPOS', label: 'Total OutStanding POS' },
+        { key: 'odAmountCurrentDue', label: 'OD Amount + Current Due' },
+        { key: 'collectedAccounts', label: '#Collected Accounts' },
+        { key: 'clientsVisited', label: 'Clients Visited' },
+        { key: 'p2pReceived', label: 'P2P received' },
+        { key: 'collectedAmount', label: '#Collected Amount' },
+        { key: 'clientsNotVisited', label: 'Clients Not Visited' },
+        { key: 'p2pConverted', label: 'P2P Converted' }
+      ]
+      exportTableToExcel(dpdData, headers, 'DPD_Collection_Efficiency')
+    }
+
+    return (
+      <div className="bg-white border border-[#003366] rounded-lg overflow-hidden">
+        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">
+          <h3 className="text-sm font-semibold">DPD Collection Efficiency</h3>
+          <button
+            onClick={handleExport}
+            className="bg-white text-red-600 border border-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            title="Export to Excel"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export
+          </button>
+        </div>
+        <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
+          <table className="w-full text-xs border border-[#003366]">
+            <thead className="sticky top-0">
+              <tr>
+                <th className="text-left py-2 px-2 font-semibold" style={{ backgroundColor: '#FFEB3B', color: '#003366' }}>DPD</th>
+                <th className="text-right py-2 px-2 font-semibold" style={{ backgroundColor: '#FFEB3B', color: '#003366' }}>Cases Allocated</th>
+                <th className="text-right py-2 px-2 font-semibold" style={{ backgroundColor: '#FFEB3B', color: '#003366' }}>Total OutStanding POS</th>
+                <th className="text-right py-2 px-2 font-semibold" style={{ backgroundColor: '#B3E5FC', color: '#003366' }}>OD Amount + Current Due</th>
+                <th className="text-right py-2 px-2 font-semibold" style={{ backgroundColor: '#B3E5FC', color: '#003366' }}>#Collected Accounts</th>
+                <th className="text-right py-2 px-2 font-semibold" style={{ backgroundColor: '#B3E5FC', color: '#003366' }}>Clients Visited</th>
+                <th className="text-right py-2 px-2 font-semibold" style={{ backgroundColor: '#B3E5FC', color: '#003366' }}>P2P received</th>
+                <th className="text-right py-2 px-2 font-semibold" style={{ backgroundColor: '#FFEB3B', color: '#003366' }}>#Collected Amount</th>
+                <th className="text-right py-2 px-2 font-semibold" style={{ backgroundColor: '#FFEB3B', color: '#003366' }}>Clients Not Visited</th>
+                <th className="text-right py-2 px-2 font-semibold" style={{ backgroundColor: '#FFEB3B', color: '#003366' }}>P2P Converted</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {dpdData.map((row, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="py-2 px-2 text-gray-800 font-medium">{row.dpd}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatNumber(row.casesAllocated)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatNumber(row.totalOutstandingPOS)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatNumber(row.odAmountCurrentDue)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatNumber(row.collectedAccounts)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatNumber(row.clientsVisited)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatNumber(row.p2pReceived)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatNumber(row.collectedAmount)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatNumber(row.clientsNotVisited)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatNumber(row.p2pConverted)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  // Helper function to render DPD Collection Efficiency Summary Table (Bottom Table)
+  const renderDPDCollectionEfficiencySummaryTable = () => {
+    const dpdData = [
+      { 
+        dpd: '0 DPD',
+        casesAllocated: 30000,
+        totalOutstandingPOS: '18.5%',
+        odAmountCurrentDue: 1200000,
+        collectedAccounts: '28.3%',
+        clientsVisited: '35.0%',
+        p2pReceivedOverall: '1.17%',
+        p2pReceivedVisitedClients: '2.92%',
+        collectedAmount: '0.49%',
+        clientsNotVisited: '65.00%',
+        p2pConverted: '0.83%'
+      },
+      { 
+        dpd: '01-30 days',
+        casesAllocated: 20000,
+        totalOutstandingPOS: '33%',
+        odAmountCurrentDue: 3000000,
+        collectedAccounts: '25%',
+        clientsVisited: '30%',
+        p2pReceivedOverall: '1.00%',
+        p2pReceivedVisitedClients: '4.00%',
+        collectedAmount: '0.47%',
+        clientsNotVisited: '70.00%',
+        p2pConverted: '5.00%'
+      },
+      { 
+        dpd: '31-60 days',
+        casesAllocated: 18000,
+        totalOutstandingPOS: '20.7%',
+        odAmountCurrentDue: 2800000,
+        collectedAccounts: '23.3%',
+        clientsVisited: '30.6%',
+        p2pReceivedOverall: '1.00%',
+        p2pReceivedVisitedClients: '3.27%',
+        collectedAmount: '0.40%',
+        clientsNotVisited: '69.44%',
+        p2pConverted: '4.44%'
+      },
+      { 
+        dpd: '61-90 days',
+        casesAllocated: 15000,
+        totalOutstandingPOS: '19.1%',
+        odAmountCurrentDue: 2500000,
+        collectedAccounts: '25.3%',
+        clientsVisited: '32.0%',
+        p2pReceivedOverall: '1.00%',
+        p2pReceivedVisitedClients: '3.13%',
+        collectedAmount: '0.35%',
+        clientsNotVisited: '68.00%',
+        p2pConverted: '4.00%'
+      },
+      { 
+        dpd: '90-120 Days',
+        casesAllocated: 12000,
+        totalOutstandingPOS: '15.7%',
+        odAmountCurrentDue: 2100000,
+        collectedAccounts: '25.8%',
+        clientsVisited: '32.5%',
+        p2pReceivedOverall: '1.00%',
+        p2pReceivedVisitedClients: '3.08%',
+        collectedAmount: '0.30%',
+        clientsNotVisited: '67.50%',
+        p2pConverted: '4.17%'
+      },
+      { 
+        dpd: '121-180 days',
+        casesAllocated: 10000,
+        totalOutstandingPOS: '14.2%',
+        odAmountCurrentDue: 1800000,
+        collectedAccounts: '26.0%',
+        clientsVisited: '32.0%',
+        p2pReceivedOverall: '0.95%',
+        p2pReceivedVisitedClients: '2.97%',
+        collectedAmount: '0.28%',
+        clientsNotVisited: '68.00%',
+        p2pConverted: '4.00%'
+      },
+      { 
+        dpd: '180-365 Days',
+        casesAllocated: 8500,
+        totalOutstandingPOS: '12.0%',
+        odAmountCurrentDue: 1500000,
+        collectedAccounts: '24.7%',
+        clientsVisited: '31.8%',
+        p2pReceivedOverall: '0.88%',
+        p2pReceivedVisitedClients: '2.78%',
+        collectedAmount: '0.25%',
+        clientsNotVisited: '68.24%',
+        p2pConverted: '3.53%'
+      },
+      { 
+        dpd: '>365',
+        casesAllocated: 6000,
+        totalOutstandingPOS: '9.2%',
+        odAmountCurrentDue: 1100000,
+        collectedAccounts: '25.0%',
+        clientsVisited: '33.3%',
+        p2pReceivedOverall: '0.92%',
+        p2pReceivedVisitedClients: '2.75%',
+        collectedAmount: '0.24%',
+        clientsNotVisited: '66.67%',
+        p2pConverted: '3.33%'
+      },
+      { 
+        dpd: 'Total',
+        casesAllocated: 119500,
+        totalOutstandingPOS: '100%',
+        odAmountCurrentDue: 15000000,
+        collectedAccounts: '25.8%',
+        clientsVisited: '32.4%',
+        p2pReceivedOverall: '1.01%',
+        p2pReceivedVisitedClients: '3.12%',
+        collectedAmount: '0.38%',
+        clientsNotVisited: '67.60%',
+        p2pConverted: '4.12%'
+      }
+    ]
+
+    const formatNumber = (value) => {
+      if (value === '' || value === null || value === undefined) return ''
+      if (typeof value === 'string' && value.includes('%')) return value
+      return value.toLocaleString('en-IN')
+    }
+
+    const handleExport = () => {
+      const headers = [
+        { key: 'dpd', label: 'DPD' },
+        { key: 'casesAllocated', label: 'Cases Allocated' },
+        { key: 'totalOutstandingPOS', label: 'Total OutStanding POS' },
+        { key: 'odAmountCurrentDue', label: 'OD Amount + Current Due' },
+        { key: 'collectedAccounts', label: '#Collected Accounts' },
+        { key: 'clientsVisited', label: 'Clients Visited' },
+        { key: 'p2pReceivedOverall', label: 'P2P received Overall' },
+        { key: 'p2pReceivedVisitedClients', label: 'P2P received Visited Clients' },
+        { key: 'collectedAmount', label: '#Collected Amount' },
+        { key: 'clientsNotVisited', label: 'Clients Not Visited' },
+        { key: 'p2pConverted', label: 'P2P Converted' }
+      ]
+      exportTableToExcel(dpdData, headers, 'DPD_Collection_Efficiency_Summary')
+    }
+
+    return (
+      <div className="bg-white border border-[#003366] rounded-lg overflow-hidden">
+        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">
+          <h3 className="text-sm font-semibold">DPD Collection Efficiency Summary</h3>
+          <button
+            onClick={handleExport}
+            className="bg-white text-red-600 border border-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
+            title="Export to Excel"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export
+          </button>
+        </div>
+        <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
+          <table className="w-full text-xs border border-[#003366]">
+            <thead className="sticky top-0">
+              <tr>
+                <th className="text-left py-2 px-2 font-semibold" style={{ backgroundColor: '#FFEB3B', color: '#003366' }}>DPD</th>
+                <th className="text-right py-2 px-2 font-semibold" style={{ backgroundColor: '#FFEB3B', color: '#003366' }}>Cases Allocated</th>
+                <th className="text-right py-2 px-2 font-semibold" style={{ backgroundColor: '#FFEB3B', color: '#003366' }}>Total OutStanding POS</th>
+                <th className="text-right py-2 px-2 font-semibold" style={{ backgroundColor: '#FFEB3B', color: '#003366' }}>OD Amount + Current Due</th>
+                <th className="text-right py-2 px-2 font-semibold" style={{ backgroundColor: '#B3E5FC', color: '#003366' }}>#Collected Accounts</th>
+                <th className="text-right py-2 px-2 font-semibold" style={{ backgroundColor: '#B3E5FC', color: '#003366' }}>Clients Visited</th>
+                <th className="text-right py-2 px-2 font-semibold" style={{ backgroundColor: '#B3E5FC', color: '#003366' }}>P2P received Overall</th>
+                <th className="text-right py-2 px-2 font-semibold" style={{ backgroundColor: '#B3E5FC', color: '#003366' }}>P2P received Visited Clients</th>
+                <th className="text-right py-2 px-2 font-semibold" style={{ backgroundColor: '#FFEB3B', color: '#003366' }}>#Collected Amount</th>
+                <th className="text-right py-2 px-2 font-semibold" style={{ backgroundColor: '#FFEB3B', color: '#003366' }}>Clients Not Visited</th>
+                <th className="text-right py-2 px-2 font-semibold" style={{ backgroundColor: '#FFEB3B', color: '#003366' }}>P2P Converted</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {dpdData.map((row, index) => (
+                <tr key={index} className={row.dpd === 'Total' ? 'bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300' : index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="py-2 px-2 text-gray-800 font-medium">{row.dpd}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatNumber(row.casesAllocated)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatNumber(row.totalOutstandingPOS)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatNumber(row.odAmountCurrentDue)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatNumber(row.collectedAccounts)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatNumber(row.clientsVisited)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatNumber(row.p2pReceivedOverall)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatNumber(row.p2pReceivedVisitedClients)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatNumber(row.collectedAmount)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatNumber(row.clientsNotVisited)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatNumber(row.p2pConverted)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
   // Helper function to render Application Status Summary table
   const renderApplicationStatusSummaryTable = () => {
     const applicationData = [
@@ -4699,6 +5074,16 @@ const Dashboard = () => {
                       {/* Bucket Wise Summary Table */}
                       <div className="lg:col-span-2">
                         {renderBucketWiseSummaryTable()}
+                      </div>
+                      
+                      {/* DPD Collection Efficiency Table */}
+                      <div className="lg:col-span-2">
+                        {renderDPDCollectionEfficiencyTable()}
+                      </div>
+                      
+                      {/* DPD Collection Efficiency Summary Table */}
+                      <div className="lg:col-span-2">
+                        {renderDPDCollectionEfficiencySummaryTable()}
                       </div>
                     </div>
                   </div>
