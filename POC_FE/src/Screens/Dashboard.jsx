@@ -1863,7 +1863,7 @@ const Dashboard = () => {
     )
   }
 
-  // Helper function to render Product Summary table
+  // Helper function to render Vertical Summary table
   // Reusable pagination component
   const renderPagination = (currentPage, setCurrentPage, totalItems, itemsPerPage) => {
     const totalPages = Math.ceil(totalItems / itemsPerPage)
@@ -1928,16 +1928,16 @@ const Dashboard = () => {
 
   const renderProductSummaryTable = () => {
     const productData = [
-      { product: 'TW', total: 9275, dtr: 6334, agtl: 740, tc: 1445, ncm: 414, acm: 26, tce: 782, cm: 38, rcm: 0 },
-      { product: 'MSME', total: 1308, dtr: 194, agtl: 159, tc: 4, ncm: 921, acm: 79, tce: 0, cm: 8, rcm: 0 },
-      { product: 'EL', total: 1231, dtr: 655, agtl: 189, tc: 2, ncm: 132, acm: 253, tce: 0, cm: 0, rcm: 0 },
-      { product: 'ORL', total: 678, dtr: 9, agtl: 431, tc: 2, ncm: 280, acm: 7, tce: 0, cm: 11, rcm: 1 },
-      { product: 'PL', total: 634, dtr: 292, agtl: 264, tc: 0, ncm: 0, acm: 28, tce: 0, cm: 49, rcm: 1 },
-      { product: 'HL', total: 386, dtr: 259, agtl: 29, tc: 3, ncm: 61, acm: 28, tce: 0, cm: 6, rcm: 0 },
-      { product: 'LAP', total: 333, dtr: 168, agtl: 38, tc: 1, ncm: 72, acm: 33, tce: 0, cm: 21, rcm: 0 },
-      { product: 'AL', total: 77, dtr: 29, agtl: 11, tc: 0, ncm: 16, acm: 34, tce: 0, cm: 2, rcm: 0 },
-      { product: 'CV', total: 10, dtr: 5, agtl: 0, tc: 0, ncm: 2, acm: 1, tce: 0, cm: 2, rcm: 0 },
-      { product: 'CE', total: 4, dtr: 4, agtl: 0, tc: 0, ncm: 0, acm: 0, tce: 0, cm: 0, rcm: 0 }
+      { product: 'CE', total: 1250, dtr: 856, agtl: 124, tc: 145, ncm: 78, acm: 32, tce: 15, cm: 0, rcm: 0 },
+      { product: 'CV', total: 2340, dtr: 1654, agtl: 289, tc: 234, ncm: 98, acm: 45, tce: 20, cm: 0, rcm: 0 },
+      { product: 'DLLN', total: 1890, dtr: 1234, agtl: 198, tc: 189, ncm: 156, acm: 67, tce: 46, cm: 2, rcm: 0 },
+      { product: 'DLLS', total: 1675, dtr: 1098, agtl: 176, tc: 167, ncm: 134, acm: 58, tce: 42, cm: 0, rcm: 0 },
+      { product: 'ICV', total: 980, dtr: 678, agtl: 98, tc: 98, ncm: 67, acm: 28, tce: 13, cm: 0, rcm: 0 },
+      { product: 'LCV', total: 1120, dtr: 789, agtl: 112, tc: 112, ncm: 78, acm: 32, tce: 0, cm: 0, rcm: 0 },
+      { product: 'SA', total: 1234, dtr: 864, agtl: 123, tc: 123, ncm: 89, acm: 35, tce: 0, cm: 0, rcm: 0 },
+      { product: 'TFE', total: 1789, dtr: 1252, agtl: 179, tc: 179, ncm: 123, acm: 56, tce: 0, cm: 0, rcm: 0 },
+      { product: 'VWFN', total: 1456, dtr: 1019, agtl: 146, tc: 146, ncm: 98, acm: 47, tce: 0, cm: 0, rcm: 0 },
+      { product: 'VWFS', total: 1234, dtr: 864, agtl: 123, tc: 123, ncm: 87, acm: 37, tce: 0, cm: 0, rcm: 0 }
     ]
     const totals = productData.reduce((acc, row) => ({
       total: acc.total + row.total,
@@ -1952,7 +1952,7 @@ const Dashboard = () => {
     }), { total: 0, dtr: 0, agtl: 0, tc: 0, ncm: 0, acm: 0, tce: 0, cm: 0, rcm: 0 })
 
     const headers = [
-      { key: 'product', label: 'PRODUCT' },
+      { key: 'product', label: 'VERTICAL' },
       { key: 'total', label: 'TOTAL' },
       { key: 'dtr', label: 'DTR' },
       { key: 'agtl', label: 'AGTL' },
@@ -1977,7 +1977,7 @@ const Dashboard = () => {
         cm: totals.cm, 
         rcm: totals.rcm 
       }]
-      exportTableToExcel(exportData, headers, 'Product_Summary')
+      exportTableToExcel(exportData, headers, 'Vertical_Summary')
     }
 
     // Pagination logic
@@ -1989,7 +1989,7 @@ const Dashboard = () => {
     return (
       <div className="bg-white border border-[#003366] rounded-lg overflow-hidden">
         <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">
-          <h3 className="text-sm font-semibold">Product Summary</h3>
+          <h3 className="text-sm font-semibold">Vertical Summary</h3>
           <button
             onClick={handleExport}
             className="bg-white text-red-600 border border-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
@@ -2005,7 +2005,7 @@ const Dashboard = () => {
           <table className="w-full text-xs border border-[#003366]">
             <thead className="bg-gray-100 text-[#003366] sticky top-0">
               <tr>
-                <th className="text-left py-2 px-2 font-semibold">PRODUCT</th>
+                <th className="text-left py-2 px-2 font-semibold">VERTICAL</th>
                 <th className="text-right py-2 px-2 font-semibold">TOTAL</th>
                 <th className="text-right py-2 px-2 font-semibold">DTR</th>
                 <th className="text-right py-2 px-2 font-semibold">AGTL</th>
@@ -2054,19 +2054,19 @@ const Dashboard = () => {
     )
   }
 
-  // Helper function to render Product Allocation Summary table
+  // Helper function to render Vertical Allocation Summary table
   const renderProductAllocationTable = () => {
     const allocationData = [
-      { product: 'TW', total: 9275, npa: 5631, sma0: 2241, sma1: 892, sma2: 511 },
-      { product: 'MSME', total: 1308, npa: 1187, sma0: 38, sma1: 22, sma2: 61 },
-      { product: 'EL', total: 1231, npa: 1183, sma0: 22, sma1: 12, sma2: 14 },
-      { product: 'ORL', total: 678, npa: 649, sma0: 12, sma1: 9, sma2: 8 },
-      { product: 'PL', total: 634, npa: 266, sma0: 264, sma1: 53, sma2: 51 },
-      { product: 'HL', total: 386, npa: 128, sma0: 87, sma1: 93, sma2: 78 },
-      { product: 'LAP', total: 333, npa: 118, sma0: 96, sma1: 61, sma2: 58 },
-      { product: 'AL', total: 77, npa: 28, sma0: 42, sma1: 4, sma2: 3 },
-      { product: 'CV', total: 10, npa: 9, sma0: 1, sma1: 0, sma2: 0 },
-      { product: 'CE', total: 4, npa: 4, sma0: 0, sma1: 0, sma2: 0 }
+      { product: 'CE', total: 1250, npa: 856, sma0: 234, sma1: 98, sma2: 62 },
+      { product: 'CV', total: 2340, npa: 1654, sma0: 456, sma1: 145, sma2: 85 },
+      { product: 'DLLN', total: 1890, npa: 1234, sma0: 378, sma1: 156, sma2: 122 },
+      { product: 'DLLS', total: 1675, npa: 1098, sma0: 335, sma1: 134, sma2: 108 },
+      { product: 'ICV', total: 980, npa: 678, sma0: 196, sma1: 67, sma2: 39 },
+      { product: 'LCV', total: 1120, npa: 789, sma0: 224, sma1: 78, sma2: 29 },
+      { product: 'SA', total: 1234, npa: 864, sma0: 247, sma1: 89, sma2: 34 },
+      { product: 'TFE', total: 1789, npa: 1252, sma0: 358, sma1: 123, sma2: 56 },
+      { product: 'VWFN', total: 1456, npa: 1019, sma0: 291, sma1: 98, sma2: 48 },
+      { product: 'VWFS', total: 1234, npa: 864, sma0: 247, sma1: 87, sma2: 36 }
     ]
     const totals = allocationData.reduce((acc, row) => ({
       total: acc.total + row.total,
@@ -2077,7 +2077,7 @@ const Dashboard = () => {
     }), { total: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 })
 
     const headers = [
-      { key: 'product', label: 'PRODUCT' },
+      { key: 'product', label: 'VERTICAL' },
       { key: 'total', label: 'TOTAL' },
       { key: 'npa', label: 'NPA' },
       { key: 'sma0', label: 'SMA0' },
@@ -2094,7 +2094,7 @@ const Dashboard = () => {
         sma1: totals.sma1, 
         sma2: totals.sma2 
       }]
-      exportTableToExcel(exportData, headers, 'Product_Allocation_Summary')
+      exportTableToExcel(exportData, headers, 'Vertical_Allocation_Summary')
     }
 
     // Pagination logic
@@ -2105,7 +2105,7 @@ const Dashboard = () => {
     return (
       <div className="bg-white border border-[#003366] rounded-lg overflow-hidden">
         <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">
-          <h3 className="text-sm font-semibold">Product Allocation Summary</h3>
+          <h3 className="text-sm font-semibold">Vertical Allocation Summary</h3>
           <button
             onClick={handleExport}
             className="bg-white text-red-600 border border-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
@@ -2121,7 +2121,7 @@ const Dashboard = () => {
           <table className="w-full text-xs border border-[#003366]">
             <thead className="bg-gray-100 text-[#003366] sticky top-0">
               <tr>
-                <th className="text-left py-2 px-2 font-semibold">PRODUCT</th>
+                <th className="text-left py-2 px-2 font-semibold">VERTICAL</th>
                 <th className="text-right py-2 px-2 font-semibold">TOTAL</th>
                 <th className="text-right py-2 px-2 font-semibold">NPA</th>
                 <th className="text-right py-2 px-2 font-semibold">SMA0</th>
@@ -5005,12 +5005,12 @@ const Dashboard = () => {
                     {/* Grid of Tables - Always show below cards */}
                     <div className="mt-6">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Product Summary Table */}
+                      {/* Vertical Summary Table */}
                       <div className="lg:col-span-2">
                         {renderProductSummaryTable()}
                       </div>
                       
-                      {/* Product Allocation Summary Table */}
+                      {/* Vertical Allocation Summary Table */}
                       <div className="lg:col-span-2">
                         {renderProductAllocationTable()}
                       </div>
