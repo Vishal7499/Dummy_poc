@@ -5124,8 +5124,354 @@ const Dashboard = () => {
                       </div>
                     </div>
 
-                    {/* Grid of Productivity Tables */}
+                    {/* Main Table */}
+                    <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden mb-6">
+                      <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
+                        <span>Staff Productivity Summary</span>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200 border border-[#003366]">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL ALLOCATED</th>
+                              <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL NOT VISITED</th>
+                              <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">NEWLY ALLOCATED NOT VISITED</th>
+                              <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH NOT VISITED</th>
+                              <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH VISITED</th>
+                              <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P SUCCESS</th>
+                              <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P FAILED</th>
+                              <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% NOT VISITED</th>
+                              <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% LAST MONTH NOT VISITED</th>
+                              <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL OVERDUE AMOUNT</th>
+                              <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 1-30</th>
+                              <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 31-60</th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            <tr className="bg-white">
+                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">7,699</td>
+                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,245</td>
+                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">456</td>
+                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">789</td>
+                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">5,664</td>
+                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">3,245</td>
+                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">892</td>
+                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.18%</td>
+                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.25%</td>
+                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹45.2 Cr</td>
+                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">2,156</td>
+                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,089</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* Breakdown Tables */}
                     <div className="space-y-6">
+                      {/* Designation Wise Table */}
+                      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+                        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
+                          <span>Designation Wise</span>
+                        </div>
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full divide-y divide-gray-200 border border-[#003366]">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DESIGNATION</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL ALLOCATED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL NOT VISITED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">NEWLY ALLOCATED NOT VISITED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH NOT VISITED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH VISITED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P SUCCESS</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P FAILED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% NOT VISITED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% LAST MONTH NOT VISITED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL OVERDUE AMOUNT</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 1-30</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 31-60</th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                              <tr className="bg-white">
+                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">DTR</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">3,245</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">524</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">189</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">335</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">2,386</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,456</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">412</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.14%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.32%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹18.5 Cr</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">856</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">432</td>
+                              </tr>
+                              <tr className="bg-gray-50">
+                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Supervisor</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">2,156</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">348</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">125</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">223</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,585</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">987</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">256</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.14%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.34%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹12.8 Cr</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">568</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">287</td>
+                              </tr>
+                              <tr className="bg-white">
+                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Senior Executive</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,456</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">235</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">89</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">146</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,075</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">623</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">124</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.14%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.03%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹8.9 Cr</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">412</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">208</td>
+                              </tr>
+                              <tr className="bg-gray-50">
+                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Executive</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">842</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">138</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">53</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">85</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">618</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">179</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">100</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.39%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.10%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹5.0 Cr</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">320</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">162</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      {/* State Wise Table */}
+                      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+                        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
+                          <span>State Wise</span>
+                        </div>
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full divide-y divide-gray-200 border border-[#003366]">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATE</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL ALLOCATED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL NOT VISITED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">NEWLY ALLOCATED NOT VISITED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH NOT VISITED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH VISITED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P SUCCESS</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P FAILED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% NOT VISITED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% LAST MONTH NOT VISITED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL OVERDUE AMOUNT</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 1-30</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 31-60</th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                              <tr className="bg-white">
+                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Maharashtra</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">2,456</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">396</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">142</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">254</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,806</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,102</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">286</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.12%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.34%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹14.5 Cr</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">678</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">342</td>
+                              </tr>
+                              <tr className="bg-gray-50">
+                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Delhi</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,856</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">299</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">108</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">191</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,366</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">834</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">216</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.11%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.29%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹11.0 Cr</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">512</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">258</td>
+                              </tr>
+                              <tr className="bg-white">
+                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Tamil Nadu</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,245</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">201</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">72</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">129</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">915</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">559</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">145</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.14%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.36%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹7.4 Cr</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">343</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">173</td>
+                              </tr>
+                              <tr className="bg-gray-50">
+                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Gujarat</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,056</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">170</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">61</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">109</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">777</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">474</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">123</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.10%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.32%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹6.3 Cr</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">291</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">147</td>
+                              </tr>
+                              <tr className="bg-white">
+                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Telangana</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">856</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">138</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">50</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">88</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">630</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">384</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">100</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.12%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.28%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹5.1 Cr</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">236</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">119</td>
+                              </tr>
+                              <tr className="bg-gray-50">
+                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Karnataka</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">230</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">37</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">13</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">24</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">169</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">103</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">27</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.09%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.43%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹1.4 Cr</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">63</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">32</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      {/* Vertical Wise Table */}
+                      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+                        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
+                          <span>Vertical Wise</span>
+                        </div>
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full divide-y divide-gray-200 border border-[#003366]">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">VERTICAL</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL ALLOCATED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL NOT VISITED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">NEWLY ALLOCATED NOT VISITED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH NOT VISITED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH VISITED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P SUCCESS</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P FAILED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% NOT VISITED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% LAST MONTH NOT VISITED</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL OVERDUE AMOUNT</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 1-30</th>
+                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 31-60</th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                              <tr className="bg-white">
+                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Tractor Finance</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">2,856</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">461</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">166</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">295</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">2,100</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,282</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">333</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.14%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.33%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹16.9 Cr</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">789</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">398</td>
+                              </tr>
+                              <tr className="bg-gray-50">
+                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Commercial Vehicle</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">2,156</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">348</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">125</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">223</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,585</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">968</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">251</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.14%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.34%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹12.8 Cr</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">596</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">301</td>
+                              </tr>
+                              <tr className="bg-white">
+                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Construction Equipment</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,856</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">299</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">108</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">191</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,366</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">834</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">216</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.11%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.29%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹11.0 Cr</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">512</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">258</td>
+                              </tr>
+                              <tr className="bg-gray-50">
+                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Home Loan</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">831</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">137</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">57</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">80</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">613</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">161</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">92</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.49%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">9.63%</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹4.5 Cr</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">259</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">132</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Previous Productivity Tables */}
+                    <div className="space-y-6 mt-6">
                       {/* MTD Productivity Report */}
                       <div>
                         {renderMTDProductivityReportTable()}
