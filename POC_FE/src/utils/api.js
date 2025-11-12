@@ -145,6 +145,31 @@ export async function dashboardDepositionApi(fromDate, toDate, page = 10, pageSi
   return res.json()
 }
 
+export async function dashboardDataApi(reportType, fromDate, toDate) {
+  const url = `${API_BASE}/dashboarddata/`
+  
+  // Default dates: 20250101 to 20250831
+  const defaultFromDate = fromDate || '2025-01-01'
+  const defaultToDate = toDate || '2025-08-31'
+  
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      report_type: reportType,
+      from_date: defaultFromDate,
+      to_date: defaultToDate,
+    }),
+  })
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    throw new Error(text || 'Failed to fetch dashboard data')
+  }
+  return res.json()
+}
+
 // Admin API Functions
 export async function adminGetUsers(page = 1, pageSize = 50) {
   const url = `${API_BASE}/admin/users/?page=${page}&page_size=${pageSize}`
@@ -256,18 +281,23 @@ export async function adminDeleteUser(username) {
   }
 }
 
-export async function adminGetActivityLogs(accessToken) {
+export async function adminGetActivityLogs() {
   const url = `${API_BASE}/admin/activity-logs/`
   const res = await fetch(url, {
     method: 'GET',
+    credentials: 'include',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
   })
   if (!res.ok) {
     const text = await res.text().catch(() => '')
-    throw new Error(text || 'Failed to fetch activity logs')
+    try {
+      const errorData = JSON.parse(text)
+      throw new Error(errorData.error || errorData.details || 'Failed to fetch activity logs')
+    } catch (e) {
+      throw new Error(text || 'Failed to fetch activity logs')
+    }
   }
   return res.json()
 }
