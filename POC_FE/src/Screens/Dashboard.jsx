@@ -173,7 +173,7 @@ const Dashboard = () => {
       try {
         console.log('Fetching vertical summary data from:', fromDate, 'to:', toDate)
         
-        const data = await dashboardDataApi('vertical summary', '2025-01-31', '2025-08-31')
+        const data = await dashboardDataApi('ALL', '2025-01-31', '2025-08-31')
         console.log('Vertical summary data fetched:', data)
         // Data is fetched but not used for now as per requirements
       } catch (error) {
