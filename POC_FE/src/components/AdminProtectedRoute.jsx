@@ -13,12 +13,13 @@ const AdminProtectedRoute = ({ children }) => {
     )
   }
 
-  // Check if user is admin
+  // Check if user is logged in
   if (!user) {
     return <Navigate to="/login" replace />
   }
 
-  if (user.username !== 'adminkotak' && user.role !== 'admin') {
+  // Only allow admin users - block normal users from accessing admin routes
+  if (user.role !== 'admin') {
     return <Navigate to="/dashboard" replace />
   }
 

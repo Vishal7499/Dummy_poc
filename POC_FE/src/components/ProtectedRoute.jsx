@@ -13,7 +13,16 @@ const ProtectedRoute = ({ children }) => {
     )
   }
 
-  return user ? children : <Navigate to="/login" replace />
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
+  // Block admin users from accessing normal routes - redirect to admin dashboard
+  if (user.role === 'admin') {
+    return <Navigate to="/admin/dashboard" replace />
+  }
+
+  return children
 }
 
 export default ProtectedRoute

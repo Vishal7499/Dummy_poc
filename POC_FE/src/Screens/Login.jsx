@@ -30,37 +30,6 @@ const Login = () => {
     setLoading(true)
     setError('')
 
-    // Check for dummy admin credentials - skip API call
-    if (formData.email === 'adminkotak' && formData.password === '1234') {
-      const userData = {
-        username: 'adminkotak',
-        role: 'admin',
-        accessToken: 'dummy_admin_token',
-        refreshToken: 'dummy_admin_refresh_token',
-        name: 'adminkotak',
-      }
-      login(userData)
-      navigate('/admin/dashboard')
-      setLoading(false)
-      return
-    }
-
-    // Check for dummy staff credentials - skip API call
-    if (formData.email === 'staffUserr' && formData.password === '1234') {
-      const userData = {
-        username: 'staffUserr',
-        role: 'staff',
-        accessToken: 'dummy_staff_token',
-        refreshToken: 'dummy_staff_refresh_token',
-        name: 'staffUserr',
-      }
-      login(userData)
-      navigate('/staff/dashboard')
-      setLoading(false)
-      return
-    }
-
-    // For other users, call the API
     try {
       const data = await loginApi({ username: formData.email, password: formData.password })
       console.log('Login response data:', data)
@@ -78,8 +47,8 @@ const Login = () => {
       }
       login(userData)
       
-      // Redirect admin users to admin dashboard
-      if (data.username === 'adminkotak' || data.role === 'admin') {
+      // Route based on role: admin goes to admin dashboard, others go to normal dashboard
+      if (data.role === 'admin') {
         navigate('/admin/dashboard')
       } else {
         navigate('/dashboard')
