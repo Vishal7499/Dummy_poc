@@ -92,6 +92,12 @@ const Dashboard = () => {
   const [stateWisePage, setStateWisePage] = useState(1)
   const [regionWisePage, setRegionWisePage] = useState(1)
   const [bucketWisePage, setBucketWisePage] = useState(1)
+  // Collection summary data state
+  const [stateWiseData, setStateWiseData] = useState(null)
+  const [regionWiseData, setRegionWiseData] = useState(null)
+  const [bucketWiseData, setBucketWiseData] = useState(null)
+  const [collectionDataLoading, setCollectionDataLoading] = useState(false)
+  const [collectionDataError, setCollectionDataError] = useState(null)
   const itemsPerPage = 10
   // Initialize date filters - default to last 30 days
   const [fromDate, setFromDate] = useState(() => {
@@ -277,23 +283,88 @@ const Dashboard = () => {
     fetchVerticalSummaryData()
   }, [selectedStaffMetric])
 
-  // Fetch collection  data from dashboardcollectonAPI
+  // Fetch collection summary data from dashboardcollectiondata API when Collection Efficiency card is clicked
   useEffect(() => {
+    if (selectedStaffMetric !== 'collection') {
+      return
+    }
+
     const fetchCollectionData = async () => {
       try {
-        console.log('Fetching collection graph data from:', fromDate, 'to:', toDate)
+        setCollectionDataLoading(true)
+        setCollectionDataError(null)
+        console.log('Fetching collection summary data from:', fromDate, 'to:', toDate)
         
         const data = await dashboardCollectionDataApi('ALL', fromDate, toDate)
-        console.log('Collection  data fetched:', data)
-        // Data is fetched but not used for now as per requirements
+        console.log('Collection summary data fetched:', data)
+        
+        // Extract and transform the data
+        if (data && data['collection state wise summary']) {
+          const transformedStateData = data['collection state wise summary']
+            .filter(item => {
+              // Filter out "Totals" row as we calculate it ourselves
+              const state = item.STATE || item.state || ''
+              return state && state.toLowerCase() !== 'totals'
+            })
+            .map(item => ({
+              state: item.STATE || item.state || '',
+              totalCases: item.TotalCases || item.totalCases || 0,
+              outstandingBalance: item['Outstanding Balance (in Cr.)'] || item['Outstanding Balance (in Cr.)'] || item.outstandingBalance || 0,
+              resolutionCount: item['Resolution Count'] || item.resolutionCount || item['Resolution Count'] || 0,
+              resolutionCountPercent: item['Resolution Count%'] || item['Resolution Count%'] || item.resolutionCountPercent || 0,
+              resolutionAmount: item['Resolution Amount'] || item.resolutionAmount || item['Resolution Amount'] || 0,
+              resolutionAmountPercent: item['Resolution Amount %'] || item['Resolution Amount %'] || item.resolutionAmountPercent || 0
+            }))
+          setStateWiseData(transformedStateData)
+        }
+        
+        if (data && data['collection location wise summary']) {
+          const transformedRegionData = data['collection location wise summary']
+            .filter(item => {
+              // Filter out "Totals" row as we calculate it ourselves
+              const location = item.LOCATION || item.location || ''
+              return location && location.toLowerCase() !== 'totals'
+            })
+            .map(item => ({
+              region: item.LOCATION || item.location || '',
+              cases: item.Cases || item.cases || 0,
+              outstandingBalance: item['Outstanding balance'] || item.outstandingBalance || 0,
+              resolutionCount: item['Resolution count'] || item.resolutionCount || 0,
+              resolutionCountPercent: item['Resolution Count%'] || item.resolutionCountPercent || 0,
+              resolutionAmount: item['Resolution amount'] || item.resolutionAmount || 0,
+              resolutionAmountPercent: item['Resolution Amount%'] || item.resolutionAmountPercent || 0
+            }))
+          setRegionWiseData(transformedRegionData)
+        }
+        
+        if (data && data['collection bucket wise summary']) {
+          const transformedBucketData = data['collection bucket wise summary']
+            .filter(item => {
+              // Filter out "Totals" row as we calculate it ourselves
+              const bucket = item.BUCKET || item.bucket || ''
+              return bucket && bucket.toLowerCase() !== 'totals'
+            })
+            .map(item => ({
+              bucket: item.BUCKET || item.bucket || '',
+              cases: item.Cases || item.cases || 0,
+              outstandingBalance: item['Outstanding balance'] || item.outstandingBalance || 0,
+              resolutionCount: item['Resolution count'] || item.resolutionCount || 0,
+              resolutionCountPercent: item['Resolution Count%'] || item.resolutionCountPercent || 0,
+              resolutionAmount: item['Resolution amount'] || item.resolutionAmount || 0,
+              resolutionAmountPercent: item['Resolution Amount%'] || item.resolutionAmountPercent || 0
+            }))
+          setBucketWiseData(transformedBucketData)
+        }
       } catch (error) {
-        console.error('Error fetching collection data:', error)
-        // Error is logged but not displayed to user for now
+        console.error('Error fetching collection summary data:', error)
+        setCollectionDataError(error.message || 'Failed to fetch collection summary data')
+      } finally {
+        setCollectionDataLoading(false)
       }
     }
 
     fetchCollectionData()
-  }, [fromDate, toDate])
+  }, [selectedStaffMetric, fromDate, toDate])
 
   // Fetch deposition data - no authentication required
   useEffect(() => {
@@ -332,7 +403,15 @@ const Dashboard = () => {
         setIsSidebarCollapsed(true)
       }
       // Close leaderboard table when clicking outside
-      if (selectedStaffMetric && leaderboardTableRef.current && !leaderboardTableRef.current.contains(event.target)) {
+      if (selectedStaffMetric && leaderboardTableRef.current) {
+        // Check if click is inside the leaderboard table ref
+        const isInsideLeaderboardRef = leaderboardTableRef.current.contains(event.target)
+        
+        // For allocation and collection sections, never close if clicking inside the ref
+        if ((selectedStaffMetric === 'allocation' || selectedStaffMetric === 'collection') && isInsideLeaderboardRef) {
+          return // Don't close - user clicked inside the section
+        }
+        
         // Check if click is not on any of the staff monitoring cards
         const staffCards = document.querySelectorAll('[data-staff-card]')
         let clickedOnCard = false
@@ -341,11 +420,26 @@ const Dashboard = () => {
             clickedOnCard = true
           }
         })
+        
         // Check if click is on filter elements (don't close table when using filters)
         const isFilterElement = filtersRef.current && filtersRef.current.contains(event.target)
         // Check if click is on customer table (don't close staff table when clicking customer table)
         const isCustomerTable = customerDetailsRef.current && customerDetailsRef.current.contains(event.target)
-        if (!clickedOnCard && !isFilterElement && !isCustomerTable) {
+        // Check if click is on table elements (tables, pagination, buttons inside tables)
+        const isTableElement = event.target.closest('table') || 
+                               event.target.closest('.table-scroll-container') ||
+                               event.target.closest('button[title="Export to Excel"]') ||
+                               event.target.closest('[class*="pagination"]') ||
+                               event.target.closest('th') ||
+                               event.target.closest('td') ||
+                               event.target.closest('tr') ||
+                               event.target.closest('tbody') ||
+                               event.target.closest('thead') ||
+                               event.target.closest('div[class*="grid"]') ||
+                               event.target.closest('div[class*="space-y"]')
+        
+        // Only close if clicking outside the ref and not on cards, filters, or table elements
+        if (!isInsideLeaderboardRef && !clickedOnCard && !isFilterElement && !isCustomerTable && !isTableElement) {
           setSelectedStaffMetric(null)
         }
       }
@@ -1992,7 +2086,7 @@ const Dashboard = () => {
   }
 
   // Helper function to render Vertical Summary table
-  // Reusable pagination component
+  // Reusable pagination component with modern design
   const renderPagination = (currentPage, setCurrentPage, totalItems, itemsPerPage) => {
     const totalPages = Math.ceil(totalItems / itemsPerPage)
     if (totalPages <= 1) return null
@@ -2006,18 +2100,68 @@ const Dashboard = () => {
       }
     }
 
+    // Calculate visible page range with ellipsis
+    const getVisiblePages = () => {
+      const maxVisible = 5
+      const pages = []
+      
+      if (totalPages <= maxVisible) {
+        // Show all pages if total is less than max visible
+        for (let i = 1; i <= totalPages; i++) {
+          pages.push(i)
+        }
+      } else {
+        // Always show first page
+        pages.push(1)
+        
+        let start = Math.max(2, currentPage - 1)
+        let end = Math.min(totalPages - 1, currentPage + 1)
+        
+        // Adjust if we're near the start
+        if (currentPage <= 3) {
+          end = Math.min(4, totalPages - 1)
+        }
+        // Adjust if we're near the end
+        if (currentPage >= totalPages - 2) {
+          start = Math.max(2, totalPages - 3)
+        }
+        
+        // Add ellipsis after first page if needed
+        if (start > 2) {
+          pages.push('ellipsis-start')
+        }
+        
+        // Add middle pages
+        for (let i = start; i <= end; i++) {
+          pages.push(i)
+        }
+        
+        // Add ellipsis before last page if needed
+        if (end < totalPages - 1) {
+          pages.push('ellipsis-end')
+        }
+        
+        // Always show last page
+        pages.push(totalPages)
+      }
+      
+      return pages
+    }
+
+    const visiblePages = getVisiblePages()
+
     return (
-      <div className="bg-gray-50 px-4 py-3 flex items-center justify-between border-t border-gray-200">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-700">
-            Showing {startIndex + 1} to {endIndex} of {totalItems} entries
+      <div className="bg-gray-50 px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-gray-200">
+        <div className="flex items-center">
+          <span className="text-sm text-gray-700 whitespace-nowrap">
+            Showing <span className="font-medium">{startIndex + 1}</span> to <span className="font-medium">{endIndex}</span> of <span className="font-medium">{totalItems}</span> entries
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 flex-wrap justify-center">
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
               currentPage === 1
                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                 : 'bg-white text-red-600 border border-red-600 hover:bg-red-50 cursor-pointer'
@@ -2025,23 +2169,32 @@ const Dashboard = () => {
           >
             Previous
           </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          {visiblePages.map((page, index) => {
+            if (page === 'ellipsis-start' || page === 'ellipsis-end') {
+              return (
+                <span key={`ellipsis-${index}`} className="px-2 text-gray-500 text-sm">
+                  ...
+                </span>
+              )
+            }
+            return (
             <button
               key={page}
               onClick={() => handlePageChange(page)}
-              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors min-w-[36px] ${
                 page === currentPage
-                  ? 'bg-red-600 text-white cursor-pointer'
+                    ? 'bg-red-600 text-white cursor-pointer shadow-sm'
                   : 'bg-white text-red-600 border border-red-600 hover:bg-red-50 cursor-pointer'
               }`}
             >
               {page}
             </button>
-          ))}
+            )
+          })}
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
               currentPage === totalPages
                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                 : 'bg-white text-red-600 border border-red-600 hover:bg-red-50 cursor-pointer'
@@ -2055,19 +2208,22 @@ const Dashboard = () => {
   }
 
   const renderProductSummaryTable = () => {
-    // Use API data if available, otherwise use fallback data
+    // Use API data if available, otherwise use fallback data with zeros
     const defaultProductData = [
-      { product: 'CE', total: 45883, good: 39971, npa: 1477, sma0: 2213, sma1: 1357, sma2: 1004 },
-      { product: 'CV', total: 84734, good: 70664, npa: 2953, sma0: 5509, sma1: 3788, sma2: 2166 },
-      { product: 'DLLS', total: 68, good: 68, npa: 0, sma0: 0, sma1: 0, sma2: 0 },
-      { product: 'ICV', total: 17, good: 13, npa: 4, sma0: 0, sma1: 0, sma2: 0 },
-      { product: 'LCV', total: 25714, good: 21012, npa: 1028, sma0: 1555, sma1: 1531, sma2: 731 },
-      { product: 'SA', total: 32395, good: 25029, npa: 2060, sma0: 2628, sma1: 1864, sma2: 1008 },
-      { product: 'TFE', total: 2600, good: 2599, npa: 0, sma0: 0, sma1: 0, sma2: 1 },
-      { product: 'VWFN', total: 131, good: 7, npa: 124, sma0: 0, sma1: 0, sma2: 0 },
-      { product: 'VWFS', total: 13, good: 11, npa: 2, sma0: 0, sma1: 0, sma2: 0 }
+      { product: 'CE', total: 0, good: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 },
+      { product: 'CV', total: 0, good: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 },
+      { product: 'DLLS', total: 0, good: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 },
+      { product: 'ICV', total: 0, good: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 },
+      { product: 'LCV', total: 0, good: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 },
+      { product: 'SA', total: 0, good: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 },
+      { product: 'TFE', total: 0, good: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 },
+      { product: 'VWFN', total: 0, good: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 },
+      { product: 'VWFS', total: 0, good: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 }
     ]
-    const productData = verticalSummaryData && verticalSummaryData.length > 0 ? verticalSummaryData : defaultProductData
+    // If API has been called (not loading) and returned empty array, show "No data available"
+    // Otherwise use API data if available, or default data
+    const hasApiData = verticalSummaryData !== null && verticalSummaryData !== undefined
+    const productData = verticalSummaryData && verticalSummaryData.length > 0 ? verticalSummaryData : (hasApiData && verticalSummaryData.length === 0 ? [] : defaultProductData)
     const totals = productData.reduce((acc, row) => ({
       total: acc.total + (row.total || 0),
       good: acc.good + (row.good || 0),
@@ -2121,12 +2277,14 @@ const Dashboard = () => {
             Export
           </button>
         </div>
-        {verticalDataLoading && (
-          <div className="p-4 text-center text-gray-600">Loading data...</div>
-        )}
-        {verticalDataError && (
+        {verticalDataLoading ? (
+          <div className="p-8 text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+            <p className="mt-2 text-sm text-gray-600">Loading data...</p>
+          </div>
+        ) : verticalDataError ? (
           <div className="p-4 text-center text-red-600">Error: {verticalDataError}</div>
-        )}
+        ) : (
         <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
           <table className="w-full text-xs border border-[#003366]">
             <thead className="bg-gray-100 text-[#003366] sticky top-0">
@@ -2141,6 +2299,12 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody className="bg-white">
+                {hasApiData && verticalSummaryData.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="py-8 px-2 text-center text-gray-500">No data available</td>
+                  </tr>
+                ) : (
+                  <>
               {paginatedData.map((row, idx) => (
                 <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                   <td className="py-2 px-2 text-gray-800 font-medium">{row.product}</td>
@@ -2162,30 +2326,36 @@ const Dashboard = () => {
                   <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma1)}</td>
                   <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
                 </tr>
+                    )}
+                  </>
               )}
             </tbody>
           </table>
         </div>
-        {renderPagination(productSummaryPage, setProductSummaryPage, productData.length, itemsPerPage)}
+        )}
+        {!verticalDataLoading && !verticalDataError && renderPagination(productSummaryPage, setProductSummaryPage, productData.length, itemsPerPage)}
       </div>
     )
   }
 
   // Helper function to render Vertical Allocation Summary table
   const renderProductAllocationTable = () => {
-    // Use API data if available, otherwise use fallback data
+    // Use API data if available, otherwise use fallback data with zeros
     const defaultAllocationData = [
-      { product: 'CE', total: 45883, good: 39971, npa: 1477, sma0: 2213, sma1: 1357, sma2: 1004 },
-      { product: 'CV', total: 84734, good: 70664, npa: 2953, sma0: 5509, sma1: 3788, sma2: 2166 },
-      { product: 'DLLS', total: 68, good: 68, npa: 0, sma0: 0, sma1: 0, sma2: 0 },
-      { product: 'ICV', total: 17, good: 13, npa: 4, sma0: 0, sma1: 0, sma2: 0 },
-      { product: 'LCV', total: 25714, good: 21012, npa: 1028, sma0: 1555, sma1: 1531, sma2: 731 },
-      { product: 'SA', total: 32395, good: 25029, npa: 2060, sma0: 2628, sma1: 1864, sma2: 1008 },
-      { product: 'TFE', total: 2600, good: 2599, npa: 0, sma0: 0, sma1: 0, sma2: 1 },
-      { product: 'VWFN', total: 131, good: 7, npa: 124, sma0: 0, sma1: 0, sma2: 0 },
-      { product: 'VWFS', total: 13, good: 11, npa: 2, sma0: 0, sma1: 0, sma2: 0 }
+      { product: 'CE', total: 0, good: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 },
+      { product: 'CV', total: 0, good: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 },
+      { product: 'DLLS', total: 0, good: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 },
+      { product: 'ICV', total: 0, good: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 },
+      { product: 'LCV', total: 0, good: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 },
+      { product: 'SA', total: 0, good: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 },
+      { product: 'TFE', total: 0, good: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 },
+      { product: 'VWFN', total: 0, good: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 },
+      { product: 'VWFS', total: 0, good: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 }
     ]
-    const allocationData = verticalAllocationData && verticalAllocationData.length > 0 ? verticalAllocationData : defaultAllocationData
+    // If API has been called (not loading) and returned empty array, show "No data available"
+    // Otherwise use API data if available, or default data
+    const hasApiData = verticalAllocationData !== null && verticalAllocationData !== undefined
+    const allocationData = verticalAllocationData && verticalAllocationData.length > 0 ? verticalAllocationData : (hasApiData && verticalAllocationData.length === 0 ? [] : defaultAllocationData)
     const totals = allocationData.reduce((acc, row) => ({
       total: acc.total + (row.total || 0),
       good: acc.good + (row.good || 0),
@@ -2238,12 +2408,14 @@ const Dashboard = () => {
             Export
           </button>
         </div>
-        {verticalDataLoading && (
-          <div className="p-4 text-center text-gray-600">Loading data...</div>
-        )}
-        {verticalDataError && (
+        {verticalDataLoading ? (
+          <div className="p-8 text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+            <p className="mt-2 text-sm text-gray-600">Loading data...</p>
+          </div>
+        ) : verticalDataError ? (
           <div className="p-4 text-center text-red-600">Error: {verticalDataError}</div>
-        )}
+        ) : (
         <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
           <table className="w-full text-xs border border-[#003366]">
             <thead className="bg-gray-100 text-[#003366] sticky top-0">
@@ -2258,6 +2430,12 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody className="bg-white">
+                {hasApiData && verticalAllocationData.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="py-8 px-2 text-center text-gray-500">No data available</td>
+                  </tr>
+                ) : (
+                  <>
               {paginatedData.map((row, idx) => (
                 <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                   <td className="py-2 px-2 text-gray-800 font-medium">{row.product}</td>
@@ -2279,11 +2457,14 @@ const Dashboard = () => {
                   <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma1)}</td>
                   <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
                 </tr>
+                    )}
+                  </>
               )}
             </tbody>
           </table>
         </div>
-        {renderPagination(productAllocationPage, setProductAllocationPage, allocationData.length, itemsPerPage)}
+        )}
+        {!verticalDataLoading && !verticalDataError && renderPagination(productAllocationPage, setProductAllocationPage, allocationData.length, itemsPerPage)}
       </div>
     )
   }
@@ -2344,12 +2525,14 @@ const Dashboard = () => {
             Export
           </button>
         </div>
-        {verticalDataLoading && (
-          <div className="p-4 text-center text-gray-600">Loading data...</div>
-        )}
-        {verticalDataError && (
+        {verticalDataLoading ? (
+          <div className="p-8 text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+            <p className="mt-2 text-sm text-gray-600">Loading data...</p>
+          </div>
+        ) : verticalDataError ? (
           <div className="p-4 text-center text-red-600">Error: {verticalDataError}</div>
-        )}
+        ) : (
         <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
           <table className="w-full text-xs border border-[#003366]">
             <thead className="bg-gray-100 text-[#003366] sticky top-0">
@@ -2364,7 +2547,11 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody className="bg-white">
-              {paginatedData.length > 0 ? (
+                {!tableData || tableData.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="py-8 px-2 text-center text-gray-500">No data available</td>
+                  </tr>
+                ) : paginatedData.length > 0 ? (
                 <>
                   {paginatedData.map((row, idx) => (
                     <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
@@ -2391,13 +2578,14 @@ const Dashboard = () => {
                 </>
               ) : (
                 <tr>
-                  <td colSpan="7" className="py-4 px-2 text-center text-gray-500">No data available</td>
+                    <td colSpan="7" className="py-8 px-2 text-center text-gray-500">No data available</td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
-        {renderPagination(currentPage, setCurrentPage, data.length, itemsPerPage)}
+        )}
+        {!verticalDataLoading && !verticalDataError && renderPagination(currentPage, setCurrentPage, data.length, itemsPerPage)}
       </div>
     )
   }
@@ -2446,22 +2634,13 @@ const Dashboard = () => {
 
   // Helper function to render State Wise Summary table
   const renderStateWiseSummaryTable = () => {
-    const stateData = [
-      { state: 'N/A', totalCases: 181986, outstandingBalance: 12, resolutionCount: 326, resolutionCountPercent: 0.18, resolutionAmount: 0, resolutionAmountPercent: 0.09 },
-      { state: 'Kerala', totalCases: 21740, outstandingBalance: 25, resolutionCount: 1787, resolutionCountPercent: 8.22, resolutionAmount: 6, resolutionAmountPercent: 2.43 },
-      { state: 'Tamil Nadu', totalCases: 9289, outstandingBalance: 39, resolutionCount: 1505, resolutionCountPercent: 16.20, resolutionAmount: 1, resolutionAmountPercent: 0.13 },
-      { state: 'Maharashtra', totalCases: 3554, outstandingBalance: 135, resolutionCount: 619, resolutionCountPercent: 17.42, resolutionAmount: 4, resolutionAmountPercent: 0.27 },
-      { state: 'Andhra Pradesh', totalCases: 3063, outstandingBalance: 4, resolutionCount: 323, resolutionCountPercent: 10.55, resolutionAmount: 0, resolutionAmountPercent: 0.85 },
-      { state: 'Karnataka', totalCases: 2220, outstandingBalance: 6, resolutionCount: 483, resolutionCountPercent: 21.76, resolutionAmount: 2, resolutionAmountPercent: 3.88 },
-      { state: 'Telangana', totalCases: 751, outstandingBalance: 5, resolutionCount: 190, resolutionCountPercent: 25.30, resolutionAmount: 0, resolutionAmountPercent: 0.03 },
-      { state: 'Gujarat', totalCases: 419, outstandingBalance: 6, resolutionCount: 143, resolutionCountPercent: 34.13, resolutionAmount: 1, resolutionAmountPercent: 0.87 },
-      { state: 'Rajasthan', totalCases: 394, outstandingBalance: 16, resolutionCount: 63, resolutionCountPercent: 15.99, resolutionAmount: 0, resolutionAmountPercent: 0.00 }
-    ]
+    const hasApiData = stateWiseData !== null && stateWiseData !== undefined
+    const stateData = stateWiseData && stateWiseData.length > 0 ? stateWiseData : []
     const totals = stateData.reduce((acc, row) => ({
-      totalCases: acc.totalCases + row.totalCases,
-      outstandingBalance: acc.outstandingBalance + row.outstandingBalance,
-      resolutionCount: acc.resolutionCount + row.resolutionCount,
-      resolutionAmount: acc.resolutionAmount + row.resolutionAmount
+      totalCases: acc.totalCases + (row.totalCases || 0),
+      outstandingBalance: acc.outstandingBalance + (parseFloat(row.outstandingBalance) || 0),
+      resolutionCount: acc.resolutionCount + (row.resolutionCount || 0),
+      resolutionAmount: acc.resolutionAmount + (parseFloat(row.resolutionAmount) || 0)
     }), { totalCases: 0, outstandingBalance: 0, resolutionCount: 0, resolutionAmount: 0 })
     const totalResolutionCountPercent = totals.totalCases > 0 ? ((totals.resolutionCount / totals.totalCases) * 100).toFixed(2) : 0
     const totalResolutionAmountPercent = totals.outstandingBalance > 0 ? ((totals.resolutionAmount / totals.outstandingBalance) * 100).toFixed(2) : 0
@@ -2509,6 +2688,14 @@ const Dashboard = () => {
             Export
           </button>
         </div>
+        {collectionDataLoading ? (
+          <div className="p-8 text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+            <p className="mt-2 text-sm text-gray-600">Loading data...</p>
+          </div>
+        ) : collectionDataError ? (
+          <div className="p-4 text-center text-red-600">Error: {collectionDataError}</div>
+        ) : (
         <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
           <table className="w-full text-xs border border-[#003366]">
             <thead className="bg-gray-100 text-[#003366] sticky top-0">
@@ -2523,63 +2710,70 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody className="bg-white">
+                {hasApiData && stateData.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="py-8 px-2 text-center text-gray-500">No data available</td>
+                  </tr>
+                ) : (
+                  <>
               {paginatedData.map((row, idx) => (
                 <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                   <td className="py-2 px-2 text-gray-800 font-medium">{row.state}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.totalCases)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{row.outstandingBalance}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.resolutionCount)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.totalCases || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(parseFloat(row.outstandingBalance) || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.resolutionCount || 0)}</td>
                   <td className="py-2 px-2 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <div className="flex-1 max-w-[100px] bg-gray-200 rounded-full h-4 relative">
-                        <div 
-                          className="bg-green-500 h-4 rounded-full" 
-                          style={{ width: `${Math.min(row.resolutionCountPercent, 100)}%` }}
-                        ></div>
+                            <div className="flex-1 max-w-[100px] bg-gray-200 rounded-full h-4 relative overflow-hidden">
+                              <div 
+                                className="bg-green-500 h-4 rounded-full transition-all relative flex items-center justify-center" 
+                                style={{ width: `${Math.min(Math.max(parseFloat(row.resolutionCountPercent) || 0, 0), 100)}%`, minWidth: parseFloat(row.resolutionCountPercent) > 0 ? '2px' : '0' }}
+                              >
+                                {parseFloat(row.resolutionCountPercent) > 5 && (
+                                  <span className="text-[10px] text-white font-medium whitespace-nowrap">
+                                    {(parseFloat(row.resolutionCountPercent) || 0).toFixed(2)}%
+                                  </span>
+                                )}
                       </div>
-                      <span className="text-gray-700 min-w-[50px] text-right">{row.resolutionCountPercent.toFixed(2)}%</span>
+                            </div>
+                            <span className="text-gray-700 min-w-[50px] text-right font-medium text-xs">{(parseFloat(row.resolutionCountPercent) || 0).toFixed(2)}%</span>
                     </div>
                   </td>
-                  <td className="py-2 px-2 text-right text-gray-700">{row.resolutionAmount}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{row.resolutionAmountPercent.toFixed(2)}%</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(parseFloat(row.resolutionAmount) || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{(parseFloat(row.resolutionAmountPercent) || 0).toFixed(2)}%</td>
                 </tr>
               ))}
-              {endIndex >= stateData.length && (
+                    {endIndex >= stateData.length && stateData.length > 0 && (
                 <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
                   <td className="py-2 px-2">Totals</td>
                   <td className="py-2 px-2 text-right">{formatIndianNumber(totals.totalCases)}</td>
-                  <td className="py-2 px-2 text-right">{totals.outstandingBalance}</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.outstandingBalance)}</td>
                   <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionCount)}</td>
                   <td className="py-2 px-2 text-right">{totalResolutionCountPercent}%</td>
-                  <td className="py-2 px-2 text-right">{totals.resolutionAmount}</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionAmount)}</td>
                 <td className="py-2 px-2 text-right">{totalResolutionAmountPercent}%</td>
               </tr>
+                    )}
+                  </>
               )}
             </tbody>
           </table>
         </div>
-        {renderPagination(stateWisePage, setStateWisePage, stateData.length, itemsPerPage)}
+        )}
+        {!collectionDataLoading && !collectionDataError && renderPagination(stateWisePage, setStateWisePage, stateData.length, itemsPerPage)}
       </div>
     )
   }
 
   // Helper function to render Region Wise Summary table
   const renderRegionWiseSummaryTable = () => {
-    const regionData = [
-      { region: 'Thrissur Zone', cases: 4840, outstandingBalance: 10, resolutionCount: 363, resolutionCountPercent: 7.50, resolutionAmount: 0, resolutionAmountPercent: 0.00 },
-      { region: 'APT Zone', cases: 2836, outstandingBalance: 7, resolutionCount: 382, resolutionCountPercent: 13.47, resolutionAmount: 0, resolutionAmountPercent: 0.49 },
-      { region: 'Chennai Zone', cases: 2744, outstandingBalance: 32, resolutionCount: 492, resolutionCountPercent: 17.93, resolutionAmount: 0, resolutionAmountPercent: 0.01 },
-      { region: 'Karnataka Zone', cases: 2268, outstandingBalance: 6, resolutionCount: 470, resolutionCountPercent: 20.72, resolutionAmount: 2, resolutionAmountPercent: 3.60 },
-      { region: 'West-2-Zone', cases: 1996, outstandingBalance: 18, resolutionCount: 156, resolutionCountPercent: 7.82, resolutionAmount: 0, resolutionAmountPercent: 0.00 },
-      { region: 'West-1-Zone', cases: 1503, outstandingBalance: 117, resolutionCount: 407, resolutionCountPercent: 27.08, resolutionAmount: 3, resolutionAmountPercent: 0.27 },
-      { region: 'North Zone', cases: 1296, outstandingBalance: 16, resolutionCount: 370, resolutionCountPercent: 28.55, resolutionAmount: 0, resolutionAmountPercent: 0.00 },
-      { region: 'AP ZONE', cases: 955, outstandingBalance: 2, resolutionCount: 77, resolutionCountPercent: 8.06, resolutionAmount: 0, resolutionAmountPercent: 0.00 }
-    ]
+    const hasApiData = regionWiseData !== null && regionWiseData !== undefined
+    const regionData = regionWiseData && regionWiseData.length > 0 ? regionWiseData : []
     const totals = regionData.reduce((acc, row) => ({
-      cases: acc.cases + row.cases,
-      outstandingBalance: acc.outstandingBalance + row.outstandingBalance,
-      resolutionCount: acc.resolutionCount + row.resolutionCount,
-      resolutionAmount: acc.resolutionAmount + row.resolutionAmount
+      cases: acc.cases + (row.cases || 0),
+      outstandingBalance: acc.outstandingBalance + (parseFloat(row.outstandingBalance) || 0),
+      resolutionCount: acc.resolutionCount + (row.resolutionCount || 0),
+      resolutionAmount: acc.resolutionAmount + (parseFloat(row.resolutionAmount) || 0)
     }), { cases: 0, outstandingBalance: 0, resolutionCount: 0, resolutionAmount: 0 })
     const totalResolutionCountPercent = totals.cases > 0 ? ((totals.resolutionCount / totals.cases) * 100).toFixed(2) : 0
     const totalResolutionAmountPercent = totals.outstandingBalance > 0 ? ((totals.resolutionAmount / totals.outstandingBalance) * 100).toFixed(2) : 0
@@ -2627,6 +2821,14 @@ const Dashboard = () => {
             Export
           </button>
         </div>
+        {collectionDataLoading ? (
+          <div className="p-8 text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+            <p className="mt-2 text-sm text-gray-600">Loading data...</p>
+          </div>
+        ) : collectionDataError ? (
+          <div className="p-4 text-center text-red-600">Error: {collectionDataError}</div>
+        ) : (
         <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
           <table className="w-full text-xs border border-[#003366]">
             <thead className="bg-gray-100 text-[#003366] sticky top-0">
@@ -2641,62 +2843,70 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody className="bg-white">
+                {hasApiData && regionData.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="py-8 px-2 text-center text-gray-500">No data available</td>
+                  </tr>
+                ) : (
+                  <>
               {paginatedData.map((row, idx) => (
                 <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                   <td className="py-2 px-2 text-gray-800 font-medium">{row.region}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.cases)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{row.outstandingBalance}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.resolutionCount)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.cases || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(parseFloat(row.outstandingBalance) || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.resolutionCount || 0)}</td>
                   <td className="py-2 px-2 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <div className="flex-1 max-w-[100px] bg-gray-200 rounded-full h-4 relative">
-                        <div 
-                          className="bg-green-500 h-4 rounded-full" 
-                          style={{ width: `${Math.min(row.resolutionCountPercent, 100)}%` }}
-                        ></div>
+                            <div className="flex-1 max-w-[100px] bg-gray-200 rounded-full h-4 relative overflow-hidden">
+                              <div 
+                                className="bg-green-500 h-4 rounded-full transition-all relative flex items-center justify-center" 
+                                style={{ width: `${Math.min(Math.max(parseFloat(row.resolutionCountPercent) || 0, 0), 100)}%`, minWidth: parseFloat(row.resolutionCountPercent) > 0 ? '2px' : '0' }}
+                              >
+                                {parseFloat(row.resolutionCountPercent) > 5 && (
+                                  <span className="text-[10px] text-white font-medium whitespace-nowrap">
+                                    {(parseFloat(row.resolutionCountPercent) || 0).toFixed(2)}%
+                                  </span>
+                                )}
                       </div>
-                      <span className="text-gray-700 min-w-[50px] text-right">{row.resolutionCountPercent.toFixed(2)}%</span>
+                            </div>
+                            <span className="text-gray-700 min-w-[50px] text-right font-medium text-xs">{(parseFloat(row.resolutionCountPercent) || 0).toFixed(2)}%</span>
                     </div>
                   </td>
-                  <td className="py-2 px-2 text-right text-gray-700">{row.resolutionAmount}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{row.resolutionAmountPercent.toFixed(2)}%</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(parseFloat(row.resolutionAmount) || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{(parseFloat(row.resolutionAmountPercent) || 0).toFixed(2)}%</td>
                 </tr>
               ))}
-              {endIndex >= regionData.length && (
+                    {endIndex >= regionData.length && regionData.length > 0 && (
                 <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
                   <td className="py-2 px-2">Totals</td>
                   <td className="py-2 px-2 text-right">{formatIndianNumber(totals.cases)}</td>
-                  <td className="py-2 px-2 text-right">{totals.outstandingBalance}</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.outstandingBalance)}</td>
                   <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionCount)}</td>
                   <td className="py-2 px-2 text-right">{totalResolutionCountPercent}%</td>
-                  <td className="py-2 px-2 text-right">{totals.resolutionAmount}</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionAmount)}</td>
                 <td className="py-2 px-2 text-right">{totalResolutionAmountPercent}%</td>
               </tr>
+                    )}
+                  </>
               )}
             </tbody>
           </table>
         </div>
-        {renderPagination(regionWisePage, setRegionWisePage, regionData.length, itemsPerPage)}
+        )}
+        {!collectionDataLoading && !collectionDataError && renderPagination(regionWisePage, setRegionWisePage, regionData.length, itemsPerPage)}
       </div>
     )
   }
 
   // Helper function to render Bucket Wise Summary table
   const renderBucketWiseSummaryTable = () => {
-    const bucketData = [
-      { bucket: 'X bucket = 1-30', cases: 91498, outstandingBalance: 38, resolutionCount: 1544, resolutionCountPercent: 1.69, resolutionAmount: 6, resolutionAmountPercent: 1.49 },
-      { bucket: '>180', cases: 58742, outstandingBalance: 77, resolutionCount: 1577, resolutionCountPercent: 2.68, resolutionAmount: 3, resolutionAmountPercent: 0.40 },
-      { bucket: 'Current = 0 DPD', cases: 28971, outstandingBalance: 1, resolutionCount: 632, resolutionCountPercent: 2.18, resolutionAmount: 0, resolutionAmountPercent: 0.00 },
-      { bucket: '91-120', cases: 15597, outstandingBalance: 30, resolutionCount: 590, resolutionCountPercent: 3.78, resolutionAmount: 0, resolutionAmountPercent: 0.08 },
-      { bucket: '31-60', cases: 11336, outstandingBalance: 38, resolutionCount: 636, resolutionCountPercent: 5.61, resolutionAmount: 2, resolutionAmountPercent: 0.63 },
-      { bucket: '121-180', cases: 10342, outstandingBalance: 53, resolutionCount: 540, resolutionCountPercent: 5.22, resolutionAmount: 0, resolutionAmountPercent: 0.02 },
-      { bucket: '61-90', cases: 8446, outstandingBalance: 21, resolutionCount: 422, resolutionCountPercent: 5.00, resolutionAmount: 2, resolutionAmountPercent: 0.91 }
-    ]
+    const hasApiData = bucketWiseData !== null && bucketWiseData !== undefined
+    const bucketData = bucketWiseData && bucketWiseData.length > 0 ? bucketWiseData : []
     const totals = bucketData.reduce((acc, row) => ({
-      cases: acc.cases + row.cases,
-      outstandingBalance: acc.outstandingBalance + row.outstandingBalance,
-      resolutionCount: acc.resolutionCount + row.resolutionCount,
-      resolutionAmount: acc.resolutionAmount + row.resolutionAmount
+      cases: acc.cases + (row.cases || 0),
+      outstandingBalance: acc.outstandingBalance + (parseFloat(row.outstandingBalance) || 0),
+      resolutionCount: acc.resolutionCount + (row.resolutionCount || 0),
+      resolutionAmount: acc.resolutionAmount + (parseFloat(row.resolutionAmount) || 0)
     }), { cases: 0, outstandingBalance: 0, resolutionCount: 0, resolutionAmount: 0 })
     const totalResolutionCountPercent = totals.cases > 0 ? ((totals.resolutionCount / totals.cases) * 100).toFixed(2) : 0
     const totalResolutionAmountPercent = totals.outstandingBalance > 0 ? ((totals.resolutionAmount / totals.outstandingBalance) * 100).toFixed(2) : 0
@@ -2744,6 +2954,14 @@ const Dashboard = () => {
             Export
           </button>
         </div>
+        {collectionDataLoading ? (
+          <div className="p-8 text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+            <p className="mt-2 text-sm text-gray-600">Loading data...</p>
+          </div>
+        ) : collectionDataError ? (
+          <div className="p-4 text-center text-red-600">Error: {collectionDataError}</div>
+        ) : (
         <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
           <table className="w-full text-xs border border-[#003366]">
             <thead className="bg-gray-100 text-[#003366] sticky top-0">
@@ -2758,70 +2976,76 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody className="bg-white">
+                {hasApiData && bucketData.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="py-8 px-2 text-center text-gray-500">No data available</td>
+                  </tr>
+                ) : (
+                  <>
               {paginatedData.map((row, idx) => (
                 <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : (row.bucket === 'X bucket = 1-30' || row.bucket === '>180' ? 'bg-yellow-50' : 'bg-gray-50')}>
                   <td className="py-2 px-2 text-gray-800 font-medium">{row.bucket}</td>
-                  <td className={`py-2 px-2 text-right ${row.bucket === 'X bucket = 1-30' || row.bucket === '>180' ? 'bg-yellow-100 font-semibold' : 'text-gray-700'}`}>{formatIndianNumber(row.cases)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{row.outstandingBalance}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.resolutionCount)}</td>
+                        <td className={`py-2 px-2 text-right ${row.bucket === 'X bucket = 1-30' || row.bucket === '>180' ? 'bg-yellow-100 font-semibold' : 'text-gray-700'}`}>{formatIndianNumber(row.cases || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(parseFloat(row.outstandingBalance) || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.resolutionCount || 0)}</td>
                   <td className="py-2 px-2 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <div className="flex-1 max-w-[100px] bg-gray-200 rounded-full h-4 relative">
-                        <div 
-                          className="bg-green-500 h-4 rounded-full" 
-                          style={{ width: `${Math.min(row.resolutionCountPercent, 100)}%` }}
-                        ></div>
+                            <div className="flex-1 max-w-[100px] bg-gray-200 rounded-full h-4 relative overflow-hidden">
+                              <div 
+                                className="bg-green-500 h-4 rounded-full transition-all relative flex items-center justify-center" 
+                                style={{ width: `${Math.min(Math.max(parseFloat(row.resolutionCountPercent) || 0, 0), 100)}%`, minWidth: parseFloat(row.resolutionCountPercent) > 0 ? '2px' : '0' }}
+                              >
+                                {parseFloat(row.resolutionCountPercent) > 5 && (
+                                  <span className="text-[10px] text-white font-medium whitespace-nowrap">
+                                    {(parseFloat(row.resolutionCountPercent) || 0).toFixed(2)}%
+                                  </span>
+                                )}
                       </div>
-                      <span className="text-gray-700 min-w-[50px] text-right">{row.resolutionCountPercent.toFixed(2)}%</span>
+                            </div>
+                            <span className="text-gray-700 min-w-[50px] text-right font-medium text-xs">{(parseFloat(row.resolutionCountPercent) || 0).toFixed(2)}%</span>
                     </div>
                   </td>
-                  <td className="py-2 px-2 text-right text-gray-700">{row.resolutionAmount}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{row.resolutionAmountPercent.toFixed(2)}%</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(parseFloat(row.resolutionAmount) || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{(parseFloat(row.resolutionAmountPercent) || 0).toFixed(2)}%</td>
                 </tr>
               ))}
-              {endIndex >= bucketData.length && (
+                    {endIndex >= bucketData.length && bucketData.length > 0 && (
                 <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
                   <td className="py-2 px-2">Totals</td>
                   <td className="py-2 px-2 text-right">{formatIndianNumber(totals.cases)}</td>
-                  <td className="py-2 px-2 text-right">{totals.outstandingBalance}</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.outstandingBalance)}</td>
                   <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionCount)}</td>
                   <td className="py-2 px-2 text-right">{totalResolutionCountPercent}%</td>
-                  <td className="py-2 px-2 text-right">{totals.resolutionAmount}</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionAmount)}</td>
                 <td className="py-2 px-2 text-right">{totalResolutionAmountPercent}%</td>
               </tr>
+                    )}
+                  </>
               )}
             </tbody>
           </table>
         </div>
-        {renderPagination(bucketWisePage, setBucketWisePage, bucketData.length, itemsPerPage)}
+        )}
+        {!collectionDataLoading && !collectionDataError && renderPagination(bucketWisePage, setBucketWisePage, bucketData.length, itemsPerPage)}
       </div>
     )
   }
 
   // Helper function to render MTD Productivity Report table
   const renderMTDProductivityReportTable = () => {
-    const data = [
-      { smartCollId: 'SSAHAREESH', name: 'HAREESH', agency: 'SS Associates', role: 'DTR', totalAllocated: 225, visitsWeb: 458, visitsField: 471, visitsAccounts: 225, avgIntensity: 13.56, numPaid: 0, efficiency: 0, paidPercent: 0, numPTP: 222, numDL: 221 },
-      { smartCollId: 'MDAANOOP', name: 'ANOOP', agency: 'MD ASSOCIATES', role: 'DTR', totalAllocated: 210, visitsWeb: 137, visitsField: 223, visitsAccounts: 196, avgIntensity: 16.18, numPaid: 12, efficiency: 0, paidPercent: 0.05, numPTP: 181, numDL: 102 },
-      { smartCollId: 'ENHVEENA', name: 'VEENA', agency: 'ENHANCE MANAGEMENT SERVICES', role: 'DTR', totalAllocated: 205, visitsWeb: 443, visitsField: 42, visitsAccounts: 204, avgIntensity: 19.69, numPaid: 2, efficiency: 0, paidPercent: 0, numPTP: 165, numDL: 203 },
-      { smartCollId: 'SKAAJEESH', name: 'Ajeesh', agency: 'Skyline Associates', role: 'DTR', totalAllocated: 200, visitsWeb: 454, visitsField: 11, visitsAccounts: 200, avgIntensity: 26.6, numPaid: 41, efficiency: 0, paidPercent: 0.2, numPTP: 167, numDL: 197 },
-      { smartCollId: 'GENGANGA', name: 'GANGA', agency: 'GENEROUS ASSOCIATES', role: 'DTR', totalAllocated: 194, visitsWeb: 278, visitsField: 245, visitsAccounts: 194, avgIntensity: 13.62, numPaid: 5, efficiency: 0, paidPercent: 0.02, numPTP: 168, numDL: 190 },
-      { smartCollId: 'SSAPAVITHRAN', name: 'PAVITHRAN', agency: 'SS Associates', role: 'DTR', totalAllocated: 190, visitsWeb: 435, visitsField: 486, visitsAccounts: 190, avgIntensity: 30.44, numPaid: 3, efficiency: 0, paidPercent: 0.01, numPTP: 187, numDL: 188 },
-      { smartCollId: 'SKAAKHIL', name: 'AKHIL', agency: 'Skyline Associates', role: 'DTR', totalAllocated: 173, visitsWeb: 226, visitsField: 2, visitsAccounts: 173, avgIntensity: 5.27, numPaid: 35, efficiency: 0.03, paidPercent: 0.2, numPTP: 133, numDL: 156 },
-      { smartCollId: 'MDAJINS', name: 'JINS', agency: 'MD ASSOCIATES', role: 'DTR', totalAllocated: 166, visitsWeb: 21, visitsField: 256, visitsAccounts: 166, avgIntensity: 5.39, numPaid: 2, efficiency: 0, paidPercent: 0.01, numPTP: 166, numDL: 66 },
-    ]
+    const data = []
 
     const totals = {
-      totalAllocated: 7699,
-      visitsWeb: 11544,
-      visitsField: 13311,
-      visitsAccounts: 7623,
-      avgIntensity: 25.18,
-      numPaid: 504,
+      totalAllocated: 0,
+      visitsWeb: 0,
+      visitsField: 0,
+      visitsAccounts: 0,
+      avgIntensity: 0,
+      numPaid: 0,
       efficiency: 0,
-      paidPercent: 0.06,
-      numPTP: 7041,
-      numDL: 6870,
+      paidPercent: 0,
+      numPTP: 0,
+      numDL: 0,
     }
 
     const headers = [
@@ -2937,28 +3161,17 @@ const Dashboard = () => {
 
   // Helper function to render FTD Productivity Report table
   const renderFTDProductivityReportTable = () => {
-    const ftdData = [
-      { smartCollId: 'AKMDINESH', name: 'DINESH', agency: 'A K Credit Management', webVisits: 0, visitsAccounts: 11, fieldVisits: 11, ptp: 11, paid: 0, ptpPercent: 1, avgIntensity: 1, paidPercent: 0 },
-      { smartCollId: 'AKMDINOY', name: 'DINOY', agency: 'A K Credit Management', webVisits: 0, visitsAccounts: 8, fieldVisits: 8, ptp: 8, paid: 0, ptpPercent: 1, avgIntensity: 1, paidPercent: 0 },
-      { smartCollId: 'AKMREJITH', name: 'REJITH P', agency: 'A K Credit Management', webVisits: 0, visitsAccounts: 1, fieldVisits: 1, ptp: 0, paid: 0, ptpPercent: 0, avgIntensity: 1, paidPercent: 0 },
-      { smartCollId: 'AKMRESMA', name: 'RESMA', agency: 'A K Credit Management', webVisits: 0, visitsAccounts: 2, fieldVisits: 2, ptp: 2, paid: 0, ptpPercent: 1, avgIntensity: 1, paidPercent: 0 },
-      { smartCollId: 'AKMSIJOY', name: 'SIJOY', agency: 'A K Credit Management', webVisits: 0, visitsAccounts: 4, fieldVisits: 4, ptp: 4, paid: 0, ptpPercent: 1, avgIntensity: 1, paidPercent: 0 },
-      { smartCollId: 'DNSABHINAND', name: 'ABHINAND', agency: 'THE DN BUSINESS SOLUTIONS', webVisits: 0, visitsAccounts: 5, fieldVisits: 5, ptp: 5, paid: 0, ptpPercent: 1, avgIntensity: 1, paidPercent: 0 },
-      { smartCollId: 'DNSPRAPHUL', name: 'PRAPHUL', agency: 'THE DN BUSINESS SOLUTIONS', webVisits: 0, visitsAccounts: 1, fieldVisits: 1, ptp: 1, paid: 0, ptpPercent: 1, avgIntensity: 1, paidPercent: 0 },
-      { smartCollId: 'DNSVISHNU', name: 'VISHNU', agency: 'THE DN BUSINESS SOLUTIONS', webVisits: 0, visitsAccounts: 9, fieldVisits: 9, ptp: 9, paid: 0, ptpPercent: 1, avgIntensity: 1, paidPercent: 0 },
-      { smartCollId: 'DNSVISHNUPRASAD', name: 'VISHNUPRASAD', agency: 'THE DN BUSINESS SOLUTIONS', webVisits: 0, visitsAccounts: 4, fieldVisits: 4, ptp: 4, paid: 0, ptpPercent: 1, avgIntensity: 1, paidPercent: 0 },
-      { smartCollId: 'GBSSRINATH', name: 'K', agency: 'GANPAT BUSINESS SOLUTIONS', webVisits: 0, visitsAccounts: 5, fieldVisits: 5, ptp: 5, paid: 0, ptpPercent: 1, avgIntensity: 1, paidPercent: 0 },
-    ]
+    const ftdData = []
 
     const totals = {
       webVisits: 0,
-      visitsAccounts: 272,
-      fieldVisits: 280,
-      ptp: 195,
-      paid: 5,
-      ptpPercent: 0.71,
-      avgIntensity: 1.03,
-      paidPercent: 0.01,
+      visitsAccounts: 0,
+      fieldVisits: 0,
+      ptp: 0,
+      paid: 0,
+      ptpPercent: 0,
+      avgIntensity: 0,
+      paidPercent: 0,
     }
 
     const headers = [
@@ -3060,17 +3273,7 @@ const Dashboard = () => {
 
   // Helper function to render MTD Collector Summary Report table
   const renderMTDCollectorSummaryReportTable = () => {
-    const mtdData = [
-      { smartCollId: 'SVGSUNIL', name: 'SUNIL', agency: 'SVG Associates', visits: 5585, visitsAccounts: 113, ptp: 784, rtp: 6, nc: 0, dl: 4795, positive: 784, negative: 4801, tos: 710.93 },
-      { smartCollId: 'SSAPAVITHRAN', name: 'PAVITHRAN', agency: 'SS Associates', visits: 3112, visitsAccounts: 190, ptp: 546, rtp: 0, nc: 0, dl: 2566, positive: 546, negative: 2566, tos: 214.98 },
-      { smartCollId: 'SKAAJEESH', name: 'Ajeesh', agency: 'Skyline Associates', visits: 3048, visitsAccounts: 200, ptp: 561, rtp: 0, nc: 0, dl: 2487, positive: 561, negative: 2487, tos: 191.86 },
-      { smartCollId: 'SKAUNNIKRISHNAN', name: 'UNNIKRISHNAN', agency: 'Skyline Associates', visits: 3009, visitsAccounts: 62, ptp: 273, rtp: 1, nc: 0, dl: 2735, positive: 273, negative: 2736, tos: 152.50 },
-      { smartCollId: 'AKMREJITH', name: 'REJITH P', agency: 'A K Credit Management', visits: 2864, visitsAccounts: 135, ptp: 449, rtp: 0, nc: 0, dl: 2415, positive: 449, negative: 2415, tos: 151.91 },
-      { smartCollId: 'RFCFAIYAZ', name: 'FAIYAZ', agency: 'Shree Raghavendra Financial Consultancy Pvt Ltd', visits: 2793, visitsAccounts: 62, ptp: 676, rtp: 0, nc: 0, dl: 2117, positive: 676, negative: 2117, tos: 304.37 },
-      { smartCollId: 'AKMDINESH', name: 'DINESH', agency: 'A K Credit Management', visits: 2791, visitsAccounts: 87, ptp: 428, rtp: 1, nc: 0, dl: 2362, positive: 428, negative: 2363, tos: 79.65 },
-      { smartCollId: 'STAPETER', name: 'PETER', agency: 'M/s. Star Associates', visits: 2567, visitsAccounts: 147, ptp: 535, rtp: 0, nc: 0, dl: 2032, positive: 535, negative: 2032, tos: 109.74 },
-      { smartCollId: 'SSASUBEESH', name: 'SUBEESH', agency: 'SS Associates', visits: 2484, visitsAccounts: 92, ptp: 453, rtp: 0, nc: 0, dl: 2031, positive: 453, negative: 2031, tos: 131.35 },
-    ]
+    const mtdData = []
 
     const headers = [
       { key: 'smartCollId', label: 'SMART COLL ID' },
@@ -3150,29 +3353,18 @@ const Dashboard = () => {
 
   // Helper function to render FTD Collector Summary Report table
   const renderFTDCollectorSummaryReportTable = () => {
-    const ftdData = [
-      { smartCollId: 'HARMANSOOR', name: 'MANSOOR', agency: 'Harshan Associates', visits: 63, visitsAccounts: 62, ptp: 55, rtp: 0, nc: 0, dl: 8, negative: 8, positive: 55, tos: '330M' },
-      { smartCollId: 'SKTSASINIVASH', name: 'E', agency: 'Shakthidaran Associates', visits: 17, visitsAccounts: 16, ptp: 0, rtp: 0, nc: 0, dl: 17, negative: 17, positive: 0, tos: '1.77M' },
-      { smartCollId: 'HARKAMALASH', name: 'KAMALASH', agency: 'Harshan Associates', visits: 16, visitsAccounts: 15, ptp: 0, rtp: 0, nc: 0, dl: 16, negative: 16, positive: 0, tos: '7.06M' },
-      { smartCollId: 'SBAASHWINI', name: 'ASHWINI', agency: 'Shri Sai Baba Agency', visits: 15, visitsAccounts: 14, ptp: 14, rtp: 0, nc: 0, dl: 1, negative: 1, positive: 14, tos: '362k' },
-      { smartCollId: 'MDALOVEJO', name: 'LOVEJO', agency: 'MD ASSOCIATES', visits: 14, visitsAccounts: 13, ptp: 13, rtp: 0, nc: 0, dl: 1, negative: 1, positive: 13, tos: '1.12M' },
-      { smartCollId: 'AKMDINESH', name: 'DINESH', agency: 'A K Credit Management', visits: 11, visitsAccounts: 11, ptp: 11, rtp: 0, nc: 0, dl: 0, negative: 0, positive: 11, tos: '79.65k' },
-      { smartCollId: 'DNSVISHNU', name: 'VISHNU', agency: 'THE DN BUSINESS SOLUTIONS', visits: 9, visitsAccounts: 9, ptp: 9, rtp: 0, nc: 0, dl: 0, negative: 0, positive: 9, tos: '1.05M' },
-      { smartCollId: 'SKTSATHYARAJ', name: 'SATHYARAJ', agency: 'Shakthidaran Associates', visits: 9, visitsAccounts: 8, ptp: 0, rtp: 0, nc: 0, dl: 9, negative: 9, positive: 0, tos: '1.77M' },
-      { smartCollId: 'MDASARATH', name: 'SARATH', agency: 'MD ASSOCIATES', visits: 8, visitsAccounts: 7, ptp: 7, rtp: 0, nc: 0, dl: 1, negative: 1, positive: 7, tos: '362k' },
-      { smartCollId: 'SKTTHIRUMOORTHI', name: 'THIRUMOORTHI', agency: 'Shakthidaran Associates', visits: 8, visitsAccounts: 8, ptp: 8, rtp: 0, nc: 0, dl: 0, negative: 0, positive: 8, tos: '1.77M' },
-    ]
+    const ftdData = []
 
     const totals = {
-      visits: 281,
-      visitsAccounts: 272,
-      ptp: 195,
-      rtp: 5,
+      visits: 0,
+      visitsAccounts: 0,
+      ptp: 0,
+      rtp: 0,
       nc: 0,
-      dl: 81,
-      negative: 86,
-      positive: 195,
-      tos: '965M',
+      dl: 0,
+      negative: 0,
+      positive: 0,
+      tos: '0',
     }
 
     const headers = [
@@ -3279,26 +3471,16 @@ const Dashboard = () => {
 
   // Helper function to render MTD Time-Wise Visit Report table
   const renderMTDTimeWiseVisitReportTable = () => {
-    const mtdData = [
-      { smartCollId: 'SVGSUNIL', name: 'SUNIL', agency: 'SVG Associates', visits: '5.59k', visitsAccounts: 113, time10_12: '4.57k', time12_2: 883, time2_4: 12, time4_6: 24, time6_7: 5 },
-      { smartCollId: 'SSAPAVITHRAN', name: 'PAVITHRAN', agency: 'SS Associates', visits: '3.11k', visitsAccounts: 190, time10_12: '2.54k', time12_2: 486, time2_4: 8, time4_6: 15, time6_7: 3 },
-      { smartCollId: 'SKAAJEESH', name: 'Ajeesh', agency: 'Skyline Associates', visits: '3.05k', visitsAccounts: 200, time10_12: '2.49k', time12_2: 454, time2_4: 7, time4_6: 12, time6_7: 2 },
-      { smartCollId: 'SKAUNNIKRISHNAN', name: 'UNNIKRISHNAN', agency: 'Skyline Associates', visits: '3.01k', visitsAccounts: 62, time10_12: '2.46k', time12_2: 423, time2_4: 6, time4_6: 10, time6_7: 2 },
-      { smartCollId: 'AKMREJITH', name: 'REJITH P', agency: 'A K Credit Management', visits: '2.86k', visitsAccounts: 135, time10_12: '2.34k', time12_2: 401, time2_4: 5, time4_6: 9, time6_7: 1 },
-      { smartCollId: 'RFCFAIYAZ', name: 'FAIYAZ', agency: 'Shree Raghavendra Financial Consultancy Pvt Ltd', visits: '2.79k', visitsAccounts: 62, time10_12: '2.28k', time12_2: 392, time2_4: 5, time4_6: 8, time6_7: 1 },
-      { smartCollId: 'AKMDINESH', name: 'DINESH', agency: 'A K Credit Management', visits: '2.79k', visitsAccounts: 87, time10_12: '2.28k', time12_2: 391, time2_4: 5, time4_6: 8, time6_7: 1 },
-      { smartCollId: 'STAPETER', name: 'PETER', agency: 'M/s. Star Associates', visits: '2.57k', visitsAccounts: 147, time10_12: '2.10k', time12_2: 360, time2_4: 4, time4_6: 7, time6_7: 1 },
-      { smartCollId: 'SSASUBEESH', name: 'SUBEESH', agency: 'SS Associates', visits: '2.48k', visitsAccounts: 92, time10_12: '2.03k', time12_2: 348, time2_4: 4, time4_6: 7, time6_7: 1 },
-    ]
+    const mtdData = []
 
     const totals = {
-      visits: '104k',
-      visitsAccounts: '7.09k',
-      time10_12: '53.7k',
-      time12_2: '32.3k',
-      time2_4: '1.3k',
-      time4_6: '6.48k',
-      time6_7: 386,
+      visits: '0',
+      visitsAccounts: '0',
+      time10_12: '0',
+      time12_2: '0',
+      time2_4: '0',
+      time4_6: '0',
+      time6_7: 0,
     }
 
     const headers = [
@@ -3395,27 +3577,16 @@ const Dashboard = () => {
 
   // Helper function to render FTD Time-Wise Visit Report table
   const renderFTDTimeWiseVisitReportTable = () => {
-    const ftdData = [
-      { smartCollId: 'HARMANSOOR', name: 'MANSOOR', agency: 'Harshan Associates', visits: 63, visitsAccounts: 62, time10_12: 55, time12_2: 8, time2_4: 0, time4_6: 0, time6_7: 0 },
-      { smartCollId: 'SKTSASINIVASH', name: 'E', agency: 'Shakthidaran Associates', visits: 17, visitsAccounts: 16, time10_12: 0, time12_2: 0, time2_4: 0, time4_6: 17, time6_7: 0 },
-      { smartCollId: 'HARKAMALASH', name: 'KAMALASH', agency: 'Harshan Associates', visits: 16, visitsAccounts: 15, time10_12: 0, time12_2: 0, time2_4: 0, time4_6: 16, time6_7: 0 },
-      { smartCollId: 'SBAASHWINI', name: 'ASHWINI', agency: 'Shri Sai Baba Agency', visits: 15, visitsAccounts: 14, time10_12: 0, time12_2: 0, time2_4: 0, time4_6: 15, time6_7: 0 },
-      { smartCollId: 'MDALOVEJO', name: 'LOVEJO', agency: 'MD ASSOCIATES', visits: 14, visitsAccounts: 13, time10_12: 0, time12_2: 0, time2_4: 0, time4_6: 14, time6_7: 0 },
-      { smartCollId: 'AKMDINESH', name: 'DINESH', agency: 'A K Credit Management', visits: 11, visitsAccounts: 11, time10_12: 0, time12_2: 0, time2_4: 0, time4_6: 11, time6_7: 0 },
-      { smartCollId: 'DNSVISHNU', name: 'VISHNU', agency: 'THE DN BUSINESS SOLUTIONS', visits: 9, visitsAccounts: 9, time10_12: 0, time12_2: 0, time2_4: 0, time4_6: 9, time6_7: 0 },
-      { smartCollId: 'SKTSATHYARAJ', name: 'SATHYARAJ', agency: 'Shakthidaran Associates', visits: 9, visitsAccounts: 8, time10_12: 0, time12_2: 0, time2_4: 0, time4_6: 9, time6_7: 0 },
-      { smartCollId: 'MDASARATH', name: 'SARATH', agency: 'MD ASSOCIATES', visits: 8, visitsAccounts: 7, time10_12: 0, time12_2: 0, time2_4: 0, time4_6: 8, time6_7: 0 },
-      { smartCollId: 'SKTTHIRUMOORTHI', name: 'THIRUMOORTHI', agency: 'Shakthidaran Associates', visits: 8, visitsAccounts: 8, time10_12: 0, time12_2: 0, time2_4: 0, time4_6: 8, time6_7: 0 },
-    ]
+    const ftdData = []
 
     const totals = {
-      visits: 251,
-      visitsAccounts: 244,
-      time10_12: 69,
-      time12_2: 54,
-      time2_4: 32,
-      time4_6: 73,
-      time6_7: 5,
+      visits: 0,
+      visitsAccounts: 0,
+      time10_12: 0,
+      time12_2: 0,
+      time2_4: 0,
+      time4_6: 0,
+      time6_7: 0,
     }
 
     const headers = [
@@ -3890,6 +4061,9 @@ const Dashboard = () => {
         .card-with-wave-thin.expanded::after {
           height: 3px;
           border-radius: 0 0 0.5rem 0.5rem;
+        }
+        .card-with-wave.card-selected::after {
+          display: none;
         }
         .card-wave-indigo::after { background-color: #003366; }
         .card-wave-blue::after { background-color: #2196F3; }
@@ -4457,7 +4631,7 @@ const Dashboard = () => {
                     {/* Allocation Summary Card */}
                     <div 
                       data-staff-card
-                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'allocation' ? 'expanded' : ''} ${selectedStaffMetric === 'allocation' ? 'scale-[1.03] shadow-lg' : ''}`}
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'allocation' ? 'expanded' : ''} ${selectedStaffMetric === 'allocation' ? 'shadow-sm border border-blue-600 card-selected' : 'border border-gray-200'}`}
                       onMouseEnter={() => setExpandedCard('allocation')}
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={(e) => {
@@ -4501,7 +4675,7 @@ const Dashboard = () => {
                     {/* Collection Efficiency Card */}
                     <div 
                       data-staff-card
-                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'collection' ? 'expanded' : ''} ${selectedStaffMetric === 'collection' ? 'scale-[1.03] shadow-lg' : ''}`}
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'collection' ? 'expanded' : ''} ${selectedStaffMetric === 'collection' ? 'shadow-sm border border-blue-600 card-selected' : 'border border-gray-200'}`}
                       onMouseEnter={() => setExpandedCard('collection')}
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={(e) => {
@@ -4537,7 +4711,7 @@ const Dashboard = () => {
                     {/* PTP Conversion Rate Card */}
                     <div 
                       data-staff-card
-                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'ptp' ? 'expanded' : ''} ${selectedStaffMetric === 'ptp' ? 'scale-[1.03] shadow-lg' : ''}`}
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'ptp' ? 'expanded' : ''} ${selectedStaffMetric === 'ptp' ? 'shadow-sm border border-blue-600 card-selected' : 'border border-gray-200'}`}
                       onMouseEnter={() => setExpandedCard('ptp')}
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={(e) => {
@@ -4573,7 +4747,7 @@ const Dashboard = () => {
                     {/* Staff Productivity Index Card */}
                     <div 
                       data-staff-card
-                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'productivity' ? 'expanded' : ''} ${selectedStaffMetric === 'productivity' ? 'scale-[1.03] shadow-lg' : ''}`}
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'productivity' ? 'expanded' : ''} ${selectedStaffMetric === 'productivity' ? 'shadow-sm border border-blue-600 card-selected' : 'border border-gray-200'}`}
                       onMouseEnter={() => setExpandedCard('productivity')}
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={(e) => {
@@ -4609,7 +4783,7 @@ const Dashboard = () => {
                     {/* Inactive/Non-performing Staff Card */}
                     <div 
                       data-staff-card
-                      className={`group bg-white rounded-lg p-3 relative cursor-pointer transition-all duration-300 card-with-wave card-wave-staff h-20 ${expandedCard === 'inactive' ? 'expanded' : ''} ${selectedStaffMetric === 'inactive' ? 'scale-[1.03] shadow-lg' : ''}`}
+                      className={`group bg-white rounded-lg p-3 relative cursor-pointer transition-all duration-300 card-with-wave card-wave-staff h-20 ${expandedCard === 'inactive' ? 'expanded' : ''} ${selectedStaffMetric === 'inactive' ? 'shadow-sm border border-blue-600 card-selected' : 'border border-gray-200'}`}
                       onMouseEnter={() => setExpandedCard('inactive')}
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={(e) => {
@@ -4842,12 +5016,15 @@ const Dashboard = () => {
 
                 {/* Collection Summary Tables - Show when collection card is clicked */}
                 {selectedStaffMetric === 'collection' && (
-                  <div ref={leaderboardTableRef} className="mb-8 w-full space-y-6">
+                  <div ref={leaderboardTableRef} className="mb-8 w-full space-y-6" onClick={(e) => e.stopPropagation()}>
                     {/* Header with Title and Close Button */}
                     <div className="flex justify-between items-center">
                       <h2 className="text-xl font-semibold text-gray-900">Collection Efficiency - Summary Details</h2>
                       <button
-                        onClick={() => setSelectedStaffMetric(null)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setSelectedStaffMetric(null)
+                        }}
                         className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
                         aria-label="Close collection tables"
                       >
@@ -4856,7 +5033,7 @@ const Dashboard = () => {
                     </div>
 
                     {/* Grid of Summary Tables */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" onClick={(e) => e.stopPropagation()}>
                       {/* State Wise Summary Table */}
                       <div className="lg:col-span-2">
                         {renderStateWiseSummaryTable()}
