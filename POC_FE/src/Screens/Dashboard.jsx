@@ -7,7 +7,7 @@ import * as XLSX from 'xlsx'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
 import { useAuth } from '../contexts/AuthContext'
-import { dashboardApi, dashboardCollectionGraphApi, dashboardDepositionApi, dashboardDataApi } from '../utils/api'
+import { dashboardApi, dashboardCollectionGraphApi, dashboardDepositionApi, dashboardDataApi, dashboardCollectionDataApi } from '../utils/api'
 import { formatIndianNumber } from '../utils/formatters'
 import tractorFinanceImage from '../assets/Images/tractor_finance.png'
 import commercialVehicleImage from '../assets/Images/commercial_vehicle.png'
@@ -183,6 +183,24 @@ const Dashboard = () => {
     }
 
     fetchVerticalSummaryData()
+  }, [fromDate, toDate])
+
+  // Fetch collection  data from dashboardcollectonAPI
+  useEffect(() => {
+    const fetchCollectionData = async () => {
+      try {
+        console.log('Fetching collection graph data from:', fromDate, 'to:', toDate)
+        
+        const data = await dashboardCollectionDataApi('ALL', fromDate, toDate)
+        console.log('Collection  data fetched:', data)
+        // Data is fetched but not used for now as per requirements
+      } catch (error) {
+        console.error('Error fetching collection data:', error)
+        // Error is logged but not displayed to user for now
+      }
+    }
+
+    fetchCollectionData()
   }, [fromDate, toDate])
 
   // Fetch deposition data - no authentication required

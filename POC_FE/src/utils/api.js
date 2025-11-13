@@ -148,7 +148,7 @@ export async function dashboardDepositionApi(fromDate, toDate, page = 10, pageSi
 export async function dashboardDataApi(reportType, fromDate, toDate) {
   const url = `${API_BASE}/dashboarddata/`
   
-  // Default dates: 20250101 to 20250831
+  // Default dates: 2025-01-01 to 2025-08-31
   const defaultFromDate = fromDate || '2025-01-01'
   const defaultToDate = toDate || '2025-08-31'
   
@@ -166,6 +166,33 @@ export async function dashboardDataApi(reportType, fromDate, toDate) {
   if (!res.ok) {
     const text = await res.text().catch(() => '')
     throw new Error(text || 'Failed to fetch dashboard data')
+  }
+  return res.json()
+}
+
+export async function dashboardCollectionDataApi(reportType, fromDate, toDate) {
+  const url = `${API_BASE}/dashboardcollectiondata/`
+  
+  // Default dates: 2025-01-01 to 2025-08-31
+  const defaultFromDate = fromDate || '2025-01-01'
+  const defaultToDate = toDate || '2025-08-31'
+  // Default report_type: collection state wise summary
+  const defaultReportType = reportType || 'collection state wise summary'
+  
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      report_type: defaultReportType,
+      from_date: defaultFromDate,
+      to_date: defaultToDate,
+    }),
+  })
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    throw new Error(text || 'Failed to fetch collection data')
   }
   return res.json()
 }
