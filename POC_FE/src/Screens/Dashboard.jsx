@@ -28,6 +28,10 @@ const Dashboard = () => {
   const [chartFilter, setChartFilter] = useState('ftd')
   const leaderboardTableRef = useRef(null)
   const [selectedDate, setSelectedDate] = useState("01-10-2025");
+  // Refs to track if data has been fetched to avoid unnecessary API calls
+  const verticalDataFetchedRef = useRef(false)
+  const collectionDataFetchedRef = useRef(false)
+  const lastCollectionFetchDatesRef = useRef({ fromDate: null, toDate: null })
 
   // Hierarchy drill-down state
   const [hierarchyPath, setHierarchyPath] = useState([]) // Array to track hierarchy path: [{level, id, name}, ...]
@@ -196,6 +200,12 @@ const Dashboard = () => {
       return
     }
 
+    // Check if data has already been fetched - if yes, don't fetch again
+    if (verticalDataFetchedRef.current) {
+      console.log('Vertical summary data already fetched, skipping API call')
+      return
+    }
+
     const fetchVerticalSummaryData = async () => {
       try {
         setVerticalDataLoading(true)
@@ -272,6 +282,9 @@ const Dashboard = () => {
         if (data && data.NCM) setNcmData(transformTableData(data.NCM))
         if (data && data.RCM) setRcmData(transformTableData(data.RCM))
         if (data && data.TCM) setTcmData(transformTableData(data.TCM))
+        
+        // Mark as fetched after successful API call
+        verticalDataFetchedRef.current = true
       } catch (error) {
         console.error('Error fetching vertical summary data:', error)
         setVerticalDataError(error.message || 'Failed to fetch vertical summary data')
@@ -286,6 +299,14 @@ const Dashboard = () => {
   // Fetch collection summary data from dashboardcollectiondata API when Collection Efficiency card is clicked
   useEffect(() => {
     if (selectedStaffMetric !== 'collection') {
+      return
+    }
+
+    // Check if data has already been fetched and dates haven't changed - if yes, don't fetch again
+    const datesChanged = lastCollectionFetchDatesRef.current.fromDate !== fromDate || lastCollectionFetchDatesRef.current.toDate !== toDate
+    
+    if (collectionDataFetchedRef.current && !datesChanged) {
+      console.log('Collection summary data already fetched and dates unchanged, skipping API call')
       return
     }
 
@@ -355,6 +376,10 @@ const Dashboard = () => {
             }))
           setBucketWiseData(transformedBucketData)
         }
+        
+        // Mark as fetched and update last fetched dates after successful fetch
+        collectionDataFetchedRef.current = true
+        lastCollectionFetchDatesRef.current = { fromDate, toDate }
       } catch (error) {
         console.error('Error fetching collection summary data:', error)
         setCollectionDataError(error.message || 'Failed to fetch collection summary data')
@@ -6777,8 +6802,6 @@ const Dashboard = () => {
                          </div>
                        </div>
                      </div>
-
-                    
           </div>
 
                   {/* Right Side - Alerts and Actions */}
@@ -6797,33 +6820,76 @@ const Dashboard = () => {
                           </button>
                           </div>
                         </div>
-                        
                       </div>
+                    
                       {/* DPD Distribution Chart */}
                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                        <h3 className="text-sm font-semibold text-gray-900 mb-3">DPD Distribution</h3>
+                      {(() => {
+                        // Get DPD data from API
+                        const dpdData = dashboardData?.dpd_data || {}
+                        const days0_30 = dpdData['0-30'] || 0
+                        const days31_60 = dpdData['31-60'] || 0
+                        const days61_90 = dpdData['61-90'] || 0
+                        const days90Plus = dpdData['90+'] || 0
+                        
+                        // Calculate total
+                        const totalCases = days0_30 + days31_60 + days61_90 + days90Plus
+                        
+                        // Calculate percentages
+                        const percent0_30 = totalCases > 0 ? ((days0_30 / totalCases) * 100).toFixed(1) : 0
+                        const percent31_60 = totalCases > 0 ? ((days31_60 / totalCases) * 100).toFixed(1) : 0
+                        const percent61_90 = totalCases > 0 ? ((days61_90 / totalCases) * 100).toFixed(1) : 0
+                        const percent90Plus = totalCases > 0 ? ((days90Plus / totalCases) * 100).toFixed(1) : 0
+                        
+                        // Calculate angles for conic gradient (360 degrees total)
+                        const angle0_30 = (parseFloat(percent0_30) / 100) * 360
+                        const angle31_60 = (parseFloat(percent31_60) / 100) * 360
+                        const angle61_90 = (parseFloat(percent61_90) / 100) * 360
+                        const angle90Plus = (parseFloat(percent90Plus) / 100) * 360
+                        
+                        // Calculate cumulative angles for conic gradient
+                        let currentAngle = 0
+                        const start0_30 = currentAngle
+                        currentAngle += angle0_30
+                        const end0_30 = currentAngle
+                        
+                        const start31_60 = currentAngle
+                        currentAngle += angle31_60
+                        const end31_60 = currentAngle
+                        
+                        const start61_90 = currentAngle
+                        currentAngle += angle61_90
+                        const end61_90 = currentAngle
+                        
+                        const start90Plus = currentAngle
+                        const end90Plus = 360
+                        
+                        return (
                        <div className="flex items-center space-x-6">
                          <div className="relative">
                            <div className="h-40 w-40 bg-gradient-to-br from-green-100 via-yellow-100 to-red-100 rounded-full flex items-center justify-center border-4 border-gray-200">
                              <div className="h-32 w-32 bg-white rounded-full flex items-center justify-center">
                                <div className="text-center">
-                                 <div className="text-2xl font-bold text-gray-700">38</div>
+                                    <div className="text-2xl font-bold text-gray-700">{formatIndianNumber(totalCases)}</div>
                                  <div className="text-xs text-gray-500">Total Cases</div>
                                </div>
                              </div>
                            </div>
-                           {/* Mock donut chart segments */}
+                              {/* Dynamic donut chart segments */}
+                              {totalCases > 0 && (
                            <div className="absolute inset-0 rounded-full" style={{
                              background: `conic-gradient(
-                               #10b981 0deg 162deg,
-                               #f59e0b 162deg 252deg,
-                               #3b82f6 252deg 324deg,
-                               #ef4444 324deg 360deg
+                                    #10b981 ${start0_30}deg ${end0_30}deg,
+                                    #f59e0b ${start31_60}deg ${end31_60}deg,
+                                    #3b82f6 ${start61_90}deg ${end61_90}deg,
+                                    #ef4444 ${start90Plus}deg ${end90Plus}deg
                              )`
                            }}></div>
+                              )}
                            <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center">
                              <div className="text-center">
-                               <div className="text-2xl font-bold text-gray-700">38</div>
+                                  <div className="text-2xl font-bold text-gray-700">{formatIndianNumber(totalCases)}</div>
                                <div className="text-xs text-gray-500">Total Cases</div>
                              </div>
                     </div>
@@ -6831,26 +6897,28 @@ const Dashboard = () => {
                          <div className="space-y-3">
                            <div className="flex items-center space-x-3">
                              <div className="w-4 h-4 bg-green-500 rounded"></div>
-                             <span className="text-gray-700 text-[12px] font-medium">0-30 days (45%)</span>
-                             <span className="text-gray-500 text-[12px]">17 cases</span>
+                                <span className="text-gray-700 text-[12px] font-medium">0-30 days ({percent0_30}%)</span>
+                                <span className="text-gray-500 text-[12px]">{formatIndianNumber(days0_30)} cases</span>
                            </div>
                            <div className="flex items-center space-x-3">
                              <div className="w-4 h-4 bg-orange-500 rounded"></div>
-                             <span className="text-gray-700 text-[12px] font-medium">31-60 days (25%)</span>
-                             <span className="text-gray-500 text-[12px]">10 cases</span>
+                                <span className="text-gray-700 text-[12px] font-medium">31-60 days ({percent31_60}%)</span>
+                                <span className="text-gray-500 text-[12px]">{formatIndianNumber(days31_60)} cases</span>
                            </div>
                            <div className="flex items-center space-x-3">
                              <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                             <span className="text-gray-700 text-[12px] font-medium">61-90 days (18%)</span>
-                             <span className="text-gray-500 text-[12px]">7 cases</span>
+                                <span className="text-gray-700 text-[12px] font-medium">61-90 days ({percent61_90}%)</span>
+                                <span className="text-gray-500 text-[12px]">{formatIndianNumber(days61_90)} cases</span>
                            </div>
                            <div className="flex items-center space-x-3">
                              <div className="w-4 h-4 bg-red-500 rounded"></div>
-                             <span className="text-gray-700 text-[12px] font-medium">90+ days (12%)</span>
-                             <span className="text-gray-500 text-[12px]">4 cases</span>
+                                <span className="text-gray-700 text-[12px] font-medium">90+ days ({percent90Plus}%)</span>
+                                <span className="text-gray-500 text-[12px]">{formatIndianNumber(days90Plus)} cases</span>
                   </div>
                 </div>
               </div>
+                        )
+                      })()}
             </div>
                     </div>
               </div>
