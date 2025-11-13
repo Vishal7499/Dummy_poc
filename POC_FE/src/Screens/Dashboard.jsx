@@ -64,14 +64,31 @@ const Dashboard = () => {
   const [depositionError, setDepositionError] = useState(null)
   const [depositionCurrentPage, setDepositionCurrentPage] = useState(1)
   const [depositionPageSize] = useState(10)
+  // Vertical summary data state
+  const [verticalSummaryData, setVerticalSummaryData] = useState(null)
+  const [verticalAllocationData, setVerticalAllocationData] = useState(null)
+  const [verticalDataLoading, setVerticalDataLoading] = useState(false)
+  const [verticalDataError, setVerticalDataError] = useState(null)
+  // Additional table data states
+  const [acmData, setAcmData] = useState(null)
+  const [allocationAdminData, setAllocationAdminData] = useState(null)
+  const [boData, setBoData] = useState(null)
+  const [clmData, setClmData] = useState(null)
+  const [dtrData, setDtrData] = useState(null)
+  const [ncmData, setNcmData] = useState(null)
+  const [rcmData, setRcmData] = useState(null)
+  const [tcmData, setTcmData] = useState(null)
   // Pagination state for all tables
   const [productSummaryPage, setProductSummaryPage] = useState(1)
   const [productAllocationPage, setProductAllocationPage] = useState(1)
   const [ncmAllocationPage, setNCMAllocationPage] = useState(1)
   const [rcmAllocationPage, setRCMAllocationPage] = useState(1)
   const [acmAllocationPage, setACMAllocationPage] = useState(1)
-  const [cmAllocationPage, setCMAllocationPage] = useState(1)
-  const [agtlAllocationPage, setAGTLAllocationPage] = useState(1)
+  const [allocationAdminPage, setAllocationAdminPage] = useState(1)
+  const [boPage, setBoPage] = useState(1)
+  const [clmPage, setClmPage] = useState(1)
+  const [dtrPage, setDtrPage] = useState(1)
+  const [tcmPage, setTcmPage] = useState(1)
   const [stateWisePage, setStateWisePage] = useState(1)
   const [regionWisePage, setRegionWisePage] = useState(1)
   const [bucketWisePage, setBucketWisePage] = useState(1)
@@ -167,23 +184,98 @@ const Dashboard = () => {
     fetchCollectionGraphData()
   }, [user?.accessToken, fromDate, toDate])
 
-  // Fetch vertical summary data from dashboarddata API
+  // Fetch vertical summary data from dashboarddata API when Case Summary card is clicked
   useEffect(() => {
+    if (selectedStaffMetric !== 'allocation') {
+      return
+    }
+
     const fetchVerticalSummaryData = async () => {
       try {
-        console.log('Fetching vertical summary data from:', fromDate, 'to:', toDate)
+        setVerticalDataLoading(true)
+        setVerticalDataError(null)
+        console.log('Fetching vertical summary data from dashboarddata API')
         
         const data = await dashboardDataApi('ALL', '2025-01-31', '2025-08-31')
         console.log('Vertical summary data fetched:', data)
-        // Data is fetched but not used for now as per requirements
+        
+        // Extract and transform the data
+        if (data && data['vertical summary']) {
+          const transformedSummary = data['vertical summary']
+            .filter(item => {
+              // Filter out "Totals" row as we calculate it ourselves
+              const vertical = item.VERTICAL || item.vertical || ''
+              return vertical && vertical.toLowerCase() !== 'totals'
+            })
+            .map(item => ({
+              product: item.VERTICAL || item.vertical || '',
+              total: item.TOTAL || item.total || 0,
+              good: item.GOOD || item.good || 0,
+              npa: item.NPA || item.npa || 0,
+              sma0: item.SMA0 || item.sma0 || 0,
+              sma1: item.SMA1 || item.sma1 || 0,
+              sma2: item.SMA2 || item.sma2 || 0
+            }))
+          setVerticalSummaryData(transformedSummary)
+        }
+        
+        if (data && data['vertical allocation summary']) {
+          const transformedAllocation = data['vertical allocation summary']
+            .filter(item => {
+              // Filter out "Totals" row as we calculate it ourselves
+              const vertical = item.VERTICAL || item.vertical || ''
+              return vertical && vertical.toLowerCase() !== 'totals'
+            })
+            .map(item => ({
+              product: item.VERTICAL || item.vertical || '',
+              total: item.TOTAL || item.total || 0,
+              good: item.GOOD || item.good || 0,
+              npa: item.NPA || item.npa || 0,
+              sma0: item.SMA0 || item.sma0 || 0,
+              sma1: item.SMA1 || item.sma1 || 0,
+              sma2: item.SMA2 || item.sma2 || 0
+            }))
+          setVerticalAllocationData(transformedAllocation)
+        }
+
+        // Transform and store data for individual tables
+        const transformTableData = (tableData) => {
+          if (!tableData) return null
+          return tableData
+            .filter(item => {
+              const vertical = item.VERTICAL || item.vertical || ''
+              return vertical && vertical.toLowerCase() !== 'totals'
+            })
+            .map(item => ({
+              product: item.VERTICAL || item.vertical || '',
+              total: item.TOTAL || item.total || 0,
+              good: item.GOOD || item.good || 0,
+              npa: item.NPA || item.npa || 0,
+              sma0: item.SMA0 || item.sma0 || 0,
+              sma1: item.SMA1 || item.sma1 || 0,
+              sma2: item.SMA2 || item.sma2 || 0
+            }))
+        }
+
+        // Set data for each table
+        if (data && data.ACM) setAcmData(transformTableData(data.ACM))
+        if (data && data.ALLOCATION_ADMIN) setAllocationAdminData(transformTableData(data.ALLOCATION_ADMIN))
+        if (data && data.BO) setBoData(transformTableData(data.BO))
+        if (data && data.CLM) setClmData(transformTableData(data.CLM))
+        if (data && data.DTR) setDtrData(transformTableData(data.DTR))
+        if (data && data.NCM) setNcmData(transformTableData(data.NCM))
+        if (data && data.RCM) setRcmData(transformTableData(data.RCM))
+        if (data && data.TCM) setTcmData(transformTableData(data.TCM))
       } catch (error) {
         console.error('Error fetching vertical summary data:', error)
-        // Error is logged but not displayed to user for now
+        setVerticalDataError(error.message || 'Failed to fetch vertical summary data')
+      } finally {
+        setVerticalDataLoading(false)
       }
     }
 
     fetchVerticalSummaryData()
-  }, [fromDate, toDate])
+  }, [selectedStaffMetric])
 
   // Fetch collection  data from dashboardcollectonAPI
   useEffect(() => {
@@ -1963,55 +2055,47 @@ const Dashboard = () => {
   }
 
   const renderProductSummaryTable = () => {
-    const productData = [
-      { product: 'CE', total: 1250, dtr: 856, agtl: 124, tc: 145, ncm: 78, acm: 32, tce: 15, cm: 0, rcm: 0 },
-      { product: 'CV', total: 2340, dtr: 1654, agtl: 289, tc: 234, ncm: 98, acm: 45, tce: 20, cm: 0, rcm: 0 },
-      { product: 'DLLN', total: 1890, dtr: 1234, agtl: 198, tc: 189, ncm: 156, acm: 67, tce: 46, cm: 2, rcm: 0 },
-      { product: 'DLLS', total: 1675, dtr: 1098, agtl: 176, tc: 167, ncm: 134, acm: 58, tce: 42, cm: 0, rcm: 0 },
-      { product: 'ICV', total: 980, dtr: 678, agtl: 98, tc: 98, ncm: 67, acm: 28, tce: 13, cm: 0, rcm: 0 },
-      { product: 'LCV', total: 1120, dtr: 789, agtl: 112, tc: 112, ncm: 78, acm: 32, tce: 0, cm: 0, rcm: 0 },
-      { product: 'SA', total: 1234, dtr: 864, agtl: 123, tc: 123, ncm: 89, acm: 35, tce: 0, cm: 0, rcm: 0 },
-      { product: 'TFE', total: 1789, dtr: 1252, agtl: 179, tc: 179, ncm: 123, acm: 56, tce: 0, cm: 0, rcm: 0 },
-      { product: 'VWFN', total: 1456, dtr: 1019, agtl: 146, tc: 146, ncm: 98, acm: 47, tce: 0, cm: 0, rcm: 0 },
-      { product: 'VWFS', total: 1234, dtr: 864, agtl: 123, tc: 123, ncm: 87, acm: 37, tce: 0, cm: 0, rcm: 0 }
+    // Use API data if available, otherwise use fallback data
+    const defaultProductData = [
+      { product: 'CE', total: 45883, good: 39971, npa: 1477, sma0: 2213, sma1: 1357, sma2: 1004 },
+      { product: 'CV', total: 84734, good: 70664, npa: 2953, sma0: 5509, sma1: 3788, sma2: 2166 },
+      { product: 'DLLS', total: 68, good: 68, npa: 0, sma0: 0, sma1: 0, sma2: 0 },
+      { product: 'ICV', total: 17, good: 13, npa: 4, sma0: 0, sma1: 0, sma2: 0 },
+      { product: 'LCV', total: 25714, good: 21012, npa: 1028, sma0: 1555, sma1: 1531, sma2: 731 },
+      { product: 'SA', total: 32395, good: 25029, npa: 2060, sma0: 2628, sma1: 1864, sma2: 1008 },
+      { product: 'TFE', total: 2600, good: 2599, npa: 0, sma0: 0, sma1: 0, sma2: 1 },
+      { product: 'VWFN', total: 131, good: 7, npa: 124, sma0: 0, sma1: 0, sma2: 0 },
+      { product: 'VWFS', total: 13, good: 11, npa: 2, sma0: 0, sma1: 0, sma2: 0 }
     ]
+    const productData = verticalSummaryData && verticalSummaryData.length > 0 ? verticalSummaryData : defaultProductData
     const totals = productData.reduce((acc, row) => ({
-      total: acc.total + row.total,
-      dtr: acc.dtr + row.dtr,
-      agtl: acc.agtl + row.agtl,
-      tc: acc.tc + row.tc,
-      ncm: acc.ncm + row.ncm,
-      acm: acc.acm + row.acm,
-      tce: acc.tce + row.tce,
-      cm: acc.cm + row.cm,
-      rcm: acc.rcm + row.rcm
-    }), { total: 0, dtr: 0, agtl: 0, tc: 0, ncm: 0, acm: 0, tce: 0, cm: 0, rcm: 0 })
+      total: acc.total + (row.total || 0),
+      good: acc.good + (row.good || 0),
+      npa: acc.npa + (row.npa || 0),
+      sma0: acc.sma0 + (row.sma0 || 0),
+      sma1: acc.sma1 + (row.sma1 || 0),
+      sma2: acc.sma2 + (row.sma2 || 0)
+    }), { total: 0, good: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 })
 
     const headers = [
       { key: 'product', label: 'VERTICAL' },
       { key: 'total', label: 'TOTAL' },
-      { key: 'dtr', label: 'DTR' },
-      { key: 'agtl', label: 'AGTL' },
-      { key: 'tc', label: 'TC' },
-      { key: 'ncm', label: 'NCM' },
-      { key: 'acm', label: 'ACM' },
-      { key: 'tce', label: 'TCE' },
-      { key: 'cm', label: 'CM' },
-      { key: 'rcm', label: 'RCM' },
+      { key: 'good', label: 'GOOD' },
+      { key: 'npa', label: 'NPA' },
+      { key: 'sma0', label: 'SMA0' },
+      { key: 'sma1', label: 'SMA1' },
+      { key: 'sma2', label: 'SMA2' },
     ]
 
     const handleExport = () => {
       const exportData = [...productData, { 
         product: 'Total', 
         total: totals.total, 
-        dtr: totals.dtr, 
-        agtl: totals.agtl, 
-        tc: totals.tc, 
-        ncm: totals.ncm, 
-        acm: totals.acm, 
-        tce: totals.tce, 
-        cm: totals.cm, 
-        rcm: totals.rcm 
+        good: totals.good, 
+        npa: totals.npa, 
+        sma0: totals.sma0, 
+        sma1: totals.sma1, 
+        sma2: totals.sma2 
       }]
       exportTableToExcel(exportData, headers, 'Vertical_Summary')
     }
@@ -2037,50 +2121,47 @@ const Dashboard = () => {
             Export
           </button>
         </div>
+        {verticalDataLoading && (
+          <div className="p-4 text-center text-gray-600">Loading data...</div>
+        )}
+        {verticalDataError && (
+          <div className="p-4 text-center text-red-600">Error: {verticalDataError}</div>
+        )}
         <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
           <table className="w-full text-xs border border-[#003366]">
             <thead className="bg-gray-100 text-[#003366] sticky top-0">
               <tr>
                 <th className="text-left py-2 px-2 font-semibold">VERTICAL</th>
                 <th className="text-right py-2 px-2 font-semibold">TOTAL</th>
-                <th className="text-right py-2 px-2 font-semibold">DTR</th>
-                <th className="text-right py-2 px-2 font-semibold">AGTL</th>
-                <th className="text-right py-2 px-2 font-semibold">TC</th>
-                <th className="text-right py-2 px-2 font-semibold">NCM</th>
-                <th className="text-right py-2 px-2 font-semibold">ACM</th>
-                <th className="text-right py-2 px-2 font-semibold">TCE</th>
-                <th className="text-right py-2 px-2 font-semibold">CM</th>
-                <th className="text-right py-2 px-2 font-semibold">RCM</th>
+                <th className="text-right py-2 px-2 font-semibold">GOOD</th>
+                <th className="text-right py-2 px-2 font-semibold">NPA</th>
+                <th className="text-right py-2 px-2 font-semibold">SMA0</th>
+                <th className="text-right py-2 px-2 font-semibold">SMA1</th>
+                <th className="text-right py-2 px-2 font-semibold">SMA2</th>
               </tr>
             </thead>
             <tbody className="bg-white">
               {paginatedData.map((row, idx) => (
                 <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                   <td className="py-2 px-2 text-gray-800 font-medium">{row.product}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.total)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.dtr)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.agtl)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.tc)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.ncm)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.acm)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.tce)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.cm)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.rcm)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.total || 0)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.good || 0)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.npa || 0)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma0 || 0)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma1 || 0)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2 || 0)}</td>
                 </tr>
               ))}
               {endIndex >= productData.length && (
                 <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
                   <td className="py-2 px-2">Totals</td>
                   <td className="py-2 px-2 text-right">{formatIndianNumber(totals.total)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.dtr)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.agtl)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.tc)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.ncm)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.acm)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.tce)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.cm)}</td>
-                <td className="py-2 px-2 text-right">{formatIndianNumber(totals.rcm)}</td>
-              </tr>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.good)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.npa)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma0)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma1)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
+                </tr>
               )}
             </tbody>
           </table>
@@ -2092,29 +2173,32 @@ const Dashboard = () => {
 
   // Helper function to render Vertical Allocation Summary table
   const renderProductAllocationTable = () => {
-    const allocationData = [
-      { product: 'CE', total: 1250, npa: 856, sma0: 234, sma1: 98, sma2: 62 },
-      { product: 'CV', total: 2340, npa: 1654, sma0: 456, sma1: 145, sma2: 85 },
-      { product: 'DLLN', total: 1890, npa: 1234, sma0: 378, sma1: 156, sma2: 122 },
-      { product: 'DLLS', total: 1675, npa: 1098, sma0: 335, sma1: 134, sma2: 108 },
-      { product: 'ICV', total: 980, npa: 678, sma0: 196, sma1: 67, sma2: 39 },
-      { product: 'LCV', total: 1120, npa: 789, sma0: 224, sma1: 78, sma2: 29 },
-      { product: 'SA', total: 1234, npa: 864, sma0: 247, sma1: 89, sma2: 34 },
-      { product: 'TFE', total: 1789, npa: 1252, sma0: 358, sma1: 123, sma2: 56 },
-      { product: 'VWFN', total: 1456, npa: 1019, sma0: 291, sma1: 98, sma2: 48 },
-      { product: 'VWFS', total: 1234, npa: 864, sma0: 247, sma1: 87, sma2: 36 }
+    // Use API data if available, otherwise use fallback data
+    const defaultAllocationData = [
+      { product: 'CE', total: 45883, good: 39971, npa: 1477, sma0: 2213, sma1: 1357, sma2: 1004 },
+      { product: 'CV', total: 84734, good: 70664, npa: 2953, sma0: 5509, sma1: 3788, sma2: 2166 },
+      { product: 'DLLS', total: 68, good: 68, npa: 0, sma0: 0, sma1: 0, sma2: 0 },
+      { product: 'ICV', total: 17, good: 13, npa: 4, sma0: 0, sma1: 0, sma2: 0 },
+      { product: 'LCV', total: 25714, good: 21012, npa: 1028, sma0: 1555, sma1: 1531, sma2: 731 },
+      { product: 'SA', total: 32395, good: 25029, npa: 2060, sma0: 2628, sma1: 1864, sma2: 1008 },
+      { product: 'TFE', total: 2600, good: 2599, npa: 0, sma0: 0, sma1: 0, sma2: 1 },
+      { product: 'VWFN', total: 131, good: 7, npa: 124, sma0: 0, sma1: 0, sma2: 0 },
+      { product: 'VWFS', total: 13, good: 11, npa: 2, sma0: 0, sma1: 0, sma2: 0 }
     ]
+    const allocationData = verticalAllocationData && verticalAllocationData.length > 0 ? verticalAllocationData : defaultAllocationData
     const totals = allocationData.reduce((acc, row) => ({
-      total: acc.total + row.total,
-      npa: acc.npa + row.npa,
-      sma0: acc.sma0 + row.sma0,
-      sma1: acc.sma1 + row.sma1,
-      sma2: acc.sma2 + row.sma2
-    }), { total: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 })
+      total: acc.total + (row.total || 0),
+      good: acc.good + (row.good || 0),
+      npa: acc.npa + (row.npa || 0),
+      sma0: acc.sma0 + (row.sma0 || 0),
+      sma1: acc.sma1 + (row.sma1 || 0),
+      sma2: acc.sma2 + (row.sma2 || 0)
+    }), { total: 0, good: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 })
 
     const headers = [
       { key: 'product', label: 'VERTICAL' },
       { key: 'total', label: 'TOTAL' },
+      { key: 'good', label: 'GOOD' },
       { key: 'npa', label: 'NPA' },
       { key: 'sma0', label: 'SMA0' },
       { key: 'sma1', label: 'SMA1' },
@@ -2125,6 +2209,7 @@ const Dashboard = () => {
       const exportData = [...allocationData, { 
         product: 'Total', 
         total: totals.total, 
+        good: totals.good, 
         npa: totals.npa, 
         sma0: totals.sma0, 
         sma1: totals.sma1, 
@@ -2153,12 +2238,19 @@ const Dashboard = () => {
             Export
           </button>
         </div>
+        {verticalDataLoading && (
+          <div className="p-4 text-center text-gray-600">Loading data...</div>
+        )}
+        {verticalDataError && (
+          <div className="p-4 text-center text-red-600">Error: {verticalDataError}</div>
+        )}
         <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
           <table className="w-full text-xs border border-[#003366]">
             <thead className="bg-gray-100 text-[#003366] sticky top-0">
               <tr>
                 <th className="text-left py-2 px-2 font-semibold">VERTICAL</th>
                 <th className="text-right py-2 px-2 font-semibold">TOTAL</th>
+                <th className="text-right py-2 px-2 font-semibold">GOOD</th>
                 <th className="text-right py-2 px-2 font-semibold">NPA</th>
                 <th className="text-right py-2 px-2 font-semibold">SMA0</th>
                 <th className="text-right py-2 px-2 font-semibold">SMA1</th>
@@ -2169,22 +2261,24 @@ const Dashboard = () => {
               {paginatedData.map((row, idx) => (
                 <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                   <td className="py-2 px-2 text-gray-800 font-medium">{row.product}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.total)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.npa)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma0)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma1)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.total || 0)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.good || 0)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.npa || 0)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma0 || 0)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma1 || 0)}</td>
+                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2 || 0)}</td>
                 </tr>
               ))}
               {endIndex >= allocationData.length && (
                 <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
                   <td className="py-2 px-2">Totals</td>
                   <td className="py-2 px-2 text-right">{formatIndianNumber(totals.total)}</td>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.good)}</td>
                   <td className="py-2 px-2 text-right">{formatIndianNumber(totals.npa)}</td>
                   <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma0)}</td>
                   <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma1)}</td>
-                <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
-              </tr>
+                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
+                </tr>
               )}
             </tbody>
           </table>
@@ -2194,25 +2288,23 @@ const Dashboard = () => {
     )
   }
 
-  // Helper function to render NCM Allocation Summary table
-  const renderNCMAllocationTable = () => {
-    const ncmData = [
-      { username: 'Francis', total: 1082, npa: 1034, sma0: 0, sma1: 4, sma2: 44 },
-      { username: 'MATHEW', total: 432, npa: 432, sma0: 0, sma1: 0, sma2: 0 },
-      { username: 'NAIMATULLAH', total: 280, npa: 271, sma0: 9, sma1: 0, sma2: 0 },
-      { username: 'Swapnil', total: 104, npa: 62, sma0: 29, sma1: 4, sma2: 9 }
-    ]
-    const totals = ncmData.reduce((acc, row) => ({
-      total: acc.total + row.total,
-      npa: acc.npa + row.npa,
-      sma0: acc.sma0 + row.sma0,
-      sma1: acc.sma1 + row.sma1,
-      sma2: acc.sma2 + row.sma2
-    }), { total: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 })
+  // Generic function to render allocation tables with API data
+  const renderGenericAllocationTable = (tableData, tableTitle, exportName, currentPage, setCurrentPage) => {
+    // Use API data if available, otherwise use empty array
+    const data = tableData && tableData.length > 0 ? tableData : []
+    const totals = data.reduce((acc, row) => ({
+      total: acc.total + (row.total || 0),
+      good: acc.good + (row.good || 0),
+      npa: acc.npa + (row.npa || 0),
+      sma0: acc.sma0 + (row.sma0 || 0),
+      sma1: acc.sma1 + (row.sma1 || 0),
+      sma2: acc.sma2 + (row.sma2 || 0)
+    }), { total: 0, good: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 })
 
     const headers = [
-      { key: 'username', label: 'Username' },
+      { key: 'product', label: 'VERTICAL' },
       { key: 'total', label: 'TOTAL' },
+      { key: 'good', label: 'GOOD' },
       { key: 'npa', label: 'NPA' },
       { key: 'sma0', label: 'SMA0' },
       { key: 'sma1', label: 'SMA1' },
@@ -2220,26 +2312,27 @@ const Dashboard = () => {
     ]
 
     const handleExport = () => {
-      const exportData = [...ncmData, { 
-        username: 'Total', 
+      const exportData = [...data, { 
+        product: 'Total', 
         total: totals.total, 
+        good: totals.good, 
         npa: totals.npa, 
         sma0: totals.sma0, 
         sma1: totals.sma1, 
         sma2: totals.sma2 
       }]
-      exportTableToExcel(exportData, headers, 'NCM_Allocation_Summary')
+      exportTableToExcel(exportData, headers, exportName)
     }
 
     // Pagination logic
-    const startIndex = (ncmAllocationPage - 1) * itemsPerPage
+    const startIndex = (currentPage - 1) * itemsPerPage
     const endIndex = startIndex + itemsPerPage
-    const paginatedData = ncmData.slice(startIndex, endIndex)
+    const paginatedData = data.slice(startIndex, endIndex)
 
     return (
       <div className="bg-white border border-[#003366] rounded-lg overflow-hidden">
         <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">
-          <h3 className="text-sm font-semibold">NCM Allocation Summary</h3>
+          <h3 className="text-sm font-semibold">{tableTitle}</h3>
           <button
             onClick={handleExport}
             className="bg-white text-red-600 border border-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
@@ -2251,12 +2344,19 @@ const Dashboard = () => {
             Export
           </button>
         </div>
+        {verticalDataLoading && (
+          <div className="p-4 text-center text-gray-600">Loading data...</div>
+        )}
+        {verticalDataError && (
+          <div className="p-4 text-center text-red-600">Error: {verticalDataError}</div>
+        )}
         <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
           <table className="w-full text-xs border border-[#003366]">
             <thead className="bg-gray-100 text-[#003366] sticky top-0">
               <tr>
-                <th className="text-left py-2 px-2 font-semibold">Username</th>
+                <th className="text-left py-2 px-2 font-semibold">VERTICAL</th>
                 <th className="text-right py-2 px-2 font-semibold">TOTAL</th>
+                <th className="text-right py-2 px-2 font-semibold">GOOD</th>
                 <th className="text-right py-2 px-2 font-semibold">NPA</th>
                 <th className="text-right py-2 px-2 font-semibold">SMA0</th>
                 <th className="text-right py-2 px-2 font-semibold">SMA1</th>
@@ -2264,440 +2364,85 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody className="bg-white">
-              {paginatedData.map((row, idx) => (
-                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="py-2 px-2 text-gray-800 font-medium">{row.username}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.total)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.npa)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma0)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma1)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2)}</td>
+              {paginatedData.length > 0 ? (
+                <>
+                  {paginatedData.map((row, idx) => (
+                    <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                      <td className="py-2 px-2 text-gray-800 font-medium">{row.product}</td>
+                      <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.total || 0)}</td>
+                      <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.good || 0)}</td>
+                      <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.npa || 0)}</td>
+                      <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma0 || 0)}</td>
+                      <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma1 || 0)}</td>
+                      <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2 || 0)}</td>
+                    </tr>
+                  ))}
+                  {endIndex >= data.length && (
+                    <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
+                      <td className="py-2 px-2">Totals</td>
+                      <td className="py-2 px-2 text-right">{formatIndianNumber(totals.total)}</td>
+                      <td className="py-2 px-2 text-right">{formatIndianNumber(totals.good)}</td>
+                      <td className="py-2 px-2 text-right">{formatIndianNumber(totals.npa)}</td>
+                      <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma0)}</td>
+                      <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma1)}</td>
+                      <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
+                    </tr>
+                  )}
+                </>
+              ) : (
+                <tr>
+                  <td colSpan="7" className="py-4 px-2 text-center text-gray-500">No data available</td>
                 </tr>
-              ))}
-              {endIndex >= ncmData.length && (
-                <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
-                  <td className="py-2 px-2">Totals</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.total)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.npa)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma0)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma1)}</td>
-                <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
-              </tr>
               )}
             </tbody>
           </table>
         </div>
-        {renderPagination(ncmAllocationPage, setNCMAllocationPage, ncmData.length, itemsPerPage)}
+        {renderPagination(currentPage, setCurrentPage, data.length, itemsPerPage)}
       </div>
     )
+  }
+
+  // Helper function to render NCM Allocation Summary table
+  const renderNCMAllocationTable = () => {
+    return renderGenericAllocationTable(ncmData, 'NCM Allocation Summary', 'NCM_Allocation_Summary', ncmAllocationPage, setNCMAllocationPage)
   }
 
   // Helper function to render RCM Allocation Summary table
   const renderRCMAllocationTable = () => {
-    const rcmData = [
-      { username: 'SATHEESH', total: 2, npa: 1, sma0: 0, sma1: 1, sma2: 0 }
-    ]
-    const totals = rcmData.reduce((acc, row) => ({
-      total: acc.total + row.total,
-      npa: acc.npa + row.npa,
-      sma0: acc.sma0 + row.sma0,
-      sma1: acc.sma1 + row.sma1,
-      sma2: acc.sma2 + row.sma2
-    }), { total: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 })
-
-    const headers = [
-      { key: 'username', label: 'Username' },
-      { key: 'total', label: 'TOTAL' },
-      { key: 'npa', label: 'NPA' },
-      { key: 'sma0', label: 'SMA0' },
-      { key: 'sma1', label: 'SMA1' },
-      { key: 'sma2', label: 'SMA2' },
-    ]
-
-    const handleExport = () => {
-      const exportData = [...rcmData, { 
-        username: 'Total', 
-        total: totals.total, 
-        npa: totals.npa, 
-        sma0: totals.sma0, 
-        sma1: totals.sma1, 
-        sma2: totals.sma2 
-      }]
-      exportTableToExcel(exportData, headers, 'RCM_Allocation_Summary')
-    }
-
-    // Pagination logic
-    const startIndex = (rcmAllocationPage - 1) * itemsPerPage
-    const endIndex = startIndex + itemsPerPage
-    const paginatedData = rcmData.slice(startIndex, endIndex)
-
-    return (
-      <div className="bg-white border border-[#003366] rounded-lg overflow-hidden">
-        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">
-          <h3 className="text-sm font-semibold">RCM Allocation Summary</h3>
-          <button
-            onClick={handleExport}
-            className="bg-white text-red-600 border border-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
-            title="Export to Excel"
-          >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Export
-          </button>
-        </div>
-        <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
-          <table className="w-full text-xs border border-[#003366]">
-            <thead className="bg-gray-100 text-[#003366] sticky top-0">
-              <tr>
-                <th className="text-left py-2 px-2 font-semibold">Username</th>
-                <th className="text-right py-2 px-2 font-semibold">TOTAL</th>
-                <th className="text-right py-2 px-2 font-semibold">NPA</th>
-                <th className="text-right py-2 px-2 font-semibold">SMA0</th>
-                <th className="text-right py-2 px-2 font-semibold">SMA1</th>
-                <th className="text-right py-2 px-2 font-semibold">SMA2</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white">
-              {paginatedData.map((row, idx) => (
-                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="py-2 px-2 text-gray-800 font-medium">{row.username}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.total)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.npa)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma0)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma1)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2)}</td>
-                </tr>
-              ))}
-              {endIndex >= rcmData.length && (
-                <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
-                  <td className="py-2 px-2">Totals</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.total)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.npa)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma0)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma1)}</td>
-                <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
-              </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        {renderPagination(rcmAllocationPage, setRCMAllocationPage, rcmData.length, itemsPerPage)}
-      </div>
-    )
+    return renderGenericAllocationTable(rcmData, 'RCM Allocation Summary', 'RCM_Allocation_Summary', rcmAllocationPage, setRCMAllocationPage)
   }
+
 
   // Helper function to render ACM Allocation Summary table
   const renderACMAllocationTable = () => {
-    const acmData = [
-      { username: 'Kessavathamaraiselvan', total: 335, npa: 327, sma0: 3, sma1: 4, sma2: 1 },
-      { username: 'Nikitha', total: 64, npa: 0, sma0: 64, sma1: 0, sma2: 0 },
-      { username: 'Anand', total: 37, npa: 15, sma0: 17, sma1: 2, sma2: 3 },
-      { username: 'NISANTH', total: 12, npa: 11, sma0: 0, sma1: 1, sma2: 0 },
-      { username: 'Gousemohiddin', total: 11, npa: 11, sma0: 0, sma1: 0, sma2: 0 },
-      { username: 'Arumugam', total: 6, npa: 6, sma0: 0, sma1: 0, sma2: 0 },
-      { username: 'Gaurav Kumar', total: 6, npa: 2, sma0: 4, sma1: 0, sma2: 0 },
-      { username: 'JOSEPH', total: 4, npa: 1, sma0: 1, sma1: 0, sma2: 2 },
-      { username: 'Ashok', total: 4, npa: 3, sma0: 1, sma1: 0, sma2: 0 },
-      { username: 'JOHN', total: 3, npa: 0, sma0: 3, sma1: 0, sma2: 0 }
-    ]
-    const totals = acmData.reduce((acc, row) => ({
-      total: acc.total + row.total,
-      npa: acc.npa + row.npa,
-      sma0: acc.sma0 + row.sma0,
-      sma1: acc.sma1 + row.sma1,
-      sma2: acc.sma2 + row.sma2
-    }), { total: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 })
-
-    const headers = [
-      { key: 'username', label: 'Username' },
-      { key: 'total', label: 'TOTAL' },
-      { key: 'npa', label: 'NPA' },
-      { key: 'sma0', label: 'SMA0' },
-      { key: 'sma1', label: 'SMA1' },
-      { key: 'sma2', label: 'SMA2' },
-    ]
-
-    const handleExport = () => {
-      const exportData = [...acmData, { 
-        username: 'Total', 
-        total: totals.total, 
-        npa: totals.npa, 
-        sma0: totals.sma0, 
-        sma1: totals.sma1, 
-        sma2: totals.sma2 
-      }]
-      exportTableToExcel(exportData, headers, 'ACM_Allocation_Summary')
-    }
-
-    // Pagination logic
-    const startIndex = (acmAllocationPage - 1) * itemsPerPage
-    const endIndex = startIndex + itemsPerPage
-    const paginatedData = acmData.slice(startIndex, endIndex)
-
-    return (
-      <div className="bg-white border border-[#003366] rounded-lg overflow-hidden">
-        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">
-          <h3 className="text-sm font-semibold">ACM Allocation Summary</h3>
-          <button
-            onClick={handleExport}
-            className="bg-white text-red-600 border border-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
-            title="Export to Excel"
-          >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Export
-          </button>
-        </div>
-        <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
-          <table className="w-full text-xs border border-[#003366]">
-            <thead className="bg-gray-100 text-[#003366] sticky top-0">
-              <tr>
-                <th className="text-left py-2 px-2 font-semibold">Username</th>
-                <th className="text-right py-2 px-2 font-semibold">TOTAL</th>
-                <th className="text-right py-2 px-2 font-semibold">NPA</th>
-                <th className="text-right py-2 px-2 font-semibold">SMA0</th>
-                <th className="text-right py-2 px-2 font-semibold">SMA1</th>
-                <th className="text-right py-2 px-2 font-semibold">SMA2</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white">
-              {paginatedData.map((row, idx) => (
-                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="py-2 px-2 text-gray-800 font-medium">{row.username}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.total)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.npa)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma0)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma1)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2)}</td>
-                </tr>
-              ))}
-              {endIndex >= acmData.length && (
-                <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
-                  <td className="py-2 px-2">Totals</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.total)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.npa)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma0)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma1)}</td>
-                <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
-              </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        {renderPagination(acmAllocationPage, setACMAllocationPage, acmData.length, itemsPerPage)}
-      </div>
-    )
+    return renderGenericAllocationTable(acmData, 'ACM Allocation Summary', 'ACM_Allocation_Summary', acmAllocationPage, setACMAllocationPage)
   }
 
-  // Helper function to render CM Allocation Summary table
-  const renderCMAllocationTable = () => {
-    const cmData = [
-      { username: 'ALTHAF', total: 207, npa: 206, sma0: 0, sma1: 1, sma2: 0 },
-      { username: 'Vishnu', total: 142, npa: 139, sma0: 0, sma1: 1, sma2: 2 },
-      { username: 'Dipak', total: 83, npa: 10, sma0: 61, sma1: 9, sma2: 3 },
-      { username: 'Varun', total: 63, npa: 8, sma0: 44, sma1: 5, sma2: 6 },
-      { username: 'Girish', total: 60, npa: 31, sma0: 22, sma1: 3, sma2: 4 },
-      { username: 'Akash', total: 44, npa: 2, sma0: 42, sma1: 0, sma2: 0 },
-      { username: 'Manuprasad', total: 39, npa: 5, sma0: 24, sma1: 4, sma2: 6 },
-      { username: 'Vinoth', total: 36, npa: 33, sma0: 0, sma1: 0, sma2: 3 },
-      { username: 'SAI KUMAR', total: 33, npa: 15, sma0: 13, sma1: 4, sma2: 1 },
-      { username: 'MANTHA', total: 31, npa: 7, sma0: 15, sma1: 5, sma2: 4 }
-    ]
-    const totals = cmData.reduce((acc, row) => ({
-      total: acc.total + row.total,
-      npa: acc.npa + row.npa,
-      sma0: acc.sma0 + row.sma0,
-      sma1: acc.sma1 + row.sma1,
-      sma2: acc.sma2 + row.sma2
-    }), { total: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 })
-
-    const headers = [
-      { key: 'username', label: 'Username' },
-      { key: 'total', label: 'TOTAL' },
-      { key: 'npa', label: 'NPA' },
-      { key: 'sma0', label: 'SMA0' },
-      { key: 'sma1', label: 'SMA1' },
-      { key: 'sma2', label: 'SMA2' },
-    ]
-
-    const handleExport = () => {
-      const exportData = [...cmData, { 
-        username: 'Total', 
-        total: totals.total, 
-        npa: totals.npa, 
-        sma0: totals.sma0, 
-        sma1: totals.sma1, 
-        sma2: totals.sma2 
-      }]
-      exportTableToExcel(exportData, headers, 'CM_Allocation_Summary')
-    }
-
-    // Pagination logic
-    const startIndex = (cmAllocationPage - 1) * itemsPerPage
-    const endIndex = startIndex + itemsPerPage
-    const paginatedData = cmData.slice(startIndex, endIndex)
-
-    return (
-      <div className="bg-white border border-[#003366] rounded-lg overflow-hidden">
-        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">
-          <h3 className="text-sm font-semibold">CM Allocation Summary</h3>
-          <button
-            onClick={handleExport}
-            className="bg-white text-red-600 border border-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
-            title="Export to Excel"
-          >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Export
-          </button>
-        </div>
-        <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
-          <table className="w-full text-xs border border-[#003366]">
-            <thead className="bg-gray-100 text-[#003366] sticky top-0">
-              <tr>
-                <th className="text-left py-2 px-2 font-semibold">Username</th>
-                <th className="text-right py-2 px-2 font-semibold">TOTAL</th>
-                <th className="text-right py-2 px-2 font-semibold">NPA</th>
-                <th className="text-right py-2 px-2 font-semibold">SMA0</th>
-                <th className="text-right py-2 px-2 font-semibold">SMA1</th>
-                <th className="text-right py-2 px-2 font-semibold">SMA2</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white">
-              {paginatedData.map((row, idx) => (
-                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="py-2 px-2 text-gray-800 font-medium">{row.username}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.total)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.npa)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma0)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma1)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2)}</td>
-                </tr>
-              ))}
-              {endIndex >= cmData.length && (
-                <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
-                  <td className="py-2 px-2">Totals</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.total)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.npa)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma0)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma1)}</td>
-                <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
-              </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        {renderPagination(cmAllocationPage, setCMAllocationPage, cmData.length, itemsPerPage)}
-      </div>
-    )
+  // Helper function to render ALLOCATION_ADMIN Allocation Summary table
+  const renderAllocationAdminTable = () => {
+    return renderGenericAllocationTable(allocationAdminData, 'Allocation Admin Summary', 'ALLOCATION_ADMIN_Summary', allocationAdminPage, setAllocationAdminPage)
   }
 
-  // Helper function to render AGTL Allocation Summary table
-  const renderAGTLAllocationTable = () => {
-    const agtlData = [
-      { username: 'NIKHIL', total: 279, npa: 270, sma0: 0, sma1: 4, sma2: 5 },
-      { username: 'JOBY', total: 194, npa: 139, sma0: 29, sma1: 13, sma2: 13 },
-      { username: 'N', total: 192, npa: 191, sma0: 0, sma1: 1, sma2: 0 },
-      { username: 'A', total: 186, npa: 89, sma0: 48, sma1: 30, sma2: 19 },
-      { username: 'SHINOJ', total: 184, npa: 184, sma0: 0, sma1: 0, sma2: 0 },
-      { username: 'VINOD', total: 151, npa: 131, sma0: 7, sma1: 9, sma2: 4 },
-      { username: 'NATARAJAN', total: 130, npa: 125, sma0: 0, sma1: 3, sma2: 2 },
-      { username: 'MUMMADI', total: 111, npa: 99, sma0: 4, sma1: 2, sma2: 6 },
-      { username: 'VENKATESH KUMAR', total: 110, npa: 109, sma0: 1, sma1: 0, sma2: 0 },
-      { username: 'SANOOP', total: 97, npa: 97, sma0: 0, sma1: 0, sma2: 0 }
-    ]
-    const totals = agtlData.reduce((acc, row) => ({
-      total: acc.total + row.total,
-      npa: acc.npa + row.npa,
-      sma0: acc.sma0 + row.sma0,
-      sma1: acc.sma1 + row.sma1,
-      sma2: acc.sma2 + row.sma2
-    }), { total: 0, npa: 0, sma0: 0, sma1: 0, sma2: 0 })
-
-    const headers = [
-      { key: 'username', label: 'Username' },
-      { key: 'total', label: 'TOTAL' },
-      { key: 'npa', label: 'NPA' },
-      { key: 'sma0', label: 'SMA0' },
-      { key: 'sma1', label: 'SMA1' },
-      { key: 'sma2', label: 'SMA2' },
-    ]
-
-    const handleExport = () => {
-      const exportData = [...agtlData, { 
-        username: 'Total', 
-        total: totals.total, 
-        npa: totals.npa, 
-        sma0: totals.sma0, 
-        sma1: totals.sma1, 
-        sma2: totals.sma2 
-      }]
-      exportTableToExcel(exportData, headers, 'AGTL_Allocation_Summary')
-    }
-
-    // Pagination logic
-    const startIndex = (agtlAllocationPage - 1) * itemsPerPage
-    const endIndex = startIndex + itemsPerPage
-    const paginatedData = agtlData.slice(startIndex, endIndex)
-
-    return (
-      <div className="bg-white border border-[#003366] rounded-lg overflow-hidden">
-        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">
-          <h3 className="text-sm font-semibold">AGTL Allocation Summary</h3>
-          <button
-            onClick={handleExport}
-            className="bg-white text-red-600 border border-red-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-100 transition-colors flex items-center gap-1"
-            title="Export to Excel"
-          >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Export
-          </button>
-        </div>
-        <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
-          <table className="w-full text-xs border border-[#003366]">
-            <thead className="bg-gray-100 text-[#003366] sticky top-0">
-              <tr>
-                <th className="text-left py-2 px-2 font-semibold">Username</th>
-                <th className="text-right py-2 px-2 font-semibold">TOTAL</th>
-                <th className="text-right py-2 px-2 font-semibold">NPA</th>
-                <th className="text-right py-2 px-2 font-semibold">SMA0</th>
-                <th className="text-right py-2 px-2 font-semibold">SMA1</th>
-                <th className="text-right py-2 px-2 font-semibold">SMA2</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white">
-              {paginatedData.map((row, idx) => (
-                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="py-2 px-2 text-gray-800 font-medium">{row.username}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.total)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.npa)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma0)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma1)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2)}</td>
-                </tr>
-              ))}
-              {endIndex >= agtlData.length && (
-                <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
-                  <td className="py-2 px-2">Totals</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.total)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.npa)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma0)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma1)}</td>
-                <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
-              </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        {renderPagination(agtlAllocationPage, setAGTLAllocationPage, agtlData.length, itemsPerPage)}
-      </div>
-    )
+  // Helper function to render BO Allocation Summary table
+  const renderBOTable = () => {
+    return renderGenericAllocationTable(boData, 'BO Allocation Summary', 'BO_Summary', boPage, setBoPage)
   }
+
+  // Helper function to render CLM Allocation Summary table
+  const renderCLMTable = () => {
+    return renderGenericAllocationTable(clmData, 'CLM Allocation Summary', 'CLM_Summary', clmPage, setClmPage)
+  }
+
+  // Helper function to render DTR Allocation Summary table
+  const renderDTRTable = () => {
+    return renderGenericAllocationTable(dtrData, 'DTR Allocation Summary', 'DTR_Summary', dtrPage, setDtrPage)
+  }
+
+  // Helper function to render TCM Allocation Summary table
+  const renderTCMTable = () => {
+    return renderGenericAllocationTable(tcmData, 'TCM Allocation Summary', 'TCM_Summary', tcmPage, setTcmPage)
+  }
+
 
   // Helper function to render State Wise Summary table
   const renderStateWiseSummaryTable = () => {
@@ -5066,16 +4811,31 @@ const Dashboard = () => {
                         {renderACMAllocationTable()}
                       </div>
                       
-                      {/* CM Allocation Summary Table */}
+                      {/* ALLOCATION_ADMIN Allocation Summary Table */}
                       <div>
-                        {renderCMAllocationTable()}
+                        {renderAllocationAdminTable()}
                       </div>
                       
-                      {/* AGTL Allocation Summary Table */}
-                      <div className="lg:col-span-2">
-                        {renderAGTLAllocationTable()}
-                        </div>
+                      {/* BO Allocation Summary Table */}
+                      <div>
+                        {renderBOTable()}
                       </div>
+                      
+                      {/* CLM Allocation Summary Table */}
+                      <div>
+                        {renderCLMTable()}
+                      </div>
+                      
+                      {/* DTR Allocation Summary Table */}
+                      <div>
+                        {renderDTRTable()}
+                      </div>
+                      
+                      {/* TCM Allocation Summary Table */}
+                      <div>
+                        {renderTCMTable()}
+                      </div>
+                    </div>
                     </div>
                   </div>
                 )}
