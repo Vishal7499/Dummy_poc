@@ -28,10 +28,6 @@ const Dashboard = () => {
   const [chartFilter, setChartFilter] = useState('ftd')
   const leaderboardTableRef = useRef(null)
   const [selectedDate, setSelectedDate] = useState("01-10-2025");
-  // Refs to track if data has been fetched to avoid unnecessary API calls
-  const verticalDataFetchedRef = useRef(false)
-  const collectionDataFetchedRef = useRef(false)
-  const lastCollectionFetchDatesRef = useRef({ fromDate: null, toDate: null })
 
   // Hierarchy drill-down state
   const [hierarchyPath, setHierarchyPath] = useState([]) // Array to track hierarchy path: [{level, id, name}, ...]
@@ -161,7 +157,7 @@ const Dashboard = () => {
 
   // Fetch collection graph data using dynamic date filters
   useEffect(() => {
-    if (!user?.accessToken || !fromDate || !toDate) {
+    if (!user?.accessToken) {
       return
     }
 
@@ -170,9 +166,12 @@ const Dashboard = () => {
         setCollectionGraphLoading(true)
         setCollectionGraphError(null)
         
-        console.log('Fetching collection graph data from:', fromDate, 'to:', toDate)
+        const defaultFromDate = fromDate || '2025-01-01'
+        const defaultToDate = toDate || '2025-12-30'
         
-        const data = await dashboardCollectionGraphApi(user.accessToken, fromDate, toDate)
+        console.log('Fetching collection graph data from:', defaultFromDate, 'to:', defaultToDate)
+        
+        const data = await dashboardCollectionGraphApi(user.accessToken, defaultFromDate, defaultToDate)
         setCollectionGraphData(data)
         console.log('Collection graph data fetched:', data)
         console.log('Collection graph data - from_date:', data?.from_date)
@@ -200,9 +199,7 @@ const Dashboard = () => {
       return
     }
 
-    // Check if data has already been fetched - if yes, don't fetch again
-    if (verticalDataFetchedRef.current) {
-      console.log('Vertical summary data already fetched, skipping API call')
+    if (!user?.accessToken) {
       return
     }
 
@@ -210,9 +207,13 @@ const Dashboard = () => {
       try {
         setVerticalDataLoading(true)
         setVerticalDataError(null)
-        console.log('Fetching vertical summary data from dashboarddata API')
         
-        const data = await dashboardDataApi('ALL', '2025-01-31', '2025-08-31')
+        const defaultFromDate = fromDate || '2025-01-01'
+        const defaultToDate = toDate || '2025-12-30'
+        
+        console.log('Fetching vertical summary data from dashboarddata API from:', defaultFromDate, 'to:', defaultToDate)
+        
+        const data = await dashboardDataApi(user.accessToken, 'ALL', defaultFromDate, defaultToDate)
         console.log('Vertical summary data fetched:', data)
         
         // Extract and transform the data
@@ -282,9 +283,6 @@ const Dashboard = () => {
         if (data && data.NCM) setNcmData(transformTableData(data.NCM))
         if (data && data.RCM) setRcmData(transformTableData(data.RCM))
         if (data && data.TCM) setTcmData(transformTableData(data.TCM))
-        
-        // Mark as fetched after successful API call
-        verticalDataFetchedRef.current = true
       } catch (error) {
         console.error('Error fetching vertical summary data:', error)
         setVerticalDataError(error.message || 'Failed to fetch vertical summary data')
@@ -294,7 +292,7 @@ const Dashboard = () => {
     }
 
     fetchVerticalSummaryData()
-  }, [selectedStaffMetric])
+  }, [selectedStaffMetric, user?.accessToken, fromDate, toDate])
 
   // Fetch collection summary data from dashboardcollectiondata API when Collection Efficiency card is clicked
   useEffect(() => {
@@ -302,11 +300,7 @@ const Dashboard = () => {
       return
     }
 
-    // Check if data has already been fetched and dates haven't changed - if yes, don't fetch again
-    const datesChanged = lastCollectionFetchDatesRef.current.fromDate !== fromDate || lastCollectionFetchDatesRef.current.toDate !== toDate
-    
-    if (collectionDataFetchedRef.current && !datesChanged) {
-      console.log('Collection summary data already fetched and dates unchanged, skipping API call')
+    if (!user?.accessToken) {
       return
     }
 
@@ -314,9 +308,13 @@ const Dashboard = () => {
       try {
         setCollectionDataLoading(true)
         setCollectionDataError(null)
-        console.log('Fetching collection summary data from:', fromDate, 'to:', toDate)
         
-        const data = await dashboardCollectionDataApi('ALL', fromDate, toDate)
+        const defaultFromDate = fromDate || '2025-01-01'
+        const defaultToDate = toDate || '2025-12-30'
+        
+        console.log('Fetching collection summary data from:', defaultFromDate, 'to:', defaultToDate)
+        
+        const data = await dashboardCollectionDataApi(user.accessToken, 'ALL', defaultFromDate, defaultToDate)
         console.log('Collection summary data fetched:', data)
         
         // Extract and transform the data
@@ -376,10 +374,6 @@ const Dashboard = () => {
             }))
           setBucketWiseData(transformedBucketData)
         }
-        
-        // Mark as fetched and update last fetched dates after successful fetch
-        collectionDataFetchedRef.current = true
-        lastCollectionFetchDatesRef.current = { fromDate, toDate }
       } catch (error) {
         console.error('Error fetching collection summary data:', error)
         setCollectionDataError(error.message || 'Failed to fetch collection summary data')
@@ -389,21 +383,25 @@ const Dashboard = () => {
     }
 
     fetchCollectionData()
-  }, [selectedStaffMetric, fromDate, toDate])
+  }, [selectedStaffMetric, fromDate, toDate, user?.accessToken])
 
-  // Fetch deposition data - no authentication required
+  // Fetch deposition data
   useEffect(() => {
+    if (!user?.accessToken) {
+      return
+    }
+
     const fetchDepositionData = async () => {
       try {
         setDepositionLoading(true)
         setDepositionError(null)
         
-        const fromDateStr = '2025-09-01'
-        const toDateStr = '2025-09-30'
+        const defaultFromDate = fromDate || '2025-01-01'
+        const defaultToDate = toDate || '2025-12-30'
         
-        console.log('Fetching deposition data from:', fromDateStr, 'to:', toDateStr, 'page:', depositionCurrentPage, 'page_size:', depositionPageSize)
+        console.log('Fetching deposition data from:', defaultFromDate, 'to:', defaultToDate, 'page:', depositionCurrentPage, 'page_size:', depositionPageSize)
         
-        const data = await dashboardDepositionApi(fromDateStr, toDateStr, depositionCurrentPage, depositionPageSize)
+        const data = await dashboardDepositionApi(user.accessToken, defaultFromDate, defaultToDate, depositionCurrentPage, depositionPageSize)
         setDepositionData(data)
         console.log('Deposition data fetched:', data)
       } catch (error) {
@@ -415,7 +413,7 @@ const Dashboard = () => {
     }
 
     fetchDepositionData()
-  }, [depositionCurrentPage, depositionPageSize])
+  }, [depositionCurrentPage, depositionPageSize, user?.accessToken, fromDate, toDate])
 
   // Click outside handler for alerts dropdown, sidebar, and leaderboard table
   useEffect(() => {
@@ -2713,12 +2711,7 @@ const Dashboard = () => {
             Export
           </button>
         </div>
-        {collectionDataLoading ? (
-          <div className="p-8 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
-            <p className="mt-2 text-sm text-gray-600">Loading data...</p>
-          </div>
-        ) : collectionDataError ? (
+        {collectionDataError ? (
           <div className="p-4 text-center text-red-600">Error: {collectionDataError}</div>
         ) : (
         <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
@@ -2846,12 +2839,7 @@ const Dashboard = () => {
             Export
           </button>
         </div>
-        {collectionDataLoading ? (
-          <div className="p-8 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
-            <p className="mt-2 text-sm text-gray-600">Loading data...</p>
-          </div>
-        ) : collectionDataError ? (
+        {collectionDataError ? (
           <div className="p-4 text-center text-red-600">Error: {collectionDataError}</div>
         ) : (
         <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
@@ -2979,12 +2967,7 @@ const Dashboard = () => {
             Export
           </button>
         </div>
-        {collectionDataLoading ? (
-          <div className="p-8 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
-            <p className="mt-2 text-sm text-gray-600">Loading data...</p>
-          </div>
-        ) : collectionDataError ? (
+        {collectionDataError ? (
           <div className="p-4 text-center text-red-600">Error: {collectionDataError}</div>
         ) : (
         <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
@@ -5057,33 +5040,51 @@ const Dashboard = () => {
                       </button>
                     </div>
 
-                    {/* Grid of Summary Tables */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" onClick={(e) => e.stopPropagation()}>
-                      {/* State Wise Summary Table */}
-                      <div className="lg:col-span-2">
-                        {renderStateWiseSummaryTable()}
+                    {/* Loading State - Show main loader */}
+                    {collectionDataLoading && (
+                      <div className="flex items-center justify-center" style={{ minHeight: 'calc(100vh - 300px)' }}>
+                        <div 
+                          className="w-16 h-16 border-4 border-blue-600 animate-spin" 
+                          style={{
+                            borderRadius: '0',
+                            borderTopColor: '#2563eb',
+                            borderRightColor: '#2563eb',
+                            borderBottomColor: '#2563eb',
+                            borderLeftColor: '#2563eb'
+                          }}
+                        ></div>
                       </div>
-                      
-                      {/* Region Wise Summary Table */}
-                      <div className="lg:col-span-2">
-                        {renderRegionWiseSummaryTable()}
+                    )}
+
+                    {/* Grid of Summary Tables - Show only when not loading */}
+                    {!collectionDataLoading && (
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" onClick={(e) => e.stopPropagation()}>
+                        {/* State Wise Summary Table */}
+                        <div className="lg:col-span-2">
+                          {renderStateWiseSummaryTable()}
+                        </div>
+                        
+                        {/* Region Wise Summary Table */}
+                        <div className="lg:col-span-2">
+                          {renderRegionWiseSummaryTable()}
+                        </div>
+                        
+                        {/* Bucket Wise Summary Table */}
+                        <div className="lg:col-span-2">
+                          {renderBucketWiseSummaryTable()}
+                        </div>
+                        
+                        {/* DPD Collection Efficiency Table */}
+                        <div className="lg:col-span-2">
+                          {renderDPDCollectionEfficiencyTable()}
+                        </div>
+                        
+                        {/* DPD Collection Efficiency Summary Table */}
+                        <div className="lg:col-span-2">
+                          {renderDPDCollectionEfficiencySummaryTable()}
+                        </div>
                       </div>
-                      
-                      {/* Bucket Wise Summary Table */}
-                      <div className="lg:col-span-2">
-                        {renderBucketWiseSummaryTable()}
-                      </div>
-                      
-                      {/* DPD Collection Efficiency Table */}
-                      <div className="lg:col-span-2">
-                        {renderDPDCollectionEfficiencyTable()}
-                      </div>
-                      
-                      {/* DPD Collection Efficiency Summary Table */}
-                      <div className="lg:col-span-2">
-                        {renderDPDCollectionEfficiencySummaryTable()}
-                      </div>
-                    </div>
+                    )}
                   </div>
                 )}
 
@@ -5504,7 +5505,7 @@ const Dashboard = () => {
                 )}
 
                 {/* Staff Performance Leaderboard Table - Show for collection and other metrics (but not allocation) */}
-                {selectedStaffMetric === 'collection' && (
+                {selectedStaffMetric === 'collection' && !collectionDataLoading && (
                   <div ref={leaderboardTableRef} className="mb-8 bg-white border border-gray-200 rounded-lg p-6 shadow-sm w-full" style={{ maxWidth: '100%', overflow: 'hidden', boxSizing: 'border-box' }}>
                     {/* Header with Title and Close Button */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -6802,6 +6803,8 @@ const Dashboard = () => {
                          </div>
                        </div>
                      </div>
+
+                    
           </div>
 
                   {/* Right Side - Alerts and Actions */}
@@ -6820,76 +6823,33 @@ const Dashboard = () => {
                           </button>
                           </div>
                         </div>
+                        
                       </div>
-                    
                       {/* DPD Distribution Chart */}
                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                        <h3 className="text-sm font-semibold text-gray-900 mb-3">DPD Distribution</h3>
-                      {(() => {
-                        // Get DPD data from API
-                        const dpdData = dashboardData?.dpd_data || {}
-                        const days0_30 = dpdData['0-30'] || 0
-                        const days31_60 = dpdData['31-60'] || 0
-                        const days61_90 = dpdData['61-90'] || 0
-                        const days90Plus = dpdData['90+'] || 0
-                        
-                        // Calculate total
-                        const totalCases = days0_30 + days31_60 + days61_90 + days90Plus
-                        
-                        // Calculate percentages
-                        const percent0_30 = totalCases > 0 ? ((days0_30 / totalCases) * 100).toFixed(1) : 0
-                        const percent31_60 = totalCases > 0 ? ((days31_60 / totalCases) * 100).toFixed(1) : 0
-                        const percent61_90 = totalCases > 0 ? ((days61_90 / totalCases) * 100).toFixed(1) : 0
-                        const percent90Plus = totalCases > 0 ? ((days90Plus / totalCases) * 100).toFixed(1) : 0
-                        
-                        // Calculate angles for conic gradient (360 degrees total)
-                        const angle0_30 = (parseFloat(percent0_30) / 100) * 360
-                        const angle31_60 = (parseFloat(percent31_60) / 100) * 360
-                        const angle61_90 = (parseFloat(percent61_90) / 100) * 360
-                        const angle90Plus = (parseFloat(percent90Plus) / 100) * 360
-                        
-                        // Calculate cumulative angles for conic gradient
-                        let currentAngle = 0
-                        const start0_30 = currentAngle
-                        currentAngle += angle0_30
-                        const end0_30 = currentAngle
-                        
-                        const start31_60 = currentAngle
-                        currentAngle += angle31_60
-                        const end31_60 = currentAngle
-                        
-                        const start61_90 = currentAngle
-                        currentAngle += angle61_90
-                        const end61_90 = currentAngle
-                        
-                        const start90Plus = currentAngle
-                        const end90Plus = 360
-                        
-                        return (
                        <div className="flex items-center space-x-6">
                          <div className="relative">
                            <div className="h-40 w-40 bg-gradient-to-br from-green-100 via-yellow-100 to-red-100 rounded-full flex items-center justify-center border-4 border-gray-200">
                              <div className="h-32 w-32 bg-white rounded-full flex items-center justify-center">
                                <div className="text-center">
-                                    <div className="text-2xl font-bold text-gray-700">{formatIndianNumber(totalCases)}</div>
+                                 <div className="text-2xl font-bold text-gray-700">38</div>
                                  <div className="text-xs text-gray-500">Total Cases</div>
                                </div>
                              </div>
                            </div>
-                              {/* Dynamic donut chart segments */}
-                              {totalCases > 0 && (
+                           {/* Mock donut chart segments */}
                            <div className="absolute inset-0 rounded-full" style={{
                              background: `conic-gradient(
-                                    #10b981 ${start0_30}deg ${end0_30}deg,
-                                    #f59e0b ${start31_60}deg ${end31_60}deg,
-                                    #3b82f6 ${start61_90}deg ${end61_90}deg,
-                                    #ef4444 ${start90Plus}deg ${end90Plus}deg
+                               #10b981 0deg 162deg,
+                               #f59e0b 162deg 252deg,
+                               #3b82f6 252deg 324deg,
+                               #ef4444 324deg 360deg
                              )`
                            }}></div>
-                              )}
                            <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center">
                              <div className="text-center">
-                                  <div className="text-2xl font-bold text-gray-700">{formatIndianNumber(totalCases)}</div>
+                               <div className="text-2xl font-bold text-gray-700">38</div>
                                <div className="text-xs text-gray-500">Total Cases</div>
                              </div>
                     </div>
@@ -6897,28 +6857,26 @@ const Dashboard = () => {
                          <div className="space-y-3">
                            <div className="flex items-center space-x-3">
                              <div className="w-4 h-4 bg-green-500 rounded"></div>
-                                <span className="text-gray-700 text-[12px] font-medium">0-30 days ({percent0_30}%)</span>
-                                <span className="text-gray-500 text-[12px]">{formatIndianNumber(days0_30)} cases</span>
+                             <span className="text-gray-700 text-[12px] font-medium">0-30 days (45%)</span>
+                             <span className="text-gray-500 text-[12px]">17 cases</span>
                            </div>
                            <div className="flex items-center space-x-3">
                              <div className="w-4 h-4 bg-orange-500 rounded"></div>
-                                <span className="text-gray-700 text-[12px] font-medium">31-60 days ({percent31_60}%)</span>
-                                <span className="text-gray-500 text-[12px]">{formatIndianNumber(days31_60)} cases</span>
+                             <span className="text-gray-700 text-[12px] font-medium">31-60 days (25%)</span>
+                             <span className="text-gray-500 text-[12px]">10 cases</span>
                            </div>
                            <div className="flex items-center space-x-3">
                              <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                                <span className="text-gray-700 text-[12px] font-medium">61-90 days ({percent61_90}%)</span>
-                                <span className="text-gray-500 text-[12px]">{formatIndianNumber(days61_90)} cases</span>
+                             <span className="text-gray-700 text-[12px] font-medium">61-90 days (18%)</span>
+                             <span className="text-gray-500 text-[12px]">7 cases</span>
                            </div>
                            <div className="flex items-center space-x-3">
                              <div className="w-4 h-4 bg-red-500 rounded"></div>
-                                <span className="text-gray-700 text-[12px] font-medium">90+ days ({percent90Plus}%)</span>
-                                <span className="text-gray-500 text-[12px]">{formatIndianNumber(days90Plus)} cases</span>
+                             <span className="text-gray-700 text-[12px] font-medium">90+ days (12%)</span>
+                             <span className="text-gray-500 text-[12px]">4 cases</span>
                   </div>
                 </div>
               </div>
-                        )
-                      })()}
             </div>
                     </div>
               </div>
