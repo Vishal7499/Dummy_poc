@@ -17,6 +17,7 @@ export async function loginApi({ username, password }) {
   
   const responseText = await res.text()
   console.log('Raw response status:', res.status)
+  console.log('Raw response text length:', responseText.length)
   console.log('Raw response text (first 200 chars):', responseText.substring(0, 200))
   console.log('Response content-type:', res.headers.get('content-type'))
   
@@ -29,38 +30,48 @@ export async function loginApi({ username, password }) {
     }
   }
   
-  // Try to parse as JSON first (in case backend returns unencrypted or wrapped response)
+  // Backend returns encrypted string - try to parse as JSON first (might be wrapped in quotes)
+  let encryptedString = null
+  
   try {
     const jsonData = JSON.parse(responseText)
     // If it's a string value (encrypted data wrapped in JSON), extract it
     if (typeof jsonData === 'string') {
-      console.log('Response is a JSON-wrapped string, extracting and decrypting...')
-      const decryptedData = decryptData(jsonData.trim())
-      console.log('Decrypted data:', decryptedData)
-      return decryptedData
-    }
-    // If it's already an object with expected fields, return it
-    if (jsonData.message || jsonData.username) {
-      console.log('Parsed as JSON object:', jsonData)
+      console.log('Response is a JSON-wrapped string, extracting...')
+      encryptedString = jsonData.trim()
+    } else if (jsonData.encrypted || jsonData.payload) {
+      // If backend wraps it in an object
+      encryptedString = (jsonData.encrypted || jsonData.payload).trim()
+    } else if (jsonData.message || jsonData.username) {
+      // If it's already decrypted (shouldn't happen but handle it)
+      console.log('Response is already decrypted:', jsonData)
       return jsonData
     }
   } catch (e) {
+    // Not valid JSON, treat as plain encrypted string
     console.log('Response is not valid JSON, treating as encrypted base64 string...')
+    encryptedString = responseText.trim()
   }
   
-  // Treat as encrypted base64 string directly
+  // Clean up the encrypted string (remove any surrounding quotes if present)
+  if (encryptedString) {
+    encryptedString = encryptedString.replace(/^["']|["']$/g, '')
+  } else {
+    encryptedString = responseText.trim().replace(/^["']|["']$/g, '')
+  }
+  
+  // Decrypt the response
   try {
-    // Clean up the response text (remove any whitespace, quotes, etc.)
-    const cleanedText = responseText.trim().replace(/^["']|["']$/g, '')
-    console.log('Attempting decryption with cleaned text (first 100 chars):', cleanedText.substring(0, 100))
+    console.log('Attempting decryption with cleaned text (first 100 chars):', encryptedString.substring(0, 100))
+    console.log('Encrypted string length:', encryptedString.length)
     
-    const decryptedData = decryptData(cleanedText)
+    const decryptedData = decryptData(encryptedString)
     console.log('Decrypted data:', decryptedData)
     return decryptedData
   } catch (error) {
     console.error('Failed to decrypt login response:', error)
-    console.error('Encrypted text length:', responseText.length)
-    console.error('Encrypted text preview:', responseText.substring(0, 100))
+    console.error('Encrypted text length:', encryptedString.length)
+    console.error('Encrypted text preview:', encryptedString.substring(0, 100))
     throw new Error('Failed to process login response: ' + error.message)
   }
 }
@@ -123,12 +134,13 @@ export async function dashboardCollectionGraphApi(accessToken, fromDate, toDate)
   return res.json()
 }
 
-export async function dashboardDepositionApi(fromDate, toDate, page = 10, pageSize = 20) {
+export async function dashboardDepositionApi(accessToken, fromDate, toDate, page = 10, pageSize = 20) {
   const url = `${API_BASE}/dashboarddeposition/`
   
   const res = await fetch(url, {
     method: 'POST',
     headers: {
+      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -145,7 +157,7 @@ export async function dashboardDepositionApi(fromDate, toDate, page = 10, pageSi
   return res.json()
 }
 
-export async function dashboardDataApi(reportType, fromDate, toDate) {
+export async function dashboardDataApi(accessToken, reportType, fromDate, toDate) {
   const url = `${API_BASE}/dashboarddata/`
   
   // Default dates: 2025-01-01 to 2025-08-31
@@ -155,6 +167,7 @@ export async function dashboardDataApi(reportType, fromDate, toDate) {
   const res = await fetch(url, {
     method: 'POST',
     headers: {
+      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -170,7 +183,7 @@ export async function dashboardDataApi(reportType, fromDate, toDate) {
   return res.json()
 }
 
-export async function dashboardCollectionDataApi(reportType, fromDate, toDate) {
+export async function dashboardCollectionDataApi(accessToken, reportType, fromDate, toDate) {
   const url = `${API_BASE}/dashboardcollectiondata/`
   
   // Default dates: 2025-01-01 to 2025-08-31
@@ -182,6 +195,7 @@ export async function dashboardCollectionDataApi(reportType, fromDate, toDate) {
   const res = await fetch(url, {
     method: 'POST',
     headers: {
+      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -198,12 +212,12 @@ export async function dashboardCollectionDataApi(reportType, fromDate, toDate) {
 }
 
 // Admin API Functions
-export async function adminGetUsers(page = 1, pageSize = 50) {
+export async function adminGetUsers(accessToken, page = 1, pageSize = 50) {
   const url = `${API_BASE}/admin/users/?page=${page}&page_size=${pageSize}`
   const res = await fetch(url, {
     method: 'GET',
-    credentials: 'include',
     headers: {
+      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
   })
@@ -214,13 +228,13 @@ export async function adminGetUsers(page = 1, pageSize = 50) {
   return res.json()
 }
 
-export async function adminCreateUser(userData) {
+export async function adminCreateUser(accessToken, userData) {
   const url = `${API_BASE}/admin/users/create/`
   
   const res = await fetch(url, {
     method: 'POST',
-    credentials: 'include',
     headers: {
+      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(userData),
@@ -243,7 +257,7 @@ export async function adminCreateUser(userData) {
   }
 }
 
-export async function adminUpdateUser(username, userData) {
+export async function adminUpdateUser(accessToken, username, userData) {
   const url = `${API_BASE}/admin/users/${username}/`
   
   // Only include password if it's provided (not empty)
@@ -254,8 +268,8 @@ export async function adminUpdateUser(username, userData) {
   
   const res = await fetch(url, {
     method: 'PUT',
-    credentials: 'include',
     headers: {
+      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(payload),
@@ -278,14 +292,14 @@ export async function adminUpdateUser(username, userData) {
   }
 }
 
-export async function adminDeleteUser(username) {
+export async function adminDeleteUser(accessToken, username) {
   // Soft delete: Set is_active to 0 instead of actually deleting
   const url = `${API_BASE}/admin/users/${username}/`
   
   const res = await fetch(url, {
     method: 'PUT',
-    credentials: 'include',
     headers: {
+      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ is_active: 0 }),
@@ -308,12 +322,12 @@ export async function adminDeleteUser(username) {
   }
 }
 
-export async function adminGetActivityLogs() {
+export async function adminGetActivityLogs(accessToken) {
   const url = `${API_BASE}/admin/activity-logs/`
   const res = await fetch(url, {
     method: 'GET',
-    credentials: 'include',
     headers: {
+      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
   })
@@ -329,13 +343,13 @@ export async function adminGetActivityLogs() {
   return res.json()
 }
 
-export async function adminGetDashboardStats() {
+export async function adminGetDashboardStats(accessToken) {
   const url = `${API_BASE}/admin/dashboard/stats/`
   console.log('Making API call to:', url)
   const res = await fetch(url, {
     method: 'GET',
-    credentials: 'include',
     headers: {
+      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
   })
