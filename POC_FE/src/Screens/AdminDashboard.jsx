@@ -19,11 +19,15 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (!user?.accessToken) {
+      return
+    }
+
     const fetchStats = async () => {
       try {
         setLoading(true)
         console.log('Fetching admin dashboard stats...')
-        const statsData = await adminGetDashboardStats()
+        const statsData = await adminGetDashboardStats(user.accessToken)
         console.log('Admin dashboard stats received:', statsData)
         
         setStats({
@@ -46,7 +50,7 @@ const AdminDashboard = () => {
     }
 
     fetchStats()
-  }, [])
+  }, [user?.accessToken])
 
   const statCards = [
     {

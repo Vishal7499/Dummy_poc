@@ -40,14 +40,21 @@ const UserManagement = () => {
   })
 
   useEffect(() => {
-    fetchUsers(pagination.current_page, pagination.page_size)
-  }, [pagination.current_page, pagination.page_size])
+    if (user?.accessToken) {
+      fetchUsers(pagination.current_page, pagination.page_size)
+    }
+  }, [pagination.current_page, pagination.page_size, user?.accessToken])
 
   const fetchUsers = async (page = 1, pageSize = 50) => {
+    if (!user?.accessToken) {
+      setError('Authentication required')
+      return
+    }
+
     try {
       setLoading(true)
       setError('')
-      const data = await adminGetUsers(page, pageSize)
+      const data = await adminGetUsers(user.accessToken, page, pageSize)
       console.log('Fetched users data:', data)
       console.log('Users array:', data.users)
       if (data.users && data.users.length > 0) {
@@ -71,8 +78,13 @@ const UserManagement = () => {
     setError('')
     setSuccess('')
 
+    if (!user?.accessToken) {
+      setError('Authentication required')
+      return
+    }
+
     try {
-      await adminCreateUser(formData)
+      await adminCreateUser(user.accessToken, formData)
       setSuccess('User created successfully!')
       setShowAddModal(false)
       resetForm()
@@ -88,8 +100,13 @@ const UserManagement = () => {
     setError('')
     setSuccess('')
 
+    if (!user?.accessToken) {
+      setError('Authentication required')
+      return
+    }
+
     try {
-      await adminUpdateUser(selectedUser.username, formData)
+      await adminUpdateUser(user.accessToken, selectedUser.username, formData)
       setSuccess('User updated successfully!')
       setShowEditModal(false)
       resetForm()
@@ -103,11 +120,16 @@ const UserManagement = () => {
   const handleDeleteUser = async () => {
     if (!selectedUser) return
 
+    if (!user?.accessToken) {
+      setError('Authentication required')
+      return
+    }
+
     setError('')
     setSuccess('')
 
     try {
-      await adminDeleteUser(selectedUser.username)
+      await adminDeleteUser(user.accessToken, selectedUser.username)
       setSuccess('User deleted successfully!')
       setShowDeleteModal(false)
       setSelectedUser(null)

@@ -2,10 +2,12 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AdminSidebar from '../components/AdminSidebar'
 import Navbar from '../components/Navbar'
+import { useAuth } from '../contexts/AuthContext'
 import { adminCreateUser } from '../utils/api'
 
 const AddUser = () => {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [error, setError] = useState('')
@@ -28,8 +30,14 @@ const AddUser = () => {
     setSuccess('')
     setLoading(true)
 
+    if (!user?.accessToken) {
+      setError('Authentication required')
+      setLoading(false)
+      return
+    }
+
     try {
-      await adminCreateUser(formData)
+      await adminCreateUser(user.accessToken, formData)
       setSuccess('User created successfully!')
       setTimeout(() => {
         navigate('/admin/users')

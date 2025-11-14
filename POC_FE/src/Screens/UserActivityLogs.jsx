@@ -14,8 +14,10 @@ const UserActivityLogs = () => {
   const [filter, setFilter] = useState('all')
 
   useEffect(() => {
-    fetchLogs()
-  }, [])
+    if (user?.accessToken) {
+      fetchLogs()
+    }
+  }, [user?.accessToken])
 
   const fetchLogs = async () => {
     // Dummy data for demo fallback
@@ -29,10 +31,17 @@ const UserActivityLogs = () => {
       { id: 7, username: 'david.miller', login_time: '2025-11-04 16:00:00', logout_time: '2025-11-04 22:00:00', status: 'LoggedOut' }
     ]
 
+    if (!user?.accessToken) {
+      setError('Authentication required')
+      setLogs(dummyLogs)
+      setLoading(false)
+      return
+    }
+
     try {
       setLoading(true)
       setError('')
-      const data = await adminGetActivityLogs()
+      const data = await adminGetActivityLogs(user.accessToken)
       if (data && data.logs) {
         setLogs(data.logs)
       } else {
