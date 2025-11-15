@@ -38,26 +38,6 @@ const AdminSidebar = ({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollaps
       active: location.pathname === '/admin/users/add'
     },
     {
-        name: 'Allocation Management',
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-          </svg>
-        ),
-        path: '/admin/allocations',
-        active: location.pathname === '/admin/allocations'
-      },
-    {
-      name: 'Bulk Upload User',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-        </svg>
-      ),
-      path: '/admin/users/bulk-upload',
-      active: location.pathname === '/admin/users/bulk-upload'
-    },
-    {
       name: 'User Activity Logs',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,6 +77,26 @@ const AdminSidebar = ({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollaps
       ),
       path: '/admin/settings-manager',
       active: location.pathname === '/admin/settings-manager'
+    },
+    {
+        name: 'Allocation Management',
+        icon: (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+          </svg>
+        ),
+        path: '/admin/allocations',
+        active: location.pathname === '/admin/allocations'
+      },
+    {
+      name: 'Bulk Upload User',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+        </svg>
+      ),
+      path: '/admin/users/bulk-upload',
+      active: location.pathname === '/admin/users/bulk-upload'
     },
     {
       name: 'Branch Management',
@@ -162,15 +162,19 @@ const AdminSidebar = ({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollaps
           </button>
           
           {/* Logo and Title */}
-          <div className={`flex items-center space-x-2 ${isCollapsed ? 'ml-0' : 'ml-0'}`}>
-            <img src={sarthiLogo} alt="Sarthi Logo" className="w-10 h-12" />
-            {!isCollapsed && (
+          {!isCollapsed && (
+            <div className="flex items-center space-x-2">
+              <img 
+                src={sarthiLogo} 
+                alt="Sarthi Logo" 
+                className="w-10 h-12 object-contain"
+              />
               <div>
                 <h1 className="text-base font-semibold text-gray-900">Sarthi Kotak POC</h1>
                 <p className="text-xs text-gray-500">Admin Dashboard</p>
               </div>
-            )}
-          </div>
+            </div>
+          )}
           
           {/* Mobile Close Button */}
           <button
