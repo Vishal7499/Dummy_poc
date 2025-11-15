@@ -24,9 +24,14 @@ const Dashboard = () => {
   const [expandedCard, setExpandedCard] = useState(null)
   const [selectedStaffMetric, setSelectedStaffMetric] = useState(null)
   const [selectedCaseMetric, setSelectedCaseMetric] = useState(null)
+  const [selectedRollMetric, setSelectedRollMetric] = useState(null) // Track selected roll metric (rollForward, rollbackReport)
   const [selectedLoanType, setSelectedLoanType] = useState(null) // Track selected loan type for Case Summary
   const [chartFilter, setChartFilter] = useState('ftd')
   const leaderboardTableRef = useRef(null)
+  const rollForwardRef = useRef(null)
+  // Roll Forward expanded rows state
+  const [expandedZones, setExpandedZones] = useState(new Set())
+  const [expandedStates, setExpandedStates] = useState(new Set())
   const [selectedDate, setSelectedDate] = useState("01-10-2025");
 
   // Hierarchy drill-down state
@@ -498,6 +503,17 @@ const Dashboard = () => {
         const isFilterElement = filtersRef.current && filtersRef.current.contains(event.target)
         if (!depositionCard && !isFilterElement) {
           setSelectedCaseMetric(null)
+        }
+      }
+
+      // Close roll forward section when clicking outside
+      if (selectedRollMetric === 'rollForward' && rollForwardRef.current && !rollForwardRef.current.contains(event.target)) {
+        // Check if click is on the roll forward card
+        const rollForwardCard = event.target.closest('[data-roll-card="rollForward"]')
+        // Check if click is on filter elements
+        const isFilterElement = filtersRef.current && filtersRef.current.contains(event.target)
+        if (!rollForwardCard && !isFilterElement) {
+          setSelectedRollMetric(null)
         }
       }
       
@@ -6678,6 +6694,2914 @@ const Dashboard = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Rollback Report */}
+                <div className="mb-8">
+                  <h2 className="text-lg font-semibold text-gray-800 mb-4">Rollback Report</h2>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div 
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative ${selectedRollMetric === 'rollbackReport' ? 'border border-blue-600 shadow-sm' : 'card-with-wave card-with-wave-thin card-wave-staff'}`}
+                      onClick={() => {
+                        if (selectedRollMetric === 'rollbackReport') {
+                          setSelectedRollMetric(null)
+                        } else {
+                          setSelectedRollMetric('rollbackReport')
+                        }
+                      }}
+                    >
+                      {renderFavoritePin('rollbackReport')}
+                      <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Rollback Report</h3>
+                      <div className="space-y-1 relative z-10">
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Total Rollbacks</span>
+                          <span className="font-semibold" style={{color: '#DC2626'}}>0</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Pending</span>
+                          <span className="font-semibold" style={{color: '#DC2626'}}>0</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Completed</span>
+                          <span className="font-semibold" style={{color: '#DC2626'}}>0</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Amount</span>
+                          <span className="font-semibold" style={{color: '#DC2626'}}>₹0</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div 
+                      data-roll-card="rollForward"
+                      className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-staff"
+                    >
+                      {renderFavoritePin('rollForward')}
+                      <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Roll Forward</h3>
+                      <div className="space-y-1 relative z-10">
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Total Roll Forwards</span>
+                          <span className="font-semibold" style={{color: '#DC2626'}}>0</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Pending</span>
+                          <span className="font-semibold" style={{color: '#DC2626'}}>0</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Completed</span>
+                          <span className="font-semibold" style={{color: '#DC2626'}}>0</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-800">
+                          <span>Amount</span>
+                          <span className="font-semibold" style={{color: '#DC2626'}}>₹0</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Roll Forward Expanded Section */}
+                {selectedRollMetric === 'rollForward' && (
+                  <div ref={rollForwardRef} className="mb-8 w-full space-y-6">
+                    <div className="flex justify-between items-center">
+                      <h2 className="text-xl font-semibold text-gray-900">Zone Wise Roll Rate Analysis</h2>
+                      <button 
+                        onClick={() => setSelectedRollMetric(null)} 
+                        className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                        aria-label="Close roll forward section"
+                      >
+                        Close
+                      </button>
+                    </div>
+
+                    {/* Summary Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Roll Forward</div>
+                        <div className="text-2xl font-bold text-gray-900">74,451</div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Roll Backward</div>
+                        <div className="text-2xl font-bold text-gray-900">10,894</div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Stabilized</div>
+                        <div className="text-2xl font-bold text-gray-900">958,071</div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Regularized</div>
+                        <div className="text-2xl font-bold text-gray-900">958,071</div>
+                      </div>
+                    </div>
+
+                    {/* Filters Section */}
+                    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">FunderName</label>
+                          <select className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option>All</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Zone</label>
+                          <select className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option>All</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Division</label>
+                          <select className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option>All</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">StateName</label>
+                          <select className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option>All</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">DistrictName</label>
+                          <select className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option>All</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Region</label>
+                          <select className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option>All</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Branch</label>
+                          <select className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option>All</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Year, Month</label>
+                          <select className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option>2024 (Year) + De...</option>
+                            <option>2025 (Year) + Ja...</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Main Content Grid - Tables and Charts */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                      {/* Left Column - Tables */}
+                      <div className="lg:col-span-2 space-y-4">
+                        {/* Zone and Division wise Roll Rate Analysis for Loans */}
+                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Zone and Division wise Roll Rate Analysis for Loans</h3>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-xs">
+                              <thead>
+                                <tr className="bg-gray-50 border-b">
+                                  <th className="text-left py-2 px-2 font-semibold text-gray-700">Zone</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Regular</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">1 to 30</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {/* Gorakhpur Zone */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <button
+                                      onClick={() => {
+                                        const newExpanded = new Set(expandedZones)
+                                        if (newExpanded.has('gorakhpur')) {
+                                          newExpanded.delete('gorakhpur')
+                                        } else {
+                                          newExpanded.add('gorakhpur')
+                                        }
+                                        setExpandedZones(newExpanded)
+                                      }}
+                                      className="flex items-center gap-1 text-gray-800 font-medium"
+                                    >
+                                      {expandedZones.has('gorakhpur') ? '−' : '+'} Gorakhpur
+                                    </button>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700">145,262</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">12,456</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">8,234</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">5,678</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">3,456</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">2,345</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">1,234</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">567</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">234</td>
+                                </tr>
+                                {expandedZones.has('gorakhpur') && (
+                                  <tr className="bg-gray-50 border-b">
+                                    <td className="py-2 px-2 pl-6 text-gray-600">Lucknow Division</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">72,631</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">6,228</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">4,117</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">2,839</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">1,728</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">1,173</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">617</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">284</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">117</td>
+                                  </tr>
+                                )}
+                                {/* Jabalpur Zone */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <button
+                                      onClick={() => {
+                                        const newExpanded = new Set(expandedZones)
+                                        if (newExpanded.has('jabalpur')) {
+                                          newExpanded.delete('jabalpur')
+                                        } else {
+                                          newExpanded.add('jabalpur')
+                                        }
+                                        setExpandedZones(newExpanded)
+                                      }}
+                                      className="flex items-center gap-1 text-gray-800 font-medium"
+                                    >
+                                      {expandedZones.has('jabalpur') ? '−' : '+'} Jabalpur
+                                    </button>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">201,240</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">18,234</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">12,456</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">8,567</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">5,234</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">3,456</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1,789</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">890</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">345</td>
+                                </tr>
+                                {expandedZones.has('jabalpur') && (
+                                  <>
+                                    <tr className="bg-gray-50 border-b">
+                                      <td className="py-2 px-2 pl-6 text-gray-600">Jhansi</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">50,310</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">4,559</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">3,114</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">2,142</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">1,309</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">864</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">447</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">223</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">86</td>
+                                    </tr>
+                                    <tr className="bg-gray-50 border-b">
+                                      <td className="py-2 px-2 pl-6 text-gray-600">Katni</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">50,310</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">4,559</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">3,114</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">2,142</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">1,309</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">864</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">447</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">223</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">86</td>
+                                    </tr>
+                                    <tr className="bg-gray-50 border-b">
+                                      <td className="py-2 px-2 pl-6 text-gray-600">Nagpur</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">50,310</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">4,559</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">3,114</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">2,142</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">1,309</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">864</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">447</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">223</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">86</td>
+                                    </tr>
+                                    <tr className="bg-gray-50 border-b">
+                                      <td className="py-2 px-2 pl-6 text-gray-600">Sagar</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">50,310</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">4,559</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">3,114</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">2,142</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">1,309</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">864</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">447</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">223</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">86</td>
+                                    </tr>
+                                  </>
+                                )}
+                                {/* Moradabad Zone */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <button
+                                      onClick={() => {
+                                        const newExpanded = new Set(expandedZones)
+                                        if (newExpanded.has('moradabad')) {
+                                          newExpanded.delete('moradabad')
+                                        } else {
+                                          newExpanded.add('moradabad')
+                                        }
+                                        setExpandedZones(newExpanded)
+                                      }}
+                                      className="flex items-center gap-1 text-gray-800 font-medium"
+                                    >
+                                      {expandedZones.has('moradabad') ? '−' : '+'} Moradabad
+                                    </button>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">221,890</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">19,456</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">13,234</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">9,123</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">5,678</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">3,789</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1,956</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">978</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">456</td>
+                                </tr>
+                                {expandedZones.has('moradabad') && (
+                                  <>
+                                    <tr className="bg-gray-50 border-b">
+                                      <td className="py-2 px-2 pl-6 text-gray-600">Jaipur</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">110,945</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">9,728</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">6,617</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">4,562</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">2,839</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">1,895</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">978</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">489</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">228</td>
+                                    </tr>
+                                    <tr className="bg-gray-50 border-b">
+                                      <td className="py-2 px-2 pl-6 text-gray-600">Moradabad</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">110,945</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">9,728</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">6,617</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">4,562</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">2,839</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">1,895</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">978</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">489</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">228</td>
+                                    </tr>
+                                  </>
+                                )}
+                                {/* Patna Zone */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Patna</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">222,197</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">19,567</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">13,345</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">9,234</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">5,789</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">3,890</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2,012</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1,006</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">467</td>
+                                </tr>
+                                {/* Prayagraj Zone */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Prayagraj</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">167,482</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">14,789</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">10,123</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">6,987</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">4,345</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2,890</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1,495</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">748</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">345</td>
+                                </tr>
+                                {/* Total Row */}
+                                <tr className="bg-gray-100 border-t-2 border-gray-300 font-bold">
+                                  <td className="py-2 px-2 text-gray-900">Total</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">958,071</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">84,502</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">57,392</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">39,589</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">24,502</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">16,370</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">8,458</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">4,189</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">1,847</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {/* Zone and Division wise Roll Rate Analysis for AUM */}
+                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Zone and Division wise Roll Rate Analysis for AUM</h3>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-xs">
+                              <thead>
+                                <tr className="bg-gray-50 border-b">
+                                  <th className="text-left py-2 px-2 font-semibold text-gray-700">Zone</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Regular</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">1 to 30</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {/* State rows with expandable functionality */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <button
+                                      onClick={() => {
+                                        const newExpanded = new Set(expandedStates)
+                                        if (newExpanded.has('bihar')) {
+                                          newExpanded.delete('bihar')
+                                        } else {
+                                          newExpanded.add('bihar')
+                                        }
+                                        setExpandedStates(newExpanded)
+                                      }}
+                                      className="flex items-center gap-1 text-gray-800 font-medium"
+                                    >
+                                      {expandedStates.has('bihar') ? '−' : '+'} Bihar
+                                    </button>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700">2,456.78</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">215.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">146.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">100.89</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">62.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">41.67</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">21.52</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">10.65</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">4.69</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <button
+                                      onClick={() => {
+                                        const newExpanded = new Set(expandedStates)
+                                        if (newExpanded.has('uttar-pradesh')) {
+                                          newExpanded.delete('uttar-pradesh')
+                                        } else {
+                                          newExpanded.add('uttar-pradesh')
+                                        }
+                                        setExpandedStates(newExpanded)
+                                      }}
+                                      className="flex items-center gap-1 text-gray-800 font-medium"
+                                    >
+                                      {expandedStates.has('uttar-pradesh') ? '−' : '+'} Uttar Pradesh
+                                    </button>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">17,751.46</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1,567.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1,065.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">734.89</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">455.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">303.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">156.78</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">77.65</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">34.23</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Madhya Pradesh</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">3,456.78</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">304.56</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">207.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">142.89</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">88.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">58.97</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">30.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">15.08</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">6.65</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Jharkhand</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1,234.56</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">108.90</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">74.05</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">51.08</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">31.62</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">21.08</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">10.89</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">5.39</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2.38</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Rajasthan</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1,123.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">99.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">67.41</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">46.52</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">28.79</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">19.19</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">9.91</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">4.91</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2.17</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Haryana</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">890.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">78.56</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">53.41</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">36.85</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">22.81</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">15.21</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">7.85</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">3.89</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1.72</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Uttarakhand</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">567.89</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">50.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">34.08</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">23.51</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">14.55</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">9.70</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">5.01</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2.48</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1.10</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Maharashtra</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">456.78</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">40.31</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">27.41</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">18.91</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">11.70</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">7.80</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">4.03</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1.99</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">0.88</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Punjab</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">345.67</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">30.51</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">20.75</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">14.32</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">8.86</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">5.91</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">3.05</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1.51</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">0.67</td>
+                                </tr>
+                                {/* Total Row */}
+                                <tr className="bg-gray-100 border-t-2 border-gray-300 font-bold">
+                                  <td className="py-2 px-2 text-gray-900">Total</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">28,283.51</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">2,494.19</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">1,696.50</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">1,170.77</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">724.33</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">483.01</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">249.49</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">123.57</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">54.46</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Column - Charts */}
+                      <div className="space-y-4">
+                        {/* Sum of Loans by Zone - Donut Chart */}
+                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Sum of Loans by Zone</h3>
+                          <Chart
+                            type="donut"
+                            height={300}
+                            series={[222197, 221890, 201240, 167482, 145262]}
+                            options={{
+                              chart: {
+                                type: 'donut',
+                                toolbar: { show: false }
+                              },
+                              labels: ['Patna', 'Moradabad', 'Jabalpur', 'Prayagraj', 'Gorakhpur'],
+                              colors: ['#3b82f6', '#1e3a8a', '#f59e0b', '#8b5cf6', '#ec4899'],
+                              legend: {
+                                position: 'bottom',
+                                fontSize: '11px'
+                              },
+                              dataLabels: {
+                                enabled: true,
+                                formatter: function (val) {
+                                  return val.toFixed(1) + '%'
+                                },
+                                style: {
+                                  fontSize: '10px'
+                                }
+                              },
+                              plotOptions: {
+                                pie: {
+                                  donut: {
+                                    size: '65%'
+                                  }
+                                }
+                              }
+                            }}
+                          />
+                        </div>
+
+                        {/* Comparison Month Principle OS (Crores) by Zone - Donut Chart */}
+                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Comparison Month Principle OS (Crores) by Zone</h3>
+                          <Chart
+                            type="donut"
+                            height={300}
+                            series={[580.58, 569.82, 515.03, 444.40, 393.48]}
+                            options={{
+                              chart: {
+                                type: 'donut',
+                                toolbar: { show: false }
+                              },
+                              labels: ['Patna', 'Moradabad', 'Jabalpur', 'Prayagraj', 'Gorakhpur'],
+                              colors: ['#3b82f6', '#1e3a8a', '#f59e0b', '#8b5cf6', '#ec4899'],
+                              legend: {
+                                position: 'bottom',
+                                fontSize: '11px'
+                              },
+                              dataLabels: {
+                                enabled: true,
+                                formatter: function (val) {
+                                  return val.toFixed(1) + '%'
+                                },
+                                style: {
+                                  fontSize: '10px'
+                                }
+                              },
+                              plotOptions: {
+                                pie: {
+                                  donut: {
+                                    size: '65%'
+                                  }
+                                }
+                              }
+                            }}
+                          />
+                        </div>
+
+                        {/* Loans by State - Bar Chart */}
+                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Loans by State</h3>
+                          <Chart
+                            type="bar"
+                            height={400}
+                            series={[{
+                              name: 'Loans',
+                              data: [7600483, 2456789, 3456789, 1234567, 1123456, 890123, 567890, 456789, 345678]
+                            }]}
+                            options={{
+                              chart: {
+                                type: 'bar',
+                                horizontal: true,
+                                toolbar: { show: false }
+                              },
+                              plotOptions: {
+                                bar: {
+                                  borderRadius: 4,
+                                  horizontal: true
+                                }
+                              },
+                              dataLabels: {
+                                enabled: true,
+                                formatter: function (val) {
+                                  return (val / 1000000).toFixed(1) + 'M'
+                                },
+                                style: {
+                                  fontSize: '10px'
+                                }
+                              },
+                              xaxis: {
+                                categories: ['Uttar Pradesh', 'Bihar', 'Madhya Pradesh', 'Jharkhand', 'Rajasthan', 'Haryana', 'Uttarakhand', 'Maharashtra', 'Punjab'],
+                                labels: {
+                                  style: { fontSize: '10px' }
+                                }
+                              },
+                              yaxis: {
+                                labels: {
+                                  style: { fontSize: '10px' }
+                                }
+                              },
+                              colors: ['#3b82f6'],
+                              grid: { borderColor: '#E5E7EB' }
+                            }}
+                          />
+                        </div>
+
+                        {/* Comparison Month Principle OS (Crores) by State - Bar Chart */}
+                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Comparison Month Principle OS (Crores) by State</h3>
+                          <Chart
+                            type="bar"
+                            height={400}
+                            series={[{
+                              name: 'Principle OS (Crores)',
+                              data: [20326.54, 5805.80, 3456.78, 1234.56, 1123.45, 890.12, 567.89, 456.78, 345.67]
+                            }]}
+                            options={{
+                              chart: {
+                                type: 'bar',
+                                horizontal: true,
+                                toolbar: { show: false }
+                              },
+                              plotOptions: {
+                                bar: {
+                                  borderRadius: 4,
+                                  horizontal: true
+                                }
+                              },
+                              dataLabels: {
+                                enabled: true,
+                                formatter: function (val) {
+                                  return val.toFixed(2)
+                                },
+                                style: {
+                                  fontSize: '10px'
+                                }
+                              },
+                              xaxis: {
+                                categories: ['Uttar Pradesh', 'Bihar', 'Madhya Pradesh', 'Jharkhand', 'Rajasthan', 'Haryana', 'Uttarakhand', 'Maharashtra', 'Punjab'],
+                                labels: {
+                                  style: { fontSize: '10px' },
+                                  formatter: function (val) {
+                                    return (val / 1000).toFixed(0) + 'K'
+                                  }
+                                }
+                              },
+                              yaxis: {
+                                labels: {
+                                  style: { fontSize: '10px' }
+                                }
+                              },
+                              colors: ['#3b82f6'],
+                              grid: { borderColor: '#E5E7EB' }
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Rollback Report Expanded Section - Roll Rate Analysis */}
+                {selectedRollMetric === 'rollbackReport' && (
+                  <div className="mb-8 w-full space-y-6">
+                    <div className="flex justify-between items-center">
+                      <h2 className="text-xl font-semibold text-gray-900">Roll Rate Analysis</h2>
+                      <button 
+                        onClick={() => setSelectedRollMetric(null)} 
+                        className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                        aria-label="Close roll rate analysis section"
+                      >
+                        Close
+                      </button>
+                    </div>
+
+                    {/* Filters Section */}
+                    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">FunderName</label>
+                          <select className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option>All</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Zone</label>
+                          <select className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option>All</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Division</label>
+                          <select className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option>All</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">StateName</label>
+                          <select className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option>All</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">DistrictName</label>
+                          <select className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option>All</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Region</label>
+                          <select className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option>All</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Branch</label>
+                          <select className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option>All</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Roll Rate Analysis for Loans */}
+                    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <h3 className="text-sm font-semibold text-gray-900 mb-4">Roll Rate Analysis for Loans</h3>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-xs">
+                          <thead>
+                            <tr className="bg-gray-50 border-b">
+                              <th className="text-left py-2 px-2 font-semibold text-gray-700">BaseMonth_Bucket</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Regular</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">1 to 30</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">New Loan</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Roll Forward %</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Roll Backward %</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Stabilized %</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Regularised %</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">ClosedLoan %</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr className="border-b hover:bg-gray-50">
+                              <td className="py-2 px-2 text-gray-800 font-medium">Regular</td>
+                              <td className="text-right py-2 px-2 text-gray-700">665,487</td>
+                              <td className="text-right py-2 px-2 text-gray-700">17,574</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">41,165</td>
+                              <td className="text-right py-2 px-2 text-gray-700">2.43%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">91.89%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">91.89%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">5.68%</td>
+                            </tr>
+                            <tr className="border-b hover:bg-gray-50">
+                              <td className="py-2 px-2 text-gray-800 font-medium">1 to 30</td>
+                              <td className="text-right py-2 px-2 text-gray-700">8,093</td>
+                              <td className="text-right py-2 px-2 text-gray-700">14,461</td>
+                              <td className="text-right py-2 px-2 text-gray-700">9,584</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">1,968</td>
+                              <td className="text-right py-2 px-2 text-gray-700">28.10%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">23.73%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">42.40%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">5.77%</td>
+                            </tr>
+                            <tr className="border-b hover:bg-gray-50">
+                              <td className="py-2 px-2 text-gray-800 font-medium">31 to 60</td>
+                              <td className="text-right py-2 px-2 text-gray-700">3,465</td>
+                              <td className="text-right py-2 px-2 text-gray-700">2,124</td>
+                              <td className="text-right py-2 px-2 text-gray-700">5,789</td>
+                              <td className="text-right py-2 px-2 text-gray-700">3,211</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">1,234</td>
+                              <td className="text-right py-2 px-2 text-gray-700">39.65%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">15.32%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">37.89%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">8.14%</td>
+                            </tr>
+                            <tr className="border-b hover:bg-gray-50">
+                              <td className="py-2 px-2 text-gray-800 font-medium">61 to 90</td>
+                              <td className="text-right py-2 px-2 text-gray-700">2,345</td>
+                              <td className="text-right py-2 px-2 text-gray-700">1,567</td>
+                              <td className="text-right py-2 px-2 text-gray-700">1,234</td>
+                              <td className="text-right py-2 px-2 text-gray-700">4,567</td>
+                              <td className="text-right py-2 px-2 text-gray-700">2,890</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">987</td>
+                              <td className="text-right py-2 px-2 text-gray-700">47.23%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">12.45%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">36.98%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">7.99%</td>
+                            </tr>
+                            <tr className="border-b hover:bg-gray-50">
+                              <td className="py-2 px-2 text-gray-800 font-medium">91 to 120</td>
+                              <td className="text-right py-2 px-2 text-gray-700">1,789</td>
+                              <td className="text-right py-2 px-2 text-gray-700">1,234</td>
+                              <td className="text-right py-2 px-2 text-gray-700">987</td>
+                              <td className="text-right py-2 px-2 text-gray-700">654</td>
+                              <td className="text-right py-2 px-2 text-gray-700">3,456</td>
+                              <td className="text-right py-2 px-2 text-gray-700">2,123</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">765</td>
+                              <td className="text-right py-2 px-2 text-gray-700">52.34%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">10.12%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">34.56%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">8.23%</td>
+                            </tr>
+                            <tr className="border-b hover:bg-gray-50">
+                              <td className="py-2 px-2 text-gray-800 font-medium">121 to 180</td>
+                              <td className="text-right py-2 px-2 text-gray-700">3,456</td>
+                              <td className="text-right py-2 px-2 text-gray-700">2,345</td>
+                              <td className="text-right py-2 px-2 text-gray-700">1,789</td>
+                              <td className="text-right py-2 px-2 text-gray-700">1,234</td>
+                              <td className="text-right py-2 px-2 text-gray-700">987</td>
+                              <td className="text-right py-2 px-2 text-gray-700">8,123</td>
+                              <td className="text-right py-2 px-2 text-gray-700">4,567</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">1,456</td>
+                              <td className="text-right py-2 px-2 text-gray-700">58.45%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">8.90%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">30.12%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">7.89%</td>
+                            </tr>
+                            <tr className="border-b hover:bg-gray-50">
+                              <td className="py-2 px-2 text-gray-800 font-medium">181 to 365</td>
+                              <td className="text-right py-2 px-2 text-gray-700">5,678</td>
+                              <td className="text-right py-2 px-2 text-gray-700">3,456</td>
+                              <td className="text-right py-2 px-2 text-gray-700">2,345</td>
+                              <td className="text-right py-2 px-2 text-gray-700">1,789</td>
+                              <td className="text-right py-2 px-2 text-gray-700">1,234</td>
+                              <td className="text-right py-2 px-2 text-gray-700">987</td>
+                              <td className="text-right py-2 px-2 text-gray-700">12,345</td>
+                              <td className="text-right py-2 px-2 text-gray-700">6,789</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">2,345</td>
+                              <td className="text-right py-2 px-2 text-gray-700">61.23%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">7.45%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">28.34%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">8.12%</td>
+                            </tr>
+                            <tr className="border-b hover:bg-gray-50">
+                              <td className="py-2 px-2 text-gray-800 font-medium">&gt;365</td>
+                              <td className="text-right py-2 px-2 text-gray-700">8,901</td>
+                              <td className="text-right py-2 px-2 text-gray-700">5,678</td>
+                              <td className="text-right py-2 px-2 text-gray-700">3,456</td>
+                              <td className="text-right py-2 px-2 text-gray-700">2,345</td>
+                              <td className="text-right py-2 px-2 text-gray-700">1,789</td>
+                              <td className="text-right py-2 px-2 text-gray-700">1,234</td>
+                              <td className="text-right py-2 px-2 text-gray-700">987</td>
+                              <td className="text-right py-2 px-2 text-gray-700">15,678</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">3,456</td>
+                              <td className="text-right py-2 px-2 text-gray-700">64.56%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">6.78%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">25.34%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">9.12%</td>
+                            </tr>
+                            <tr className="border-b hover:bg-gray-50">
+                              <td className="py-2 px-2 text-gray-800 font-medium">New Loan</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">12,345</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                            </tr>
+                            <tr className="bg-gray-100 border-t-2 border-gray-300 font-bold">
+                              <td className="py-2 px-2 text-gray-900">Total</td>
+                              <td className="text-right py-2 px-2 text-gray-900">707,280</td>
+                              <td className="text-right py-2 px-2 text-gray-900">33,198</td>
+                              <td className="text-right py-2 px-2 text-gray-900">14,589</td>
+                              <td className="text-right py-2 px-2 text-gray-900">12,350</td>
+                              <td className="text-right py-2 px-2 text-gray-900">12,323</td>
+                              <td className="text-right py-2 px-2 text-gray-900">23,941</td>
+                              <td className="text-right py-2 px-2 text-gray-900">45,101</td>
+                              <td className="text-right py-2 px-2 text-gray-900">61,788</td>
+                              <td className="text-right py-2 px-2 text-gray-900">12,345</td>
+                              <td className="text-right py-2 px-2 text-gray-900">47,501</td>
+                              <td className="text-right py-2 px-2 text-gray-900">29.49%</td>
+                              <td className="text-right py-2 px-2 text-gray-900">12.34%</td>
+                              <td className="text-right py-2 px-2 text-gray-900">54.23%</td>
+                              <td className="text-right py-2 px-2 text-gray-900">91.89%</td>
+                              <td className="text-right py-2 px-2 text-gray-900">6.78%</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* Roll Rate Analysis for AUM */}
+                    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <h3 className="text-sm font-semibold text-gray-900 mb-4">Roll Rate Analysis for AUM</h3>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-xs">
+                          <thead>
+                            <tr className="bg-gray-50 border-b">
+                              <th className="text-left py-2 px-2 font-semibold text-gray-700">BaseMonth_Bucket</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Regular</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">1 to 30</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">New Loan</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Roll Forward %</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Roll Backward %</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Stabilized %</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Regularised %</th>
+                              <th className="text-right py-2 px-2 font-semibold text-gray-700">ClosedLoan %</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr className="border-b hover:bg-gray-50">
+                              <td className="py-2 px-2 text-gray-800 font-medium">Regular</td>
+                              <td className="text-right py-2 px-2 text-gray-700">2,028.58</td>
+                              <td className="text-right py-2 px-2 text-gray-700">77.72</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">33.12</td>
+                              <td className="text-right py-2 px-2 text-gray-700">2.43%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">91.89%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">91.89%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">5.68%</td>
+                            </tr>
+                            <tr className="border-b hover:bg-gray-50">
+                              <td className="py-2 px-2 text-gray-800 font-medium">1 to 30</td>
+                              <td className="text-right py-2 px-2 text-gray-700">18.51</td>
+                              <td className="text-right py-2 px-2 text-gray-700">32.77</td>
+                              <td className="text-right py-2 px-2 text-gray-700">22.36</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">1.13</td>
+                              <td className="text-right py-2 px-2 text-gray-700">28.10%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">23.73%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">42.40%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">5.77%</td>
+                            </tr>
+                            <tr className="border-b hover:bg-gray-50">
+                              <td className="py-2 px-2 text-gray-800 font-medium">31 to 60</td>
+                              <td className="text-right py-2 px-2 text-gray-700">12.34</td>
+                              <td className="text-right py-2 px-2 text-gray-700">8.45</td>
+                              <td className="text-right py-2 px-2 text-gray-700">19.23</td>
+                              <td className="text-right py-2 px-2 text-gray-700">11.56</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">4.12</td>
+                              <td className="text-right py-2 px-2 text-gray-700">39.65%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">15.32%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">37.89%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">8.14%</td>
+                            </tr>
+                            <tr className="border-b hover:bg-gray-50">
+                              <td className="py-2 px-2 text-gray-800 font-medium">61 to 90</td>
+                              <td className="text-right py-2 px-2 text-gray-700">9.87</td>
+                              <td className="text-right py-2 px-2 text-gray-700">6.54</td>
+                              <td className="text-right py-2 px-2 text-gray-700">5.12</td>
+                              <td className="text-right py-2 px-2 text-gray-700">18.45</td>
+                              <td className="text-right py-2 px-2 text-gray-700">12.34</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">3.89</td>
+                              <td className="text-right py-2 px-2 text-gray-700">47.23%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">12.45%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">36.98%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">7.99%</td>
+                            </tr>
+                            <tr className="border-b hover:bg-gray-50">
+                              <td className="py-2 px-2 text-gray-800 font-medium">91 to 120</td>
+                              <td className="text-right py-2 px-2 text-gray-700">7.65</td>
+                              <td className="text-right py-2 px-2 text-gray-700">5.23</td>
+                              <td className="text-right py-2 px-2 text-gray-700">4.12</td>
+                              <td className="text-right py-2 px-2 text-gray-700">2.78</td>
+                              <td className="text-right py-2 px-2 text-gray-700">14.56</td>
+                              <td className="text-right py-2 px-2 text-gray-700">9.12</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">3.12</td>
+                              <td className="text-right py-2 px-2 text-gray-700">52.34%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">10.12%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">34.56%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">8.23%</td>
+                            </tr>
+                            <tr className="border-b hover:bg-gray-50">
+                              <td className="py-2 px-2 text-gray-800 font-medium">121 to 180</td>
+                              <td className="text-right py-2 px-2 text-gray-700">14.56</td>
+                              <td className="text-right py-2 px-2 text-gray-700">9.87</td>
+                              <td className="text-right py-2 px-2 text-gray-700">7.65</td>
+                              <td className="text-right py-2 px-2 text-gray-700">5.23</td>
+                              <td className="text-right py-2 px-2 text-gray-700">4.12</td>
+                              <td className="text-right py-2 px-2 text-gray-700">33.45</td>
+                              <td className="text-right py-2 px-2 text-gray-700">19.23</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">5.89</td>
+                              <td className="text-right py-2 px-2 text-gray-700">58.45%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">8.90%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">30.12%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">7.89%</td>
+                            </tr>
+                            <tr className="border-b hover:bg-gray-50">
+                              <td className="py-2 px-2 text-gray-800 font-medium">181 to 365</td>
+                              <td className="text-right py-2 px-2 text-gray-700">23.45</td>
+                              <td className="text-right py-2 px-2 text-gray-700">14.56</td>
+                              <td className="text-right py-2 px-2 text-gray-700">9.87</td>
+                              <td className="text-right py-2 px-2 text-gray-700">7.65</td>
+                              <td className="text-right py-2 px-2 text-gray-700">5.23</td>
+                              <td className="text-right py-2 px-2 text-gray-700">4.12</td>
+                              <td className="text-right py-2 px-2 text-gray-700">51.23</td>
+                              <td className="text-right py-2 px-2 text-gray-700">28.45</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">9.78</td>
+                              <td className="text-right py-2 px-2 text-gray-700">61.23%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">7.45%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">28.34%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">8.12%</td>
+                            </tr>
+                            <tr className="border-b hover:bg-gray-50">
+                              <td className="py-2 px-2 text-gray-800 font-medium">&gt;365</td>
+                              <td className="text-right py-2 px-2 text-gray-700">36.78</td>
+                              <td className="text-right py-2 px-2 text-gray-700">23.45</td>
+                              <td className="text-right py-2 px-2 text-gray-700">14.56</td>
+                              <td className="text-right py-2 px-2 text-gray-700">9.87</td>
+                              <td className="text-right py-2 px-2 text-gray-700">7.65</td>
+                              <td className="text-right py-2 px-2 text-gray-700">5.23</td>
+                              <td className="text-right py-2 px-2 text-gray-700">4.12</td>
+                              <td className="text-right py-2 px-2 text-gray-700">63.45</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">14.23</td>
+                              <td className="text-right py-2 px-2 text-gray-700">64.56%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">6.78%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">25.34%</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">9.12%</td>
+                            </tr>
+                            <tr className="border-b hover:bg-gray-50">
+                              <td className="py-2 px-2 text-gray-800 font-medium">New Loan</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">50.12</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                              <td className="text-right py-2 px-2 text-gray-700">-</td>
+                            </tr>
+                            <tr className="bg-gray-100 border-t-2 border-gray-300 font-bold">
+                              <td className="py-2 px-2 text-gray-900">Total</td>
+                              <td className="text-right py-2 px-2 text-gray-900">2,028.58</td>
+                              <td className="text-right py-2 px-2 text-gray-900">77.72</td>
+                              <td className="text-right py-2 px-2 text-gray-900">33.12</td>
+                              <td className="text-right py-2 px-2 text-gray-900">28.31</td>
+                              <td className="text-right py-2 px-2 text-gray-900">29.11</td>
+                              <td className="text-right py-2 px-2 text-gray-900">56.94</td>
+                              <td className="text-right py-2 px-2 text-gray-900">100.15</td>
+                              <td className="text-right py-2 px-2 text-gray-900">119.89</td>
+                              <td className="text-right py-2 px-2 text-gray-900">50.12</td>
+                              <td className="text-right py-2 px-2 text-gray-900">119.89</td>
+                              <td className="text-right py-2 px-2 text-gray-900">29.49%</td>
+                              <td className="text-right py-2 px-2 text-gray-900">12.34%</td>
+                              <td className="text-right py-2 px-2 text-gray-900">54.23%</td>
+                              <td className="text-right py-2 px-2 text-gray-900">91.89%</td>
+                              <td className="text-right py-2 px-2 text-gray-900">6.78%</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* Main Content Grid - Tables and Charts */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                      {/* Left Column - Tables */}
+                      <div className="lg:col-span-2 space-y-4">
+                        {/* Zone and Division wise Roll Rate Analysis for Loans */}
+                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Zone and Division wise Roll Rate Analysis for Loans</h3>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-xs">
+                              <thead>
+                                <tr className="bg-gray-50 border-b">
+                                  <th className="text-left py-2 px-2 font-semibold text-gray-700">Zone</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Regular</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">1 to 30</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {/* Gorakhpur Zone */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <button
+                                      onClick={() => {
+                                        const newExpanded = new Set(expandedZones)
+                                        if (newExpanded.has('gorakhpur')) {
+                                          newExpanded.delete('gorakhpur')
+                                        } else {
+                                          newExpanded.add('gorakhpur')
+                                        }
+                                        setExpandedZones(newExpanded)
+                                      }}
+                                      className="flex items-center gap-1 text-gray-800 font-medium"
+                                    >
+                                      {expandedZones.has('gorakhpur') ? '−' : '+'} Gorakhpur
+                                    </button>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700">145,262</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">12,456</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">8,234</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">5,678</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">3,456</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">2,345</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">1,234</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">567</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">234</td>
+                                </tr>
+                                {expandedZones.has('gorakhpur') && (
+                                  <tr className="bg-gray-50 border-b">
+                                    <td className="py-2 px-2 pl-6 text-gray-600">Lucknow Division</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">72,631</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">6,228</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">4,117</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">2,839</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">1,728</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">1,173</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">617</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">284</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">117</td>
+                                  </tr>
+                                )}
+                                {/* Jabalpur Zone */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <button
+                                      onClick={() => {
+                                        const newExpanded = new Set(expandedZones)
+                                        if (newExpanded.has('jabalpur')) {
+                                          newExpanded.delete('jabalpur')
+                                        } else {
+                                          newExpanded.add('jabalpur')
+                                        }
+                                        setExpandedZones(newExpanded)
+                                      }}
+                                      className="flex items-center gap-1 text-gray-800 font-medium"
+                                    >
+                                      {expandedZones.has('jabalpur') ? '−' : '+'} Jabalpur
+                                    </button>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">201,240</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">18,234</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">12,456</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">8,567</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">5,234</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">3,456</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1,789</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">890</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">15,321</td>
+                                </tr>
+                                {expandedZones.has('jabalpur') && (
+                                  <>
+                                    <tr className="bg-gray-50 border-b">
+                                      <td className="py-2 px-2 pl-6 text-gray-600">Jhansi</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">50,310</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">4,559</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">3,114</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">2,142</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">1,309</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">864</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">447</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">223</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">3,830</td>
+                                    </tr>
+                                    <tr className="bg-gray-50 border-b">
+                                      <td className="py-2 px-2 pl-6 text-gray-600">Katni</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">50,310</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">4,559</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">3,114</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">2,142</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">1,309</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">864</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">447</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">223</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">3,830</td>
+                                    </tr>
+                                    <tr className="bg-gray-50 border-b">
+                                      <td className="py-2 px-2 pl-6 text-gray-600">Nagpur</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">50,310</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">4,559</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">3,114</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">2,142</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">1,309</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">864</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">447</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">223</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">3,830</td>
+                                    </tr>
+                                    <tr className="bg-gray-50 border-b">
+                                      <td className="py-2 px-2 pl-6 text-gray-600">Sagar</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">50,310</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">4,559</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">3,114</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">2,142</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">1,309</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">864</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">447</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">223</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">3,830</td>
+                                    </tr>
+                                  </>
+                                )}
+                                {/* Moradabad Zone */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <button
+                                      onClick={() => {
+                                        const newExpanded = new Set(expandedZones)
+                                        if (newExpanded.has('moradabad')) {
+                                          newExpanded.delete('moradabad')
+                                        } else {
+                                          newExpanded.add('moradabad')
+                                        }
+                                        setExpandedZones(newExpanded)
+                                      }}
+                                      className="flex items-center gap-1 text-gray-800 font-medium"
+                                    >
+                                      {expandedZones.has('moradabad') ? '−' : '+'} Moradabad
+                                    </button>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">179,146</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">15,789</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">10,756</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">7,412</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">4,612</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">3,078</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1,589</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">794</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">10,196</td>
+                                </tr>
+                                {expandedZones.has('moradabad') && (
+                                  <>
+                                    <tr className="bg-gray-50 border-b">
+                                      <td className="py-2 px-2 pl-6 text-gray-600">Jaipur</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">89,573</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">7,895</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">5,378</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">3,706</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">2,306</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">1,539</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">795</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">397</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">5,098</td>
+                                    </tr>
+                                    <tr className="bg-gray-50 border-b">
+                                      <td className="py-2 px-2 pl-6 text-gray-600">Moradabad</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">89,573</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">7,895</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">5,378</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">3,706</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">2,306</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">1,539</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">795</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">397</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">5,098</td>
+                                    </tr>
+                                  </>
+                                )}
+                                {/* Patna Zone */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Patna</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">222,197</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">19,567</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">13,345</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">9,234</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">5,789</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">3,890</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2,012</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1,006</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">12,634</td>
+                                </tr>
+                                {/* Prayagraj Zone */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Prayagraj</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">167,482</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">14,789</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">10,123</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">6,987</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">4,345</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2,890</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1,495</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">748</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">9,523</td>
+                                </tr>
+                                {/* Total Row */}
+                                <tr className="bg-gray-100 border-t-2 border-gray-300 font-bold">
+                                  <td className="py-2 px-2 text-gray-900">Total</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">707,280</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">33,198</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">14,589</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">12,350</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">12,323</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">23,941</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">45,101</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">61,788</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">47,501</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {/* Zone and Division wise Roll Rate Analysis for AUM */}
+                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Zone and Division wise Roll Rate Analysis for AUM</h3>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-xs">
+                              <thead>
+                                <tr className="bg-gray-50 border-b">
+                                  <th className="text-left py-2 px-2 font-semibold text-gray-700">Zone</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Regular</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">1 to 30</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {/* Gorakhpur Zone */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <button
+                                      onClick={() => {
+                                        const newExpanded = new Set(expandedZones)
+                                        if (newExpanded.has('gorakhpur-aum')) {
+                                          newExpanded.delete('gorakhpur-aum')
+                                        } else {
+                                          newExpanded.add('gorakhpur-aum')
+                                        }
+                                        setExpandedZones(newExpanded)
+                                      }}
+                                      className="flex items-center gap-1 text-gray-800 font-medium"
+                                    >
+                                      {expandedZones.has('gorakhpur-aum') ? '−' : '+'} Gorakhpur
+                                    </button>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700">393.48</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">33.78</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">22.33</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">15.40</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">9.37</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">6.36</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">3.35</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">1.54</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">0.63</td>
+                                </tr>
+                                {expandedZones.has('gorakhpur-aum') && (
+                                  <tr className="bg-gray-50 border-b">
+                                    <td className="py-2 px-2 pl-6 text-gray-600">Lucknow Division</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">196.74</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">16.89</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">11.17</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">7.70</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">4.69</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">3.18</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">1.67</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">0.77</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">0.32</td>
+                                  </tr>
+                                )}
+                                {/* Jabalpur Zone */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <button
+                                      onClick={() => {
+                                        const newExpanded = new Set(expandedZones)
+                                        if (newExpanded.has('jabalpur-aum')) {
+                                          newExpanded.delete('jabalpur-aum')
+                                        } else {
+                                          newExpanded.add('jabalpur-aum')
+                                        }
+                                        setExpandedZones(newExpanded)
+                                      }}
+                                      className="flex items-center gap-1 text-gray-800 font-medium"
+                                    >
+                                      {expandedZones.has('jabalpur-aum') ? '−' : '+'} Jabalpur
+                                    </button>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">515.03</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">46.64</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">31.85</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">21.91</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">13.38</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">8.84</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">4.58</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2.28</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">27.95</td>
+                                </tr>
+                                {expandedZones.has('jabalpur-aum') && (
+                                  <>
+                                    <tr className="bg-gray-50 border-b">
+                                      <td className="py-2 px-2 pl-6 text-gray-600">Jhansi</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">128.76</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">11.66</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">7.96</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">5.48</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">3.35</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">2.21</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">1.14</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">0.57</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">6.99</td>
+                                    </tr>
+                                    <tr className="bg-gray-50 border-b">
+                                      <td className="py-2 px-2 pl-6 text-gray-600">Katni</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">128.76</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">11.66</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">7.96</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">5.48</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">3.35</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">2.21</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">1.14</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">0.57</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">6.99</td>
+                                    </tr>
+                                    <tr className="bg-gray-50 border-b">
+                                      <td className="py-2 px-2 pl-6 text-gray-600">Nagpur</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">128.76</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">11.66</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">7.96</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">5.48</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">3.35</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">2.21</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">1.14</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">0.57</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">6.99</td>
+                                    </tr>
+                                    <tr className="bg-gray-50 border-b">
+                                      <td className="py-2 px-2 pl-6 text-gray-600">Sagar</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">128.76</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">11.66</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">7.96</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">5.48</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">3.35</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">2.21</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">1.14</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">0.57</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">6.99</td>
+                                    </tr>
+                                  </>
+                                )}
+                                {/* Moradabad Zone */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <button
+                                      onClick={() => {
+                                        const newExpanded = new Set(expandedZones)
+                                        if (newExpanded.has('moradabad-aum')) {
+                                          newExpanded.delete('moradabad-aum')
+                                        } else {
+                                          newExpanded.add('moradabad-aum')
+                                        }
+                                        setExpandedZones(newExpanded)
+                                      }}
+                                      className="flex items-center gap-1 text-gray-800 font-medium"
+                                    >
+                                      {expandedZones.has('moradabad-aum') ? '−' : '+'} Moradabad
+                                    </button>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">497.49</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">12.13</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">29.18</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">20.10</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">12.51</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">8.35</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">4.31</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2.15</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">27.66</td>
+                                </tr>
+                                {expandedZones.has('moradabad-aum') && (
+                                  <>
+                                    <tr className="bg-gray-50 border-b">
+                                      <td className="py-2 px-2 pl-6 text-gray-600">Jaipur</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">248.75</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">6.07</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">14.59</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">10.05</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">6.26</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">4.18</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">2.16</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">1.08</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">13.83</td>
+                                    </tr>
+                                    <tr className="bg-gray-50 border-b">
+                                      <td className="py-2 px-2 pl-6 text-gray-600">Moradabad</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">248.75</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">6.07</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">14.59</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">10.05</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">6.26</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">4.18</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">2.16</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">1.08</td>
+                                      <td className="text-right py-2 px-2 text-gray-700">13.83</td>
+                                    </tr>
+                                  </>
+                                )}
+                                {/* Patna Zone */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Patna</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">580.58</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">51.19</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">34.89</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">24.06</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">15.08</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">10.05</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">5.20</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2.60</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">34.25</td>
+                                </tr>
+                                {/* Prayagraj Zone */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Prayagraj</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">444.40</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">39.20</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">26.72</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">18.43</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">11.55</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">7.70</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">3.98</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1.99</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">25.84</td>
+                                </tr>
+                                {/* Total Row */}
+                                <tr className="bg-gray-100 border-t-2 border-gray-300 font-bold">
+                                  <td className="py-2 px-2 text-gray-900">Total</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">2,028.58</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">77.72</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">33.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">28.31</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">29.11</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">56.94</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">100.15</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">119.89</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">29.49</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Column - Charts */}
+                      <div className="space-y-4">
+                        {/* Sum of Loans by Zone - Donut Chart */}
+                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Sum of Loans by Zone</h3>
+                          <Chart
+                            type="donut"
+                            height={300}
+                            series={[222197, 221890, 201240, 167482, 145262]}
+                            options={{
+                              chart: {
+                                type: 'donut',
+                                toolbar: { show: false }
+                              },
+                              labels: ['Patna', 'Moradabad', 'Jabalpur', 'Prayagraj', 'Gorakhpur'],
+                              colors: ['#3b82f6', '#1e3a8a', '#f59e0b', '#8b5cf6', '#ec4899'],
+                              legend: {
+                                position: 'bottom',
+                                fontSize: '11px'
+                              },
+                              dataLabels: {
+                                enabled: true,
+                                formatter: function (val) {
+                                  return val.toFixed(1) + '%'
+                                },
+                                style: {
+                                  fontSize: '10px'
+                                }
+                              },
+                              plotOptions: {
+                                pie: {
+                                  donut: {
+                                    size: '65%'
+                                  }
+                                }
+                              }
+                            }}
+                          />
+                        </div>
+
+                        {/* Comparison Month Principle OS (Crores) by Zone - Donut Chart */}
+                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Comparison Month Principle OS (Crores) by Zone</h3>
+                          <Chart
+                            type="donut"
+                            height={300}
+                            series={[580.58, 569.82, 515.03, 444.40, 393.48]}
+                            options={{
+                              chart: {
+                                type: 'donut',
+                                toolbar: { show: false }
+                              },
+                              labels: ['Patna', 'Moradabad', 'Jabalpur', 'Prayagraj', 'Gorakhpur'],
+                              colors: ['#60a5fa', '#1e3a8a', '#f59e0b', '#8b5cf6', '#ec4899'],
+                              legend: {
+                                position: 'bottom',
+                                fontSize: '11px'
+                              },
+                              dataLabels: {
+                                enabled: true,
+                                formatter: function (val) {
+                                  return val.toFixed(1) + '%'
+                                },
+                                style: {
+                                  fontSize: '10px'
+                                }
+                              },
+                              plotOptions: {
+                                pie: {
+                                  donut: {
+                                    size: '65%'
+                                  }
+                                }
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* State-wise Analysis Section */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
+                      {/* Left Column - Tables */}
+                      <div className="lg:col-span-2 space-y-4">
+                        {/* Zone and Division wise Roll Rate Analysis for Loans - State wise */}
+                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Zone and Division wise Roll Rate Analysis for Loans</h3>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-xs">
+                              <thead>
+                                <tr className="bg-gray-50 border-b">
+                                  <th className="text-left py-2 px-2 font-semibold text-gray-700">StateName</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Regular</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">1 to 30</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {/* Uttar Pradesh */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <button
+                                      onClick={() => {
+                                        const newExpanded = new Set(expandedStates)
+                                        if (newExpanded.has('uttar-pradesh')) {
+                                          newExpanded.delete('uttar-pradesh')
+                                        } else {
+                                          newExpanded.add('uttar-pradesh')
+                                        }
+                                        setExpandedStates(newExpanded)
+                                      }}
+                                      className="flex items-center gap-1 text-gray-800 font-medium"
+                                    >
+                                      {expandedStates.has('uttar-pradesh') ? '−' : '+'} Uttar Pradesh
+                                    </button>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">6,181,886</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">290,628</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">104,523</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">81,945</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">69,123</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">119,567</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">250,234</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">284,567</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">302,114</td>
+                                </tr>
+                                {expandedStates.has('uttar-pradesh') && (
+                                  <tr className="bg-gray-50 border-b">
+                                    <td className="py-2 px-2 pl-6 text-gray-600">Division 1</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">3,090,943</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">145,314</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">52,262</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">40,973</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">34,562</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">59,784</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">125,117</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">142,284</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">151,057</td>
+                                  </tr>
+                                )}
+                                {/* Bihar */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <button
+                                      onClick={() => {
+                                        const newExpanded = new Set(expandedStates)
+                                        if (newExpanded.has('bihar')) {
+                                          newExpanded.delete('bihar')
+                                        } else {
+                                          newExpanded.add('bihar')
+                                        }
+                                        setExpandedStates(newExpanded)
+                                      }}
+                                      className="flex items-center gap-1 text-gray-800 font-medium"
+                                    >
+                                      {expandedStates.has('bihar') ? '−' : '+'} Bihar
+                                    </button>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2,531,456</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">118,945</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">42,789</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">33,567</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">28,345</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">49,012</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">102,456</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">116,234</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">123,567</td>
+                                </tr>
+                                {expandedStates.has('bihar') && (
+                                  <tr className="bg-gray-50 border-b">
+                                    <td className="py-2 px-2 pl-6 text-gray-600">Division 1</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">1,265,728</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">59,473</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">21,395</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">16,784</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">14,173</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">24,506</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">51,228</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">58,117</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">61,784</td>
+                                  </tr>
+                                )}
+                                {/* Madhya Pradesh */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <button
+                                      onClick={() => {
+                                        const newExpanded = new Set(expandedStates)
+                                        if (newExpanded.has('madhya-pradesh')) {
+                                          newExpanded.delete('madhya-pradesh')
+                                        } else {
+                                          newExpanded.add('madhya-pradesh')
+                                        }
+                                        setExpandedStates(newExpanded)
+                                      }}
+                                      className="flex items-center gap-1 text-gray-800 font-medium"
+                                    >
+                                      {expandedStates.has('madhya-pradesh') ? '−' : '+'} Madhya Pradesh
+                                    </button>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2,108,712</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">99,123</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">35,678</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">27,945</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">23,612</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">40,845</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">85,345</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">96,890</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">102,945</td>
+                                </tr>
+                                {expandedStates.has('madhya-pradesh') && (
+                                  <tr className="bg-gray-50 border-b">
+                                    <td className="py-2 px-2 pl-6 text-gray-600">Division 1</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">1,054,356</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">49,562</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">17,839</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">13,973</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">11,806</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">20,423</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">42,673</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">48,445</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">51,473</td>
+                                  </tr>
+                                )}
+                                {/* Jharkhand */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Jharkhand</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">311,234</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">14,623</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">5,267</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">4,128</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">3,489</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">6,034</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">12,612</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">14,312</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">15,203</td>
+                                </tr>
+                                {/* Rajasthan */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Rajasthan</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">271,456</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">12,756</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">4,592</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">3,601</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">3,042</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">5,262</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">11,001</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">12,484</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">13,262</td>
+                                </tr>
+                                {/* Haryana */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Haryana</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">265,123</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">12,461</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">4,486</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">3,518</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2,972</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">5,141</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">10,748</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">12,195</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">12,955</td>
+                                </tr>
+                                {/* Uttarakhand */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Uttarakhand</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">195,234</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">9,176</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">3,304</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2,591</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2,189</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">3,787</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">7,917</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">8,984</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">9,543</td>
+                                </tr>
+                                {/* Maharashtra */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Maharashtra</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">62,345</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2,930</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1,055</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">827</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">699</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1,209</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2,527</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2,867</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">3,045</td>
+                                </tr>
+                                {/* Punjab */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Punjab</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">59,789</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2,810</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1,012</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">793</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">670</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1,159</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2,423</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2,750</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2,921</td>
+                                </tr>
+                                {/* Chhattisgarh */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Chhattisgarh</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">31,140</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1,463</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">527</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">413</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">349</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">604</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1,262</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1,432</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1,521</td>
+                                </tr>
+                                {/* Total Row */}
+                                <tr className="bg-gray-100 border-t-2 border-gray-300 font-bold">
+                                  <td className="py-2 px-2 text-gray-900">Total</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">11,616,839</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">622,590</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">224,065</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">175,356</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">147,870</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">255,779</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">534,986</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">607,255</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">599,275</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {/* Zone and Division wise Roll Rate Analysis for AUM - State wise */}
+                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Zone and Division wise Roll Rate Analysis for AUM</h3>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-xs">
+                              <thead>
+                                <tr className="bg-gray-50 border-b">
+                                  <th className="text-left py-2 px-2 font-semibold text-gray-700">StateName</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Regular</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">1 to 30</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {/* Uttar Pradesh */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <button
+                                      onClick={() => {
+                                        const newExpanded = new Set(expandedStates)
+                                        if (newExpanded.has('uttar-pradesh-aum')) {
+                                          newExpanded.delete('uttar-pradesh-aum')
+                                        } else {
+                                          newExpanded.add('uttar-pradesh-aum')
+                                        }
+                                        setExpandedStates(newExpanded)
+                                      }}
+                                      className="flex items-center gap-1 text-gray-800 font-medium"
+                                    >
+                                      {expandedStates.has('uttar-pradesh-aum') ? '−' : '+'} Uttar Pradesh
+                                    </button>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">17,751.46</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">666.04</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">239.65</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">187.89</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">158.56</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">274.35</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">573.78</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">651.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">198.86</td>
+                                </tr>
+                                {expandedStates.has('uttar-pradesh-aum') && (
+                                  <tr className="bg-gray-50 border-b">
+                                    <td className="py-2 px-2 pl-6 text-gray-600">Division 1</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">8,875.73</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">333.02</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">119.83</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">93.95</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">79.28</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">137.18</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">286.89</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">325.73</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">99.43</td>
+                                  </tr>
+                                )}
+                                {/* Bihar */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <button
+                                      onClick={() => {
+                                        const newExpanded = new Set(expandedStates)
+                                        if (newExpanded.has('bihar-aum')) {
+                                          newExpanded.delete('bihar-aum')
+                                        } else {
+                                          newExpanded.add('bihar-aum')
+                                        }
+                                        setExpandedStates(newExpanded)
+                                      }}
+                                      className="flex items-center gap-1 text-gray-800 font-medium"
+                                    >
+                                      {expandedStates.has('bihar-aum') ? '−' : '+'} Bihar
+                                    </button>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">7,265.80</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">341.29</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">122.80</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">96.33</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">81.35</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">140.66</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">294.05</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">333.54</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">354.48</td>
+                                </tr>
+                                {expandedStates.has('bihar-aum') && (
+                                  <tr className="bg-gray-50 border-b">
+                                    <td className="py-2 px-2 pl-6 text-gray-600">Division 1</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">3,632.90</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">170.65</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">61.40</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">48.17</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">40.68</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">70.33</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">147.03</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">166.77</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">177.24</td>
+                                  </tr>
+                                )}
+                                {/* Madhya Pradesh */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <button
+                                      onClick={() => {
+                                        const newExpanded = new Set(expandedStates)
+                                        if (newExpanded.has('madhya-pradesh-aum')) {
+                                          newExpanded.delete('madhya-pradesh-aum')
+                                        } else {
+                                          newExpanded.add('madhya-pradesh-aum')
+                                        }
+                                        setExpandedStates(newExpanded)
+                                      }}
+                                      className="flex items-center gap-1 text-gray-800 font-medium"
+                                    >
+                                      {expandedStates.has('madhya-pradesh-aum') ? '−' : '+'} Madhya Pradesh
+                                    </button>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">6,052.00</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">284.44</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">102.40</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">80.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">67.78</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">117.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">244.99</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">278.08</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">295.45</td>
+                                </tr>
+                                {expandedStates.has('madhya-pradesh-aum') && (
+                                  <tr className="bg-gray-50 border-b">
+                                    <td className="py-2 px-2 pl-6 text-gray-600">Division 1</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">3,026.00</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">142.22</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">51.20</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">40.12</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">33.89</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">58.62</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">122.50</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">139.04</td>
+                                    <td className="text-right py-2 px-2 text-gray-700">147.73</td>
+                                  </tr>
+                                )}
+                                {/* Jharkhand */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Jharkhand</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">893.04</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">41.97</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">15.11</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">11.85</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">10.01</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">17.32</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">36.20</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">41.08</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">43.63</td>
+                                </tr>
+                                {/* Rajasthan */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Rajasthan</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">779.18</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">36.61</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">13.18</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">10.34</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">8.73</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">15.10</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">31.57</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">35.83</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">38.06</td>
+                                </tr>
+                                {/* Haryana */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Haryana</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">760.70</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">35.75</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">12.87</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">10.10</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">8.53</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">14.75</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">30.85</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">35.00</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">37.18</td>
+                                </tr>
+                                {/* Uttarakhand */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Uttarakhand</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">560.32</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">26.33</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">9.48</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">7.44</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">6.28</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">10.87</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">22.72</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">25.78</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">27.39</td>
+                                </tr>
+                                {/* Maharashtra */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Maharashtra</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">178.93</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">8.41</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">3.03</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2.37</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2.01</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">3.47</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">7.25</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">8.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">8.74</td>
+                                </tr>
+                                {/* Punjab */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Punjab</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">171.59</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">8.06</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2.90</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">2.28</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1.92</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">3.33</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">6.95</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">7.89</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">8.38</td>
+                                </tr>
+                                {/* Chhattisgarh */}
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2">
+                                    <span className="text-gray-800 font-medium">Chhattisgarh</span>
+                                  </td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">89.37</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">4.20</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1.51</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1.19</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1.00</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">1.73</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">3.62</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">4.11</td>
+                                  <td className="text-right py-2 px-2 text-gray-700 font-semibold">4.37</td>
+                                </tr>
+                                {/* Total Row */}
+                                <tr className="bg-gray-100 border-t-2 border-gray-300 font-bold">
+                                  <td className="py-2 px-2 text-gray-900">Total</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">33,237.95</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">1,407.42</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">484.16</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">376.67</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">319.27</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">552.65</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">1,115.84</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">1,114.19</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">358.85</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Column - Charts */}
+                      <div className="space-y-4">
+                        {/* Loans by State - Horizontal Bar Chart */}
+                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Loans by State</h3>
+                          <Chart
+                            type="bar"
+                            height={400}
+                            series={[{
+                              name: 'Loans',
+                              data: [7600483, 3111032, 2588299, 383644, 334231, 326578, 240645, 76803, 73549, 31140]
+                            }]}
+                            options={{
+                              chart: {
+                                type: 'bar',
+                                horizontal: true,
+                                toolbar: { show: false }
+                              },
+                              plotOptions: {
+                                bar: {
+                                  borderRadius: 4,
+                                  horizontal: true
+                                }
+                              },
+                              dataLabels: {
+                                enabled: true,
+                                formatter: function (val) {
+                                  return (val / 1000000).toFixed(1) + 'M'
+                                },
+                                style: {
+                                  fontSize: '10px'
+                                }
+                              },
+                              xaxis: {
+                                categories: ['Uttar Pradesh', 'Bihar', 'Madhya Pradesh', 'Jharkhand', 'Rajasthan', 'Haryana', 'Uttarakhand', 'Maharashtra', 'Punjab', 'Chhattisgarh'],
+                                labels: {
+                                  style: { fontSize: '10px' },
+                                  formatter: function (val) {
+                                    return (val / 1000000).toFixed(1) + 'M'
+                                  }
+                                }
+                              },
+                              yaxis: {
+                                labels: {
+                                  style: { fontSize: '10px' }
+                                }
+                              },
+                              colors: ['#3b82f6'],
+                              grid: { borderColor: '#E5E7EB' }
+                            }}
+                          />
+                        </div>
+
+                        {/* Comparison Month Principle OS (Crores) by State - Horizontal Bar Chart */}
+                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Comparison Month Principle OS (Crores) by State</h3>
+                          <Chart
+                            type="bar"
+                            height={400}
+                            series={[{
+                              name: 'Principle OS (Crores)',
+                              data: [20326.54, 8615.60, 6397.14, 973.67, 860.29, 818.16, 561.88, 143.32, 137.78, 80.57]
+                            }]}
+                            options={{
+                              chart: {
+                                type: 'bar',
+                                horizontal: true,
+                                toolbar: { show: false }
+                              },
+                              plotOptions: {
+                                bar: {
+                                  borderRadius: 4,
+                                  horizontal: true
+                                }
+                              },
+                              dataLabels: {
+                                enabled: true,
+                                formatter: function (val) {
+                                  return val.toFixed(2)
+                                },
+                                style: {
+                                  fontSize: '10px'
+                                }
+                              },
+                              xaxis: {
+                                categories: ['Uttar Pradesh', 'Bihar', 'Madhya Pradesh', 'Jharkhand', 'Rajasthan', 'Haryana', 'Uttarakhand', 'Maharashtra', 'Punjab', 'Chhattisgarh'],
+                                labels: {
+                                  style: { fontSize: '10px' },
+                                  formatter: function (val) {
+                                    return (val / 1000).toFixed(0) + 'K'
+                                  }
+                                }
+                              },
+                              yaxis: {
+                                labels: {
+                                  style: { fontSize: '10px' }
+                                }
+                              },
+                              colors: ['#3b82f6'],
+                              grid: { borderColor: '#E5E7EB' }
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Trend Charts Section */}
+                {selectedRollMetric === 'rollbackReport' && (
+                  <div className="mb-8 w-full space-y-6 mt-6">
+                    <h2 className="text-xl font-semibold text-gray-900">Trend Analysis (Lakhs)</h2>
+                    
+                    {/* Top 6 Charts in 2x3 Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Row 1: Roll Forward and Roll Backward */}
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <h3 className="text-sm font-semibold text-gray-900 mb-4">Roll Forward Trend (Lakhs)</h3>
+                        <Chart
+                          type="line"
+                          height={200}
+                          series={[{
+                            name: 'Roll Forward',
+                            data: [0.59, 0.49, 0.50, 0.57, 0.61, 0.58, 0.72, 0.84, 0.83, 0.97, 0.82, 0.77, 0.74, 0.61, 0.20]
+                          }]}
+                          options={{
+                            chart: {
+                              type: 'line',
+                              toolbar: { show: false },
+                              zoom: { enabled: false }
+                            },
+                            stroke: {
+                              curve: 'smooth',
+                              width: 2,
+                              colors: ['#60a5fa']
+                            },
+                            markers: {
+                              size: 4,
+                              colors: ['#60a5fa']
+                            },
+                            xaxis: {
+                              categories: ['Jan 24', 'Feb 24', 'Mar 24', 'Apr 24', 'May 24', 'Jun 24', 'Jul 24', 'Aug 24', 'Sep 24', 'Oct 24', 'Nov 24', 'Dec 24', 'Jan 25', 'Feb 25', 'Mar 25'],
+                              labels: {
+                                style: { fontSize: '10px' },
+                                rotate: -45
+                              }
+                            },
+                            yaxis: {
+                              labels: {
+                                style: { fontSize: '10px' },
+                                formatter: function (val) {
+                                  return val.toFixed(2)
+                                }
+                              }
+                            },
+                            dataLabels: {
+                              enabled: true,
+                              formatter: function (val) {
+                                return val.toFixed(2)
+                              },
+                              style: {
+                                fontSize: '9px',
+                                colors: ['#374151']
+                              }
+                            },
+                            grid: {
+                              borderColor: '#E5E7EB',
+                              strokeDashArray: 3
+                            },
+                            colors: ['#60a5fa']
+                          }}
+                        />
+                      </div>
+
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <h3 className="text-sm font-semibold text-gray-900 mb-4">Roll Backward Trend (Lakhs)</h3>
+                        <Chart
+                          type="line"
+                          height={200}
+                          series={[{
+                            name: 'Roll Backward',
+                            data: [0.15, 0.14, 0.13, 0.11, 0.14, 0.12, 0.11, 0.12, 0.14, 0.13, 0.19, 0.12, 0.11, 0.09, 0.02]
+                          }]}
+                          options={{
+                            chart: {
+                              type: 'line',
+                              toolbar: { show: false },
+                              zoom: { enabled: false }
+                            },
+                            stroke: {
+                              curve: 'smooth',
+                              width: 2,
+                              colors: ['#60a5fa']
+                            },
+                            markers: {
+                              size: 4,
+                              colors: ['#60a5fa']
+                            },
+                            xaxis: {
+                              categories: ['Jan 24', 'Feb 24', 'Mar 24', 'Apr 24', 'May 24', 'Jun 24', 'Jul 24', 'Aug 24', 'Sep 24', 'Oct 24', 'Nov 24', 'Dec 24', 'Jan 25', 'Feb 25', 'Mar 25'],
+                              labels: {
+                                style: { fontSize: '10px' },
+                                rotate: -45
+                              }
+                            },
+                            yaxis: {
+                              labels: {
+                                style: { fontSize: '10px' },
+                                formatter: function (val) {
+                                  return val.toFixed(2)
+                                }
+                              }
+                            },
+                            dataLabels: {
+                              enabled: true,
+                              formatter: function (val) {
+                                return val.toFixed(2)
+                              },
+                              style: {
+                                fontSize: '9px',
+                                colors: ['#374151']
+                              }
+                            },
+                            grid: {
+                              borderColor: '#E5E7EB',
+                              strokeDashArray: 3
+                            },
+                            colors: ['#60a5fa']
+                          }}
+                        />
+                      </div>
+
+                      {/* Row 2: Stabilized and Regularised */}
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <h3 className="text-sm font-semibold text-gray-900 mb-4">Stabilized Trend (Lakhs)</h3>
+                        <Chart
+                          type="line"
+                          height={200}
+                          series={[{
+                            name: 'Stabilized',
+                            data: [9.28, 9.28, 9.02, 8.85, 8.77, 8.74, 8.60, 8.49, 8.56, 8.45, 8.38, 8.36, 8.25, 8.32, 8.80]
+                          }]}
+                          options={{
+                            chart: {
+                              type: 'line',
+                              toolbar: { show: false },
+                              zoom: { enabled: false }
+                            },
+                            stroke: {
+                              curve: 'smooth',
+                              width: 2,
+                              colors: ['#60a5fa']
+                            },
+                            markers: {
+                              size: 4,
+                              colors: ['#60a5fa']
+                            },
+                            xaxis: {
+                              categories: ['Jan 24', 'Feb 24', 'Mar 24', 'Apr 24', 'May 24', 'Jun 24', 'Jul 24', 'Aug 24', 'Sep 24', 'Oct 24', 'Nov 24', 'Dec 24', 'Jan 25', 'Feb 25', 'Mar 25'],
+                              labels: {
+                                style: { fontSize: '10px' },
+                                rotate: -45
+                              }
+                            },
+                            yaxis: {
+                              labels: {
+                                style: { fontSize: '10px' },
+                                formatter: function (val) {
+                                  return val.toFixed(2)
+                                }
+                              }
+                            },
+                            dataLabels: {
+                              enabled: true,
+                              formatter: function (val) {
+                                return val.toFixed(2)
+                              },
+                              style: {
+                                fontSize: '9px',
+                                colors: ['#374151']
+                              }
+                            },
+                            grid: {
+                              borderColor: '#E5E7EB',
+                              strokeDashArray: 3
+                            },
+                            colors: ['#60a5fa']
+                          }}
+                        />
+                      </div>
+
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <h3 className="text-sm font-semibold text-gray-900 mb-4">Regularised Trend (Lakhs)</h3>
+                        <Chart
+                          type="line"
+                          height={200}
+                          series={[{
+                            name: 'Regularised',
+                            data: [0.13, 0.12, 0.11, 0.10, 0.12, 0.11, 0.10, 0.11, 0.12, 0.12, 0.18, 0.10, 0.09, 0.08, 0.02]
+                          }]}
+                          options={{
+                            chart: {
+                              type: 'line',
+                              toolbar: { show: false },
+                              zoom: { enabled: false }
+                            },
+                            stroke: {
+                              curve: 'smooth',
+                              width: 2,
+                              colors: ['#60a5fa']
+                            },
+                            markers: {
+                              size: 4,
+                              colors: ['#60a5fa']
+                            },
+                            xaxis: {
+                              categories: ['Jan 24', 'Feb 24', 'Mar 24', 'Apr 24', 'May 24', 'Jun 24', 'Jul 24', 'Aug 24', 'Sep 24', 'Oct 24', 'Nov 24', 'Dec 24', 'Jan 25', 'Feb 25', 'Mar 25'],
+                              labels: {
+                                style: { fontSize: '10px' },
+                                rotate: -45
+                              }
+                            },
+                            yaxis: {
+                              labels: {
+                                style: { fontSize: '10px' },
+                                formatter: function (val) {
+                                  return val.toFixed(2)
+                                }
+                              }
+                            },
+                            dataLabels: {
+                              enabled: true,
+                              formatter: function (val) {
+                                return val.toFixed(2)
+                              },
+                              style: {
+                                fontSize: '9px',
+                                colors: ['#374151']
+                              }
+                            },
+                            grid: {
+                              borderColor: '#E5E7EB',
+                              strokeDashArray: 3
+                            },
+                            colors: ['#60a5fa']
+                          }}
+                        />
+                      </div>
+
+                      {/* Row 3: Closed Loans and New Loans */}
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <h3 className="text-sm font-semibold text-gray-900 mb-4">Closed Loans Trend (Lakhs)</h3>
+                        <Chart
+                          type="line"
+                          height={200}
+                          series={[{
+                            name: 'Closed Loans',
+                            data: [0.55, 0.53, 0.42, 0.44, 0.47, 0.38, 0.40, 0.36, 0.38, 0.40, 0.31, 0.42, 0.48, 0.44, 0.01]
+                          }]}
+                          options={{
+                            chart: {
+                              type: 'line',
+                              toolbar: { show: false },
+                              zoom: { enabled: false }
+                            },
+                            stroke: {
+                              curve: 'smooth',
+                              width: 2,
+                              colors: ['#60a5fa']
+                            },
+                            markers: {
+                              size: 4,
+                              colors: ['#60a5fa']
+                            },
+                            xaxis: {
+                              categories: ['Jan 24', 'Feb 24', 'Mar 24', 'Apr 24', 'May 24', 'Jun 24', 'Jul 24', 'Aug 24', 'Sep 24', 'Oct 24', 'Nov 24', 'Dec 24', 'Jan 25', 'Feb 25', 'Mar 25'],
+                              labels: {
+                                style: { fontSize: '10px' },
+                                rotate: -45
+                              }
+                            },
+                            yaxis: {
+                              labels: {
+                                style: { fontSize: '10px' },
+                                formatter: function (val) {
+                                  return val.toFixed(2)
+                                }
+                              }
+                            },
+                            dataLabels: {
+                              enabled: true,
+                              formatter: function (val) {
+                                return val.toFixed(2)
+                              },
+                              style: {
+                                fontSize: '9px',
+                                colors: ['#374151']
+                              }
+                            },
+                            grid: {
+                              borderColor: '#E5E7EB',
+                              strokeDashArray: 3
+                            },
+                            colors: ['#60a5fa']
+                          }}
+                        />
+                      </div>
+
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <h3 className="text-sm font-semibold text-gray-900 mb-4">New Loans Trend (Lakhs)</h3>
+                        <Chart
+                          type="line"
+                          height={200}
+                          series={[{
+                            name: 'New Loans',
+                            data: [0.46, 0.43, 0.16, 0.31, 0.45, 0.32, 0.39, 0.38, 0.45, 0.43, 0.15, 0.28, 0.33, 0.36, 0.36]
+                          }]}
+                          options={{
+                            chart: {
+                              type: 'line',
+                              toolbar: { show: false },
+                              zoom: { enabled: false }
+                            },
+                            stroke: {
+                              curve: 'smooth',
+                              width: 2,
+                              colors: ['#60a5fa']
+                            },
+                            markers: {
+                              size: 4,
+                              colors: ['#60a5fa']
+                            },
+                            xaxis: {
+                              categories: ['Jan 24', 'Feb 24', 'Mar 24', 'Apr 24', 'May 24', 'Jun 24', 'Jul 24', 'Aug 24', 'Sep 24', 'Oct 24', 'Nov 24', 'Dec 24', 'Jan 25', 'Feb 25', 'Mar 25'],
+                              labels: {
+                                style: { fontSize: '10px' },
+                                rotate: -45
+                              }
+                            },
+                            yaxis: {
+                              labels: {
+                                style: { fontSize: '10px' },
+                                formatter: function (val) {
+                                  return val.toFixed(2)
+                                }
+                              }
+                            },
+                            dataLabels: {
+                              enabled: true,
+                              formatter: function (val) {
+                                return val.toFixed(2)
+                              },
+                              style: {
+                                fontSize: '9px',
+                                colors: ['#374151']
+                              }
+                            },
+                            grid: {
+                              borderColor: '#E5E7EB',
+                              strokeDashArray: 3
+                            },
+                            colors: ['#60a5fa']
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Total Loans Trend - Full Width */}
+                    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <h3 className="text-sm font-semibold text-gray-900 mb-4">Total Loans Trend (Lakhs)</h3>
+                      <Chart
+                        type="line"
+                        height={300}
+                        series={[{
+                          name: 'Total Loans',
+                          data: [10.57, 10.45, 10.08, 9.97, 9.99, 9.83, 9.83, 9.82, 9.91, 9.96, 9.70, 9.67, 9.58, 9.46, 9.02]
+                        }]}
+                        options={{
+                          chart: {
+                            type: 'line',
+                            toolbar: { show: false },
+                            zoom: { enabled: false }
+                          },
+                          stroke: {
+                            curve: 'smooth',
+                            width: 2,
+                            colors: ['#60a5fa']
+                          },
+                          markers: {
+                            size: 4,
+                            colors: ['#60a5fa']
+                          },
+                          xaxis: {
+                            categories: ['Jan 24', 'Feb 24', 'Mar 24', 'Apr 24', 'May 24', 'Jun 24', 'Jul 24', 'Aug 24', 'Sep 24', 'Oct 24', 'Nov 24', 'Dec 24', 'Jan 25', 'Feb 25', 'Mar 25'],
+                            labels: {
+                              style: { fontSize: '10px' },
+                              rotate: -45
+                            }
+                          },
+                          yaxis: {
+                            labels: {
+                              style: { fontSize: '10px' },
+                              formatter: function (val) {
+                                return val.toFixed(2)
+                              }
+                            }
+                          },
+                          dataLabels: {
+                            enabled: true,
+                            formatter: function (val) {
+                              return val.toFixed(2)
+                            },
+                            style: {
+                              fontSize: '9px',
+                              colors: ['#374151']
+                            }
+                          },
+                          grid: {
+                            borderColor: '#E5E7EB',
+                            strokeDashArray: 3
+                          },
+                          colors: ['#60a5fa']
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {/* Reposition Expanded Section */}
                 {selectedCaseMetric === 'reposition' && (
