@@ -52,8 +52,8 @@ const AddUser = () => {
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F8F8F8' }}>
       <div className="flex h-screen overflow-hidden">
-        {/* Sidebar */}
-        <div className={`${isMobileSidebarOpen ? 'block' : 'hidden'} lg:block ${isSidebarCollapsed ? 'lg:w-20' : 'lg:w-64'} transition-all duration-300 fixed lg:static inset-y-0 left-0 z-50`}>
+        {/* Sidebar - Small when closed, overlay when open */}
+        <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-20' : 'w-0 overflow-hidden'}`}>
           <AdminSidebar
             isMobileOpen={isMobileSidebarOpen}
             setIsMobileOpen={setIsMobileSidebarOpen}
@@ -61,21 +61,40 @@ const AddUser = () => {
             setIsCollapsed={setIsSidebarCollapsed}
           />
         </div>
+        
+        {/* Overlay Sidebar when expanded */}
+        {!isSidebarCollapsed && (
+          <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 shadow-lg">
+            <AdminSidebar
+              isMobileOpen={isMobileSidebarOpen}
+              setIsMobileOpen={setIsMobileSidebarOpen}
+              isCollapsed={isSidebarCollapsed}
+              setIsCollapsed={setIsSidebarCollapsed}
+            />
+          </div>
+        )}
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div 
+          className="flex-1 flex flex-col overflow-hidden relative transition-all duration-300"
+          style={{
+            marginLeft: typeof window !== 'undefined' && window.innerWidth >= 1024 
+              ? (isSidebarCollapsed ? '0px' : '256px')
+              : '0px'
+          }}
+        >
           <Navbar
             onMobileMenuClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
             isSidebarCollapsed={isSidebarCollapsed}
           />
 
-          <main className="flex-1 overflow-y-auto p-6">
-            <div className="max-w-4xl mx-auto">
+          <main className="flex-1 overflow-y-auto p-6" style={{ paddingTop: '80px' }}>
+            <div className="max-w-7xl mx-auto">
               {/* Header */}
-              <div className="mb-6">
+              <div className="mb-4 mt-4">
                 <button
                   onClick={() => navigate('/admin/users')}
-                  className="mb-4 flex items-center"
+                  className="mb-3 flex items-center"
                   style={{ color: '#6B7280' }}
                 >
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,7 +103,7 @@ const AddUser = () => {
                   Back to Users
                 </button>
                 <h1 className="text-3xl font-bold mb-1 pb-2 border-b-2" style={{ color: '#1F2937', borderColor: '#EF4444' }}>Add New User</h1>
-                <p className="mt-2" style={{ color: '#6B7280' }}>Create a new user account with appropriate permissions</p>
+                <p className="mt-1" style={{ color: '#6B7280' }}>Create a new user account with appropriate permissions</p>
               </div>
 
               {/* Messages */}
@@ -100,11 +119,11 @@ const AddUser = () => {
               )}
 
               {/* Form */}
-              <div className="bg-white rounded-xl shadow-md border p-6" style={{ borderColor: '#E5E7EB' }}>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white rounded-xl shadow-md border p-5" style={{ borderColor: '#E5E7EB' }}>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#6B7280' }}>
+                      <label className="block text-sm font-medium mb-1.5" style={{ color: '#6B7280' }}>
                         Username <span style={{ color: '#EF4444' }}>*</span>
                       </label>
                       <input
@@ -112,14 +131,14 @@ const AddUser = () => {
                         required
                         value={formData.username}
                         onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                         style={{ backgroundColor: '#FFFFFF', borderColor: '#D1D5DB', color: '#1F2937' }}
                         placeholder="Enter username"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#6B7280' }}>
+                      <label className="block text-sm font-medium mb-1.5" style={{ color: '#6B7280' }}>
                         Password <span style={{ color: '#EF4444' }}>*</span>
                       </label>
                       <input
@@ -127,66 +146,66 @@ const AddUser = () => {
                         required
                         value={formData.password}
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                         style={{ backgroundColor: '#FFFFFF', borderColor: '#D1D5DB', color: '#1F2937' }}
                         placeholder="Enter password"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#6B7280' }}>First Name</label>
+                      <label className="block text-sm font-medium mb-1.5" style={{ color: '#6B7280' }}>First Name</label>
                       <input
                         type="text"
                         value={formData.first_name}
                         onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                         style={{ backgroundColor: '#FFFFFF', borderColor: '#D1D5DB', color: '#1F2937' }}
                         placeholder="Enter first name"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#6B7280' }}>Last Name</label>
+                      <label className="block text-sm font-medium mb-1.5" style={{ color: '#6B7280' }}>Last Name</label>
                       <input
                         type="text"
                         value={formData.last_name}
                         onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                         style={{ backgroundColor: '#FFFFFF', borderColor: '#D1D5DB', color: '#1F2937' }}
                         placeholder="Enter last name"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#6B7280' }}>Email</label>
+                      <label className="block text-sm font-medium mb-1.5" style={{ color: '#6B7280' }}>Email</label>
                       <input
                         type="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                         style={{ backgroundColor: '#FFFFFF', borderColor: '#D1D5DB', color: '#1F2937' }}
                         placeholder="user@example.com"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#6B7280' }}>Mobile Number</label>
+                      <label className="block text-sm font-medium mb-1.5" style={{ color: '#6B7280' }}>Mobile Number</label>
                       <input
                         type="tel"
                         value={formData.mobile_number}
                         onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value })}
-                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                         style={{ backgroundColor: '#FFFFFF', borderColor: '#D1D5DB', color: '#1F2937' }}
                         placeholder="+91 9876543210"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#6B7280' }}>Role</label>
+                      <label className="block text-sm font-medium mb-1.5" style={{ color: '#6B7280' }}>Role</label>
                       <select
                         value={formData.role}
                         onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                         style={{ backgroundColor: '#FFFFFF', borderColor: '#D1D5DB', color: '#1F2937' }}
                       >
                         <option value="user">User</option>
@@ -197,11 +216,11 @@ const AddUser = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#6B7280' }}>Status</label>
+                      <label className="block text-sm font-medium mb-1.5" style={{ color: '#6B7280' }}>Status</label>
                       <select
                         value={formData.is_active ? 'active' : 'inactive'}
                         onChange={(e) => setFormData({ ...formData, is_active: e.target.value === 'active' })}
-                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                         style={{ backgroundColor: '#FFFFFF', borderColor: '#D1D5DB', color: '#1F2937' }}
                       >
                         <option value="active">Active</option>
@@ -210,7 +229,7 @@ const AddUser = () => {
                     </div>
                   </div>
 
-                  <div className="flex justify-end space-x-3 pt-4 border-t" style={{ borderColor: '#E5E7EB' }}>
+                  <div className="flex justify-end space-x-3 pt-3 border-t" style={{ borderColor: '#E5E7EB' }}>
                     <button
                       type="button"
                       onClick={() => navigate('/admin/users')}

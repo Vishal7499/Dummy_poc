@@ -32,8 +32,8 @@ const SystemSettings = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="flex h-screen overflow-hidden">
-        {/* Sidebar */}
-        <div className={`${isMobileSidebarOpen ? 'block' : 'hidden'} lg:block ${isSidebarCollapsed ? 'lg:w-20' : 'lg:w-64'} transition-all duration-300 fixed lg:static inset-y-0 left-0 z-50`}>
+        {/* Sidebar - Small when closed, overlay when open */}
+        <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-20' : 'w-0 overflow-hidden'}`}>
           <AdminSidebar
             isMobileOpen={isMobileSidebarOpen}
             setIsMobileOpen={setIsMobileSidebarOpen}
@@ -41,20 +41,39 @@ const SystemSettings = () => {
             setIsCollapsed={setIsSidebarCollapsed}
           />
         </div>
+        
+        {/* Overlay Sidebar when expanded */}
+        {!isSidebarCollapsed && (
+          <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 shadow-lg">
+            <AdminSidebar
+              isMobileOpen={isMobileSidebarOpen}
+              setIsMobileOpen={setIsMobileSidebarOpen}
+              isCollapsed={isSidebarCollapsed}
+              setIsCollapsed={setIsSidebarCollapsed}
+            />
+          </div>
+        )}
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div 
+          className="flex-1 flex flex-col overflow-hidden relative transition-all duration-300"
+          style={{
+            marginLeft: typeof window !== 'undefined' && window.innerWidth >= 1024 
+              ? (isSidebarCollapsed ? '0px' : '256px')
+              : '0px'
+          }}
+        >
           <Navbar
             onMobileMenuClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
             isSidebarCollapsed={isSidebarCollapsed}
           />
 
-          <main className="flex-1 overflow-y-auto p-6">
-            <div className="max-w-4xl mx-auto">
+          <main className="flex-1 overflow-y-auto p-6" style={{ paddingTop: '80px' }}>
+            <div className="max-w-7xl mx-auto">
               {/* Header */}
-              <div className="mb-6">
+              <div className="mb-4 mt-4">
                 <h1 className="text-3xl font-bold text-gray-900">System Settings</h1>
-                <p className="text-gray-600 mt-2">Configure system-wide settings and preferences</p>
+                {/* <p className="text-gray-600 mt-2">Configure system-wide settings and preferences</p> */}
               </div>
 
               {/* Message */}
@@ -69,12 +88,12 @@ const SystemSettings = () => {
               )}
 
               {/* Settings Sections */}
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {/* Security Settings */}
-                <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-                  <h2 className="text-xl font-bold text-gray-900 mb-4">Security Settings</h2>
+                <div className="bg-white rounded-lg shadow-md border border-gray-200 p-5">
+                  <h2 className="text-lg font-bold text-gray-900 mb-3">Security Settings</h2>
                   
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Session Timeout (minutes)
@@ -125,10 +144,10 @@ const SystemSettings = () => {
                 </div>
 
                 {/* Notification Settings */}
-                <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-                  <h2 className="text-xl font-bold text-gray-900 mb-4">Notification Settings</h2>
+                <div className="bg-white rounded-lg shadow-md border border-gray-200 p-5">
+                  <h2 className="text-lg font-bold text-gray-900 mb-3">Notification Settings</h2>
                   
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Email Notifications</label>
@@ -151,10 +170,10 @@ const SystemSettings = () => {
                 </div>
 
                 {/* System Maintenance */}
-                <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-                  <h2 className="text-xl font-bold text-gray-900 mb-4">System Maintenance</h2>
+                <div className="bg-white rounded-lg shadow-md border border-gray-200 p-5">
+                  <h2 className="text-lg font-bold text-gray-900 mb-3">System Maintenance</h2>
                   
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Maintenance Mode</label>

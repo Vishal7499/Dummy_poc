@@ -17,7 +17,8 @@ const BranchManagement = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="flex h-screen overflow-hidden">
-        <div className={`${isMobileSidebarOpen ? 'block' : 'hidden'} lg:block ${isSidebarCollapsed ? 'lg:w-20' : 'lg:w-64'} transition-all duration-300 fixed lg:static inset-y-0 left-0 z-50`}>
+        {/* Sidebar - Small when closed, overlay when open */}
+        <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-20' : 'w-0 overflow-hidden'}`}>
           <AdminSidebar
             isMobileOpen={isMobileSidebarOpen}
             setIsMobileOpen={setIsMobileSidebarOpen}
@@ -25,14 +26,34 @@ const BranchManagement = () => {
             setIsCollapsed={setIsSidebarCollapsed}
           />
         </div>
+        
+        {/* Overlay Sidebar when expanded */}
+        {!isSidebarCollapsed && (
+          <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 shadow-lg">
+            <AdminSidebar
+              isMobileOpen={isMobileSidebarOpen}
+              setIsMobileOpen={setIsMobileSidebarOpen}
+              isCollapsed={isSidebarCollapsed}
+              setIsCollapsed={setIsSidebarCollapsed}
+            />
+          </div>
+        )}
 
-        <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Main Content */}
+        <div 
+          className="flex-1 flex flex-col overflow-hidden relative transition-all duration-300"
+          style={{
+            marginLeft: typeof window !== 'undefined' && window.innerWidth >= 1024 
+              ? (isSidebarCollapsed ? '0px' : '256px')
+              : '0px'
+          }}
+        >
           <Navbar
             onMobileMenuClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
             isSidebarCollapsed={isSidebarCollapsed}
           />
 
-          <main className="flex-1 overflow-y-auto p-6">
+          <main className="flex-1 overflow-y-auto p-6" style={{ paddingTop: '80px' }}>
             <div className="max-w-7xl mx-auto">
               <div className="mb-6 flex justify-between items-center">
                 <div>

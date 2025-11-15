@@ -130,7 +130,7 @@ const UserManagement = () => {
 
     try {
       await adminDeleteUser(user.accessToken, selectedUser.username)
-      setSuccess('User deleted successfully!')
+      setSuccess('User deactivated successfully!')
       setShowDeleteModal(false)
       setSelectedUser(null)
       fetchUsers(pagination.current_page, pagination.page_size)
@@ -194,8 +194,8 @@ const UserManagement = () => {
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F8F8F8' }}>
       <div className="flex h-screen overflow-hidden">
-        {/* Sidebar */}
-        <div className={`${isMobileSidebarOpen ? 'block' : 'hidden'} lg:block ${isSidebarCollapsed ? 'lg:w-20' : 'lg:w-64'} transition-all duration-300 fixed lg:static inset-y-0 left-0 z-50`}>
+        {/* Sidebar - Small when closed, overlay when open */}
+        <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-20' : 'w-0 overflow-hidden'}`}>
           <AdminSidebar
             isMobileOpen={isMobileSidebarOpen}
             setIsMobileOpen={setIsMobileSidebarOpen}
@@ -203,15 +203,34 @@ const UserManagement = () => {
             setIsCollapsed={setIsSidebarCollapsed}
           />
         </div>
+        
+        {/* Overlay Sidebar when expanded */}
+        {!isSidebarCollapsed && (
+          <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 shadow-lg">
+            <AdminSidebar
+              isMobileOpen={isMobileSidebarOpen}
+              setIsMobileOpen={setIsMobileSidebarOpen}
+              isCollapsed={isSidebarCollapsed}
+              setIsCollapsed={setIsSidebarCollapsed}
+            />
+          </div>
+        )}
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div 
+          className="flex-1 flex flex-col overflow-hidden relative transition-all duration-300"
+          style={{
+            marginLeft: typeof window !== 'undefined' && window.innerWidth >= 1024 
+              ? (isSidebarCollapsed ? '0px' : '256px')
+              : '0px'
+          }}
+        >
           <Navbar
             onMobileMenuClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
             isSidebarCollapsed={isSidebarCollapsed}
           />
 
-          <main className="flex-1 overflow-y-auto p-6">
+          <main className="flex-1 overflow-y-auto p-6" style={{ paddingTop: '80px' }}>
             <div className="max-w-7xl mx-auto">
               {/* Header */}
               <div className="mb-6 flex justify-between items-center">
@@ -266,54 +285,56 @@ const UserManagement = () => {
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: '#EF4444' }}></div>
                 </div>
               ) : (
-                <div className="bg-white rounded-xl shadow-md border overflow-hidden" style={{ borderColor: '#E5E7EB' }}>
-                  <div className="overflow-x-auto" style={{ maxWidth: '100%' }}>
-                    <table className="w-full divide-y divide-gray-200" style={{ minWidth: '1200px' }}>
-                      <thead style={{ backgroundColor: '#F9FAFB' }}>
+                <div className="bg-white border border-[#003366] rounded-lg overflow-hidden">
+                  <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">
+                    <h3 className="text-sm font-semibold">Users</h3>
+                  </div>
+                  <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container" style={{ width: '100%' }}>
+                    <table className="w-full text-sm border border-[#003366]" style={{ minWidth: '1200px' }}>
+                      <thead className="bg-gray-100 text-[#003366] sticky top-0">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: '#6B7280' }}>Username</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: '#6B7280' }}>Name</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: '#6B7280' }}>Mobile</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: '#6B7280' }}>Role</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: '#6B7280' }}>Status</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: '#6B7280' }}>Created By</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: '#6B7280' }}>Creation Date</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: '#6B7280' }}>Last Login</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: '#6B7280' }}>Email</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: '#6B7280' }}>Actions</th>
+                          <th className="text-left py-3 px-3 font-semibold whitespace-nowrap">Username</th>
+                          <th className="text-left py-3 px-3 font-semibold whitespace-nowrap">Name</th>
+                          <th className="text-left py-3 px-3 font-semibold whitespace-nowrap">Mobile</th>
+                          <th className="text-left py-3 px-3 font-semibold whitespace-nowrap">Role</th>
+                          <th className="text-left py-3 px-3 font-semibold whitespace-nowrap">Status</th>
+                          <th className="text-left py-3 px-3 font-semibold whitespace-nowrap">Created By</th>
+                          <th className="text-left py-3 px-3 font-semibold whitespace-nowrap">Creation Date</th>
+                          <th className="text-left py-3 px-3 font-semibold whitespace-nowrap">Email</th>
+                          <th className="text-left py-3 px-3 font-semibold whitespace-nowrap">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
+                      <tbody className="bg-white">
                         {filteredUsers.length === 0 ? (
                           <tr>
-                            <td colSpan="10" className="px-6 py-8 text-center" style={{ color: '#6B7280' }}>
+                            <td colSpan="9" className="py-8 px-3 text-center text-gray-500">
                               {searchTerm ? 'No users found matching your search.' : 'No users found.'}
                             </td>
                           </tr>
                         ) : (
-                          filteredUsers.map((userItem) => (
-                            <tr key={userItem.username} className="hover:bg-gray-50">
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium" style={{ color: '#1F2937' }}>{userItem.username}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: '#1F2937' }}>
+                          filteredUsers.map((userItem, index) => (
+                            <tr key={userItem.username} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                              <td className="py-3 px-3 text-gray-800 font-medium whitespace-nowrap">{userItem.username}</td>
+                              <td className="py-3 px-3 text-gray-700 whitespace-nowrap">
                                 {userItem.first_name} {userItem.last_name}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: '#6B7280' }}>{userItem.mobile_number || '-'}</td>
-                              <td className="px-6 py-4 whitespace-nowrap">
+                              <td className="py-3 px-3 text-gray-700 whitespace-nowrap">{userItem.mobile_number || '-'}</td>
+                              <td className="py-3 px-3 whitespace-nowrap">
                                 <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                                   userItem.role === 'admin' || userItem.role === 'Admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
                                 }`}>
                                   {userItem.role || 'user'}
                                 </span>
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
+                              <td className="py-3 px-3 whitespace-nowrap">
                                 <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                                   userItem.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                                 }`}>
                                   {userItem.status || (userItem.is_active ? 'Active' : 'Inactive')}
                                 </span>
                               </td>
-                              <td className="px-4 py-4 whitespace-nowrap text-sm" style={{ color: '#6B7280' }}>{userItem.created_by || '-'}</td>
-                              <td className="px-4 py-4 whitespace-nowrap text-sm" style={{ color: '#6B7280' }}>
+                              <td className="py-3 px-3 text-gray-700 whitespace-nowrap">{userItem.created_by || '-'}</td>
+                              <td className="py-3 px-3 text-gray-700 whitespace-nowrap">
                                 {userItem.creation_date ? (() => {
                                   try {
                                     return new Date(userItem.creation_date).toLocaleString('en-US', {
@@ -328,23 +349,8 @@ const UserManagement = () => {
                                   }
                                 })() : '-'}
                               </td>
-                              <td className="px-4 py-4 whitespace-nowrap text-sm" style={{ color: '#6B7280' }}>
-                                {userItem.last_login ? (() => {
-                                  try {
-                                    return new Date(userItem.last_login).toLocaleString('en-US', {
-                                      year: 'numeric',
-                                      month: '2-digit',
-                                      day: '2-digit',
-                                      hour: '2-digit',
-                                      minute: '2-digit'
-                                    })
-                                  } catch (e) {
-                                    return userItem.last_login
-                                  }
-                                })() : '-'}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: '#6B7280' }}>{userItem.email || '-'}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <td className="py-3 px-3 text-gray-700 whitespace-nowrap">{userItem.email || '-'}</td>
+                              <td className="py-3 px-3 whitespace-nowrap">
                                 <div className="flex space-x-2">
                                   <button
                                     onClick={() => openEditModal(userItem)}
@@ -359,7 +365,7 @@ const UserManagement = () => {
                                       className="cursor-pointer font-medium"
                                     style={{ color: '#EF4444' }}
                                     >
-                                      Delete
+                                      Deactivate
                                     </button>
                                   )}
                                 </div>
@@ -744,13 +750,13 @@ const UserManagement = () => {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* Deactivate Confirmation Modal */}
       {showDeleteModal && selectedUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-md border max-w-md w-full p-6" style={{ borderColor: '#E5E7EB' }}>
-            <h2 className="text-2xl font-bold mb-4" style={{ color: '#1F2937' }}>Delete User</h2>
+            <h2 className="text-2xl font-bold mb-4" style={{ color: '#1F2937' }}>Deactivate User</h2>
             <p className="mb-6" style={{ color: '#6B7280' }}>
-              Are you sure you want to delete user <strong style={{ color: '#1F2937' }}>{selectedUser.username}</strong>? This action cannot be undone.
+              Are you sure you want to deactivate user <strong style={{ color: '#1F2937' }}>{selectedUser.username}</strong>? This action will disable the user account.
             </p>
             <div className="flex justify-end space-x-3">
               <button
@@ -768,7 +774,7 @@ const UserManagement = () => {
                 className="px-4 py-2 text-white rounded-lg transition-colors cursor-pointer"
                 style={{ backgroundColor: '#EF4444' }}
               >
-                Delete
+                Deactivate
               </button>
             </div>
           </div>
