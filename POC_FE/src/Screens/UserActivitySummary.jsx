@@ -14,15 +14,46 @@ const UserActivitySummary = () => {
   const [activityData, setActivityData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Filter states
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+  const [username, setUsername] = useState('');
 
   useEffect(() => {
-    fetchActivitySummary();
-  }, []);
+    if (authToken) {
+      fetchActivitySummary();
+    }
+  }, [authToken]);
 
   const fetchActivitySummary = async () => {
+    if (!authToken) {
+      setError('Authentication required');
+      return;
+    }
+
     try {
       setLoading(true);
-      const response = await fetch(`${apiBaseUrl}/activity/summary/`, {
+      setError(null);
+      
+      // Build query parameters
+      const params = new URLSearchParams();
+      if (username) {
+        params.append('username', username);
+      }
+      if (fromDate) {
+        params.append('from_date', fromDate);
+      }
+      if (toDate) {
+        params.append('to_date', toDate);
+      }
+      
+      const queryString = params.toString();
+      const url = `${apiBaseUrl}/activity/summary/${queryString ? `?${queryString}` : ''}`;
+      
+      console.log('Fetching activity summary with URL:', url);
+      
+      const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${authToken}`,
           'Content-Type': 'application/json',
@@ -33,13 +64,28 @@ const UserActivitySummary = () => {
         const data = await response.json();
         setActivityData(data);
       } else {
-        setError('Failed to fetch activity summary');
+        const errorData = await response.json().catch(() => ({ error: 'Failed to fetch activity summary' }));
+        setError(errorData.error || 'Failed to fetch activity summary');
       }
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Failed to fetch activity summary');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleApplyFilters = () => {
+    fetchActivitySummary();
+  };
+
+  const handleResetFilters = () => {
+    setFromDate('');
+    setToDate('');
+    setUsername('');
+    // Fetch with empty filters after a short delay to allow state to update
+    setTimeout(() => {
+      fetchActivitySummary();
+    }, 100);
   };
 
   const formatTime = (seconds) => {
@@ -54,26 +100,65 @@ const UserActivitySummary = () => {
     return new Date(dateString).toLocaleString();
   };
 
-  if (loading) {
-    return <div>Loading activity summary...</div>;
+  if (loading && !activityData) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="flex h-screen overflow-hidden">
+          {/* Sidebar - Small when closed, overlay when open */}
+          <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-20' : 'w-0 overflow-hidden'}`}>
+            <AdminSidebar
+              isMobileOpen={isMobileSidebarOpen}
+              setIsMobileOpen={setIsMobileSidebarOpen}
+              isCollapsed={isSidebarCollapsed}
+              setIsCollapsed={setIsSidebarCollapsed}
+            />
+          </div>
+          
+          {/* Overlay Sidebar when expanded */}
+          {!isSidebarCollapsed && (
+            <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 shadow-lg">
+              <AdminSidebar
+                isMobileOpen={isMobileSidebarOpen}
+                setIsMobileOpen={setIsMobileSidebarOpen}
+                isCollapsed={isSidebarCollapsed}
+                setIsCollapsed={setIsSidebarCollapsed}
+              />
+            </div>
+          )}
+
+          {/* Main Content */}
+          <div 
+            className="flex-1 flex flex-col overflow-hidden relative transition-all duration-300"
+            style={{
+              marginLeft: typeof window !== 'undefined' && window.innerWidth >= 1024 
+                ? (isSidebarCollapsed ? '0px' : '256px')
+                : '0px'
+            }}
+          >
+            <Navbar
+              onMobileMenuClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+              isSidebarCollapsed={isSidebarCollapsed}
+            />
+            <main className="flex-1 overflow-y-auto p-6 flex items-center justify-center" style={{ paddingTop: '80px' }}>
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading activity summary...</p>
+              </div>
+            </main>
+          </div>
+        </div>
+      </div>
+    );
   }
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
-  if (!activityData) {
-    return <div>No activity data available</div>;
-  }
-
-  const activitySummary = activityData.activity_summary?.[0] || {};
-  const sectionVisits = activityData.section_visits || [];
+  const activitySummaries = activityData?.activity_summary || [];
+  const sectionVisits = activityData?.section_visits || [];
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="flex h-screen overflow-hidden">
-        {/* Sidebar */}
-        <div className={`${isMobileSidebarOpen ? 'block' : 'hidden'} lg:block ${isSidebarCollapsed ? 'lg:w-20' : 'lg:w-64'} transition-all duration-300 fixed lg:static inset-y-0 left-0 z-50`}>
+        {/* Sidebar - Small when closed, overlay when open */}
+        <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-20' : 'w-0 overflow-hidden'}`}>
           <AdminSidebar
             isMobileOpen={isMobileSidebarOpen}
             setIsMobileOpen={setIsMobileSidebarOpen}
@@ -81,120 +166,207 @@ const UserActivitySummary = () => {
             setIsCollapsed={setIsSidebarCollapsed}
           />
         </div>
+        
+        {/* Overlay Sidebar when expanded */}
+        {!isSidebarCollapsed && (
+          <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 shadow-lg">
+            <AdminSidebar
+              isMobileOpen={isMobileSidebarOpen}
+              setIsMobileOpen={setIsMobileSidebarOpen}
+              isCollapsed={isSidebarCollapsed}
+              setIsCollapsed={setIsSidebarCollapsed}
+            />
+          </div>
+        )}
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div 
+          className="flex-1 flex flex-col overflow-hidden relative transition-all duration-300"
+          style={{
+            marginLeft: typeof window !== 'undefined' && window.innerWidth >= 1024 
+              ? (isSidebarCollapsed ? '0px' : '256px')
+              : '0px'
+          }}
+        >
           <Navbar
             onMobileMenuClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
             isSidebarCollapsed={isSidebarCollapsed}
           />
 
-          <main className="flex-1 overflow-y-auto p-6">
+          <main className="flex-1 overflow-y-auto p-6" style={{ paddingTop: '80px' }}>
             <div className="max-w-7xl mx-auto">
               <div style={{ padding: '20px' }}>
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">User Activity Summary</h2>
+                {/* <h2 className="text-3xl font-bold text-gray-900 mb-6">User Activity Summary</h2> */}
                 
-                {/* Activity Summary Table */}
-                <div style={{ marginBottom: '30px' }}>
-                  <h3 className="text-xl font-semibold mb-4">Session Information</h3>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ddd' }}>
-                    <thead>
-                      <tr style={{ backgroundColor: '#f2f2f2' }}>
-                        <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Metric</th>
-                        <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Value</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>First Login</td>
-                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                          {formatDateTime(activitySummary.first_login)}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>Last Activity</td>
-                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                          {formatDateTime(activitySummary.last_activity)}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>Active Time</td>
-                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                          {formatTime(activitySummary.active_time_seconds || 0)}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>Inactive Duration</td>
-                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                          {formatTime(activitySummary.inactive_duration_seconds || 0)}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>Page Visits</td>
-                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                          {activitySummary.page_visits || 0}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>API Calls</td>
-                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                          {activitySummary.api_calls || 0}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>Status</td>
-                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                          {activitySummary.status || 'N/A'}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                {/* Filters Section */}
+                <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Filters</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {/* Username Filter */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Username
+                      </label>
+                      <input
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="Enter username"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                    
+                    {/* From Date Filter */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        From Date
+                      </label>
+                      <input
+                        type="date"
+                        value={fromDate}
+                        onChange={(e) => setFromDate(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                    
+                    {/* To Date Filter */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        To Date
+                      </label>
+                      <input
+                        type="date"
+                        value={toDate}
+                        onChange={(e) => setToDate(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                    
+                    {/* Action Buttons */}
+                    <div className="flex items-end gap-2">
+                      <button
+                        onClick={handleApplyFilters}
+                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                      >
+                        Apply Filters
+                      </button>
+                      <button
+                        onClick={handleResetFilters}
+                        className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                      >
+                        Reset
+                      </button>
+                    </div>
+                  </div>
                 </div>
+                
+                {/* Error Message */}
+                {error && (
+                  <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                    {error}
+                  </div>
+                )}
+                
+                {/* Activity Summary Table - Multiple Sessions */}
+                {activityData && activitySummaries.length > 0 && (
+                  <>
+                    <div className="bg-white border border-[#003366] rounded-lg overflow-hidden mb-6">
+                      <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">
+                        <h3 className="text-sm font-semibold">Activity Summary - All Sessions</h3>
+                      </div>
+                      <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container" style={{ width: '100%' }}>
+                        <table className="w-full text-sm border border-[#003366]" style={{ minWidth: '1400px' }}>
+                          <thead className="bg-gray-100 text-[#003366] sticky top-0">
+                            <tr>
+                              <th className="text-left py-3 px-3 font-semibold whitespace-nowrap">Username</th>
+                              <th className="text-left py-3 px-3 font-semibold whitespace-nowrap">First Login</th>
+                              <th className="text-left py-3 px-3 font-semibold whitespace-nowrap">Last Login</th>
+                              <th className="text-right py-3 px-3 font-semibold whitespace-nowrap">Active Time</th>
+                              <th className="text-right py-3 px-3 font-semibold whitespace-nowrap">Inactive Duration</th>
+                              <th className="text-right py-3 px-3 font-semibold whitespace-nowrap">Page Visits</th>
+                              <th className="text-right py-3 px-3 font-semibold whitespace-nowrap">API Calls</th>
+                              <th className="text-left py-3 px-3 font-semibold whitespace-nowrap">Most Visited Page</th>
+                              <th className="text-left py-3 px-3 font-semibold whitespace-nowrap">Status</th>
+                              <th className="text-left py-3 px-3 font-semibold whitespace-nowrap">Last Logout Time</th>
+                              <th className="text-left py-3 px-3 font-semibold whitespace-nowrap">Logout Reason</th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white">
+                            {activitySummaries.map((summary, index) => (
+                              <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                <td className="py-3 px-3 text-gray-800 font-medium whitespace-nowrap">{summary.username || 'N/A'}</td>
+                                <td className="py-3 px-3 text-gray-700 whitespace-nowrap">{formatDateTime(summary.first_login)}</td>
+                                <td className="py-3 px-3 text-gray-700 whitespace-nowrap">{formatDateTime(summary.last_login)}</td>
+                                <td className="py-3 px-3 text-right text-gray-700 whitespace-nowrap">{formatTime(summary.active_time_seconds || 0)}</td>
+                                <td className="py-3 px-3 text-right text-gray-700 whitespace-nowrap">{formatTime(summary.inactive_duration_seconds || 0)}</td>
+                                <td className="py-3 px-3 text-right text-gray-700 whitespace-nowrap">{summary.page_visits || 0}</td>
+                                <td className="py-3 px-3 text-right text-gray-700 whitespace-nowrap">{summary.api_calls || 0}</td>
+                                <td className="py-3 px-3 text-gray-700 whitespace-nowrap">{summary.most_visited_page || '-'}</td>
+                                <td className="py-3 px-3 whitespace-nowrap">
+                                  <span style={{
+                                    padding: '4px 8px',
+                                    borderRadius: '4px',
+                                    fontSize: '12px',
+                                    fontWeight: '600',
+                                    backgroundColor: summary.status === 'Active' ? '#d1fae5' : summary.status === 'SessionTimeout' ? '#fee2e2' : '#e5e7eb',
+                                    color: summary.status === 'Active' ? '#065f46' : summary.status === 'SessionTimeout' ? '#991b1b' : '#374151'
+                                  }}>
+                                    {summary.status || 'N/A'}
+                                  </span>
+                                </td>
+                                <td className="py-3 px-3 text-gray-700 whitespace-nowrap">{summary.last_logout_time ? formatDateTime(summary.last_logout_time) : '-'}</td>
+                                <td className="py-3 px-3 text-gray-700 whitespace-nowrap">{summary.logout_reason || '-'}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
 
-                {/* Section Visits Table */}
-                <div>
-                  <h3 className="text-xl font-semibold mb-4">Most Visited Sections</h3>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ddd' }}>
-                    <thead>
-                      <tr style={{ backgroundColor: '#f2f2f2' }}>
-                        <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Section Name</th>
-                        <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Backend Name</th>
-                        <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'right' }}>Total Visits</th>
-                        <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'right' }}>Time Spent</th>
-                        <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Last Visit</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {sectionVisits.length > 0 ? (
-                        sectionVisits.map((section, index) => (
-                          <tr key={index}>
-                            <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                              {section.section_name}
-                            </td>
-                            <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                              {section.backend_name || 'N/A'}
-                            </td>
-                            <td style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'right' }}>
-                              {section.total_visits || 0}
-                            </td>
-                            <td style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'right' }}>
-                              {formatTime(section.total_time_spent_seconds || 0)}
-                            </td>
-                            <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                              {formatDateTime(section.last_visit_time)}
-                            </td>
+                  {/* Section Visits Table */}
+                  <div className="bg-white border border-[#003366] rounded-lg overflow-hidden">
+                    <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">
+                      <h3 className="text-sm font-semibold">Most Visited Sections</h3>
+                    </div>
+                    <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container" style={{ width: '100%' }}>
+                      <table className="w-full text-sm border border-[#003366]">
+                        <thead className="bg-gray-100 text-[#003366] sticky top-0">
+                          <tr>
+                            <th className="text-left py-3 px-3 font-semibold whitespace-nowrap">Section Name</th>
+                            <th className="text-left py-3 px-3 font-semibold whitespace-nowrap">Backend Name</th>
+                            <th className="text-right py-3 px-3 font-semibold whitespace-nowrap">Total Visits</th>
+                            <th className="text-right py-3 px-3 font-semibold whitespace-nowrap">Time Spent</th>
+                            <th className="text-left py-3 px-3 font-semibold whitespace-nowrap">Last Visit</th>
                           </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="5" style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'center' }}>
-                            No section visits recorded
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                        </thead>
+                        <tbody className="bg-white">
+                          {sectionVisits.length > 0 ? (
+                            sectionVisits.map((section, index) => (
+                              <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                <td className="py-3 px-3 text-gray-800 font-medium whitespace-nowrap">{section.section_name}</td>
+                                <td className="py-3 px-3 text-gray-700 whitespace-nowrap">{section.backend_name || 'N/A'}</td>
+                                <td className="py-3 px-3 text-right text-gray-700 whitespace-nowrap">{section.total_visits || 0}</td>
+                                <td className="py-3 px-3 text-right text-gray-700 whitespace-nowrap">{formatTime(section.total_time_spent_seconds || 0)}</td>
+                                <td className="py-3 px-3 text-gray-700 whitespace-nowrap">{formatDateTime(section.last_visit_time)}</td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan="5" className="py-8 px-3 text-center text-gray-500">No section visits recorded</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  </>
+                )}
+                
+                {!activityData && !loading && (
+                  <div className="text-center py-12 text-gray-500">
+                    No activity data available. Please apply filters to view data.
+                  </div>
+                )}
               </div>
             </div>
           </main>
