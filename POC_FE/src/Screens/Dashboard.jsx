@@ -100,14 +100,26 @@ const Dashboard = () => {
   const [collectionDataError, setCollectionDataError] = useState(null)
   const itemsPerPage = 10
   // Initialize date filters - default to last 30 days
-  const [fromDate, setFromDate] = useState(() => {
+  const getDefaultFromDate = () => {
     const date = new Date()
     date.setDate(date.getDate() - 30)
     return date.toISOString().split('T')[0]
-  })
-  const [toDate, setToDate] = useState(() => {
+  }
+  const getDefaultToDate = () => {
     return new Date().toISOString().split('T')[0]
-  })
+  }
+  const [fromDate, setFromDate] = useState(() => getDefaultFromDate())
+  const [toDate, setToDate] = useState(() => getDefaultToDate())
+  
+  // Helper to check if dates are at default values
+  const isFromDateDefault = () => {
+    const defaultFrom = getDefaultFromDate()
+    return fromDate === defaultFrom
+  }
+  const isToDateDefault = () => {
+    const defaultTo = getDefaultToDate()
+    return toDate === defaultTo
+  }
   const [favoriteCards, setFavoriteCards] = useState(() => {
     try {
       const stored = localStorage.getItem('favoriteCards')
@@ -1161,10 +1173,8 @@ const Dashboard = () => {
     setFilterState('All States')
     setFilterDistrict('All Districts')
     setFilterPICode('All PI Codes')
-    const date = new Date()
-    date.setDate(date.getDate() - 30)
-    setFromDate(date.toISOString().split('T')[0])
-    setToDate(new Date().toISOString().split('T')[0])
+    setFromDate(getDefaultFromDate())
+    setToDate(getDefaultToDate())
   }
 
   // Customer pagination
@@ -2301,9 +2311,12 @@ const Dashboard = () => {
           </button>
         </div>
         {verticalDataLoading ? (
-          <div className="p-8 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
-            <p className="mt-2 text-sm text-gray-600">Loading data...</p>
+          <div className="py-12 px-8 text-center">
+            <div 
+              className="inline-block animate-spin h-10 w-10 border-4 border-red-600" 
+              style={{ borderRadius: '0' }}
+            ></div>
+            <p className="mt-4 text-sm font-medium text-gray-600">Loading data...</p>
           </div>
         ) : verticalDataError ? (
           <div className="p-4 text-center text-red-600">Error: {verticalDataError}</div>
@@ -2432,9 +2445,12 @@ const Dashboard = () => {
           </button>
         </div>
         {verticalDataLoading ? (
-          <div className="p-8 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
-            <p className="mt-2 text-sm text-gray-600">Loading data...</p>
+          <div className="py-12 px-8 text-center">
+            <div 
+              className="inline-block animate-spin h-10 w-10 border-4 border-red-600" 
+              style={{ borderRadius: '0' }}
+            ></div>
+            <p className="mt-4 text-sm font-medium text-gray-600">Loading data...</p>
           </div>
         ) : verticalDataError ? (
           <div className="p-4 text-center text-red-600">Error: {verticalDataError}</div>
@@ -2549,9 +2565,12 @@ const Dashboard = () => {
           </button>
         </div>
         {verticalDataLoading ? (
-          <div className="p-8 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
-            <p className="mt-2 text-sm text-gray-600">Loading data...</p>
+          <div className="py-12 px-8 text-center">
+            <div 
+              className="inline-block animate-spin h-10 w-10 border-4 border-red-600" 
+              style={{ borderRadius: '0' }}
+            ></div>
+            <p className="mt-4 text-sm font-medium text-gray-600">Loading data...</p>
           </div>
         ) : verticalDataError ? (
           <div className="p-4 text-center text-red-600">Error: {verticalDataError}</div>
@@ -2953,7 +2972,7 @@ const Dashboard = () => {
     const paginatedData = bucketData.slice(startIndex, endIndex)
 
     return (
-      <div className="bg-white border border-[#003366] rounded-lg overflow-hidden">
+      <div className="bg-white border border-[#003366] rounded-lg overflow-hidden mt-16">
         <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">
           <h3 className="text-sm font-semibold">Bucket Wise Summary</h3>
           <button
@@ -3691,10 +3710,24 @@ const Dashboard = () => {
 
   // Render Deposition Table
   const renderDepositionTable = () => {
+    if (depositionLoading) {
+      return (
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-12 text-center">
+          <div className="flex flex-col items-center space-y-4">
+            <div 
+              className="animate-spin h-10 w-10 border-4 border-red-600" 
+              style={{ borderRadius: '0' }}
+            ></div>
+            <p className="text-sm font-medium text-gray-600">Loading deposition data...</p>
+          </div>
+        </div>
+      )
+    }
+    
     if (!depositionData || !depositionData.deposition_data || depositionData.deposition_data.length === 0) {
       return (
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 text-center text-gray-500">
-          {depositionLoading ? 'Loading deposition data...' : 'No deposition data available'}
+          No deposition data available
         </div>
       )
     }
@@ -4107,7 +4140,15 @@ const Dashboard = () => {
         </div>
       )}
       
-      <div ref={mainContentRef} className="flex flex-col overflow-hidden flex-1 relative">
+      <div 
+        ref={mainContentRef} 
+        className="flex flex-col overflow-hidden flex-1 relative transition-all duration-300"
+        style={{
+          marginLeft: typeof window !== 'undefined' && window.innerWidth >= 1024 
+            ? (isSidebarCollapsed ? '0px' : '272px')
+            : '0px'
+        }}
+      >
         {/* Navbar */}
         <Navbar 
           onMobileMenuClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)} 
@@ -4117,17 +4158,14 @@ const Dashboard = () => {
 
         {/* Loading Overlay */}
         {dashboardLoading && (
-          <div className="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50">
-            <div 
-              className="w-16 h-16 border-4 border-blue-600 animate-spin" 
-              style={{
-                borderRadius: '0',
-                borderTopColor: '#2563eb',
-                borderRightColor: '#2563eb',
-                borderBottomColor: '#2563eb',
-                borderLeftColor: '#2563eb'
-              }}
-            ></div>
+          <div className="absolute inset-0 bg-white bg-opacity-95 flex flex-col items-center justify-center z-50">
+            <div className="flex flex-col items-center space-y-4">
+              <div 
+                className="animate-spin h-12 w-12 border-4 border-red-600" 
+                style={{ borderRadius: '0' }}
+              ></div>
+              <p className="text-sm font-medium text-gray-600">Loading dashboard data...</p>
+            </div>
           </div>
         )}
 
@@ -4207,7 +4245,7 @@ const Dashboard = () => {
         )}
         
         {/* Main Content - Scrollable */}
-        <main className="flex-1 overflow-hidden flex flex-col">
+        <main className="flex-1 overflow-hidden flex flex-col" style={{ paddingTop: '64px' }}>
           {/* Collection Dashboard Content */}
           <div className="bg-gray-100 flex-1 overflow-hidden flex">
             <div className="flex gap-4 p-4 w-full h-full overflow-hidden">
@@ -4232,7 +4270,9 @@ const Dashboard = () => {
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">Type of Loan <span className="text-gray-400 font-normal">(4)</span></label>
                       <select 
-                        className="w-full p-2 border border-gray-300 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
+                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${
+                          filterLoanType !== 'All Loans' ? 'border-2 border-red-600' : 'border border-gray-300'
+                        }`}
                         value={filterLoanType}
                         onChange={(e) => setFilterLoanType(e.target.value)}
                       >
@@ -4245,7 +4285,9 @@ const Dashboard = () => {
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">DPD Buckets <span className="text-gray-400 font-normal">(6)</span></label>
                       <select 
-                        className="w-full p-2 border border-gray-300 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
+                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${
+                          filterDPD !== 'All Buckets' ? 'border-2 border-red-600' : 'border border-gray-300'
+                        }`}
                         value={filterDPD}
                         onChange={(e) => setFilterDPD(e.target.value)}
                       >
@@ -4261,7 +4303,9 @@ const Dashboard = () => {
                       <label className="block text-xs font-medium text-gray-600 mb-1">From Date</label>
                       <input 
                         type="date" 
-                        className="w-full p-2 border border-gray-300 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors" 
+                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${
+                          !isFromDateDefault() ? 'border-2 border-red-600' : 'border border-gray-300'
+                        }`}
                         value={fromDate}
                         onChange={(e) => setFromDate(e.target.value)}
                       />
@@ -4270,7 +4314,9 @@ const Dashboard = () => {
                       <label className="block text-xs font-medium text-gray-600 mb-1">To Date</label>
                       <input 
                         type="date" 
-                        className="w-full p-2 border border-gray-300 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors" 
+                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${
+                          !isToDateDefault() ? 'border-2 border-red-600' : 'border border-gray-300'
+                        }`}
                         value={toDate}
                         onChange={(e) => setToDate(e.target.value)}
                         max={new Date().toISOString().split('T')[0]}
@@ -4280,7 +4326,9 @@ const Dashboard = () => {
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">Geography <span className="text-gray-400 font-normal">(6)</span></label>
                       <select 
-                        className="w-full p-2 border border-gray-300 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
+                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${
+                          filterGeography !== 'All Regions' ? 'border-2 border-red-600' : 'border border-gray-300'
+                        }`}
                         value={filterGeography}
                         onChange={(e) => setFilterGeography(e.target.value)}
                       >
@@ -4295,7 +4343,9 @@ const Dashboard = () => {
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">State <span className="text-gray-400 font-normal">(9)</span></label>
                       <select 
-                        className="w-full p-2 border border-gray-300 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
+                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${
+                          filterState !== 'All States' ? 'border-2 border-red-600' : 'border border-gray-300'
+                        }`}
                         value={filterState}
                         onChange={(e) => setFilterState(e.target.value)}
                       >
@@ -4313,7 +4363,9 @@ const Dashboard = () => {
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">District <span className="text-gray-400 font-normal">(10)</span></label>
                       <select 
-                        className="w-full p-2 border border-gray-300 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
+                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${
+                          filterDistrict !== 'All Districts' ? 'border-2 border-red-600' : 'border border-gray-300'
+                        }`}
                         value={filterDistrict}
                         onChange={(e) => setFilterDistrict(e.target.value)}
                       >
@@ -4332,7 +4384,9 @@ const Dashboard = () => {
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">PI Code <span className="text-gray-400 font-normal">(13)</span></label>
                       <select 
-                        className="w-full p-2 border border-gray-300 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
+                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${
+                          filterPICode !== 'All PI Codes' ? 'border-2 border-red-600' : 'border border-gray-300'
+                        }`}
                         value={filterPICode}
                         onChange={(e) => setFilterPICode(e.target.value)}
                       >
@@ -4846,8 +4900,24 @@ const Dashboard = () => {
                       </button>
                     </div>
 
-                    {/* Loan Type Cards - Always show on top */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* Loading State - Show main loader */}
+                    {verticalDataLoading && (
+                      <div className="flex flex-col items-center justify-center py-20 px-4" style={{ minHeight: '400px' }}>
+                        <div className="flex flex-col items-center space-y-4">
+                          <div 
+                className="animate-spin h-12 w-12 border-4 border-red-600" 
+                style={{ borderRadius: '0' }}
+              ></div>
+                          <p className="text-sm font-medium text-gray-600">Loading allocation data...</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Content - Show only when not loading */}
+                    {!verticalDataLoading && (
+                      <>
+                        {/* Loan Type Cards - Always show on top */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         {/* Tractor Finance Card */}
                         <div
                           onClick={() => setSelectedLoanType('tractor')}
@@ -4963,62 +5033,64 @@ const Dashboard = () => {
                             <div className="relative w-32 flex-shrink-0 overflow-hidden"></div>
                           </div>
                         </div>
-                      </div>
+                        </div>
 
-                    {/* Grid of Tables - Always show below cards */}
-                    <div className="mt-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Vertical Summary Table */}
-                      <div className="lg:col-span-2">
-                        {renderProductSummaryTable()}
-                      </div>
-                      
-                      {/* Vertical Allocation Summary Table */}
-                      <div className="lg:col-span-2">
-                        {renderProductAllocationTable()}
-                      </div>
-                      
-                      {/* NCM Allocation Summary Table */}
-                      <div>
-                        {renderNCMAllocationTable()}
-                      </div>
-                      
-                      {/* RCM Allocation Summary Table */}
-                      <div>
-                        {renderRCMAllocationTable()}
-                      </div>
-                      
-                      {/* ACM Allocation Summary Table */}
-                      <div>
-                        {renderACMAllocationTable()}
-                      </div>
-                      
-                      {/* ALLOCATION_ADMIN Allocation Summary Table */}
-                      <div>
-                        {renderAllocationAdminTable()}
-                      </div>
-                      
-                      {/* BO Allocation Summary Table */}
-                      <div>
-                        {renderBOTable()}
-                      </div>
-                      
-                      {/* CLM Allocation Summary Table */}
-                      <div>
-                        {renderCLMTable()}
-                      </div>
-                      
-                      {/* DTR Allocation Summary Table */}
-                      <div>
-                        {renderDTRTable()}
-                      </div>
-                      
-                      {/* TCM Allocation Summary Table */}
-                      <div>
-                        {renderTCMTable()}
-                      </div>
-                    </div>
-                    </div>
+                        {/* Grid of Tables - Always show below cards */}
+                        <div className="mt-6">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Vertical Summary Table */}
+                            <div className="lg:col-span-2">
+                              {renderProductSummaryTable()}
+                            </div>
+                            
+                            {/* Vertical Allocation Summary Table */}
+                            <div className="lg:col-span-2">
+                              {renderProductAllocationTable()}
+                            </div>
+                            
+                            {/* NCM Allocation Summary Table */}
+                            <div>
+                              {renderNCMAllocationTable()}
+                            </div>
+                            
+                            {/* RCM Allocation Summary Table */}
+                            <div>
+                              {renderRCMAllocationTable()}
+                            </div>
+                            
+                            {/* ACM Allocation Summary Table */}
+                            <div>
+                              {renderACMAllocationTable()}
+                            </div>
+                            
+                            {/* ALLOCATION_ADMIN Allocation Summary Table */}
+                            <div>
+                              {renderAllocationAdminTable()}
+                            </div>
+                            
+                            {/* BO Allocation Summary Table */}
+                            <div>
+                              {renderBOTable()}
+                            </div>
+                            
+                            {/* CLM Allocation Summary Table */}
+                            <div>
+                              {renderCLMTable()}
+                            </div>
+                            
+                            {/* DTR Allocation Summary Table */}
+                            <div>
+                              {renderDTRTable()}
+                            </div>
+                            
+                            {/* TCM Allocation Summary Table */}
+                            <div>
+                              {renderTCMTable()}
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
 
@@ -5042,17 +5114,14 @@ const Dashboard = () => {
 
                     {/* Loading State - Show main loader */}
                     {collectionDataLoading && (
-                      <div className="flex items-center justify-center" style={{ minHeight: 'calc(100vh - 300px)' }}>
-                        <div 
-                          className="w-16 h-16 border-4 border-blue-600 animate-spin" 
-                          style={{
-                            borderRadius: '0',
-                            borderTopColor: '#2563eb',
-                            borderRightColor: '#2563eb',
-                            borderBottomColor: '#2563eb',
-                            borderLeftColor: '#2563eb'
-                          }}
-                        ></div>
+                      <div className="flex flex-col items-center justify-center py-20 px-4" style={{ minHeight: '400px' }}>
+                        <div className="flex flex-col items-center space-y-4">
+                          <div 
+                className="animate-spin h-12 w-12 border-4 border-red-600" 
+                style={{ borderRadius: '0' }}
+              ></div>
+                          <p className="text-sm font-medium text-gray-600">Loading collection data...</p>
+                        </div>
                       </div>
                     )}
 
@@ -5103,6 +5172,22 @@ const Dashboard = () => {
                       </button>
                     </div>
 
+                    {/* Loading State - Show main loader */}
+                    {verticalDataLoading && (
+                      <div className="flex flex-col items-center justify-center py-20 px-4" style={{ minHeight: '400px' }}>
+                        <div className="flex flex-col items-center space-y-4">
+                          <div 
+                className="animate-spin h-12 w-12 border-4 border-red-600" 
+                style={{ borderRadius: '0' }}
+              ></div>
+                          <p className="text-sm font-medium text-gray-600">Loading productivity data...</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Content - Show only when not loading */}
+                    {!verticalDataLoading && (
+                      <>
                     {/* Summary Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                       <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
@@ -5501,6 +5586,8 @@ const Dashboard = () => {
                         {renderFTDTimeWiseVisitReportTable()}
                       </div>
                     </div>
+                      </>
+                    )}
                   </div>
                 )}
 
@@ -5688,6 +5775,22 @@ const Dashboard = () => {
                 {/* Staff Performance Leaderboard Table - Show for other metrics (but not allocation or collection) */}
                 {selectedStaffMetric && selectedStaffMetric !== 'allocation' && selectedStaffMetric !== 'collection' && selectedStaffMetric !== 'productivity' && (
                   <div ref={leaderboardTableRef} className="mb-8 bg-white border border-gray-200 rounded-lg p-6 shadow-sm w-full" style={{ maxWidth: '100%', overflow: 'hidden', boxSizing: 'border-box' }}>
+                    {/* Loading State - Show main loader */}
+                    {verticalDataLoading && (
+                      <div className="flex flex-col items-center justify-center py-20 px-4" style={{ minHeight: '400px' }}>
+                        <div className="flex flex-col items-center space-y-4">
+                          <div 
+                className="animate-spin h-12 w-12 border-4 border-red-600" 
+                style={{ borderRadius: '0' }}
+              ></div>
+                          <p className="text-sm font-medium text-gray-600">Loading {getCardName(selectedStaffMetric).toLowerCase()}...</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Content - Show only when not loading */}
+                    {!verticalDataLoading && (
+                      <>
                     {/* Header with Title and Close Button */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                       <div className="flex-1">
@@ -5936,6 +6039,8 @@ const Dashboard = () => {
                         </button>
                       </div>
                     </div>
+                      </>
+                    )}
                   </div>
                 )}
 
