@@ -27,6 +27,7 @@ const Dashboard = () => {
   const [selectedRollMetric, setSelectedRollMetric] = useState(null) // Track selected roll metric (rollForward, rollbackReport)
   const [selectedLoanType, setSelectedLoanType] = useState(null) // Track selected loan type for Case Summary
   const [chartFilter, setChartFilter] = useState('ftd')
+  const [rollRateAnalysisTab, setRollRateAnalysisTab] = useState('customerNumbers') // Track active tab in Roll Rate Analysis: 'customerNumbers', 'customerOutstanding', 'trendAnalysis'
   const leaderboardTableRef = useRef(null)
   const rollForwardRef = useRef(null)
   // Roll Forward expanded rows state
@@ -6705,12 +6706,11 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Rollback Report */}
+                {/* Portfolio Performance */}
                 <div className="mb-8">
-                  <h2 className="text-lg font-semibold text-gray-800 mb-4">Rollback Report</h2>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div 
-                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative ${selectedRollMetric === 'rollbackReport' ? 'border border-blue-600 shadow-sm' : 'card-with-wave card-with-wave-thin card-wave-staff'}`}
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-lg font-semibold text-gray-800">Portfolio Performance</h2>
+                    <button
                       onClick={() => {
                         if (selectedRollMetric === 'rollbackReport') {
                           setSelectedRollMetric(null)
@@ -6718,9 +6718,25 @@ const Dashboard = () => {
                           setSelectedRollMetric('rollbackReport')
                         }
                       }}
+                      className="flex items-center justify-center w-8 h-8 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                      aria-label={selectedRollMetric === 'rollbackReport' ? 'Close roll rate analysis' : 'Open roll rate analysis'}
+                    >
+                      <svg 
+                        className={`w-5 h-5 text-gray-600 transition-transform ${selectedRollMetric === 'rollbackReport' ? 'rotate-180' : ''}`}
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div 
+                      className="group bg-white rounded-lg p-3 transition-all duration-200 relative card-with-wave card-with-wave-thin card-wave-staff"
                     >
                       {renderFavoritePin('rollbackReport')}
-                      <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Rollback Report</h3>
+                      <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Portfolio Performance</h3>
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Total Rollbacks</span>
@@ -6743,7 +6759,7 @@ const Dashboard = () => {
 
                     <div 
                       data-roll-card="rollForward"
-                      className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-staff"
+                      className="group bg-white rounded-lg p-3 transition-all duration-200 relative card-with-wave card-with-wave-thin card-wave-staff"
                     >
                       {renderFavoritePin('rollForward')}
                       <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Roll Forward</h3>
@@ -7543,9 +7559,48 @@ const Dashboard = () => {
                       </div>
                     </div>
 
-                    {/* Roll Rate Analysis for Loans */}
-                    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                      <h3 className="text-sm font-semibold text-gray-900 mb-4">Roll Rate Analysis for Loans</h3>
+                    {/* Tab Navigation */}
+                    <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+                      <div className="flex border-b border-gray-200">
+                        <button
+                          onClick={() => setRollRateAnalysisTab('customerNumbers')}
+                          className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                            rollRateAnalysisTab === 'customerNumbers'
+                              ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                          }`}
+                        >
+                          Customer Numbers
+                        </button>
+                        <button
+                          onClick={() => setRollRateAnalysisTab('customerOutstanding')}
+                          className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                            rollRateAnalysisTab === 'customerOutstanding'
+                              ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                          }`}
+                        >
+                          Customer Outstanding
+                        </button>
+                        <button
+                          onClick={() => setRollRateAnalysisTab('trendAnalysis')}
+                          className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                            rollRateAnalysisTab === 'trendAnalysis'
+                              ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                          }`}
+                        >
+                          Trend Analysis
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Customer Numbers Tab Content */}
+                    {rollRateAnalysisTab === 'customerNumbers' && (
+                      <div className="space-y-6">
+                        {/* Roll Rate Analysis for Loans */}
+                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Roll Rate Analysis for Loans</h3>
                       <div className="overflow-x-auto">
                         <table className="w-full text-xs">
                           <thead>
@@ -7752,220 +7807,230 @@ const Dashboard = () => {
                           </tbody>
                         </table>
                       </div>
-                    </div>
-
-                    {/* Roll Rate Analysis for AUM */}
-                    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                      <h3 className="text-sm font-semibold text-gray-900 mb-4">Roll Rate Analysis for AUM</h3>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-xs">
-                          <thead>
-                            <tr className="bg-gray-50 border-b">
-                              <th className="text-left py-2 px-2 font-semibold text-gray-700">BaseMonth_Bucket</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Regular</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">1 to 30</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">New Loan</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Roll Forward %</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Roll Backward %</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Stabilized %</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Regularised %</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">ClosedLoan %</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr className="border-b hover:bg-gray-50">
-                              <td className="py-2 px-2 text-gray-800 font-medium">Regular</td>
-                              <td className="text-right py-2 px-2 text-gray-700">2,028.58</td>
-                              <td className="text-right py-2 px-2 text-gray-700">77.72</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">33.12</td>
-                              <td className="text-right py-2 px-2 text-gray-700">2.43%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">91.89%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">91.89%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">5.68%</td>
-                            </tr>
-                            <tr className="border-b hover:bg-gray-50">
-                              <td className="py-2 px-2 text-gray-800 font-medium">1 to 30</td>
-                              <td className="text-right py-2 px-2 text-gray-700">18.51</td>
-                              <td className="text-right py-2 px-2 text-gray-700">32.77</td>
-                              <td className="text-right py-2 px-2 text-gray-700">22.36</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">1.13</td>
-                              <td className="text-right py-2 px-2 text-gray-700">28.10%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">23.73%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">42.40%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">5.77%</td>
-                            </tr>
-                            <tr className="border-b hover:bg-gray-50">
-                              <td className="py-2 px-2 text-gray-800 font-medium">31 to 60</td>
-                              <td className="text-right py-2 px-2 text-gray-700">12.34</td>
-                              <td className="text-right py-2 px-2 text-gray-700">8.45</td>
-                              <td className="text-right py-2 px-2 text-gray-700">19.23</td>
-                              <td className="text-right py-2 px-2 text-gray-700">11.56</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">4.12</td>
-                              <td className="text-right py-2 px-2 text-gray-700">39.65%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">15.32%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">37.89%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">8.14%</td>
-                            </tr>
-                            <tr className="border-b hover:bg-gray-50">
-                              <td className="py-2 px-2 text-gray-800 font-medium">61 to 90</td>
-                              <td className="text-right py-2 px-2 text-gray-700">9.87</td>
-                              <td className="text-right py-2 px-2 text-gray-700">6.54</td>
-                              <td className="text-right py-2 px-2 text-gray-700">5.12</td>
-                              <td className="text-right py-2 px-2 text-gray-700">18.45</td>
-                              <td className="text-right py-2 px-2 text-gray-700">12.34</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">3.89</td>
-                              <td className="text-right py-2 px-2 text-gray-700">47.23%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">12.45%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">36.98%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">7.99%</td>
-                            </tr>
-                            <tr className="border-b hover:bg-gray-50">
-                              <td className="py-2 px-2 text-gray-800 font-medium">91 to 120</td>
-                              <td className="text-right py-2 px-2 text-gray-700">7.65</td>
-                              <td className="text-right py-2 px-2 text-gray-700">5.23</td>
-                              <td className="text-right py-2 px-2 text-gray-700">4.12</td>
-                              <td className="text-right py-2 px-2 text-gray-700">2.78</td>
-                              <td className="text-right py-2 px-2 text-gray-700">14.56</td>
-                              <td className="text-right py-2 px-2 text-gray-700">9.12</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">3.12</td>
-                              <td className="text-right py-2 px-2 text-gray-700">52.34%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">10.12%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">34.56%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">8.23%</td>
-                            </tr>
-                            <tr className="border-b hover:bg-gray-50">
-                              <td className="py-2 px-2 text-gray-800 font-medium">121 to 180</td>
-                              <td className="text-right py-2 px-2 text-gray-700">14.56</td>
-                              <td className="text-right py-2 px-2 text-gray-700">9.87</td>
-                              <td className="text-right py-2 px-2 text-gray-700">7.65</td>
-                              <td className="text-right py-2 px-2 text-gray-700">5.23</td>
-                              <td className="text-right py-2 px-2 text-gray-700">4.12</td>
-                              <td className="text-right py-2 px-2 text-gray-700">33.45</td>
-                              <td className="text-right py-2 px-2 text-gray-700">19.23</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">5.89</td>
-                              <td className="text-right py-2 px-2 text-gray-700">58.45%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">8.90%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">30.12%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">7.89%</td>
-                            </tr>
-                            <tr className="border-b hover:bg-gray-50">
-                              <td className="py-2 px-2 text-gray-800 font-medium">181 to 365</td>
-                              <td className="text-right py-2 px-2 text-gray-700">23.45</td>
-                              <td className="text-right py-2 px-2 text-gray-700">14.56</td>
-                              <td className="text-right py-2 px-2 text-gray-700">9.87</td>
-                              <td className="text-right py-2 px-2 text-gray-700">7.65</td>
-                              <td className="text-right py-2 px-2 text-gray-700">5.23</td>
-                              <td className="text-right py-2 px-2 text-gray-700">4.12</td>
-                              <td className="text-right py-2 px-2 text-gray-700">51.23</td>
-                              <td className="text-right py-2 px-2 text-gray-700">28.45</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">9.78</td>
-                              <td className="text-right py-2 px-2 text-gray-700">61.23%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">7.45%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">28.34%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">8.12%</td>
-                            </tr>
-                            <tr className="border-b hover:bg-gray-50">
-                              <td className="py-2 px-2 text-gray-800 font-medium">&gt;365</td>
-                              <td className="text-right py-2 px-2 text-gray-700">36.78</td>
-                              <td className="text-right py-2 px-2 text-gray-700">23.45</td>
-                              <td className="text-right py-2 px-2 text-gray-700">14.56</td>
-                              <td className="text-right py-2 px-2 text-gray-700">9.87</td>
-                              <td className="text-right py-2 px-2 text-gray-700">7.65</td>
-                              <td className="text-right py-2 px-2 text-gray-700">5.23</td>
-                              <td className="text-right py-2 px-2 text-gray-700">4.12</td>
-                              <td className="text-right py-2 px-2 text-gray-700">63.45</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">14.23</td>
-                              <td className="text-right py-2 px-2 text-gray-700">64.56%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">6.78%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">25.34%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">9.12%</td>
-                            </tr>
-                            <tr className="border-b hover:bg-gray-50">
-                              <td className="py-2 px-2 text-gray-800 font-medium">New Loan</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">50.12</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                            </tr>
-                            <tr className="bg-gray-100 border-t-2 border-gray-300 font-bold">
-                              <td className="py-2 px-2 text-gray-900">Total</td>
-                              <td className="text-right py-2 px-2 text-gray-900">2,028.58</td>
-                              <td className="text-right py-2 px-2 text-gray-900">77.72</td>
-                              <td className="text-right py-2 px-2 text-gray-900">33.12</td>
-                              <td className="text-right py-2 px-2 text-gray-900">28.31</td>
-                              <td className="text-right py-2 px-2 text-gray-900">29.11</td>
-                              <td className="text-right py-2 px-2 text-gray-900">56.94</td>
-                              <td className="text-right py-2 px-2 text-gray-900">100.15</td>
-                              <td className="text-right py-2 px-2 text-gray-900">119.89</td>
-                              <td className="text-right py-2 px-2 text-gray-900">50.12</td>
-                              <td className="text-right py-2 px-2 text-gray-900">119.89</td>
-                              <td className="text-right py-2 px-2 text-gray-900">29.49%</td>
-                              <td className="text-right py-2 px-2 text-gray-900">12.34%</td>
-                              <td className="text-right py-2 px-2 text-gray-900">54.23%</td>
-                              <td className="text-right py-2 px-2 text-gray-900">91.89%</td>
-                              <td className="text-right py-2 px-2 text-gray-900">6.78%</td>
-                            </tr>
-                          </tbody>
-                        </table>
+                        </div>
                       </div>
-                    </div>
+                    )}
 
-                    {/* Main Content Grid - Tables and Charts */}
+                    {/* Customer Outstanding Tab Content */}
+                    {rollRateAnalysisTab === 'customerOutstanding' && (
+                      <div className="space-y-6">
+                        {/* Roll Rate Analysis for AUM */}
+                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Roll Rate Analysis for AUM</h3>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-xs">
+                              <thead>
+                                <tr className="bg-gray-50 border-b">
+                                  <th className="text-left py-2 px-2 font-semibold text-gray-700">BaseMonth_Bucket</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Regular</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">1 to 30</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">New Loan</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Roll Forward %</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Roll Backward %</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Stabilized %</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Regularised %</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">ClosedLoan %</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2 text-gray-800 font-medium">Regular</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">2,028.58</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">77.72</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">33.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">2.43%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">91.89%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">91.89%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">5.68%</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2 text-gray-800 font-medium">1 to 30</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">18.51</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">32.77</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">22.36</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">1.13</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">28.10%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">23.73%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">42.40%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">5.77%</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2 text-gray-800 font-medium">31 to 60</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">12.34</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">8.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">19.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">11.56</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">4.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">39.65%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">15.32%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">37.89%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">8.14%</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2 text-gray-800 font-medium">61 to 90</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">9.87</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">6.54</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">5.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">18.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">12.34</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">3.89</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">47.23%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">12.45%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">36.98%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">7.99%</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2 text-gray-800 font-medium">91 to 120</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">7.65</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">5.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">4.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">2.78</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">14.56</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">9.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">3.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">52.34%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">10.12%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">34.56%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">8.23%</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2 text-gray-800 font-medium">121 to 180</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">14.56</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">9.87</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">7.65</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">5.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">4.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">33.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">19.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">5.89</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">58.45%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">8.90%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">30.12%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">7.89%</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2 text-gray-800 font-medium">181 to 365</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">23.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">14.56</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">9.87</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">7.65</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">5.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">4.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">51.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">28.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">9.78</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">61.23%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">7.45%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">28.34%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">8.12%</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2 text-gray-800 font-medium">&gt;365</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">36.78</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">23.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">14.56</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">9.87</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">7.65</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">5.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">4.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">63.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">14.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">64.56%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">6.78%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">25.34%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">9.12%</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2 text-gray-800 font-medium">New Loan</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">50.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                </tr>
+                                <tr className="bg-gray-100 border-t-2 border-gray-300 font-bold">
+                                  <td className="py-2 px-2 text-gray-900">Total</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">2,028.58</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">77.72</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">33.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">28.31</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">29.11</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">56.94</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">100.15</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">119.89</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">50.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">119.89</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">29.49%</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">12.34%</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">54.23%</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">91.89%</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">6.78%</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Trend Analysis Tab Content */}
+                    {rollRateAnalysisTab === 'trendAnalysis' && (
+                      <div className="space-y-6">
+                        {/* Main Content Grid - Charts */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                       {/* Left Column - Tables */}
                       <div className="lg:col-span-2 space-y-4">
@@ -9190,10 +9255,12 @@ const Dashboard = () => {
                         </div>
                       </div>
                     </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
-                {/* Trend Charts Section */}
+                {/* Trend Charts Section - Move to Trend Analysis Tab */}
                 {selectedRollMetric === 'rollbackReport' && (
                   <div className="mb-8 w-full space-y-6 mt-6">
                     <h2 className="text-xl font-semibold text-gray-900">Trend Analysis (Lakhs)</h2>
