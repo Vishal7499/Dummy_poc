@@ -116,7 +116,7 @@ const Dashboard = () => {
   }
   const [fromDate, setFromDate] = useState(() => getDefaultFromDate())
   const [toDate, setToDate] = useState(() => getDefaultToDate())
-  
+
   // Helper to check if dates are at default values
   const isFromDateDefault = () => {
     const defaultFrom = getDefaultFromDate()
@@ -183,12 +183,12 @@ const Dashboard = () => {
       try {
         setCollectionGraphLoading(true)
         setCollectionGraphError(null)
-        
+
         const defaultFromDate = fromDate || '2025-01-01'
         const defaultToDate = toDate || '2025-12-30'
-        
+
         console.log('Fetching collection graph data from:', defaultFromDate, 'to:', defaultToDate)
-        
+
         const data = await dashboardCollectionGraphApi(user.accessToken, defaultFromDate, defaultToDate)
         setCollectionGraphData(data)
         console.log('Collection graph data fetched:', data)
@@ -225,15 +225,15 @@ const Dashboard = () => {
       try {
         setVerticalDataLoading(true)
         setVerticalDataError(null)
-        
+
         const defaultFromDate = fromDate || '2025-01-01'
         const defaultToDate = toDate || '2025-12-30'
-        
+
         console.log('Fetching vertical summary data from dashboarddata API from:', defaultFromDate, 'to:', defaultToDate)
-        
+
         const data = await dashboardDataApi(user.accessToken, 'ALL', defaultFromDate, defaultToDate)
         console.log('Vertical summary data fetched:', data)
-        
+
         // Extract and transform the data
         if (data && data['vertical summary']) {
           const transformedSummary = data['vertical summary']
@@ -253,7 +253,7 @@ const Dashboard = () => {
             }))
           setVerticalSummaryData(transformedSummary)
         }
-        
+
         if (data && data['vertical allocation summary']) {
           const transformedAllocation = data['vertical allocation summary']
             .filter(item => {
@@ -326,15 +326,15 @@ const Dashboard = () => {
       try {
         setCollectionDataLoading(true)
         setCollectionDataError(null)
-        
+
         const defaultFromDate = fromDate || '2025-01-01'
         const defaultToDate = toDate || '2025-12-30'
-        
+
         console.log('Fetching collection summary data from:', defaultFromDate, 'to:', defaultToDate)
-        
+
         const data = await dashboardCollectionDataApi(user.accessToken, 'ALL', defaultFromDate, defaultToDate)
         console.log('Collection summary data fetched:', data)
-        
+
         // Extract and transform the data
         if (data && data['collection state wise summary']) {
           const transformedStateData = data['collection state wise summary']
@@ -354,7 +354,7 @@ const Dashboard = () => {
             }))
           setStateWiseData(transformedStateData)
         }
-        
+
         if (data && data['collection location wise summary']) {
           const transformedRegionData = data['collection location wise summary']
             .filter(item => {
@@ -373,7 +373,7 @@ const Dashboard = () => {
             }))
           setRegionWiseData(transformedRegionData)
         }
-        
+
         if (data && data['collection bucket wise summary']) {
           const transformedBucketData = data['collection bucket wise summary']
             .filter(item => {
@@ -413,12 +413,12 @@ const Dashboard = () => {
       try {
         setDepositionLoading(true)
         setDepositionError(null)
-        
+
         const defaultFromDate = fromDate || '2025-01-01'
         const defaultToDate = toDate || '2025-12-30'
-        
+
         console.log('Fetching deposition data from:', defaultFromDate, 'to:', defaultToDate, 'page:', depositionCurrentPage, 'page_size:', depositionPageSize)
-        
+
         const data = await dashboardDepositionApi(user.accessToken, defaultFromDate, defaultToDate, depositionCurrentPage, depositionPageSize)
         setDepositionData(data)
         console.log('Deposition data fetched:', data)
@@ -447,12 +447,12 @@ const Dashboard = () => {
       if (selectedStaffMetric && leaderboardTableRef.current) {
         // Check if click is inside the leaderboard table ref
         const isInsideLeaderboardRef = leaderboardTableRef.current.contains(event.target)
-        
+
         // For allocation and collection sections, never close if clicking inside the ref
         if ((selectedStaffMetric === 'allocation' || selectedStaffMetric === 'collection') && isInsideLeaderboardRef) {
           return // Don't close - user clicked inside the section
         }
-        
+
         // Check if click is not on any of the staff monitoring cards
         const staffCards = document.querySelectorAll('[data-staff-card]')
         let clickedOnCard = false
@@ -461,30 +461,30 @@ const Dashboard = () => {
             clickedOnCard = true
           }
         })
-        
+
         // Check if click is on filter elements (don't close table when using filters)
         const isFilterElement = filtersRef.current && filtersRef.current.contains(event.target)
         // Check if click is on customer table (don't close staff table when clicking customer table)
         const isCustomerTable = customerDetailsRef.current && customerDetailsRef.current.contains(event.target)
         // Check if click is on table elements (tables, pagination, buttons inside tables)
-        const isTableElement = event.target.closest('table') || 
-                               event.target.closest('.table-scroll-container') ||
-                               event.target.closest('button[title="Export to Excel"]') ||
-                               event.target.closest('[class*="pagination"]') ||
-                               event.target.closest('th') ||
-                               event.target.closest('td') ||
-                               event.target.closest('tr') ||
-                               event.target.closest('tbody') ||
-                               event.target.closest('thead') ||
-                               event.target.closest('div[class*="grid"]') ||
-                               event.target.closest('div[class*="space-y"]')
-        
+        const isTableElement = event.target.closest('table') ||
+          event.target.closest('.table-scroll-container') ||
+          event.target.closest('button[title="Export to Excel"]') ||
+          event.target.closest('[class*="pagination"]') ||
+          event.target.closest('th') ||
+          event.target.closest('td') ||
+          event.target.closest('tr') ||
+          event.target.closest('tbody') ||
+          event.target.closest('thead') ||
+          event.target.closest('div[class*="grid"]') ||
+          event.target.closest('div[class*="space-y"]')
+
         // Only close if clicking outside the ref and not on cards, filters, or table elements
         if (!isInsideLeaderboardRef && !clickedOnCard && !isFilterElement && !isCustomerTable && !isTableElement) {
           setSelectedStaffMetric(null)
         }
       }
-      
+
       // Close reposition section when clicking outside
       if (selectedCaseMetric === 'reposition' && leaderboardTableRef.current && !leaderboardTableRef.current.contains(event.target)) {
         // Check if click is on the reposition card
@@ -517,7 +517,7 @@ const Dashboard = () => {
           setSelectedRollMetric(null)
         }
       }
-      
+
       // Close customer table when clicking outside
       if (showCustomerDetails && customerDetailsRef.current && !customerDetailsRef.current.contains(event.target)) {
         // Check if click is on the customer count button in the staff table
@@ -532,7 +532,7 @@ const Dashboard = () => {
           setCustomerCurrentPage(1)
         }
       }
-      
+
       // Close engagement section when clicking outside
       if (selectedEngagementCard && engagementSectionRef.current && !engagementSectionRef.current.contains(event.target)) {
         // Check if click is on engagement cards (don't close when clicking cards)
@@ -680,19 +680,19 @@ const Dashboard = () => {
     // Supervisors (Top Level)
     { id: 'EMP001', name: 'Ramesh Kumar', hierarchy: 'Supervisor', hierarchyLevel: 1, parentId: null, piCode: 'PI001', center: 'Mumbai', district: 'Mumbai', state: 'Maharashtra', loanType: 'Tractor', region: 'North', customers: 156, due: 3200000, overdue: 450000, calls: 45, visits: 12, collected: 2500000, efficiency: 92, escalations: 1 },
     { id: 'EMP006', name: 'Rajesh Singh', hierarchy: 'Supervisor', hierarchyLevel: 1, parentId: null, piCode: 'PI006', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 178, due: 3600000, overdue: 180000, calls: 48, visits: 14, collected: 2800000, efficiency: 95, escalations: 0 },
-    
+
     // Senior Executives (Level 2 - report to Supervisors)
     { id: 'EMP003', name: 'Priya Rao', hierarchy: 'Senior Executive', hierarchyLevel: 2, parentId: 'EMP001', piCode: 'PI003', center: 'Chennai', district: 'Chennai', state: 'Tamil Nadu', loanType: 'Construction Equipment', region: 'East', customers: 134, due: 2800000, overdue: 320000, calls: 42, visits: 15, collected: 2200000, efficiency: 88, escalations: 0 },
     { id: 'EMP010', name: 'Arjun Reddy', hierarchy: 'Senior Executive', hierarchyLevel: 2, parentId: 'EMP001', piCode: 'PI010', center: 'Hyderabad', district: 'Hyderabad', state: 'Telangana', loanType: 'Construction Equipment', region: 'South', customers: 142, due: 3000000, overdue: 250000, calls: 41, visits: 13, collected: 2350000, efficiency: 89, escalations: 1 },
     { id: 'EMP013', name: 'Suresh Mehta', hierarchy: 'Senior Executive', hierarchyLevel: 2, parentId: 'EMP006', piCode: 'PI013', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 120, due: 2800000, overdue: 200000, calls: 43, visits: 13, collected: 2400000, efficiency: 87, escalations: 1 },
-    
+
     // Executives (Level 3 - report to Senior Executives)
     { id: 'EMP005', name: 'Meena Iyer', hierarchy: 'Executive', hierarchyLevel: 3, parentId: 'EMP003', piCode: 'PI005', center: 'Mumbai', district: 'Mumbai', state: 'Maharashtra', loanType: 'Commercial Vehicle', region: 'Central', customers: 112, due: 2400000, overdue: 380000, calls: 40, visits: 10, collected: 1950000, efficiency: 80, escalations: 2 },
     { id: 'EMP008', name: 'Vikram Joshi', hierarchy: 'Executive', hierarchyLevel: 3, parentId: 'EMP003', piCode: 'PI008', center: 'Ahmedabad', district: 'Ahmedabad', state: 'Gujarat', loanType: 'Commercial Vehicle', region: 'West', customers: 125, due: 2600000, overdue: 290000, calls: 44, visits: 11, collected: 2100000, efficiency: 85, escalations: 1 },
     { id: 'EMP012', name: 'Rohit Agarwal', hierarchy: 'Executive', hierarchyLevel: 3, parentId: 'EMP010', piCode: 'PI012', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 165, due: 3400000, overdue: 195000, calls: 46, visits: 16, collected: 2650000, efficiency: 91, escalations: 0 },
     { id: 'EMP014', name: 'Neha Kapoor', hierarchy: 'Executive', hierarchyLevel: 3, parentId: 'EMP010', piCode: 'PI014', center: 'Hyderabad', district: 'Hyderabad', state: 'Telangana', loanType: 'Commercial Vehicle', region: 'South', customers: 98, due: 2200000, overdue: 320000, calls: 37, visits: 9, collected: 1800000, efficiency: 78, escalations: 2 },
     { id: 'EMP015', name: 'Amit Verma', hierarchy: 'Executive', hierarchyLevel: 3, parentId: 'EMP013', piCode: 'PI015', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 110, due: 2500000, overdue: 280000, calls: 39, visits: 11, collected: 2000000, efficiency: 82, escalations: 1 },
-    
+
     // Collection Officers (Level 4 - report to Executives)
     { id: 'EMP002', name: 'Ankit Sharma', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP005', piCode: 'PI002', center: 'Bangalore', district: 'Bangalore', state: 'Karnataka', loanType: 'Commercial Vehicle', region: 'South', customers: 89, due: 2100000, overdue: 680000, calls: 38, visits: 8, collected: 1800000, efficiency: 67, escalations: 3 },
     { id: 'EMP004', name: 'Suresh Patel', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP005', piCode: 'PI004', center: 'Pune', district: 'Pune', state: 'Maharashtra', loanType: 'Tractor', region: 'West', customers: 67, due: 1500000, overdue: 890000, calls: 35, visits: 6, collected: 1200000, efficiency: 54, escalations: 5 },
@@ -704,12 +704,12 @@ const Dashboard = () => {
     { id: 'EMP018', name: 'Manoj Tiwari', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP014', piCode: 'PI018', center: 'Hyderabad', district: 'Hyderabad', state: 'Telangana', loanType: 'Construction Equipment', region: 'South', customers: 81, due: 1700000, overdue: 350000, calls: 34, visits: 9, collected: 1550000, efficiency: 70, escalations: 2 },
     { id: 'EMP019', name: 'Anita Reddy', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP015', piCode: 'PI019', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 58, due: 1300000, overdue: 520000, calls: 30, visits: 6, collected: 1200000, efficiency: 55, escalations: 5 },
     { id: 'EMP020', name: 'Kiran Patel', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP015', piCode: 'PI020', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Commercial Vehicle', region: 'North', customers: 75, due: 1500000, overdue: 400000, calls: 32, visits: 8, collected: 1450000, efficiency: 68, escalations: 3 },
-    
+
     // Additional Supervisors
     { id: 'EMP021', name: 'Vikram Malhotra', hierarchy: 'Supervisor', hierarchyLevel: 1, parentId: null, piCode: 'PI021', center: 'Bangalore', district: 'Bangalore Urban', state: 'Karnataka', loanType: 'Commercial Vehicle', region: 'South', customers: 145, due: 3100000, overdue: 220000, calls: 47, visits: 13, collected: 2600000, efficiency: 90, escalations: 1 },
     { id: 'EMP022', name: 'Sunita Menon', hierarchy: 'Supervisor', hierarchyLevel: 1, parentId: null, piCode: 'PI022', center: 'Kolkata', district: 'Kolkata', state: 'West Bengal', loanType: 'Construction Equipment', region: 'East', customers: 132, due: 2900000, overdue: 380000, calls: 44, visits: 12, collected: 2300000, efficiency: 86, escalations: 2 },
     { id: 'EMP023', name: 'Rajesh Iyer', hierarchy: 'Supervisor', hierarchyLevel: 1, parentId: null, piCode: 'PI023', center: 'Pune', district: 'Pune', state: 'Maharashtra', loanType: 'Tractor', region: 'West', customers: 168, due: 3500000, overdue: 195000, calls: 49, visits: 15, collected: 2900000, efficiency: 93, escalations: 0 },
-    
+
     // Additional Senior Executives
     { id: 'EMP024', name: 'Anjali Deshmukh', hierarchy: 'Senior Executive', hierarchyLevel: 2, parentId: 'EMP021', piCode: 'PI024', center: 'Bangalore', district: 'Bangalore Urban', state: 'Karnataka', loanType: 'Commercial Vehicle', region: 'South', customers: 128, due: 2700000, overdue: 280000, calls: 41, visits: 12, collected: 2250000, efficiency: 85, escalations: 1 },
     { id: 'EMP025', name: 'Manoj Reddy', hierarchy: 'Senior Executive', hierarchyLevel: 2, parentId: 'EMP021', piCode: 'PI025', center: 'Mysore', district: 'Mysore', state: 'Karnataka', loanType: 'Tractor', region: 'South', customers: 115, due: 2600000, overdue: 310000, calls: 40, visits: 11, collected: 2150000, efficiency: 83, escalations: 2 },
@@ -717,7 +717,7 @@ const Dashboard = () => {
     { id: 'EMP027', name: 'Rohit Chatterjee', hierarchy: 'Senior Executive', hierarchyLevel: 2, parentId: 'EMP022', piCode: 'PI027', center: 'Howrah', district: 'Howrah', state: 'West Bengal', loanType: 'Commercial Vehicle', region: 'East', customers: 138, due: 2850000, overdue: 260000, calls: 42, visits: 13, collected: 2400000, efficiency: 87, escalations: 1 },
     { id: 'EMP028', name: 'Priya Kulkarni', hierarchy: 'Senior Executive', hierarchyLevel: 2, parentId: 'EMP023', piCode: 'PI028', center: 'Pune', district: 'Pune', state: 'Maharashtra', loanType: 'Tractor', region: 'West', customers: 142, due: 2950000, overdue: 240000, calls: 43, visits: 14, collected: 2500000, efficiency: 88, escalations: 1 },
     { id: 'EMP029', name: 'Amit Joshi', hierarchy: 'Senior Executive', hierarchyLevel: 2, parentId: 'EMP023', piCode: 'PI029', center: 'Nagpur', district: 'Nagpur', state: 'Maharashtra', loanType: 'Construction Equipment', region: 'West', customers: 135, due: 2750000, overdue: 300000, calls: 41, visits: 12, collected: 2300000, efficiency: 84, escalations: 2 },
-    
+
     // Additional Executives
     { id: 'EMP030', name: 'Deepa Shetty', hierarchy: 'Executive', hierarchyLevel: 3, parentId: 'EMP024', piCode: 'PI030', center: 'Bangalore', district: 'Bangalore Urban', state: 'Karnataka', loanType: 'Commercial Vehicle', region: 'South', customers: 105, due: 2300000, overdue: 350000, calls: 38, visits: 9, collected: 1900000, efficiency: 79, escalations: 2 },
     { id: 'EMP031', name: 'Suresh Gowda', hierarchy: 'Executive', hierarchyLevel: 3, parentId: 'EMP024', piCode: 'PI031', center: 'Mangalore', district: 'Dakshina Kannada', state: 'Karnataka', loanType: 'Tractor', region: 'South', customers: 98, due: 2100000, overdue: 380000, calls: 36, visits: 8, collected: 1750000, efficiency: 76, escalations: 3 },
@@ -726,7 +726,7 @@ const Dashboard = () => {
     { id: 'EMP034', name: 'Anita Sen', hierarchy: 'Executive', hierarchyLevel: 3, parentId: 'EMP027', piCode: 'PI034', center: 'Howrah', district: 'Howrah', state: 'West Bengal', loanType: 'Commercial Vehicle', region: 'East', customers: 118, due: 2500000, overdue: 300000, calls: 40, visits: 11, collected: 2100000, efficiency: 82, escalations: 1 },
     { id: 'EMP035', name: 'Ravi Patil', hierarchy: 'Executive', hierarchyLevel: 3, parentId: 'EMP028', piCode: 'PI035', center: 'Pune', district: 'Pune', state: 'Maharashtra', loanType: 'Tractor', region: 'West', customers: 125, due: 2600000, overdue: 280000, calls: 41, visits: 12, collected: 2200000, efficiency: 83, escalations: 1 },
     { id: 'EMP036', name: 'Kiran Shinde', hierarchy: 'Executive', hierarchyLevel: 3, parentId: 'EMP029', piCode: 'PI036', center: 'Nagpur', district: 'Nagpur', state: 'Maharashtra', loanType: 'Construction Equipment', region: 'West', customers: 102, due: 2200000, overdue: 340000, calls: 38, visits: 9, collected: 1800000, efficiency: 78, escalations: 2 },
-    
+
     // Additional Collection Officers
     { id: 'EMP037', name: 'Pooja Nair', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP030', piCode: 'PI037', center: 'Bangalore', district: 'Bangalore Urban', state: 'Karnataka', loanType: 'Commercial Vehicle', region: 'South', customers: 68, due: 1450000, overdue: 480000, calls: 30, visits: 6, collected: 1250000, efficiency: 61, escalations: 4 },
     { id: 'EMP038', name: 'Rajesh Kamath', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP030', piCode: 'PI038', center: 'Bangalore', district: 'Bangalore Urban', state: 'Karnataka', loanType: 'Tractor', region: 'South', customers: 73, due: 1550000, overdue: 420000, calls: 32, visits: 7, collected: 1350000, efficiency: 64, escalations: 3 },
@@ -945,7 +945,7 @@ const Dashboard = () => {
   const getFilteredStaffData = (metric) => {
     // Determine which staff to show based on hierarchy path
     let baseFiltered = staffLeaderboardBaseData
-    
+
     // If we're in a hierarchy drill-down, filter by parent
     if (hierarchyPath.length > 0) {
       const currentParent = hierarchyPath[hierarchyPath.length - 1]
@@ -957,7 +957,7 @@ const Dashboard = () => {
       // Show staff at current hierarchy level
       baseFiltered = staffLeaderboardBaseData.filter(staff => staff.hierarchyLevel === currentHierarchyLevel)
     }
-    
+
     let filtered = baseFiltered.filter(staff => {
       // Apply search filter
       const matchesSearch = staff.id.toLowerCase().includes(staffSearchTerm.toLowerCase()) ||
@@ -971,43 +971,43 @@ const Dashboard = () => {
         staff.customers.toString().includes(staffSearchTerm) ||
         staff.due.toString().includes(staffSearchTerm) ||
         staff.overdue.toString().includes(staffSearchTerm)
-      
+
       // Apply loan type filter
-      const matchesLoanType = filterLoanType === 'All Loans' || 
+      const matchesLoanType = filterLoanType === 'All Loans' ||
         (filterLoanType === 'Tractor Finance' && staff.loanType === 'Tractor') ||
         (filterLoanType === 'Commercial Vehicle' && staff.loanType === 'Commercial Vehicle') ||
         (filterLoanType === 'Construction Equipment' && staff.loanType === 'Construction Equipment')
-      
+
       // Apply geography/region filter
-      const matchesGeography = filterGeography === 'All Regions' || 
+      const matchesGeography = filterGeography === 'All Regions' ||
         staff.region === filterGeography
-      
+
       // Apply state filter
-      const matchesState = filterState === 'All States' || 
+      const matchesState = filterState === 'All States' ||
         staff.state === filterState
-      
+
       // Apply district filter
-      const matchesDistrict = filterDistrict === 'All Districts' || 
+      const matchesDistrict = filterDistrict === 'All Districts' ||
         staff.district === filterDistrict
-      
+
       // Apply PI Code filter
-      const matchesPICode = filterPICode === 'All PI Codes' || 
+      const matchesPICode = filterPICode === 'All PI Codes' ||
         staff.piCode === filterPICode
-      
+
       // Apply metric-specific filter
       let matchesMetric = true
       if (metric === 'inactive') {
         matchesMetric = staff.efficiency < 50
       }
-      
+
       return matchesSearch && matchesLoanType && matchesGeography && matchesState && matchesDistrict && matchesPICode && matchesMetric
     })
 
     // Sort based on selected metric and sort order
     filtered.sort((a, b) => {
       let aValue, bValue
-      
-      switch(metric) {
+
+      switch (metric) {
         case 'allocation':
           aValue = a.customers
           bValue = b.customers
@@ -1030,7 +1030,7 @@ const Dashboard = () => {
           aValue = a[staffSortBy] || a.efficiency
           bValue = b[staffSortBy] || b.efficiency
       }
-      
+
       if (staffSortOrder === 'asc') {
         return aValue > bValue ? 1 : -1
       } else {
@@ -1073,7 +1073,7 @@ const Dashboard = () => {
   const handleHierarchyDrillDown = (staff) => {
     // Check if this staff member has subordinates
     const hasSubordinates = staffLeaderboardBaseData.some(s => s.parentId === staff.id)
-    
+
     if (hasSubordinates) {
       // Add current staff to hierarchy path
       setHierarchyPath(prev => [...prev, {
@@ -1163,7 +1163,7 @@ const Dashboard = () => {
     setSelectedStaff(staff)
     setShowCustomerDetails(true)
     setCustomerCurrentPage(1)
-    
+
     // Scroll to customer details table after a short delay to ensure it's rendered
     setTimeout(() => {
       if (customerDetailsRef.current) {
@@ -1235,20 +1235,20 @@ const Dashboard = () => {
       const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
       const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
       const dayName = dayNames[date.getDay()]
-      
+
       // Convert crores to rupees (multiply by 10000000)
       const valueInRupees = (item.collection_amount_cr || 0) * 10000000
-      
+
       // Format the label - show day name, date number and month (e.g., "Mon 1 Oct", "Tue 2 Oct")
       // For better readability, show: "1 Oct" or "Mon 1" based on data density
       const dateNumber = date.getDate()
       const monthName = monthNames[date.getMonth()]
-      
+
       // Use compact format: "1 Oct" for clarity, or "Mon 1" if many data points
-      const label = sortedData.length > 15 
-        ? `${dateNumber} ${monthName}` 
+      const label = sortedData.length > 15
+        ? `${dateNumber} ${monthName}`
         : `${dayName} ${dateNumber} ${monthName}`
-      
+
       return {
         day: label, // Use formatted label with day name, date and month
         date: item.date, // Keep original date for reference
@@ -1397,8 +1397,8 @@ const Dashboard = () => {
 
   // Handle favorite toggle
   const toggleFavorite = (cardId) => {
-    setFavoriteCards(prev => 
-      prev.includes(cardId) 
+    setFavoriteCards(prev =>
+      prev.includes(cardId)
         ? prev.filter(id => id !== cardId)
         : [...prev, cardId]
     )
@@ -1433,9 +1433,9 @@ const Dashboard = () => {
     try {
       // Prepare header row (extract labels from header objects)
       const headerRow = headers.map(header => header.label || header)
-      
+
       // Prepare data rows
-      const dataRows = data.map(row => 
+      const dataRows = data.map(row =>
         headers.map(header => {
           const key = header.key || header
           const value = row[key]
@@ -1630,7 +1630,7 @@ const Dashboard = () => {
   // Helper function to render DPD Collection Efficiency Table (Top Table)
   const renderDPDCollectionEfficiencyTable = () => {
     const dpdData = [
-      { 
+      {
         dpd: '0 DPD',
         casesAllocated: 30000,
         totalOutstandingPOS: 85000000,
@@ -1642,7 +1642,7 @@ const Dashboard = () => {
         clientsNotVisited: 18000,
         p2pConverted: 25
       },
-      { 
+      {
         dpd: '01-30 days',
         casesAllocated: 20000,
         totalOutstandingPOS: 100000000,
@@ -1654,7 +1654,7 @@ const Dashboard = () => {
         clientsNotVisited: 14000,
         p2pConverted: 10
       },
-      { 
+      {
         dpd: '31-60 days',
         casesAllocated: 18000,
         totalOutstandingPOS: 95000000,
@@ -1666,7 +1666,7 @@ const Dashboard = () => {
         clientsNotVisited: 12500,
         p2pConverted: 8
       },
-      { 
+      {
         dpd: '61-90 days',
         casesAllocated: 15000,
         totalOutstandingPOS: 88000000,
@@ -1678,7 +1678,7 @@ const Dashboard = () => {
         clientsNotVisited: 10200,
         p2pConverted: 6
       },
-      { 
+      {
         dpd: '90-120 Days',
         casesAllocated: 12000,
         totalOutstandingPOS: 72000000,
@@ -1690,7 +1690,7 @@ const Dashboard = () => {
         clientsNotVisited: 8100,
         p2pConverted: 5
       },
-      { 
+      {
         dpd: '121-180 days',
         casesAllocated: 10000,
         totalOutstandingPOS: 65000000,
@@ -1702,7 +1702,7 @@ const Dashboard = () => {
         clientsNotVisited: 6800,
         p2pConverted: 4
       },
-      { 
+      {
         dpd: '180-365 Days',
         casesAllocated: 8500,
         totalOutstandingPOS: 55000000,
@@ -1714,7 +1714,7 @@ const Dashboard = () => {
         clientsNotVisited: 5800,
         p2pConverted: 3
       },
-      { 
+      {
         dpd: '>365',
         casesAllocated: 6000,
         totalOutstandingPOS: 42000000,
@@ -1805,7 +1805,7 @@ const Dashboard = () => {
   // Helper function to render DPD Collection Efficiency Summary Table (Bottom Table)
   const renderDPDCollectionEfficiencySummaryTable = () => {
     const dpdData = [
-      { 
+      {
         dpd: '0 DPD',
         casesAllocated: 30000,
         totalOutstandingPOS: '18.5%',
@@ -1818,7 +1818,7 @@ const Dashboard = () => {
         clientsNotVisited: '65.00%',
         p2pConverted: '0.83%'
       },
-      { 
+      {
         dpd: '01-30 days',
         casesAllocated: 20000,
         totalOutstandingPOS: '33%',
@@ -1831,7 +1831,7 @@ const Dashboard = () => {
         clientsNotVisited: '70.00%',
         p2pConverted: '5.00%'
       },
-      { 
+      {
         dpd: '31-60 days',
         casesAllocated: 18000,
         totalOutstandingPOS: '20.7%',
@@ -1844,7 +1844,7 @@ const Dashboard = () => {
         clientsNotVisited: '69.44%',
         p2pConverted: '4.44%'
       },
-      { 
+      {
         dpd: '61-90 days',
         casesAllocated: 15000,
         totalOutstandingPOS: '19.1%',
@@ -1857,7 +1857,7 @@ const Dashboard = () => {
         clientsNotVisited: '68.00%',
         p2pConverted: '4.00%'
       },
-      { 
+      {
         dpd: '90-120 Days',
         casesAllocated: 12000,
         totalOutstandingPOS: '15.7%',
@@ -1870,7 +1870,7 @@ const Dashboard = () => {
         clientsNotVisited: '67.50%',
         p2pConverted: '4.17%'
       },
-      { 
+      {
         dpd: '121-180 days',
         casesAllocated: 10000,
         totalOutstandingPOS: '14.2%',
@@ -1883,7 +1883,7 @@ const Dashboard = () => {
         clientsNotVisited: '68.00%',
         p2pConverted: '4.00%'
       },
-      { 
+      {
         dpd: '180-365 Days',
         casesAllocated: 8500,
         totalOutstandingPOS: '12.0%',
@@ -1896,7 +1896,7 @@ const Dashboard = () => {
         clientsNotVisited: '68.24%',
         p2pConverted: '3.53%'
       },
-      { 
+      {
         dpd: '>365',
         casesAllocated: 6000,
         totalOutstandingPOS: '9.2%',
@@ -1909,7 +1909,7 @@ const Dashboard = () => {
         clientsNotVisited: '66.67%',
         p2pConverted: '3.33%'
       },
-      { 
+      {
         dpd: 'Total',
         casesAllocated: 119500,
         totalOutstandingPOS: '100%',
@@ -2154,7 +2154,7 @@ const Dashboard = () => {
     const getVisiblePages = () => {
       const maxVisible = 5
       const pages = []
-      
+
       if (totalPages <= maxVisible) {
         // Show all pages if total is less than max visible
         for (let i = 1; i <= totalPages; i++) {
@@ -2163,10 +2163,10 @@ const Dashboard = () => {
       } else {
         // Always show first page
         pages.push(1)
-        
+
         let start = Math.max(2, currentPage - 1)
         let end = Math.min(totalPages - 1, currentPage + 1)
-        
+
         // Adjust if we're near the start
         if (currentPage <= 3) {
           end = Math.min(4, totalPages - 1)
@@ -2175,26 +2175,26 @@ const Dashboard = () => {
         if (currentPage >= totalPages - 2) {
           start = Math.max(2, totalPages - 3)
         }
-        
+
         // Add ellipsis after first page if needed
         if (start > 2) {
           pages.push('ellipsis-start')
         }
-        
+
         // Add middle pages
         for (let i = start; i <= end; i++) {
           pages.push(i)
         }
-        
+
         // Add ellipsis before last page if needed
         if (end < totalPages - 1) {
           pages.push('ellipsis-end')
         }
-        
+
         // Always show last page
         pages.push(totalPages)
       }
-      
+
       return pages
     }
 
@@ -2211,11 +2211,10 @@ const Dashboard = () => {
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-              currentPage === 1
+            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${currentPage === 1
                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                 : 'bg-white text-red-600 border border-red-600 hover:bg-red-50 cursor-pointer'
-            }`}
+              }`}
           >
             Previous
           </button>
@@ -2228,27 +2227,25 @@ const Dashboard = () => {
               )
             }
             return (
-            <button
-              key={page}
-              onClick={() => handlePageChange(page)}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors min-w-[36px] ${
-                page === currentPage
+              <button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors min-w-[36px] ${page === currentPage
                     ? 'bg-red-600 text-white cursor-pointer shadow-sm'
-                  : 'bg-white text-red-600 border border-red-600 hover:bg-red-50 cursor-pointer'
-              }`}
-            >
-              {page}
-            </button>
+                    : 'bg-white text-red-600 border border-red-600 hover:bg-red-50 cursor-pointer'
+                  }`}
+              >
+                {page}
+              </button>
             )
           })}
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-              currentPage === totalPages
+            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${currentPage === totalPages
                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                 : 'bg-white text-red-600 border border-red-600 hover:bg-red-50 cursor-pointer'
-            }`}
+              }`}
           >
             Next
           </button>
@@ -2294,14 +2291,14 @@ const Dashboard = () => {
     ]
 
     const handleExport = () => {
-      const exportData = [...productData, { 
-        product: 'Total', 
-        total: totals.total, 
-        good: totals.good, 
-        npa: totals.npa, 
-        sma0: totals.sma0, 
-        sma1: totals.sma1, 
-        sma2: totals.sma2 
+      const exportData = [...productData, {
+        product: 'Total',
+        total: totals.total,
+        good: totals.good,
+        npa: totals.npa,
+        sma0: totals.sma0,
+        sma1: totals.sma1,
+        sma2: totals.sma2
       }]
       exportTableToExcel(exportData, headers, 'Vertical_Summary')
     }
@@ -2329,8 +2326,8 @@ const Dashboard = () => {
         </div>
         {verticalDataLoading ? (
           <div className="py-12 px-8 text-center">
-            <div 
-              className="inline-block animate-spin h-10 w-10 border-4 border-red-600" 
+            <div
+              className="inline-block animate-spin h-10 w-10 border-4 border-red-600"
               style={{ borderRadius: '0' }}
             ></div>
             <p className="mt-4 text-sm font-medium text-gray-600">Loading data...</p>
@@ -2338,53 +2335,53 @@ const Dashboard = () => {
         ) : verticalDataError ? (
           <div className="p-4 text-center text-red-600">Error: {verticalDataError}</div>
         ) : (
-        <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
-          <table className="w-full text-xs border border-[#003366]">
-            <thead className="bg-gray-100 text-[#003366] sticky top-0">
-              <tr>
-                <th className="text-left py-2 px-2 font-semibold">VERTICAL</th>
-                <th className="text-right py-2 px-2 font-semibold">TOTAL</th>
-                <th className="text-right py-2 px-2 font-semibold">GOOD</th>
-                <th className="text-right py-2 px-2 font-semibold">NPA</th>
-                <th className="text-right py-2 px-2 font-semibold">SMA0</th>
-                <th className="text-right py-2 px-2 font-semibold">SMA1</th>
-                <th className="text-right py-2 px-2 font-semibold">SMA2</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white">
+          <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
+            <table className="w-full text-xs border border-[#003366]">
+              <thead className="bg-gray-100 text-[#003366] sticky top-0">
+                <tr>
+                  <th className="text-left py-2 px-2 font-semibold">VERTICAL</th>
+                  <th className="text-right py-2 px-2 font-semibold">TOTAL</th>
+                  <th className="text-right py-2 px-2 font-semibold">GOOD</th>
+                  <th className="text-right py-2 px-2 font-semibold">NPA</th>
+                  <th className="text-right py-2 px-2 font-semibold">SMA0</th>
+                  <th className="text-right py-2 px-2 font-semibold">SMA1</th>
+                  <th className="text-right py-2 px-2 font-semibold">SMA2</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white">
                 {hasApiData && verticalSummaryData.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="py-8 px-2 text-center text-gray-500">No data available</td>
                   </tr>
                 ) : (
                   <>
-              {paginatedData.map((row, idx) => (
-                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="py-2 px-2 text-gray-800 font-medium">{row.product}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.total || 0)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.good || 0)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.npa || 0)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma0 || 0)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma1 || 0)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2 || 0)}</td>
-                </tr>
-              ))}
-              {endIndex >= productData.length && (
-                <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
-                  <td className="py-2 px-2">Totals</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.total)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.good)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.npa)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma0)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma1)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
-                </tr>
+                    {paginatedData.map((row, idx) => (
+                      <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                        <td className="py-2 px-2 text-gray-800 font-medium">{row.product}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.total || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.good || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.npa || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma0 || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma1 || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2 || 0)}</td>
+                      </tr>
+                    ))}
+                    {endIndex >= productData.length && (
+                      <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
+                        <td className="py-2 px-2">Totals</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.total)}</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.good)}</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.npa)}</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma0)}</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma1)}</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
+                      </tr>
                     )}
                   </>
-              )}
-            </tbody>
-          </table>
-        </div>
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
         {!verticalDataLoading && !verticalDataError && renderPagination(productSummaryPage, setProductSummaryPage, productData.length, itemsPerPage)}
       </div>
@@ -2429,14 +2426,14 @@ const Dashboard = () => {
     ]
 
     const handleExport = () => {
-      const exportData = [...allocationData, { 
-        product: 'Total', 
-        total: totals.total, 
-        good: totals.good, 
-        npa: totals.npa, 
-        sma0: totals.sma0, 
-        sma1: totals.sma1, 
-        sma2: totals.sma2 
+      const exportData = [...allocationData, {
+        product: 'Total',
+        total: totals.total,
+        good: totals.good,
+        npa: totals.npa,
+        sma0: totals.sma0,
+        sma1: totals.sma1,
+        sma2: totals.sma2
       }]
       exportTableToExcel(exportData, headers, 'Vertical_Allocation_Summary')
     }
@@ -2463,8 +2460,8 @@ const Dashboard = () => {
         </div>
         {verticalDataLoading ? (
           <div className="py-12 px-8 text-center">
-            <div 
-              className="inline-block animate-spin h-10 w-10 border-4 border-red-600" 
+            <div
+              className="inline-block animate-spin h-10 w-10 border-4 border-red-600"
               style={{ borderRadius: '0' }}
             ></div>
             <p className="mt-4 text-sm font-medium text-gray-600">Loading data...</p>
@@ -2472,53 +2469,53 @@ const Dashboard = () => {
         ) : verticalDataError ? (
           <div className="p-4 text-center text-red-600">Error: {verticalDataError}</div>
         ) : (
-        <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
-          <table className="w-full text-xs border border-[#003366]">
-            <thead className="bg-gray-100 text-[#003366] sticky top-0">
-              <tr>
-                <th className="text-left py-2 px-2 font-semibold">VERTICAL</th>
-                <th className="text-right py-2 px-2 font-semibold">TOTAL</th>
-                <th className="text-right py-2 px-2 font-semibold">GOOD</th>
-                <th className="text-right py-2 px-2 font-semibold">NPA</th>
-                <th className="text-right py-2 px-2 font-semibold">SMA0</th>
-                <th className="text-right py-2 px-2 font-semibold">SMA1</th>
-                <th className="text-right py-2 px-2 font-semibold">SMA2</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white">
+          <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
+            <table className="w-full text-xs border border-[#003366]">
+              <thead className="bg-gray-100 text-[#003366] sticky top-0">
+                <tr>
+                  <th className="text-left py-2 px-2 font-semibold">VERTICAL</th>
+                  <th className="text-right py-2 px-2 font-semibold">TOTAL</th>
+                  <th className="text-right py-2 px-2 font-semibold">GOOD</th>
+                  <th className="text-right py-2 px-2 font-semibold">NPA</th>
+                  <th className="text-right py-2 px-2 font-semibold">SMA0</th>
+                  <th className="text-right py-2 px-2 font-semibold">SMA1</th>
+                  <th className="text-right py-2 px-2 font-semibold">SMA2</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white">
                 {hasApiData && verticalAllocationData.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="py-8 px-2 text-center text-gray-500">No data available</td>
                   </tr>
                 ) : (
                   <>
-              {paginatedData.map((row, idx) => (
-                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="py-2 px-2 text-gray-800 font-medium">{row.product}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.total || 0)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.good || 0)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.npa || 0)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma0 || 0)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma1 || 0)}</td>
-                  <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2 || 0)}</td>
-                </tr>
-              ))}
-              {endIndex >= allocationData.length && (
-                <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
-                  <td className="py-2 px-2">Totals</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.total)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.good)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.npa)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma0)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma1)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
-                </tr>
+                    {paginatedData.map((row, idx) => (
+                      <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                        <td className="py-2 px-2 text-gray-800 font-medium">{row.product}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.total || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.good || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.npa || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma0 || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma1 || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2 || 0)}</td>
+                      </tr>
+                    ))}
+                    {endIndex >= allocationData.length && (
+                      <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
+                        <td className="py-2 px-2">Totals</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.total)}</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.good)}</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.npa)}</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma0)}</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma1)}</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
+                      </tr>
                     )}
                   </>
-              )}
-            </tbody>
-          </table>
-        </div>
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
         {!verticalDataLoading && !verticalDataError && renderPagination(productAllocationPage, setProductAllocationPage, allocationData.length, itemsPerPage)}
       </div>
@@ -2549,14 +2546,14 @@ const Dashboard = () => {
     ]
 
     const handleExport = () => {
-      const exportData = [...data, { 
-        product: 'Total', 
-        total: totals.total, 
-        good: totals.good, 
-        npa: totals.npa, 
-        sma0: totals.sma0, 
-        sma1: totals.sma1, 
-        sma2: totals.sma2 
+      const exportData = [...data, {
+        product: 'Total',
+        total: totals.total,
+        good: totals.good,
+        npa: totals.npa,
+        sma0: totals.sma0,
+        sma1: totals.sma1,
+        sma2: totals.sma2
       }]
       exportTableToExcel(exportData, headers, exportName)
     }
@@ -2583,8 +2580,8 @@ const Dashboard = () => {
         </div>
         {verticalDataLoading ? (
           <div className="py-12 px-8 text-center">
-            <div 
-              className="inline-block animate-spin h-10 w-10 border-4 border-red-600" 
+            <div
+              className="inline-block animate-spin h-10 w-10 border-4 border-red-600"
               style={{ borderRadius: '0' }}
             ></div>
             <p className="mt-4 text-sm font-medium text-gray-600">Loading data...</p>
@@ -2592,57 +2589,57 @@ const Dashboard = () => {
         ) : verticalDataError ? (
           <div className="p-4 text-center text-red-600">Error: {verticalDataError}</div>
         ) : (
-        <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
-          <table className="w-full text-xs border border-[#003366]">
-            <thead className="bg-gray-100 text-[#003366] sticky top-0">
-              <tr>
-                <th className="text-left py-2 px-2 font-semibold">VERTICAL</th>
-                <th className="text-right py-2 px-2 font-semibold">TOTAL</th>
-                <th className="text-right py-2 px-2 font-semibold">GOOD</th>
-                <th className="text-right py-2 px-2 font-semibold">NPA</th>
-                <th className="text-right py-2 px-2 font-semibold">SMA0</th>
-                <th className="text-right py-2 px-2 font-semibold">SMA1</th>
-                <th className="text-right py-2 px-2 font-semibold">SMA2</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white">
+          <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
+            <table className="w-full text-xs border border-[#003366]">
+              <thead className="bg-gray-100 text-[#003366] sticky top-0">
+                <tr>
+                  <th className="text-left py-2 px-2 font-semibold">VERTICAL</th>
+                  <th className="text-right py-2 px-2 font-semibold">TOTAL</th>
+                  <th className="text-right py-2 px-2 font-semibold">GOOD</th>
+                  <th className="text-right py-2 px-2 font-semibold">NPA</th>
+                  <th className="text-right py-2 px-2 font-semibold">SMA0</th>
+                  <th className="text-right py-2 px-2 font-semibold">SMA1</th>
+                  <th className="text-right py-2 px-2 font-semibold">SMA2</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white">
                 {!tableData || tableData.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="py-8 px-2 text-center text-gray-500">No data available</td>
                   </tr>
                 ) : paginatedData.length > 0 ? (
-                <>
-                  {paginatedData.map((row, idx) => (
-                    <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="py-2 px-2 text-gray-800 font-medium">{row.product}</td>
-                      <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.total || 0)}</td>
-                      <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.good || 0)}</td>
-                      <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.npa || 0)}</td>
-                      <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma0 || 0)}</td>
-                      <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma1 || 0)}</td>
-                      <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2 || 0)}</td>
-                    </tr>
-                  ))}
-                  {endIndex >= data.length && (
-                    <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
-                      <td className="py-2 px-2">Totals</td>
-                      <td className="py-2 px-2 text-right">{formatIndianNumber(totals.total)}</td>
-                      <td className="py-2 px-2 text-right">{formatIndianNumber(totals.good)}</td>
-                      <td className="py-2 px-2 text-right">{formatIndianNumber(totals.npa)}</td>
-                      <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma0)}</td>
-                      <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma1)}</td>
-                      <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
-                    </tr>
-                  )}
-                </>
-              ) : (
-                <tr>
+                  <>
+                    {paginatedData.map((row, idx) => (
+                      <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                        <td className="py-2 px-2 text-gray-800 font-medium">{row.product}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.total || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.good || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.npa || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma0 || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma1 || 0)}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.sma2 || 0)}</td>
+                      </tr>
+                    ))}
+                    {endIndex >= data.length && (
+                      <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
+                        <td className="py-2 px-2">Totals</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.total)}</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.good)}</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.npa)}</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma0)}</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma1)}</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.sma2)}</td>
+                      </tr>
+                    )}
+                  </>
+                ) : (
+                  <tr>
                     <td colSpan="7" className="py-8 px-2 text-center text-gray-500">No data available</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
         {!verticalDataLoading && !verticalDataError && renderPagination(currentPage, setCurrentPage, data.length, itemsPerPage)}
       </div>
@@ -2715,14 +2712,14 @@ const Dashboard = () => {
     ]
 
     const handleExport = () => {
-      const exportData = [...stateData, { 
-        state: 'Total', 
-        totalCases: totals.totalCases, 
-        outstandingBalance: totals.outstandingBalance, 
-        resolutionCount: totals.resolutionCount, 
-        resolutionCountPercent: totalResolutionCountPercent, 
-        resolutionAmount: totals.resolutionAmount, 
-        resolutionAmountPercent: totalResolutionAmountPercent 
+      const exportData = [...stateData, {
+        state: 'Total',
+        totalCases: totals.totalCases,
+        outstandingBalance: totals.outstandingBalance,
+        resolutionCount: totals.resolutionCount,
+        resolutionCountPercent: totalResolutionCountPercent,
+        resolutionAmount: totals.resolutionAmount,
+        resolutionAmountPercent: totalResolutionAmountPercent
       }]
       exportTableToExcel(exportData, headers, 'State_Wise_Summary')
     }
@@ -2750,37 +2747,37 @@ const Dashboard = () => {
         {collectionDataError ? (
           <div className="p-4 text-center text-red-600">Error: {collectionDataError}</div>
         ) : (
-        <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
-          <table className="w-full text-xs border border-[#003366]">
-            <thead className="bg-gray-100 text-[#003366] sticky top-0">
-              <tr>
-                <th className="text-left py-2 px-2 font-semibold">State</th>
-                <th className="text-right py-2 px-2 font-semibold">Total Cases</th>
-                <th className="text-right py-2 px-2 font-semibold">Outstanding Balance (in Cr.)</th>
-                <th className="text-right py-2 px-2 font-semibold">Resolution Count</th>
-                <th className="text-right py-2 px-2 font-semibold">Resolution Count%</th>
-                <th className="text-right py-2 px-2 font-semibold">Resolution Amount</th>
-                <th className="text-right py-2 px-2 font-semibold">Resolution Amount %</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white">
+          <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
+            <table className="w-full text-xs border border-[#003366]">
+              <thead className="bg-gray-100 text-[#003366] sticky top-0">
+                <tr>
+                  <th className="text-left py-2 px-2 font-semibold">State</th>
+                  <th className="text-right py-2 px-2 font-semibold">Total Cases</th>
+                  <th className="text-right py-2 px-2 font-semibold">Outstanding Balance (in Cr.)</th>
+                  <th className="text-right py-2 px-2 font-semibold">Resolution Count</th>
+                  <th className="text-right py-2 px-2 font-semibold">Resolution Count%</th>
+                  <th className="text-right py-2 px-2 font-semibold">Resolution Amount</th>
+                  <th className="text-right py-2 px-2 font-semibold">Resolution Amount %</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white">
                 {hasApiData && stateData.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="py-8 px-2 text-center text-gray-500">No data available</td>
                   </tr>
                 ) : (
                   <>
-              {paginatedData.map((row, idx) => (
-                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="py-2 px-2 text-gray-800 font-medium">{row.state}</td>
+                    {paginatedData.map((row, idx) => (
+                      <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                        <td className="py-2 px-2 text-gray-800 font-medium">{row.state}</td>
                         <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.totalCases || 0)}</td>
                         <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(parseFloat(row.outstandingBalance) || 0)}</td>
                         <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.resolutionCount || 0)}</td>
-                  <td className="py-2 px-2 text-right">
-                    <div className="flex items-center justify-end gap-2">
+                        <td className="py-2 px-2 text-right">
+                          <div className="flex items-center justify-end gap-2">
                             <div className="flex-1 max-w-[100px] bg-gray-200 rounded-full h-4 relative overflow-hidden">
-                              <div 
-                                className="bg-green-500 h-4 rounded-full transition-all relative flex items-center justify-center" 
+                              <div
+                                className="bg-green-500 h-4 rounded-full transition-all relative flex items-center justify-center"
                                 style={{ width: `${Math.min(Math.max(parseFloat(row.resolutionCountPercent) || 0, 0), 100)}%`, minWidth: parseFloat(row.resolutionCountPercent) > 0 ? '2px' : '0' }}
                               >
                                 {parseFloat(row.resolutionCountPercent) > 5 && (
@@ -2788,31 +2785,31 @@ const Dashboard = () => {
                                     {(parseFloat(row.resolutionCountPercent) || 0).toFixed(2)}%
                                   </span>
                                 )}
-                      </div>
+                              </div>
                             </div>
                             <span className="text-gray-700 min-w-[50px] text-right font-medium text-xs">{(parseFloat(row.resolutionCountPercent) || 0).toFixed(2)}%</span>
-                    </div>
-                  </td>
+                          </div>
+                        </td>
                         <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(parseFloat(row.resolutionAmount) || 0)}</td>
                         <td className="py-2 px-2 text-right text-gray-700">{(parseFloat(row.resolutionAmountPercent) || 0).toFixed(2)}%</td>
-                </tr>
-              ))}
+                      </tr>
+                    ))}
                     {endIndex >= stateData.length && stateData.length > 0 && (
-                <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
-                  <td className="py-2 px-2">Totals</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.totalCases)}</td>
+                      <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
+                        <td className="py-2 px-2">Totals</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.totalCases)}</td>
                         <td className="py-2 px-2 text-right">{formatIndianNumber(totals.outstandingBalance)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionCount)}</td>
-                  <td className="py-2 px-2 text-right">{totalResolutionCountPercent}%</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionCount)}</td>
+                        <td className="py-2 px-2 text-right">{totalResolutionCountPercent}%</td>
                         <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionAmount)}</td>
-                <td className="py-2 px-2 text-right">{totalResolutionAmountPercent}%</td>
-              </tr>
+                        <td className="py-2 px-2 text-right">{totalResolutionAmountPercent}%</td>
+                      </tr>
                     )}
                   </>
-              )}
-            </tbody>
-          </table>
-        </div>
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
         {!collectionDataLoading && !collectionDataError && renderPagination(stateWisePage, setStateWisePage, stateData.length, itemsPerPage)}
       </div>
@@ -2843,14 +2840,14 @@ const Dashboard = () => {
     ]
 
     const handleExport = () => {
-      const exportData = [...regionData, { 
-        region: 'Total', 
-        cases: totals.cases, 
-        outstandingBalance: totals.outstandingBalance, 
-        resolutionCount: totals.resolutionCount, 
-        resolutionCountPercent: totalResolutionCountPercent, 
-        resolutionAmount: totals.resolutionAmount, 
-        resolutionAmountPercent: totalResolutionAmountPercent 
+      const exportData = [...regionData, {
+        region: 'Total',
+        cases: totals.cases,
+        outstandingBalance: totals.outstandingBalance,
+        resolutionCount: totals.resolutionCount,
+        resolutionCountPercent: totalResolutionCountPercent,
+        resolutionAmount: totals.resolutionAmount,
+        resolutionAmountPercent: totalResolutionAmountPercent
       }]
       exportTableToExcel(exportData, headers, 'Region_Wise_Summary')
     }
@@ -2878,37 +2875,37 @@ const Dashboard = () => {
         {collectionDataError ? (
           <div className="p-4 text-center text-red-600">Error: {collectionDataError}</div>
         ) : (
-        <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
-          <table className="w-full text-xs border border-[#003366]">
-            <thead className="bg-gray-100 text-[#003366] sticky top-0">
-              <tr>
-                <th className="text-left py-2 px-2 font-semibold">Region</th>
-                <th className="text-right py-2 px-2 font-semibold">Cases</th>
-                <th className="text-right py-2 px-2 font-semibold">Outstanding balance</th>
-                <th className="text-right py-2 px-2 font-semibold">Resolution count</th>
-                <th className="text-right py-2 px-2 font-semibold">Resolution Count%</th>
-                <th className="text-right py-2 px-2 font-semibold">Resolution amount</th>
-                <th className="text-right py-2 px-2 font-semibold">Resolution Amount%</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white">
+          <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
+            <table className="w-full text-xs border border-[#003366]">
+              <thead className="bg-gray-100 text-[#003366] sticky top-0">
+                <tr>
+                  <th className="text-left py-2 px-2 font-semibold">Region</th>
+                  <th className="text-right py-2 px-2 font-semibold">Cases</th>
+                  <th className="text-right py-2 px-2 font-semibold">Outstanding balance</th>
+                  <th className="text-right py-2 px-2 font-semibold">Resolution count</th>
+                  <th className="text-right py-2 px-2 font-semibold">Resolution Count%</th>
+                  <th className="text-right py-2 px-2 font-semibold">Resolution amount</th>
+                  <th className="text-right py-2 px-2 font-semibold">Resolution Amount%</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white">
                 {hasApiData && regionData.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="py-8 px-2 text-center text-gray-500">No data available</td>
                   </tr>
                 ) : (
                   <>
-              {paginatedData.map((row, idx) => (
-                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="py-2 px-2 text-gray-800 font-medium">{row.region}</td>
+                    {paginatedData.map((row, idx) => (
+                      <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                        <td className="py-2 px-2 text-gray-800 font-medium">{row.region}</td>
                         <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.cases || 0)}</td>
                         <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(parseFloat(row.outstandingBalance) || 0)}</td>
                         <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.resolutionCount || 0)}</td>
-                  <td className="py-2 px-2 text-right">
-                    <div className="flex items-center justify-end gap-2">
+                        <td className="py-2 px-2 text-right">
+                          <div className="flex items-center justify-end gap-2">
                             <div className="flex-1 max-w-[100px] bg-gray-200 rounded-full h-4 relative overflow-hidden">
-                              <div 
-                                className="bg-green-500 h-4 rounded-full transition-all relative flex items-center justify-center" 
+                              <div
+                                className="bg-green-500 h-4 rounded-full transition-all relative flex items-center justify-center"
                                 style={{ width: `${Math.min(Math.max(parseFloat(row.resolutionCountPercent) || 0, 0), 100)}%`, minWidth: parseFloat(row.resolutionCountPercent) > 0 ? '2px' : '0' }}
                               >
                                 {parseFloat(row.resolutionCountPercent) > 5 && (
@@ -2916,31 +2913,31 @@ const Dashboard = () => {
                                     {(parseFloat(row.resolutionCountPercent) || 0).toFixed(2)}%
                                   </span>
                                 )}
-                      </div>
+                              </div>
                             </div>
                             <span className="text-gray-700 min-w-[50px] text-right font-medium text-xs">{(parseFloat(row.resolutionCountPercent) || 0).toFixed(2)}%</span>
-                    </div>
-                  </td>
+                          </div>
+                        </td>
                         <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(parseFloat(row.resolutionAmount) || 0)}</td>
                         <td className="py-2 px-2 text-right text-gray-700">{(parseFloat(row.resolutionAmountPercent) || 0).toFixed(2)}%</td>
-                </tr>
-              ))}
+                      </tr>
+                    ))}
                     {endIndex >= regionData.length && regionData.length > 0 && (
-                <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
-                  <td className="py-2 px-2">Totals</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.cases)}</td>
+                      <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
+                        <td className="py-2 px-2">Totals</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.cases)}</td>
                         <td className="py-2 px-2 text-right">{formatIndianNumber(totals.outstandingBalance)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionCount)}</td>
-                  <td className="py-2 px-2 text-right">{totalResolutionCountPercent}%</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionCount)}</td>
+                        <td className="py-2 px-2 text-right">{totalResolutionCountPercent}%</td>
                         <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionAmount)}</td>
-                <td className="py-2 px-2 text-right">{totalResolutionAmountPercent}%</td>
-              </tr>
+                        <td className="py-2 px-2 text-right">{totalResolutionAmountPercent}%</td>
+                      </tr>
                     )}
                   </>
-              )}
-            </tbody>
-          </table>
-        </div>
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
         {!collectionDataLoading && !collectionDataError && renderPagination(regionWisePage, setRegionWisePage, regionData.length, itemsPerPage)}
       </div>
@@ -2971,14 +2968,14 @@ const Dashboard = () => {
     ]
 
     const handleExport = () => {
-      const exportData = [...bucketData, { 
-        bucket: 'Total', 
-        cases: totals.cases, 
-        outstandingBalance: totals.outstandingBalance, 
-        resolutionCount: totals.resolutionCount, 
-        resolutionCountPercent: totalResolutionCountPercent, 
-        resolutionAmount: totals.resolutionAmount, 
-        resolutionAmountPercent: totalResolutionAmountPercent 
+      const exportData = [...bucketData, {
+        bucket: 'Total',
+        cases: totals.cases,
+        outstandingBalance: totals.outstandingBalance,
+        resolutionCount: totals.resolutionCount,
+        resolutionCountPercent: totalResolutionCountPercent,
+        resolutionAmount: totals.resolutionAmount,
+        resolutionAmountPercent: totalResolutionAmountPercent
       }]
       exportTableToExcel(exportData, headers, 'Bucket_Wise_Summary')
     }
@@ -3006,37 +3003,37 @@ const Dashboard = () => {
         {collectionDataError ? (
           <div className="p-4 text-center text-red-600">Error: {collectionDataError}</div>
         ) : (
-        <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
-          <table className="w-full text-xs border border-[#003366]">
-            <thead className="bg-gray-100 text-[#003366] sticky top-0">
-              <tr>
-                <th className="text-left py-2 px-2 font-semibold">Bucket</th>
-                <th className="text-right py-2 px-2 font-semibold">Cases</th>
-                <th className="text-right py-2 px-2 font-semibold">Outstanding balance</th>
-                <th className="text-right py-2 px-2 font-semibold">Resolution count</th>
-                <th className="text-right py-2 px-2 font-semibold">Resolution Count%</th>
-                <th className="text-right py-2 px-2 font-semibold">Resolution amount</th>
-                <th className="text-right py-2 px-2 font-semibold">Resolution Amount%</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white">
+          <div className="overflow-x-auto max-h-96 overflow-y-auto table-scroll-container">
+            <table className="w-full text-xs border border-[#003366]">
+              <thead className="bg-gray-100 text-[#003366] sticky top-0">
+                <tr>
+                  <th className="text-left py-2 px-2 font-semibold">Bucket</th>
+                  <th className="text-right py-2 px-2 font-semibold">Cases</th>
+                  <th className="text-right py-2 px-2 font-semibold">Outstanding balance</th>
+                  <th className="text-right py-2 px-2 font-semibold">Resolution count</th>
+                  <th className="text-right py-2 px-2 font-semibold">Resolution Count%</th>
+                  <th className="text-right py-2 px-2 font-semibold">Resolution amount</th>
+                  <th className="text-right py-2 px-2 font-semibold">Resolution Amount%</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white">
                 {hasApiData && bucketData.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="py-8 px-2 text-center text-gray-500">No data available</td>
                   </tr>
                 ) : (
                   <>
-              {paginatedData.map((row, idx) => (
-                <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : (row.bucket === 'X bucket = 1-30' || row.bucket === '>180' ? 'bg-yellow-50' : 'bg-gray-50')}>
-                  <td className="py-2 px-2 text-gray-800 font-medium">{row.bucket}</td>
+                    {paginatedData.map((row, idx) => (
+                      <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : (row.bucket === 'X bucket = 1-30' || row.bucket === '>180' ? 'bg-yellow-50' : 'bg-gray-50')}>
+                        <td className="py-2 px-2 text-gray-800 font-medium">{row.bucket}</td>
                         <td className={`py-2 px-2 text-right ${row.bucket === 'X bucket = 1-30' || row.bucket === '>180' ? 'bg-yellow-100 font-semibold' : 'text-gray-700'}`}>{formatIndianNumber(row.cases || 0)}</td>
                         <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(parseFloat(row.outstandingBalance) || 0)}</td>
                         <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.resolutionCount || 0)}</td>
-                  <td className="py-2 px-2 text-right">
-                    <div className="flex items-center justify-end gap-2">
+                        <td className="py-2 px-2 text-right">
+                          <div className="flex items-center justify-end gap-2">
                             <div className="flex-1 max-w-[100px] bg-gray-200 rounded-full h-4 relative overflow-hidden">
-                              <div 
-                                className="bg-green-500 h-4 rounded-full transition-all relative flex items-center justify-center" 
+                              <div
+                                className="bg-green-500 h-4 rounded-full transition-all relative flex items-center justify-center"
                                 style={{ width: `${Math.min(Math.max(parseFloat(row.resolutionCountPercent) || 0, 0), 100)}%`, minWidth: parseFloat(row.resolutionCountPercent) > 0 ? '2px' : '0' }}
                               >
                                 {parseFloat(row.resolutionCountPercent) > 5 && (
@@ -3044,31 +3041,31 @@ const Dashboard = () => {
                                     {(parseFloat(row.resolutionCountPercent) || 0).toFixed(2)}%
                                   </span>
                                 )}
-                      </div>
+                              </div>
                             </div>
                             <span className="text-gray-700 min-w-[50px] text-right font-medium text-xs">{(parseFloat(row.resolutionCountPercent) || 0).toFixed(2)}%</span>
-                    </div>
-                  </td>
+                          </div>
+                        </td>
                         <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(parseFloat(row.resolutionAmount) || 0)}</td>
                         <td className="py-2 px-2 text-right text-gray-700">{(parseFloat(row.resolutionAmountPercent) || 0).toFixed(2)}%</td>
-                </tr>
-              ))}
+                      </tr>
+                    ))}
                     {endIndex >= bucketData.length && bucketData.length > 0 && (
-                <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
-                  <td className="py-2 px-2">Totals</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.cases)}</td>
+                      <tr className="bg-gray-100 text-gray-900 font-semibold border-t-2 border-gray-300">
+                        <td className="py-2 px-2">Totals</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.cases)}</td>
                         <td className="py-2 px-2 text-right">{formatIndianNumber(totals.outstandingBalance)}</td>
-                  <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionCount)}</td>
-                  <td className="py-2 px-2 text-right">{totalResolutionCountPercent}%</td>
+                        <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionCount)}</td>
+                        <td className="py-2 px-2 text-right">{totalResolutionCountPercent}%</td>
                         <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionAmount)}</td>
-                <td className="py-2 px-2 text-right">{totalResolutionAmountPercent}%</td>
-              </tr>
+                        <td className="py-2 px-2 text-right">{totalResolutionAmountPercent}%</td>
+                      </tr>
                     )}
                   </>
-              )}
-            </tbody>
-          </table>
-        </div>
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
         {!collectionDataLoading && !collectionDataError && renderPagination(bucketWisePage, setBucketWisePage, bucketData.length, itemsPerPage)}
       </div>
@@ -3110,21 +3107,21 @@ const Dashboard = () => {
     ]
 
     const handleExport = () => {
-      const exportData = [...data, { 
-        smartCollId: 'Totals', 
-        name: '', 
-        agency: '', 
-        role: '', 
-        totalAllocated: totals.totalAllocated, 
-        visitsWeb: totals.visitsWeb, 
-        visitsField: totals.visitsField, 
-        visitsAccounts: totals.visitsAccounts, 
-        avgIntensity: totals.avgIntensity, 
-        numPaid: totals.numPaid, 
-        efficiency: totals.efficiency, 
-        paidPercent: totals.paidPercent, 
-        numPTP: totals.numPTP, 
-        numDL: totals.numDL 
+      const exportData = [...data, {
+        smartCollId: 'Totals',
+        name: '',
+        agency: '',
+        role: '',
+        totalAllocated: totals.totalAllocated,
+        visitsWeb: totals.visitsWeb,
+        visitsField: totals.visitsField,
+        visitsAccounts: totals.visitsAccounts,
+        avgIntensity: totals.avgIntensity,
+        numPaid: totals.numPaid,
+        efficiency: totals.efficiency,
+        paidPercent: totals.paidPercent,
+        numPTP: totals.numPTP,
+        numDL: totals.numDL
       }]
       exportTableToExcel(exportData, headers, 'MTD_Productivity_Report')
     }
@@ -3233,18 +3230,18 @@ const Dashboard = () => {
     ]
 
     const handleExport = () => {
-      const exportData = [...ftdData, { 
-        smartCollId: 'Totals', 
-        name: '', 
-        agency: '', 
-        webVisits: totals.webVisits, 
-        visitsAccounts: totals.visitsAccounts, 
-        fieldVisits: totals.fieldVisits, 
-        ptp: totals.ptp, 
-        paid: totals.paid, 
-        ptpPercent: totals.ptpPercent, 
-        avgIntensity: totals.avgIntensity, 
-        paidPercent: totals.paidPercent 
+      const exportData = [...ftdData, {
+        smartCollId: 'Totals',
+        name: '',
+        agency: '',
+        webVisits: totals.webVisits,
+        visitsAccounts: totals.visitsAccounts,
+        fieldVisits: totals.fieldVisits,
+        ptp: totals.ptp,
+        paid: totals.paid,
+        ptpPercent: totals.ptpPercent,
+        avgIntensity: totals.avgIntensity,
+        paidPercent: totals.paidPercent
       }]
       exportTableToExcel(exportData, headers, 'FTD_Productivity_Report')
     }
@@ -3427,19 +3424,19 @@ const Dashboard = () => {
     ]
 
     const handleExport = () => {
-      const exportData = [...ftdData, { 
-        smartCollId: 'Totals', 
-        name: '', 
-        agency: '', 
-        visits: totals.visits, 
-        visitsAccounts: totals.visitsAccounts, 
-        ptp: totals.ptp, 
-        rtp: totals.rtp, 
-        nc: totals.nc, 
-        dl: totals.dl, 
-        negative: totals.negative, 
-        positive: totals.positive, 
-        tos: totals.tos 
+      const exportData = [...ftdData, {
+        smartCollId: 'Totals',
+        name: '',
+        agency: '',
+        visits: totals.visits,
+        visitsAccounts: totals.visitsAccounts,
+        ptp: totals.ptp,
+        rtp: totals.rtp,
+        nc: totals.nc,
+        dl: totals.dl,
+        negative: totals.negative,
+        positive: totals.positive,
+        tos: totals.tos
       }]
       exportTableToExcel(exportData, headers, 'FTD_Collector_Summary_Report')
     }
@@ -3541,17 +3538,17 @@ const Dashboard = () => {
     ]
 
     const handleExport = () => {
-      const exportData = [...mtdData, { 
-        smartCollId: 'Totals', 
-        name: '', 
-        agency: '', 
-        visits: totals.visits, 
-        visitsAccounts: totals.visitsAccounts, 
-        time10_12: totals.time10_12, 
-        time12_2: totals.time12_2, 
-        time2_4: totals.time2_4, 
-        time4_6: totals.time4_6, 
-        time6_7: totals.time6_7 
+      const exportData = [...mtdData, {
+        smartCollId: 'Totals',
+        name: '',
+        agency: '',
+        visits: totals.visits,
+        visitsAccounts: totals.visitsAccounts,
+        time10_12: totals.time10_12,
+        time12_2: totals.time12_2,
+        time2_4: totals.time2_4,
+        time4_6: totals.time4_6,
+        time6_7: totals.time6_7
       }]
       exportTableToExcel(exportData, headers, 'MTD_Time_Wise_Visit_Report')
     }
@@ -3647,17 +3644,17 @@ const Dashboard = () => {
     ]
 
     const handleExport = () => {
-      const exportData = [...ftdData, { 
-        smartCollId: 'Totals', 
-        name: '', 
-        agency: '', 
-        visits: totals.visits, 
-        visitsAccounts: totals.visitsAccounts, 
-        time10_12: totals.time10_12, 
-        time12_2: totals.time12_2, 
-        time2_4: totals.time2_4, 
-        time4_6: totals.time4_6, 
-        time6_7: totals.time6_7 
+      const exportData = [...ftdData, {
+        smartCollId: 'Totals',
+        name: '',
+        agency: '',
+        visits: totals.visits,
+        visitsAccounts: totals.visitsAccounts,
+        time10_12: totals.time10_12,
+        time12_2: totals.time12_2,
+        time2_4: totals.time2_4,
+        time4_6: totals.time4_6,
+        time6_7: totals.time6_7
       }]
       exportTableToExcel(exportData, headers, 'FTD_Time_Wise_Visit_Report')
     }
@@ -3731,8 +3728,8 @@ const Dashboard = () => {
       return (
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-12 text-center">
           <div className="flex flex-col items-center space-y-4">
-            <div 
-              className="animate-spin h-10 w-10 border-4 border-red-600" 
+            <div
+              className="animate-spin h-10 w-10 border-4 border-red-600"
               style={{ borderRadius: '0' }}
             ></div>
             <p className="text-sm font-medium text-gray-600">Loading deposition data...</p>
@@ -3740,7 +3737,7 @@ const Dashboard = () => {
         </div>
       )
     }
-    
+
     if (!depositionData || !depositionData.deposition_data || depositionData.deposition_data.length === 0) {
       return (
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 text-center text-gray-500">
@@ -3763,9 +3760,9 @@ const Dashboard = () => {
       if (!dateString) return '-'
       try {
         const date = new Date(dateString)
-        return date.toLocaleString('en-GB', { 
-          day: '2-digit', 
-          month: '2-digit', 
+        return date.toLocaleString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
           year: 'numeric',
           hour: '2-digit',
           minute: '2-digit'
@@ -3852,11 +3849,10 @@ const Dashboard = () => {
           key="prev"
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={!hasPrevious}
-          className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-            hasPrevious
+          className={`px-3 py-1 rounded text-sm font-medium transition-colors ${hasPrevious
               ? 'bg-white text-red-600 border border-red-600 hover:bg-red-50 cursor-pointer'
               : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-          }`}
+            }`}
         >
           Previous
         </button>
@@ -3888,11 +3884,10 @@ const Dashboard = () => {
           <button
             key={i}
             onClick={() => handlePageChange(i)}
-            className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-              i === currentPage
+            className={`px-3 py-1 rounded text-sm font-medium transition-colors ${i === currentPage
                 ? 'bg-red-600 text-white cursor-pointer'
                 : 'bg-white text-red-600 border border-red-600 hover:bg-red-50 cursor-pointer'
-            }`}
+              }`}
           >
             {i}
           </button>
@@ -3925,11 +3920,10 @@ const Dashboard = () => {
           key="next"
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={!hasNext}
-          className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-            hasNext
+          className={`px-3 py-1 rounded text-sm font-medium transition-colors ${hasNext
               ? 'bg-white text-red-600 border border-red-600 hover:bg-red-50 cursor-pointer'
               : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-          }`}
+            }`}
         >
           Next
         </button>
@@ -3945,7 +3939,7 @@ const Dashboard = () => {
           <div className="flex items-center gap-4">
             {pagination && (
               <span className="text-sm">
-                Page {currentPage} of {totalPages} 
+                Page {currentPage} of {totalPages}
                 ({totalCount} total records)
               </span>
             )}
@@ -4035,7 +4029,7 @@ const Dashboard = () => {
   console.log('dashboardData', dashboardData?.loan_data?.total_loans)
 
   return (
-    <div className="h-screen font-['Montserrat'] flex" style={{background: 'linear-gradient(135deg,rgb(255, 255, 255) 0%,rgb(255, 255, 255) 100%)'}}>
+    <div className="h-screen font-['Montserrat'] flex" style={{ background: 'linear-gradient(135deg,rgb(255, 255, 255) 0%,rgb(255, 255, 255) 100%)' }}>
       <style>{`
         /* Custom Scrollbar Styles - Very Thin and Red */
         * {
@@ -4147,38 +4141,38 @@ const Dashboard = () => {
       `}</style>
       {/* Sidebar - Small when closed, overlay when open */}
       <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : 'w-0 overflow-hidden'}`}>
-        <Sidebar 
-          isMobileOpen={isMobileSidebarOpen} 
+        <Sidebar
+          isMobileOpen={isMobileSidebarOpen}
           setIsMobileOpen={setIsMobileSidebarOpen}
           isCollapsed={isSidebarCollapsed}
           setIsCollapsed={setIsSidebarCollapsed}
         />
       </div>
-      
+
       {/* Overlay Sidebar when expanded */}
       {!isSidebarCollapsed && (
         <div className="fixed inset-y-0 left-0 z-50 w-68 bg-white border-r border-gray-200 shadow-lg">
-          <Sidebar 
-            isMobileOpen={isMobileSidebarOpen} 
+          <Sidebar
+            isMobileOpen={isMobileSidebarOpen}
             setIsMobileOpen={setIsMobileSidebarOpen}
             isCollapsed={isSidebarCollapsed}
             setIsCollapsed={setIsSidebarCollapsed}
           />
         </div>
       )}
-      
-      <div 
-        ref={mainContentRef} 
+
+      <div
+        ref={mainContentRef}
         className="flex flex-col overflow-hidden flex-1 relative transition-all duration-300"
         style={{
-          marginLeft: typeof window !== 'undefined' && window.innerWidth >= 1024 
+          marginLeft: typeof window !== 'undefined' && window.innerWidth >= 1024
             ? (isSidebarCollapsed ? '0px' : '272px')
             : '0px'
         }}
       >
         {/* Navbar */}
-        <Navbar 
-          onMobileMenuClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)} 
+        <Navbar
+          onMobileMenuClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
           isSidebarCollapsed={isSidebarCollapsed}
           onBellClick={() => setShowAlerts(!showAlerts)}
         />
@@ -4187,8 +4181,8 @@ const Dashboard = () => {
         {dashboardLoading && (
           <div className="absolute inset-0 bg-white bg-opacity-95 flex flex-col items-center justify-center z-50">
             <div className="flex flex-col items-center space-y-4">
-              <div 
-                className="animate-spin h-12 w-12 border-4 border-red-600" 
+              <div
+                className="animate-spin h-12 w-12 border-4 border-red-600"
                 style={{ borderRadius: '0' }}
               ></div>
               <p className="text-sm font-medium text-gray-600">Loading dashboard data...</p>
@@ -4238,7 +4232,7 @@ const Dashboard = () => {
             </div>
           </div>
         )}
-        
+
         {/* Live Alerts Dropdown */}
         {showAlerts && (
           <div ref={alertsRef} className="absolute top-16 right-4 z-50 w-78 bg-white border border-gray-200 rounded-lg shadow-lg">
@@ -4259,18 +4253,18 @@ const Dashboard = () => {
                 <button className="mt-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs transition-colors cursor-pointer">
                   View
                 </button>
-            </div>
+              </div>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                 <div className="text-blue-800 text-xs">Unallocated cases &gt; threshold: 23</div>
                 <div className="text-blue-600 text-xs mt-1">08:20</div>
                 <button className="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs transition-colors cursor-pointer">
                   View
-              </button>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
         )}
-        
+
         {/* Main Content - Scrollable */}
         <main className="flex-1 overflow-hidden flex flex-col" style={{ paddingTop: '64px' }}>
           {/* Collection Dashboard Content */}
@@ -4296,10 +4290,9 @@ const Dashboard = () => {
                   <div className="space-y-3">
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">Type of Loan <span className="text-gray-400 font-normal">(4)</span></label>
-                      <select 
-                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${
-                          filterLoanType !== 'All Loans' ? 'border-2 border-red-600' : 'border border-gray-300'
-                        }`}
+                      <select
+                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${filterLoanType !== 'All Loans' ? 'border-2 border-red-600' : 'border border-gray-300'
+                          }`}
                         value={filterLoanType}
                         onChange={(e) => setFilterLoanType(e.target.value)}
                       >
@@ -4311,10 +4304,9 @@ const Dashboard = () => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">DPD Buckets <span className="text-gray-400 font-normal">(6)</span></label>
-                      <select 
-                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${
-                          filterDPD !== 'All Buckets' ? 'border-2 border-red-600' : 'border border-gray-300'
-                        }`}
+                      <select
+                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${filterDPD !== 'All Buckets' ? 'border-2 border-red-600' : 'border border-gray-300'
+                          }`}
                         value={filterDPD}
                         onChange={(e) => setFilterDPD(e.target.value)}
                       >
@@ -4328,34 +4320,31 @@ const Dashboard = () => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">From Date</label>
-                      <input 
-                        type="date" 
-                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${
-                          !isFromDateDefault() ? 'border-2 border-red-600' : 'border border-gray-300'
-                        }`}
+                      <input
+                        type="date"
+                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${!isFromDateDefault() ? 'border-2 border-red-600' : 'border border-gray-300'
+                          }`}
                         value={fromDate}
                         onChange={(e) => setFromDate(e.target.value)}
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">To Date</label>
-                      <input 
-                        type="date" 
-                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${
-                          !isToDateDefault() ? 'border-2 border-red-600' : 'border border-gray-300'
-                        }`}
+                      <input
+                        type="date"
+                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${!isToDateDefault() ? 'border-2 border-red-600' : 'border border-gray-300'
+                          }`}
                         value={toDate}
                         onChange={(e) => setToDate(e.target.value)}
                         max={new Date().toISOString().split('T')[0]}
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">Geography <span className="text-gray-400 font-normal">(6)</span></label>
-                      <select 
-                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${
-                          filterGeography !== 'All Regions' ? 'border-2 border-red-600' : 'border border-gray-300'
-                        }`}
+                      <select
+                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${filterGeography !== 'All Regions' ? 'border-2 border-red-600' : 'border border-gray-300'
+                          }`}
                         value={filterGeography}
                         onChange={(e) => setFilterGeography(e.target.value)}
                       >
@@ -4369,10 +4358,9 @@ const Dashboard = () => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">State <span className="text-gray-400 font-normal">(9)</span></label>
-                      <select 
-                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${
-                          filterState !== 'All States' ? 'border-2 border-red-600' : 'border border-gray-300'
-                        }`}
+                      <select
+                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${filterState !== 'All States' ? 'border-2 border-red-600' : 'border border-gray-300'
+                          }`}
                         value={filterState}
                         onChange={(e) => setFilterState(e.target.value)}
                       >
@@ -4389,10 +4377,9 @@ const Dashboard = () => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">District <span className="text-gray-400 font-normal">(10)</span></label>
-                      <select 
-                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${
-                          filterDistrict !== 'All Districts' ? 'border-2 border-red-600' : 'border border-gray-300'
-                        }`}
+                      <select
+                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${filterDistrict !== 'All Districts' ? 'border-2 border-red-600' : 'border border-gray-300'
+                          }`}
                         value={filterDistrict}
                         onChange={(e) => setFilterDistrict(e.target.value)}
                       >
@@ -4410,10 +4397,9 @@ const Dashboard = () => {
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">PI Code <span className="text-gray-400 font-normal">(13)</span></label>
-                      <select 
-                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${
-                          filterPICode !== 'All PI Codes' ? 'border-2 border-red-600' : 'border border-gray-300'
-                        }`}
+                      <select
+                        className={`w-full p-2 rounded text-xs focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors ${filterPICode !== 'All PI Codes' ? 'border-2 border-red-600' : 'border border-gray-300'
+                          }`}
                         value={filterPICode}
                         onChange={(e) => setFilterPICode(e.target.value)}
                       >
@@ -4432,10 +4418,10 @@ const Dashboard = () => {
                         <option>PI012</option>
                       </select>
                     </div>
-            </div>
-          </div>
+                  </div>
+                </div>
 
-                
+
 
                 {/* Section 7: Delegation Tracking */}
                 <div className="bg-gray-50 border-l-4 border-t border-r border-b border-gray-200 rounded-lg p-4 shadow-sm" style={{ borderLeftColor: '#003366' }}>
@@ -4450,25 +4436,25 @@ const Dashboard = () => {
                       <div className="text-indigo-800 text-xs font-semibold">Delegation Types</div>
                       <div className="text-indigo-600 text-xs mt-1">Leave: 5 | Overload: 4</div>
                       <div className="text-indigo-600 text-xs">Escalation: 2 | Special: 1</div>
-                  </div>
+                    </div>
                     <div className="bg-red-50 border border-red-200 rounded-lg p-2">
                       <div className="text-red-800 text-xs font-semibold">Re-delegation Alerts</div>
                       <div className="text-red-600 text-xs mt-1">Overdue: 3</div>
                       <button className="mt-1 bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs transition-colors cursor-pointer">
                         View Details
                       </button>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-2">
+                    <div className="text-green-800 text-xs font-semibold">Outstanding Value per Collector</div>
+                    <div className="text-green-600 text-xs mt-1">Avg: ₹2.1Cr</div>
+                    <div className="text-green-600 text-xs">Max: ₹3.2Cr</div>
                   </div>
                 </div>
               </div>
-                              <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-
-               <div className="bg-green-50 border border-green-200 rounded-lg p-2">
-                          <div className="text-green-800 text-xs font-semibold">Outstanding Value per Collector</div>
-                          <div className="text-green-600 text-xs mt-1">Avg: ₹2.1Cr</div>
-                          <div className="text-green-600 text-xs">Max: ₹3.2Cr</div>
-                          </div>
-                          </div>
-            </div>
 
               {/* Right Side - Main Content */}
               <div className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden h-full pr-6">
@@ -4482,13 +4468,13 @@ const Dashboard = () => {
                       {favoriteCards.map(cardId => {
                         const card = allCards.find(c => c.id === cardId)
                         if (!card) return null
-                        
+
                         // Render different cards based on their ID
                         if (cardId === 'allocation') {
                           return (
                             <div key={cardId} className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg card-with-wave card-wave-staff">
                               <div className="text-xs text-gray-800 relative z-10">Allocation Summary</div>
-                              <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>1,245</div>
+                              <div className="text-lg font-bold relative z-10" style={{ color: '#DC2626' }}>1,245</div>
                               {renderFavoritePin('allocation')}
                             </div>
                           )
@@ -4496,7 +4482,7 @@ const Dashboard = () => {
                           return (
                             <div key={cardId} className="group bg-white  rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg card-with-wave card-wave-staff">
                               <div className="text-xs text-gray-800 relative z-10">Collection Efficiency (%)</div>
-                              <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>86.4%</div>
+                              <div className="text-lg font-bold relative z-10" style={{ color: '#DC2626' }}>86.4%</div>
                               {renderFavoritePin('collection')}
                             </div>
                           )
@@ -4504,7 +4490,7 @@ const Dashboard = () => {
                           return (
                             <div key={cardId} className="group bg-white  rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg card-with-wave card-wave-staff">
                               <div className="text-xs text-gray-800 relative z-10">PTP Conversion Rate (%)</div>
-                              <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>72.3%</div>
+                              <div className="text-lg font-bold relative z-10" style={{ color: '#DC2626' }}>72.3%</div>
                               {renderFavoritePin('ptp')}
                             </div>
                           )
@@ -4512,7 +4498,7 @@ const Dashboard = () => {
                           return (
                             <div key={cardId} className="group bg-white  rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg card-with-wave card-wave-staff">
                               <div className="text-xs text-gray-800 relative z-10">Staff Productivity Index</div>
-                              <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>156</div>
+                              <div className="text-lg font-bold relative z-10" style={{ color: '#DC2626' }}>156</div>
                               {renderFavoritePin('productivity')}
                             </div>
                           )
@@ -4520,7 +4506,7 @@ const Dashboard = () => {
                           return (
                             <div key={cardId} className="group bg-white  rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg card-with-wave card-wave-staff">
                               <div className="text-xs text-gray-800 relative z-10">Inactive/Non-performing Staff</div>
-                              <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>3</div>
+                              <div className="text-lg font-bold relative z-10" style={{ color: '#DC2626' }}>3</div>
                               {renderFavoritePin('inactive')}
                             </div>
                           )
@@ -4528,7 +4514,7 @@ const Dashboard = () => {
                           return (
                             <div key={cardId} className="group bg-white  rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg card-with-wave card-wave-staff">
                               <div className="text-xs text-gray-800 relative z-10">Deposition</div>
-                              <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>{depositionData?.pagination?.total_count || 0}</div>
+                              <div className="text-lg font-bold relative z-10" style={{ color: '#DC2626' }}>{depositionData?.pagination?.total_count || 0}</div>
                               {renderFavoritePin('deposition')}
                             </div>
                           )
@@ -4540,11 +4526,11 @@ const Dashboard = () => {
                               <div className="space-y-1 relative z-10">
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Messages Sent</span>
-                                  <span className="font-semibold" style={{color: '#003366'}}>1,245</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>1,245</span>
                                 </div>
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Delivered</span>
-                                  <span className="font-semibold" style={{color: '#003366'}}>1,180</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>1,180</span>
                                 </div>
                               </div>
                             </div>
@@ -4557,11 +4543,11 @@ const Dashboard = () => {
                               <div className="space-y-1 relative z-10">
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Calls Triggered</span>
-                                  <span className="font-semibold" style={{color: '#003366'}}>2,100</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>2,100</span>
                                 </div>
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Answered</span>
-                                  <span className="font-semibold" style={{color: '#003366'}}>1,580</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>1,580</span>
                                 </div>
                               </div>
                             </div>
@@ -4574,11 +4560,11 @@ const Dashboard = () => {
                               <div className="space-y-1 relative z-10">
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Total Calls</span>
-                                  <span className="font-semibold" style={{color: '#003366'}}>1,850</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>1,850</span>
                                 </div>
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Successful Connects</span>
-                                  <span className="font-semibold" style={{color: '#003366'}}>1,340</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>1,340</span>
                                 </div>
                               </div>
                             </div>
@@ -4591,11 +4577,11 @@ const Dashboard = () => {
                               <div className="space-y-1 relative z-10">
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Planned Visits</span>
-                                  <span className="font-semibold" style={{color: '#003366'}}>156</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>156</span>
                                 </div>
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Completed Visits</span>
-                                  <span className="font-semibold" style={{color: '#003366'}}>122</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>122</span>
                                 </div>
                               </div>
                             </div>
@@ -4608,11 +4594,11 @@ const Dashboard = () => {
                               <div className="space-y-1 relative z-10">
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Customer Count</span>
-                                  <span className="font-semibold" style={{color: '#003366'}}>45</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>45</span>
                                 </div>
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Amount</span>
-                                  <span className="font-semibold" style={{color: '#003366'}}>₹1.25Cr</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>₹1.25Cr</span>
                                 </div>
                               </div>
                             </div>
@@ -4625,15 +4611,15 @@ const Dashboard = () => {
                               <div className="space-y-1 relative z-10">
                                 <div className="flex flex-row justify-between text-xs text-gray-800">
                                   <span># Todays PTP</span>
-                                  <span className="font-semibold" style={{color: '#003366'}}>23</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>23</span>
                                   <span># Future PTP</span>
-                                  <span className="font-semibold" style={{color: '#003366'}}>890</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>890</span>
                                 </div>
                                 <div className="flex flex-row justify-between text-xs text-gray-800">
                                   <span># Failed PTP</span>
-                                  <span className="font-semibold" style={{color: '#003366'}}>234</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>234</span>
                                   <span># Total PTP</span>
-                                  <span className="font-semibold" style={{color: '#003366'}}>1120</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>1120</span>
                                 </div>
                               </div>
                             </div>
@@ -4646,11 +4632,11 @@ const Dashboard = () => {
                               <div className="space-y-1 relative z-10">
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span># Customers</span>
-                                  <span className="font-semibold" style={{color: '#003366'}}>67</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>67</span>
                                 </div>
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Pending Amount</span>
-                                  <span className="font-semibold" style={{color: '#003366'}}>₹34L</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>₹34L</span>
                                 </div>
                               </div>
                             </div>
@@ -4663,11 +4649,11 @@ const Dashboard = () => {
                               <div className="space-y-1 relative z-10">
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span># Customers</span>
-                                  <span className="font-semibold" style={{color: '#003366'}}>189</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>189</span>
                                 </div>
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Collected Amount</span>
-                                  <span className="font-semibold" style={{color: '#003366'}}>₹56L</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>₹56L</span>
                                 </div>
                               </div>
                             </div>
@@ -4680,11 +4666,11 @@ const Dashboard = () => {
                               <div className="space-y-1 relative z-10">
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span># Customers</span>
-                                  <span className="font-semibold" style={{color: '#003366'}}>89</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>89</span>
                                 </div>
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Broken Amount</span>
-                                  <span className="font-semibold" style={{color: '#003366'}}>₹28L</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>₹28L</span>
                                 </div>
                               </div>
                             </div>
@@ -4697,11 +4683,11 @@ const Dashboard = () => {
                               <div className="space-y-1 relative z-10">
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Count of Invalid Contacts</span>
-                                  <span className="font-semibold" style={{color: '#003366'}}>156</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>156</span>
                                 </div>
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Status</span>
-                                  <span className="font-semibold" style={{color: '#003366'}}>Data Correction</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>Data Correction</span>
                                 </div>
                               </div>
                             </div>
@@ -4718,7 +4704,7 @@ const Dashboard = () => {
                   <h2 className="text-lg font-semibold text-gray-800 mb-4">Staff Monitoring</h2>
                   <div className="grid grid-cols-5 gap-3 relative w-full">
                     {/* Allocation Summary Card */}
-                    <div 
+                    <div
                       data-staff-card
                       className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'allocation' ? 'expanded' : ''} ${selectedStaffMetric === 'allocation' ? 'card-selected' : 'border border-gray-200'}`}
                       onMouseEnter={() => setExpandedCard('allocation')}
@@ -4730,31 +4716,31 @@ const Dashboard = () => {
                     >
                       {renderFavoritePin('allocation')}
                       <div className="text-xs text-gray-800 relative z-10">Case Summary</div>
-                      <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>{formatIndianNumber(dashboardData?.loan_data?.total_loans)}</div>
+                      <div className="text-lg font-bold relative z-10" style={{ color: '#DC2626' }}>{formatIndianNumber(dashboardData?.loan_data?.total_loans)}</div>
                       {expandedCard === 'allocation' && (
                         <div className="card-expanded-content">
                           <div className="text-xs text-gray-800 mb-1">Case Summary</div>
-                          <div className="text-lg font-bold mb-2" style={{color: '#DC2626'}}>{formatIndianNumber(dashboardData?.loan_data?.total_loans)}</div>
+                          <div className="text-lg font-bold mb-2" style={{ color: '#DC2626' }}>{formatIndianNumber(dashboardData?.loan_data?.total_loans)}</div>
                           <div className="space-y-1">
                             <div className="flex justify-between text-xs text-gray-800">
                               <span>Active Accounts:</span>
-                              <span style={{color: '#DC2626'}}>{formatIndianNumber(dashboardData?.loan_data?.total_loans)}</span>
+                              <span style={{ color: '#DC2626' }}>{formatIndianNumber(dashboardData?.loan_data?.total_loans)}</span>
                             </div>
                             <div className="flex justify-between text-xs text-gray-800">
                               <span>Total Staff:</span>
-                              <span style={{color: '#DC2626'}}>{dashboardData?.loan_data?.unique_staff}</span>
+                              <span style={{ color: '#DC2626' }}>{dashboardData?.loan_data?.unique_staff}</span>
                             </div>
                             <div className="flex justify-between text-xs text-gray-800">
                               <span>Per Staff Avg:</span>
-                              <span style={{color: '#DC2626'}}>{dashboardData?.loan_data?.avg_loans_per_staff} %</span>
+                              <span style={{ color: '#DC2626' }}>{dashboardData?.loan_data?.avg_loans_per_staff} %</span>
                             </div>
                             <div className="flex justify-between text-xs text-gray-800">
                               <span>Outstanding Value:</span>
-                              <span style={{color: '#DC2626'}}>{dashboardData?.loan_data?.total_tos_in_cr} Cr</span>
+                              <span style={{ color: '#DC2626' }}>{dashboardData?.loan_data?.total_tos_in_cr} Cr</span>
                             </div>
                             <div className="flex justify-between text-xs text-gray-800">
                               <span>Unallocated Cases:</span>
-                              <span style={{color: '#DC2626'}}>23</span>
+                              <span style={{ color: '#DC2626' }}>23</span>
                             </div>
                           </div>
                         </div>
@@ -4762,7 +4748,7 @@ const Dashboard = () => {
                     </div>
 
                     {/* Collection Efficiency Card */}
-                    <div 
+                    <div
                       data-staff-card
                       className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'collection' ? 'expanded' : ''} ${selectedStaffMetric === 'collection' ? 'card-selected' : 'border border-gray-200'}`}
                       onMouseEnter={() => setExpandedCard('collection')}
@@ -4774,23 +4760,23 @@ const Dashboard = () => {
                     >
                       {renderFavoritePin('collection')}
                       <div className="text-xs text-gray-800 relative z-10">Collection Efficiency (%)</div>
-                      <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>{dashboardData?.collection_data?.collection_percentage}%</div>
+                      <div className="text-lg font-bold relative z-10" style={{ color: '#DC2626' }}>{dashboardData?.collection_data?.collection_percentage}%</div>
                       {expandedCard === 'collection' && (
                         <div className="card-expanded-content">
                           <div className="text-xs text-gray-800 mb-1">Collection Efficiency (%)</div>
-                          <div className="text-lg font-bold mb-2" style={{color: '#DC2626'}}>{dashboardData?.collection_data?.collection_percentage}%</div>
+                          <div className="text-lg font-bold mb-2" style={{ color: '#DC2626' }}>{dashboardData?.collection_data?.collection_percentage}%</div>
                           <div className="space-y-1">
                             <div className="flex justify-between text-xs text-gray-800">
                               <span>Amount Collected:</span>
-                              <span style={{color: '#DC2626'}}>{dashboardData?.collection_data?.collection_amount_cr} Cr</span>
+                              <span style={{ color: '#DC2626' }}>{dashboardData?.collection_data?.collection_amount_cr} Cr</span>
                             </div>
                             <div className="flex justify-between text-xs text-gray-800">
                               <span>Total Due:</span>
-                              <span style={{color: '#DC2626'}}>{dashboardData?.collection_data?.total_overdue_cr} Cr</span>
+                              <span style={{ color: '#DC2626' }}>{dashboardData?.collection_data?.total_overdue_cr} Cr</span>
                             </div>
                             <div className="flex justify-between text-xs text-gray-800">
                               <span>Difference:</span>
-                              <span style={{color: '#DC2626'}}>{dashboardData?.collection_data?.collection_amount_cr - dashboardData?.collection_data?.total_overdue_cr} Cr</span>
+                              <span style={{ color: '#DC2626' }}>{dashboardData?.collection_data?.collection_amount_cr - dashboardData?.collection_data?.total_overdue_cr} Cr</span>
                             </div>
                           </div>
                         </div>
@@ -4798,7 +4784,7 @@ const Dashboard = () => {
                     </div>
 
                     {/* PTP Conversion Rate Card */}
-                    <div 
+                    <div
                       data-staff-card
                       className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'ptp' ? 'expanded' : ''} ${selectedStaffMetric === 'ptp' ? 'card-selected' : 'border border-gray-200'}`}
                       onMouseEnter={() => setExpandedCard('ptp')}
@@ -4810,23 +4796,23 @@ const Dashboard = () => {
                     >
                       {renderFavoritePin('ptp')}
                       <div className="text-xs text-gray-800 relative z-10">PTP Conversion Rate (%)</div>
-                      <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>72.3%</div>
+                      <div className="text-lg font-bold relative z-10" style={{ color: '#DC2626' }}>72.3%</div>
                       {expandedCard === 'ptp' && (
                         <div className="card-expanded-content">
                           <div className="text-xs text-gray-800 mb-1">PTP Conversion Rate (%)</div>
-                          <div className="text-lg font-bold mb-2" style={{color: '#DC2626'}}>72.3%</div>
+                          <div className="text-lg font-bold mb-2" style={{ color: '#DC2626' }}>72.3%</div>
                           <div className="space-y-1">
                             <div className="flex justify-between text-xs text-gray-800">
                               <span>PTPs Fulfilled:</span>
-                              <span style={{color: '#DC2626'}}>234</span>
+                              <span style={{ color: '#DC2626' }}>234</span>
                             </div>
                             <div className="flex justify-between text-xs text-gray-800">
                               <span>Total PTPs:</span>
-                              <span style={{color: '#DC2626'}}>324</span>
+                              <span style={{ color: '#DC2626' }}>324</span>
                             </div>
                             <div className="flex justify-between text-xs text-gray-800">
                               <span>Pending:</span>
-                              <span style={{color: '#DC2626'}}>90</span>
+                              <span style={{ color: '#DC2626' }}>90</span>
                             </div>
                           </div>
                         </div>
@@ -4834,7 +4820,7 @@ const Dashboard = () => {
                     </div>
 
                     {/* Staff Productivity Index Card */}
-                    <div 
+                    <div
                       data-staff-card
                       className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'productivity' ? 'expanded' : ''} ${selectedStaffMetric === 'productivity' ? 'card-selected' : 'border border-gray-200'}`}
                       onMouseEnter={() => setExpandedCard('productivity')}
@@ -4846,23 +4832,23 @@ const Dashboard = () => {
                     >
                       {renderFavoritePin('productivity')}
                       <div className="text-xs text-gray-800 relative z-10">Staff Productivity Index</div>
-                      <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>156</div>
+                      <div className="text-lg font-bold relative z-10" style={{ color: '#DC2626' }}>156</div>
                       {expandedCard === 'productivity' && (
                         <div className="card-expanded-content">
                           <div className="text-xs text-gray-800 mb-1">Staff Productivity Index</div>
-                          <div className="text-lg font-bold mb-2" style={{color: '#DC2626'}}>156</div>
+                          <div className="text-lg font-bold mb-2" style={{ color: '#DC2626' }}>156</div>
                           <div className="space-y-1">
                             <div className="flex justify-between text-xs text-gray-800">
                               <span>Total Calls:</span>
-                              <span style={{color: '#DC2626'}}>1,245</span>
+                              <span style={{ color: '#DC2626' }}>1,245</span>
                             </div>
                             <div className="flex justify-between text-xs text-gray-800">
                               <span>Total Visits:</span>
-                              <span style={{color: '#DC2626'}}>89</span>
+                              <span style={{ color: '#DC2626' }}>89</span>
                             </div>
                             <div className="flex justify-between text-xs text-gray-800">
                               <span>Weight:</span>
-                              <span style={{color: '#DC2626'}}>1.2x</span>
+                              <span style={{ color: '#DC2626' }}>1.2x</span>
                             </div>
                           </div>
                         </div>
@@ -4870,7 +4856,7 @@ const Dashboard = () => {
                     </div>
 
                     {/* Inactive/Non-performing Staff Card */}
-                    <div 
+                    <div
                       data-staff-card
                       className={`group bg-white rounded-lg p-3 relative cursor-pointer transition-all duration-300 card-with-wave card-wave-staff h-20 ${expandedCard === 'inactive' ? 'expanded' : ''} ${selectedStaffMetric === 'inactive' ? 'card-selected' : 'border border-gray-200'}`}
                       onMouseEnter={() => setExpandedCard('inactive')}
@@ -4883,24 +4869,24 @@ const Dashboard = () => {
                       {renderFavoritePin('inactive')}
                       <div className="absolute top-0 right-0 bg-red-600 text-white text-xs rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center font-bold z-20 shadow-sm">3</div>
                       <div className="text-xs text-gray-800 relative z-10">Inactive/Non-performing Staff</div>
-                      <div className="text-lg font-bold relative z-10" style={{color: '#DC2626'}}>3</div>
+                      <div className="text-lg font-bold relative z-10" style={{ color: '#DC2626' }}>3</div>
                       {expandedCard === 'inactive' && (
                         <div className="card-expanded-content">
                           <div className="text-xs text-gray-800 mb-1">Inactive/Non-performing Staff</div>
-                          <div className="text-lg font-bold mb-1" style={{color: '#DC2626'}}>3</div>
+                          <div className="text-lg font-bold mb-1" style={{ color: '#DC2626' }}>3</div>
                           <div className="text-xs text-gray-800 mb-2">0 calls or 0 visits</div>
                           <div className="space-y-1">
                             <div className="flex justify-between text-xs text-gray-800">
                               <span>Ramesh K.</span>
-                              <span style={{color: '#DC2626'}}>(0 calls)</span>
+                              <span style={{ color: '#DC2626' }}>(0 calls)</span>
                             </div>
                             <div className="flex justify-between text-xs text-gray-800">
                               <span>Priya S.</span>
-                              <span style={{color: '#DC2626'}}>(0 visits)</span>
+                              <span style={{ color: '#DC2626' }}>(0 visits)</span>
                             </div>
                             <div className="flex justify-between text-xs text-gray-800">
                               <span>Ankit M.</span>
-                              <span style={{color: '#DC2626'}}>(0 both)</span>
+                              <span style={{ color: '#DC2626' }}>(0 both)</span>
                             </div>
                           </div>
                         </div>
@@ -4931,10 +4917,10 @@ const Dashboard = () => {
                     {verticalDataLoading && (
                       <div className="flex flex-col items-center justify-center py-20 px-4" style={{ minHeight: '400px' }}>
                         <div className="flex flex-col items-center space-y-4">
-                          <div 
-                className="animate-spin h-12 w-12 border-4 border-red-600" 
-                style={{ borderRadius: '0' }}
-              ></div>
+                          <div
+                            className="animate-spin h-12 w-12 border-4 border-red-600"
+                            style={{ borderRadius: '0' }}
+                          ></div>
                           <p className="text-sm font-medium text-gray-600">Loading allocation data...</p>
                         </div>
                       </div>
@@ -4945,121 +4931,121 @@ const Dashboard = () => {
                       <>
                         {/* Loan Type Cards - Always show on top */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {/* Tractor Finance Card */}
-                        <div
-                          onClick={() => setSelectedLoanType('tractor')}
-                          className={`group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer ${selectedLoanType === 'tractor' ? 'card-selected-zoom' : 'border border-gray-200 hover:border-red-600'}`}
-                          style={{
-                            backgroundImage: tractorFinanceImage ? `url("${tractorFinanceImage}")` : 'none',
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'right center',
-                            backgroundRepeat: 'no-repeat'
-                          }}
-                        >
-                          {/* Removed overlay/blur to show full tractor image clearly */}
-                          <div className="flex h-32 relative z-10">
-                            {/* Left Side - Text Content */}
-                            <div className="flex-1 flex flex-col justify-center px-3 py-2 z-10 relative">
-                              <h3 className="text-base font-bold text-gray-900 mb-1">Tractor Finance</h3>
-                              <p className="text-xs text-gray-600 mb-2 line-clamp-2">Agricultural equipment financing solutions</p>
-                              <div className="flex items-center text-red-600 font-semibold text-xs">
-                                <span>View Details</span>
-                                <svg className="w-3 h-3 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
+                          {/* Tractor Finance Card */}
+                          <div
+                            onClick={() => setSelectedLoanType('tractor')}
+                            className={`group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer ${selectedLoanType === 'tractor' ? 'card-selected-zoom' : 'border border-gray-200 hover:border-red-600'}`}
+                            style={{
+                              backgroundImage: tractorFinanceImage ? `url("${tractorFinanceImage}")` : 'none',
+                              backgroundSize: 'cover',
+                              backgroundPosition: 'right center',
+                              backgroundRepeat: 'no-repeat'
+                            }}
+                          >
+                            {/* Removed overlay/blur to show full tractor image clearly */}
+                            <div className="flex h-32 relative z-10">
+                              {/* Left Side - Text Content */}
+                              <div className="flex-1 flex flex-col justify-center px-3 py-2 z-10 relative">
+                                <h3 className="text-base font-bold text-gray-900 mb-1">Tractor Finance</h3>
+                                <p className="text-xs text-gray-600 mb-2 line-clamp-2">Agricultural equipment financing solutions</p>
+                                <div className="flex items-center text-red-600 font-semibold text-xs">
+                                  <span>View Details</span>
+                                  <svg className="w-3 h-3 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                  </svg>
+                                </div>
                               </div>
+                              {/* Right Side spacer only; background image on container shows the tractor without blur */}
+                              <div className="relative w-32 flex-shrink-0 overflow-hidden"></div>
                             </div>
-                            {/* Right Side spacer only; background image on container shows the tractor without blur */}
-                            <div className="relative w-32 flex-shrink-0 overflow-hidden"></div>
                           </div>
-                        </div>
 
-                        {/* Commercial Vehicle Card */}
-                        <div
-                          onClick={() => setSelectedLoanType('vehicle')}
-                          className={`group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer ${selectedLoanType === 'vehicle' ? 'card-selected-zoom' : 'border border-gray-200 hover:border-red-600'}`}
-                          style={{
-                            backgroundImage: commercialVehicleImage ? `url("${commercialVehicleImage}")` : 'none',
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'right center',
-                            backgroundRepeat: 'no-repeat'
-                          }}
-                        >
-                          {/* Removed overlay/blur to show full vehicle image clearly */}
-                          <div className="flex h-32 relative z-10">
-                            {/* Left Side - Text Content */}
-                            <div className="flex-1 flex flex-col justify-center px-3 py-2 z-10 relative">
-                              <h3 className="text-base font-bold text-gray-900 mb-1">Commercial Vehicle</h3>
-                              <p className="text-xs text-gray-600 mb-2 line-clamp-2">Vehicle financing for commercial purposes</p>
-                              <div className="flex items-center text-red-600 font-semibold text-xs">
-                                <span>View Details</span>
-                                <svg className="w-3 h-3 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
+                          {/* Commercial Vehicle Card */}
+                          <div
+                            onClick={() => setSelectedLoanType('vehicle')}
+                            className={`group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer ${selectedLoanType === 'vehicle' ? 'card-selected-zoom' : 'border border-gray-200 hover:border-red-600'}`}
+                            style={{
+                              backgroundImage: commercialVehicleImage ? `url("${commercialVehicleImage}")` : 'none',
+                              backgroundSize: 'cover',
+                              backgroundPosition: 'right center',
+                              backgroundRepeat: 'no-repeat'
+                            }}
+                          >
+                            {/* Removed overlay/blur to show full vehicle image clearly */}
+                            <div className="flex h-32 relative z-10">
+                              {/* Left Side - Text Content */}
+                              <div className="flex-1 flex flex-col justify-center px-3 py-2 z-10 relative">
+                                <h3 className="text-base font-bold text-gray-900 mb-1">Commercial Vehicle</h3>
+                                <p className="text-xs text-gray-600 mb-2 line-clamp-2">Vehicle financing for commercial purposes</p>
+                                <div className="flex items-center text-red-600 font-semibold text-xs">
+                                  <span>View Details</span>
+                                  <svg className="w-3 h-3 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                  </svg>
+                                </div>
                               </div>
+                              {/* Right Side spacer only; background image on container shows the vehicle without blur */}
+                              <div className="relative w-32 flex-shrink-0 overflow-hidden"></div>
                             </div>
-                            {/* Right Side spacer only; background image on container shows the vehicle without blur */}
-                            <div className="relative w-32 flex-shrink-0 overflow-hidden"></div>
                           </div>
-                        </div>
 
-                        {/* Construction Equipment Card */}
-                        <div
-                          onClick={() => setSelectedLoanType('construction')}
-                          className={`group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer ${selectedLoanType === 'construction' ? 'card-selected-zoom' : 'border border-gray-200 hover:border-red-600'}`}
-                          style={{
-                            backgroundImage: constructionEquipmentImage ? `url("${constructionEquipmentImage}")` : 'none',
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'right center',
-                            backgroundRepeat: 'no-repeat'
-                          }}
-                        >
-                          {/* Removed overlay/blur to show full construction image clearly */}
-                          <div className="flex h-32 relative z-10">
-                            {/* Left Side - Text Content */}
-                            <div className="flex-1 flex flex-col justify-center px-3 py-2 z-10 relative">
-                              <h3 className="text-base font-bold text-gray-900 mb-1">Construction Equipment</h3>
-                              <p className="text-xs text-gray-600 mb-2 line-clamp-2">Heavy machinery and equipment financing</p>
-                              <div className="flex items-center text-red-600 font-semibold text-xs">
-                                <span>View Details</span>
-                                <svg className="w-3 h-3 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
+                          {/* Construction Equipment Card */}
+                          <div
+                            onClick={() => setSelectedLoanType('construction')}
+                            className={`group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer ${selectedLoanType === 'construction' ? 'card-selected-zoom' : 'border border-gray-200 hover:border-red-600'}`}
+                            style={{
+                              backgroundImage: constructionEquipmentImage ? `url("${constructionEquipmentImage}")` : 'none',
+                              backgroundSize: 'cover',
+                              backgroundPosition: 'right center',
+                              backgroundRepeat: 'no-repeat'
+                            }}
+                          >
+                            {/* Removed overlay/blur to show full construction image clearly */}
+                            <div className="flex h-32 relative z-10">
+                              {/* Left Side - Text Content */}
+                              <div className="flex-1 flex flex-col justify-center px-3 py-2 z-10 relative">
+                                <h3 className="text-base font-bold text-gray-900 mb-1">Construction Equipment</h3>
+                                <p className="text-xs text-gray-600 mb-2 line-clamp-2">Heavy machinery and equipment financing</p>
+                                <div className="flex items-center text-red-600 font-semibold text-xs">
+                                  <span>View Details</span>
+                                  <svg className="w-3 h-3 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                  </svg>
+                                </div>
                               </div>
+                              {/* Right Side spacer only; background image on container shows the construction image without blur */}
+                              <div className="relative w-32 flex-shrink-0 overflow-hidden"></div>
                             </div>
-                            {/* Right Side spacer only; background image on container shows the construction image without blur */}
-                            <div className="relative w-32 flex-shrink-0 overflow-hidden"></div>
                           </div>
-                        </div>
 
-                        {/* Home Loan Card */}
-                        <div
-                          onClick={() => setSelectedLoanType('home')}
-                          className={`group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer ${selectedLoanType === 'home' ? 'card-selected-zoom' : 'border border-gray-200 hover:border-red-600'}`}
-                          style={{
-                            backgroundImage: homeLoanImage ? `url("${homeLoanImage}")` : 'none',
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'right center',
-                            backgroundRepeat: 'no-repeat'
-                          }}
-                        >
-                          {/* Removed overlay/blur to show full home loan image clearly */}
-                          <div className="flex h-32 relative z-10">
-                            {/* Left Side - Text Content */}
-                            <div className="flex-1 flex flex-col justify-center px-3 py-2 z-10 relative">
-                              <h3 className="text-base font-bold text-gray-900 mb-1">Home Loan</h3>
-                              <p className="text-xs text-gray-600 mb-2 line-clamp-2">Residential property financing solutions</p>
-                              <div className="flex items-center text-red-600 font-semibold text-xs">
-                                <span>View Details</span>
-                                <svg className="w-3 h-3 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
+                          {/* Home Loan Card */}
+                          <div
+                            onClick={() => setSelectedLoanType('home')}
+                            className={`group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer ${selectedLoanType === 'home' ? 'card-selected-zoom' : 'border border-gray-200 hover:border-red-600'}`}
+                            style={{
+                              backgroundImage: homeLoanImage ? `url("${homeLoanImage}")` : 'none',
+                              backgroundSize: 'cover',
+                              backgroundPosition: 'right center',
+                              backgroundRepeat: 'no-repeat'
+                            }}
+                          >
+                            {/* Removed overlay/blur to show full home loan image clearly */}
+                            <div className="flex h-32 relative z-10">
+                              {/* Left Side - Text Content */}
+                              <div className="flex-1 flex flex-col justify-center px-3 py-2 z-10 relative">
+                                <h3 className="text-base font-bold text-gray-900 mb-1">Home Loan</h3>
+                                <p className="text-xs text-gray-600 mb-2 line-clamp-2">Residential property financing solutions</p>
+                                <div className="flex items-center text-red-600 font-semibold text-xs">
+                                  <span>View Details</span>
+                                  <svg className="w-3 h-3 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                  </svg>
+                                </div>
                               </div>
+                              {/* Right Side spacer only; background image on container shows the home loan image without blur */}
+                              <div className="relative w-32 flex-shrink-0 overflow-hidden"></div>
                             </div>
-                            {/* Right Side spacer only; background image on container shows the home loan image without blur */}
-                            <div className="relative w-32 flex-shrink-0 overflow-hidden"></div>
                           </div>
-                        </div>
                         </div>
 
                         {/* Grid of Tables - Always show below cards */}
@@ -5069,47 +5055,47 @@ const Dashboard = () => {
                             <div className="lg:col-span-2">
                               {renderProductSummaryTable()}
                             </div>
-                            
+
                             {/* Vertical Allocation Summary Table */}
                             <div className="lg:col-span-2">
                               {renderProductAllocationTable()}
                             </div>
-                            
+
                             {/* NCM Allocation Summary Table */}
                             <div>
                               {renderNCMAllocationTable()}
                             </div>
-                            
+
                             {/* RCM Allocation Summary Table */}
                             <div>
                               {renderRCMAllocationTable()}
                             </div>
-                            
+
                             {/* ACM Allocation Summary Table */}
                             <div>
                               {renderACMAllocationTable()}
                             </div>
-                            
+
                             {/* ALLOCATION_ADMIN Allocation Summary Table */}
                             <div>
                               {renderAllocationAdminTable()}
                             </div>
-                            
+
                             {/* BO Allocation Summary Table */}
                             <div>
                               {renderBOTable()}
                             </div>
-                            
+
                             {/* CLM Allocation Summary Table */}
                             <div>
                               {renderCLMTable()}
                             </div>
-                            
+
                             {/* DTR Allocation Summary Table */}
                             <div>
                               {renderDTRTable()}
                             </div>
-                            
+
                             {/* TCM Allocation Summary Table */}
                             <div>
                               {renderTCMTable()}
@@ -5143,10 +5129,10 @@ const Dashboard = () => {
                     {collectionDataLoading && (
                       <div className="flex flex-col items-center justify-center py-20 px-4" style={{ minHeight: '400px' }}>
                         <div className="flex flex-col items-center space-y-4">
-                          <div 
-                className="animate-spin h-12 w-12 border-4 border-red-600" 
-                style={{ borderRadius: '0' }}
-              ></div>
+                          <div
+                            className="animate-spin h-12 w-12 border-4 border-red-600"
+                            style={{ borderRadius: '0' }}
+                          ></div>
                           <p className="text-sm font-medium text-gray-600">Loading collection data...</p>
                         </div>
                       </div>
@@ -5159,22 +5145,22 @@ const Dashboard = () => {
                         <div className="lg:col-span-2">
                           {renderStateWiseSummaryTable()}
                         </div>
-                        
+
                         {/* Region Wise Summary Table */}
                         <div className="lg:col-span-2">
                           {renderRegionWiseSummaryTable()}
                         </div>
-                        
+
                         {/* Bucket Wise Summary Table */}
                         <div className="lg:col-span-2">
                           {renderBucketWiseSummaryTable()}
                         </div>
-                        
+
                         {/* DPD Collection Efficiency Table */}
                         <div className="lg:col-span-2">
                           {renderDPDCollectionEfficiencyTable()}
                         </div>
-                        
+
                         {/* DPD Collection Efficiency Summary Table */}
                         <div className="lg:col-span-2">
                           {renderDPDCollectionEfficiencySummaryTable()}
@@ -5203,10 +5189,10 @@ const Dashboard = () => {
                     {verticalDataLoading && (
                       <div className="flex flex-col items-center justify-center py-20 px-4" style={{ minHeight: '400px' }}>
                         <div className="flex flex-col items-center space-y-4">
-                          <div 
-                className="animate-spin h-12 w-12 border-4 border-red-600" 
-                style={{ borderRadius: '0' }}
-              ></div>
+                          <div
+                            className="animate-spin h-12 w-12 border-4 border-red-600"
+                            style={{ borderRadius: '0' }}
+                          ></div>
                           <p className="text-sm font-medium text-gray-600">Loading productivity data...</p>
                         </div>
                       </div>
@@ -5215,404 +5201,404 @@ const Dashboard = () => {
                     {/* Content - Show only when not loading */}
                     {!verticalDataLoading && (
                       <>
-                    {/* Summary Cards */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                        <div className="text-sm text-gray-600 mb-1">Total Users</div>
-                        <div className="text-2xl font-bold text-gray-900">323</div>
-                      </div>
-                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                        <div className="text-sm text-gray-600 mb-1">Total Users (Collectors)</div>
-                        <div className="text-2xl font-bold text-gray-900">111</div>
-                      </div>
-                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                        <div className="text-sm text-gray-600 mb-1">Total Logged-in (Collectors)</div>
-                        <div className="text-2xl font-bold text-gray-900">38</div>
-                      </div>
-                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                        <div className="text-sm text-gray-600 mb-1">Total Not Logged-in (Collectors)</div>
-                        <div className="text-2xl font-bold text-gray-900">73</div>
-                      </div>
-                    </div>
+                        {/* Summary Cards */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                          <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                            <div className="text-sm text-gray-600 mb-1">Total Users</div>
+                            <div className="text-2xl font-bold text-gray-900">323</div>
+                          </div>
+                          <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                            <div className="text-sm text-gray-600 mb-1">Total Users (Collectors)</div>
+                            <div className="text-2xl font-bold text-gray-900">111</div>
+                          </div>
+                          <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                            <div className="text-sm text-gray-600 mb-1">Total Logged-in (Collectors)</div>
+                            <div className="text-2xl font-bold text-gray-900">38</div>
+                          </div>
+                          <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                            <div className="text-sm text-gray-600 mb-1">Total Not Logged-in (Collectors)</div>
+                            <div className="text-2xl font-bold text-gray-900">73</div>
+                          </div>
+                        </div>
 
-                    {/* Main Table */}
-                    <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden mb-6">
-                      <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
-                        <span>Staff Productivity Summary</span>
-                      </div>
-                      <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200 border border-[#003366]">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL ALLOCATED</th>
-                              <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL NOT VISITED</th>
-                              <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">NEWLY ALLOCATED NOT VISITED</th>
-                              <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH NOT VISITED</th>
-                              <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH VISITED</th>
-                              <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P SUCCESS</th>
-                              <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P FAILED</th>
-                              <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% NOT VISITED</th>
-                              <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% LAST MONTH NOT VISITED</th>
-                              <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL OVERDUE AMOUNT</th>
-                              <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 1-30</th>
-                              <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 31-60</th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            <tr className="bg-white">
-                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">7,699</td>
-                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,245</td>
-                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">456</td>
-                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">789</td>
-                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">5,664</td>
-                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">3,245</td>
-                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">892</td>
-                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.18%</td>
-                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.25%</td>
-                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹45.2 Cr</td>
-                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">2,156</td>
-                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,089</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
+                        {/* Main Table */}
+                        <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden mb-6">
+                          <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
+                            <span>Staff Productivity Summary</span>
+                          </div>
+                          <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200 border border-[#003366]">
+                              <thead className="bg-gray-50">
+                                <tr>
+                                  <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL ALLOCATED</th>
+                                  <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL NOT VISITED</th>
+                                  <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">NEWLY ALLOCATED NOT VISITED</th>
+                                  <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH NOT VISITED</th>
+                                  <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH VISITED</th>
+                                  <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P SUCCESS</th>
+                                  <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P FAILED</th>
+                                  <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% NOT VISITED</th>
+                                  <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% LAST MONTH NOT VISITED</th>
+                                  <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL OVERDUE AMOUNT</th>
+                                  <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 1-30</th>
+                                  <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 31-60</th>
+                                </tr>
+                              </thead>
+                              <tbody className="bg-white divide-y divide-gray-200">
+                                <tr className="bg-white">
+                                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800">7,699</td>
+                                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,245</td>
+                                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">456</td>
+                                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">789</td>
+                                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">5,664</td>
+                                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">3,245</td>
+                                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">892</td>
+                                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.18%</td>
+                                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.25%</td>
+                                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹45.2 Cr</td>
+                                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">2,156</td>
+                                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,089</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
 
-                    {/* Breakdown Tables */}
-                    <div className="space-y-6">
-                      {/* Designation Wise Table */}
-                      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-                        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
-                          <span>Designation Wise</span>
-                        </div>
-                        <div className="overflow-x-auto">
-                          <table className="min-w-full divide-y divide-gray-200 border border-[#003366]">
-                            <thead className="bg-gray-50">
-                              <tr>
-                                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DESIGNATION</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL ALLOCATED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL NOT VISITED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">NEWLY ALLOCATED NOT VISITED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH NOT VISITED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH VISITED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P SUCCESS</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P FAILED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% NOT VISITED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% LAST MONTH NOT VISITED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL OVERDUE AMOUNT</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 1-30</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 31-60</th>
-                              </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                              <tr className="bg-white">
-                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">DTR</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">3,245</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">524</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">189</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">335</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">2,386</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,456</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">412</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.14%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.32%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹18.5 Cr</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">856</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">432</td>
-                              </tr>
-                              <tr className="bg-gray-50">
-                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Supervisor</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">2,156</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">348</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">125</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">223</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,585</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">987</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">256</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.14%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.34%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹12.8 Cr</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">568</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">287</td>
-                              </tr>
-                              <tr className="bg-white">
-                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Senior Executive</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,456</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">235</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">89</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">146</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,075</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">623</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">124</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.14%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.03%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹8.9 Cr</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">412</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">208</td>
-                              </tr>
-                              <tr className="bg-gray-50">
-                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Executive</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">842</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">138</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">53</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">85</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">618</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">179</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">100</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.39%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.10%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹5.0 Cr</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">320</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">162</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
+                        {/* Breakdown Tables */}
+                        <div className="space-y-6">
+                          {/* Designation Wise Table */}
+                          <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+                            <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
+                              <span>Designation Wise</span>
+                            </div>
+                            <div className="overflow-x-auto">
+                              <table className="min-w-full divide-y divide-gray-200 border border-[#003366]">
+                                <thead className="bg-gray-50">
+                                  <tr>
+                                    <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DESIGNATION</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL ALLOCATED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL NOT VISITED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">NEWLY ALLOCATED NOT VISITED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH NOT VISITED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH VISITED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P SUCCESS</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P FAILED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% NOT VISITED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% LAST MONTH NOT VISITED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL OVERDUE AMOUNT</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 1-30</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 31-60</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                  <tr className="bg-white">
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">DTR</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">3,245</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">524</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">189</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">335</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">2,386</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,456</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">412</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.14%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.32%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹18.5 Cr</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">856</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">432</td>
+                                  </tr>
+                                  <tr className="bg-gray-50">
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Supervisor</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">2,156</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">348</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">125</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">223</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,585</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">987</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">256</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.14%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.34%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹12.8 Cr</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">568</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">287</td>
+                                  </tr>
+                                  <tr className="bg-white">
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Senior Executive</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,456</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">235</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">89</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">146</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,075</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">623</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">124</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.14%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.03%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹8.9 Cr</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">412</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">208</td>
+                                  </tr>
+                                  <tr className="bg-gray-50">
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Executive</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">842</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">138</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">53</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">85</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">618</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">179</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">100</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.39%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.10%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹5.0 Cr</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">320</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">162</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
 
-                      {/* State Wise Table */}
-                      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-                        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
-                          <span>State Wise</span>
-                        </div>
-                        <div className="overflow-x-auto">
-                          <table className="min-w-full divide-y divide-gray-200 border border-[#003366]">
-                            <thead className="bg-gray-50">
-                              <tr>
-                                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATE</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL ALLOCATED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL NOT VISITED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">NEWLY ALLOCATED NOT VISITED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH NOT VISITED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH VISITED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P SUCCESS</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P FAILED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% NOT VISITED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% LAST MONTH NOT VISITED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL OVERDUE AMOUNT</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 1-30</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 31-60</th>
-                              </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                              <tr className="bg-white">
-                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Maharashtra</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">2,456</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">396</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">142</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">254</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,806</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,102</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">286</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.12%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.34%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹14.5 Cr</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">678</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">342</td>
-                              </tr>
-                              <tr className="bg-gray-50">
-                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Delhi</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,856</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">299</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">108</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">191</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,366</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">834</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">216</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.11%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.29%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹11.0 Cr</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">512</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">258</td>
-                              </tr>
-                              <tr className="bg-white">
-                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Tamil Nadu</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,245</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">201</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">72</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">129</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">915</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">559</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">145</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.14%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.36%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹7.4 Cr</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">343</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">173</td>
-                              </tr>
-                              <tr className="bg-gray-50">
-                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Gujarat</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,056</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">170</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">61</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">109</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">777</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">474</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">123</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.10%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.32%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹6.3 Cr</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">291</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">147</td>
-                              </tr>
-                              <tr className="bg-white">
-                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Telangana</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">856</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">138</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">50</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">88</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">630</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">384</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">100</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.12%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.28%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹5.1 Cr</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">236</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">119</td>
-                              </tr>
-                              <tr className="bg-gray-50">
-                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Karnataka</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">230</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">37</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">13</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">24</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">169</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">103</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">27</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.09%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.43%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹1.4 Cr</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">63</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">32</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
+                          {/* State Wise Table */}
+                          <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+                            <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
+                              <span>State Wise</span>
+                            </div>
+                            <div className="overflow-x-auto">
+                              <table className="min-w-full divide-y divide-gray-200 border border-[#003366]">
+                                <thead className="bg-gray-50">
+                                  <tr>
+                                    <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATE</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL ALLOCATED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL NOT VISITED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">NEWLY ALLOCATED NOT VISITED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH NOT VISITED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH VISITED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P SUCCESS</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P FAILED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% NOT VISITED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% LAST MONTH NOT VISITED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL OVERDUE AMOUNT</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 1-30</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 31-60</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                  <tr className="bg-white">
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Maharashtra</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">2,456</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">396</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">142</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">254</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,806</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,102</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">286</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.12%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.34%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹14.5 Cr</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">678</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">342</td>
+                                  </tr>
+                                  <tr className="bg-gray-50">
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Delhi</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,856</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">299</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">108</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">191</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,366</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">834</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">216</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.11%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.29%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹11.0 Cr</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">512</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">258</td>
+                                  </tr>
+                                  <tr className="bg-white">
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Tamil Nadu</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,245</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">201</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">72</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">129</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">915</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">559</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">145</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.14%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.36%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹7.4 Cr</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">343</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">173</td>
+                                  </tr>
+                                  <tr className="bg-gray-50">
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Gujarat</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,056</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">170</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">61</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">109</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">777</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">474</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">123</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.10%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.32%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹6.3 Cr</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">291</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">147</td>
+                                  </tr>
+                                  <tr className="bg-white">
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Telangana</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">856</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">138</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">50</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">88</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">630</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">384</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">100</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.12%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.28%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹5.1 Cr</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">236</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">119</td>
+                                  </tr>
+                                  <tr className="bg-gray-50">
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Karnataka</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">230</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">37</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">13</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">24</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">169</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">103</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">27</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.09%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.43%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹1.4 Cr</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">63</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">32</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
 
-                      {/* Vertical Wise Table */}
-                      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-                        <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
-                          <span>Vertical Wise</span>
+                          {/* Vertical Wise Table */}
+                          <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+                            <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 text-lg font-semibold flex justify-between items-center">
+                              <span>Vertical Wise</span>
+                            </div>
+                            <div className="overflow-x-auto">
+                              <table className="min-w-full divide-y divide-gray-200 border border-[#003366]">
+                                <thead className="bg-gray-50">
+                                  <tr>
+                                    <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">VERTICAL</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL ALLOCATED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL NOT VISITED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">NEWLY ALLOCATED NOT VISITED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH NOT VISITED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH VISITED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P SUCCESS</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P FAILED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% NOT VISITED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% LAST MONTH NOT VISITED</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL OVERDUE AMOUNT</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 1-30</th>
+                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 31-60</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                  <tr className="bg-white">
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Tractor Finance</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">2,856</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">461</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">166</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">295</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">2,100</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,282</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">333</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.14%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.33%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹16.9 Cr</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">789</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">398</td>
+                                  </tr>
+                                  <tr className="bg-gray-50">
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Commercial Vehicle</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">2,156</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">348</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">125</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">223</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,585</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">968</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">251</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.14%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.34%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹12.8 Cr</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">596</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">301</td>
+                                  </tr>
+                                  <tr className="bg-white">
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Construction Equipment</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,856</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">299</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">108</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">191</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,366</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">834</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">216</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.11%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.29%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹11.0 Cr</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">512</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">258</td>
+                                  </tr>
+                                  <tr className="bg-gray-50">
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Home Loan</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">831</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">137</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">57</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">80</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">613</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">161</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">92</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.49%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">9.63%</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹4.5 Cr</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">259</td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">132</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
                         </div>
-                        <div className="overflow-x-auto">
-                          <table className="min-w-full divide-y divide-gray-200 border border-[#003366]">
-                            <thead className="bg-gray-50">
-                              <tr>
-                                <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">VERTICAL</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL ALLOCATED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL NOT VISITED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">NEWLY ALLOCATED NOT VISITED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH NOT VISITED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH VISITED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P SUCCESS</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">LAST MONTH P2P FAILED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% NOT VISITED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% LAST MONTH NOT VISITED</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL OVERDUE AMOUNT</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 1-30</th>
-                                <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">DPD 31-60</th>
-                              </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                              <tr className="bg-white">
-                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Tractor Finance</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">2,856</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">461</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">166</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">295</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">2,100</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,282</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">333</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.14%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.33%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹16.9 Cr</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">789</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">398</td>
-                              </tr>
-                              <tr className="bg-gray-50">
-                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Commercial Vehicle</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">2,156</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">348</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">125</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">223</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,585</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">968</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">251</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.14%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.34%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹12.8 Cr</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">596</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">301</td>
-                              </tr>
-                              <tr className="bg-white">
-                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Construction Equipment</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,856</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">299</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">108</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">191</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">1,366</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">834</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">216</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.11%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">10.29%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹11.0 Cr</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">512</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">258</td>
-                              </tr>
-                              <tr className="bg-gray-50">
-                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Home Loan</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">831</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">137</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">57</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">80</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">613</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">161</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">92</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">16.49%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">9.63%</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">₹4.5 Cr</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">259</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-800 text-right">132</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    </div>
 
-                    {/* Previous Productivity Tables */}
-                    <div className="space-y-6 mt-6">
-                      {/* MTD Productivity Report */}
-                      <div>
-                        {renderMTDProductivityReportTable()}
-                      </div>
-                      
-                      {/* FTD Productivity Report */}
-                      <div>
-                        {renderFTDProductivityReportTable()}
-                      </div>
-                      
-                      {/* MTD Collector Summary Report */}
-                      <div>
-                        {renderMTDCollectorSummaryReportTable()}
-                      </div>
-                      
-                      {/* FTD Collector Summary Report */}
-                      <div>
-                        {renderFTDCollectorSummaryReportTable()}
-                      </div>
-                      
-                      {/* MTD Time-Wise Visit Report */}
-                      <div>
-                        {renderMTDTimeWiseVisitReportTable()}
-                      </div>
-                      
-                      {/* FTD Time-Wise Visit Report */}
-                      <div>
-                        {renderFTDTimeWiseVisitReportTable()}
-                      </div>
-                    </div>
+                        {/* Previous Productivity Tables */}
+                        <div className="space-y-6 mt-6">
+                          {/* MTD Productivity Report */}
+                          <div>
+                            {renderMTDProductivityReportTable()}
+                          </div>
+
+                          {/* FTD Productivity Report */}
+                          <div>
+                            {renderFTDProductivityReportTable()}
+                          </div>
+
+                          {/* MTD Collector Summary Report */}
+                          <div>
+                            {renderMTDCollectorSummaryReportTable()}
+                          </div>
+
+                          {/* FTD Collector Summary Report */}
+                          <div>
+                            {renderFTDCollectorSummaryReportTable()}
+                          </div>
+
+                          {/* MTD Time-Wise Visit Report */}
+                          <div>
+                            {renderMTDTimeWiseVisitReportTable()}
+                          </div>
+
+                          {/* FTD Time-Wise Visit Report */}
+                          <div>
+                            {renderFTDTimeWiseVisitReportTable()}
+                          </div>
+                        </div>
                       </>
                     )}
                   </div>
@@ -5624,7 +5610,7 @@ const Dashboard = () => {
                     {/* Header with Title and Close Button */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                       <h2 className="text-xl font-semibold text-gray-900">{getCardName(selectedStaffMetric)}</h2>
-                      
+
                       {/* Search and Filter Controls */}
                       <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                         <input
@@ -5659,7 +5645,7 @@ const Dashboard = () => {
                         </select>
                       </div>
                     </div>
-                    
+
                     {/* Scrollable Table Container - Horizontal Scroll Only */}
                     <div className="border border-gray-200 rounded-lg overflow-hidden" style={{ maxWidth: '100%' }}>
                       <div className="overflow-x-auto" style={{ maxWidth: '100%' }}>
@@ -5698,12 +5684,11 @@ const Dashboard = () => {
                                   <td className="py-3 px-3 font-mono text-xs text-left whitespace-nowrap">{staff.id}</td>
                                   <td className="py-3 px-3 font-medium text-left whitespace-nowrap">{staff.name}</td>
                                   <td className="py-3 px-3 text-left whitespace-nowrap">
-                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                      staff.hierarchy === 'Supervisor' ? 'bg-purple-100 text-purple-800' :
-                                      staff.hierarchy === 'Senior Executive' ? 'bg-blue-100 text-blue-800' :
-                                      staff.hierarchy === 'Executive' ? 'bg-green-100 text-green-800' :
-                                      'bg-gray-100 text-gray-800'
-                                    }`}>
+                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${staff.hierarchy === 'Supervisor' ? 'bg-purple-100 text-purple-800' :
+                                        staff.hierarchy === 'Senior Executive' ? 'bg-blue-100 text-blue-800' :
+                                          staff.hierarchy === 'Executive' ? 'bg-green-100 text-green-800' :
+                                            'bg-gray-100 text-gray-800'
+                                      }`}>
                                       {staff.hierarchy}
                                     </span>
                                   </td>
@@ -5712,17 +5697,16 @@ const Dashboard = () => {
                                   <td className="py-3 px-3 text-left whitespace-nowrap">{staff.district}</td>
                                   <td className="py-3 px-3 text-left whitespace-nowrap">{staff.state}</td>
                                   <td className="py-3 px-3 text-left whitespace-nowrap">
-                                    <span className={`px-3 py-1 rounded text-xs font-medium ${
-                                      staff.loanType === 'Tractor' ? 'bg-orange-100 text-orange-800' :
-                                      staff.loanType === 'Commercial Vehicle' ? 'bg-blue-100 text-blue-800' :
-                                      'bg-green-100 text-green-800'
-                                    }`}>
+                                    <span className={`px-3 py-1 rounded text-xs font-medium ${staff.loanType === 'Tractor' ? 'bg-orange-100 text-orange-800' :
+                                        staff.loanType === 'Commercial Vehicle' ? 'bg-blue-100 text-blue-800' :
+                                          'bg-green-100 text-green-800'
+                                      }`}>
                                       {staff.loanType}
                                     </span>
                                   </td>
                                   <td className="py-3 px-3 text-left whitespace-nowrap">{staff.region}</td>
                                   <td className="py-3 px-3 text-right font-medium whitespace-nowrap">
-                                    <button 
+                                    <button
                                       data-customer-count-button
                                       onClick={() => handleCustomerCountClick(staff)}
                                       className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
@@ -5736,20 +5720,18 @@ const Dashboard = () => {
                                   <td className="py-3 px-3 text-right whitespace-nowrap">{staff.visits}</td>
                                   <td className="py-3 px-3 text-right font-medium whitespace-nowrap">₹{(staff.collected / 100000).toFixed(1)}L</td>
                                   <td className="py-3 px-3 text-right whitespace-nowrap">
-                                    <span className={`font-semibold ${
-                                      staff.efficiency >= 90 ? 'text-green-600' :
-                                      staff.efficiency >= 70 ? 'text-orange-600' :
-                                      'text-red-600'
-                                    }`}>
+                                    <span className={`font-semibold ${staff.efficiency >= 90 ? 'text-green-600' :
+                                        staff.efficiency >= 70 ? 'text-orange-600' :
+                                          'text-red-600'
+                                      }`}>
                                       {staff.efficiency}%
                                     </span>
                                   </td>
                                   <td className="py-3 px-3 text-right whitespace-nowrap">
-                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                      staff.escalations === 0 ? 'bg-green-100 text-green-800' :
-                                      staff.escalations <= 2 ? 'bg-yellow-100 text-yellow-800' :
-                                      'bg-red-100 text-red-800'
-                                    }`}>
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${staff.escalations === 0 ? 'bg-green-100 text-green-800' :
+                                        staff.escalations <= 2 ? 'bg-yellow-100 text-yellow-800' :
+                                          'bg-red-100 text-red-800'
+                                      }`}>
                                       {staff.escalations}
                                     </span>
                                   </td>
@@ -5760,7 +5742,7 @@ const Dashboard = () => {
                         </table>
                       </div>
                     </div>
-                    
+
                     {/* Pagination */}
                     <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
                       <div className="text-sm text-gray-600">
@@ -5778,11 +5760,10 @@ const Dashboard = () => {
                           <button
                             key={page}
                             onClick={() => setStaffCurrentPage(page)}
-                            className={`px-4 py-2 border rounded-lg text-sm transition-colors cursor-pointer ${
-                              staffCurrentPage === page
+                            className={`px-4 py-2 border rounded-lg text-sm transition-colors cursor-pointer ${staffCurrentPage === page
                                 ? 'bg-blue-600 text-white border-blue-600'
                                 : 'border-gray-300 hover:bg-gray-50'
-                            }`}
+                              }`}
                           >
                             {page}
                           </button>
@@ -5806,266 +5787,260 @@ const Dashboard = () => {
                     {verticalDataLoading && (
                       <div className="flex flex-col items-center justify-center py-20 px-4" style={{ minHeight: '400px' }}>
                         <div className="flex flex-col items-center space-y-4">
-                          <div 
-                className="animate-spin h-12 w-12 border-4 border-red-600" 
-                style={{ borderRadius: '0' }}
-              ></div>
+                          <div
+                            className="animate-spin h-12 w-12 border-4 border-red-600"
+                            style={{ borderRadius: '0' }}
+                          ></div>
                           <p className="text-sm font-medium text-gray-600">Loading {getCardName(selectedStaffMetric).toLowerCase()}...</p>
                         </div>
                       </div>
                     )}
-                    
+
                     {/* Content - Show only when not loading */}
                     {!verticalDataLoading && (
                       <>
-                    {/* Header with Title and Close Button */}
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                      <div className="flex-1">
-                        <h2 className="text-xl font-semibold text-gray-900 mb-2">{getCardName(selectedStaffMetric)}</h2>
-                        {/* Breadcrumb Navigation */}
-                        {hierarchyPath.length > 0 && (
-                          <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
-                            <button
-                              onClick={() => handleHierarchyBack(0)}
-                              className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
-                            >
-                              All Supervisors
-                            </button>
-                            {hierarchyPath.map((item, index) => (
-                              <React.Fragment key={item.id}>
-                                <span className="text-gray-400">/</span>
+                        {/* Header with Title and Close Button */}
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                          <div className="flex-1">
+                            <h2 className="text-xl font-semibold text-gray-900 mb-2">{getCardName(selectedStaffMetric)}</h2>
+                            {/* Breadcrumb Navigation */}
+                            {hierarchyPath.length > 0 && (
+                              <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
                                 <button
-                                  onClick={() => handleHierarchyBack(index + 1)}
+                                  onClick={() => handleHierarchyBack(0)}
                                   className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
                                 >
-                                  {item.name} ({item.hierarchy})
+                                  All Supervisors
                                 </button>
-                              </React.Fragment>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* Search and Filter Controls */}
-                      <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                        <input
-                          type="text"
-                          placeholder="Search by ID, Name, PI Code, Center, District, State, Loan Type, Customers, Due, Overdue..."
-                          value={staffSearchTerm}
-                          onChange={(e) => setStaffSearchTerm(e.target.value)}
-                          className="px-4 py-2 border border-gray-300 rounded-lg text-sm w-full sm:w-80 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                        <select
-                          value={staffSortBy}
-                          onChange={(e) => setStaffSortBy(e.target.value)}
-                          className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                          <option value="efficiency">Sort by Efficiency</option>
-                          <option value="collected">Sort by Collected Amount</option>
-                          <option value="customers">Sort by Customers</option>
-                          <option value="due">Sort by Due Amount</option>
-                          <option value="overdue">Sort by Overdue Amount</option>
-                          <option value="calls">Sort by Calls</option>
-                          <option value="visits">Sort by Visits</option>
-                          <option value="name">Sort by Name</option>
-                          <option value="hierarchy">Sort by Hierarchy</option>
-                        </select>
-                        <select
-                          value={staffSortOrder}
-                          onChange={(e) => setStaffSortOrder(e.target.value)}
-                          className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                          <option value="desc">Descending</option>
-                          <option value="asc">Ascending</option>
-                        </select>
-                        <button
-                          onClick={handleExportToExcel}
-                          className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors cursor-pointer whitespace-nowrap flex items-center gap-2"
-                          aria-label="Export to Excel"
-                          title="Export all filtered data to Excel"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                          Export
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedStaffMetric(null)
-                            setHierarchyPath([])
-                            setCurrentHierarchyLevel(null)
-                          }}
-                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
-                          aria-label="Close leaderboard"
-                          title="Close table"
-                        >
-                          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                    
-                    {/* Scrollable Table Container - Horizontal Scroll Only */}
-                    <div className="border border-gray-200 rounded-lg overflow-hidden" style={{ maxWidth: '100%' }}>
-                      <div className="overflow-x-auto" style={{ maxWidth: '100%' }}>
-                        <table className="w-full text-sm" style={{ tableLayout: 'auto', width: '100%' }}>
-                          <thead>
-                            <tr className="text-gray-600 border-b border-gray-200 bg-gray-50">
-                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Emp ID</th>
-                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Name</th>
-                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Hierarchy</th>
-                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">PI Code</th>
-                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Center</th>
-                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">District</th>
-                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">State</th>
-                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Loan Type</th>
-                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Region</th>
-                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Customers</th>
-                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Due</th>
-                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Overdue</th>
-                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Calls</th>
-                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Visits</th>
-                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Collected</th>
-                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Efficiency</th>
-                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Escalations</th>
-                            </tr>
-                          </thead>
-                          <tbody className="text-gray-700">
-                            {paginatedStaffData.length === 0 ? (
-                              <tr>
-                                <td colSpan="16" className="py-8 text-center text-gray-500">
-                                  No staff data found
-                                </td>
-                              </tr>
-                            ) : (
-                              paginatedStaffData.map((staff) => {
-                                const hasSubordinates = staffLeaderboardBaseData.some(s => s.parentId === staff.id)
-                                return (
-                                <tr 
-                                  key={staff.id} 
-                                  className={`border-b border-gray-100 transition-colors ${
-                                    hasSubordinates 
-                                      ? 'hover:bg-blue-50 cursor-pointer' 
-                                      : 'hover:bg-gray-50'
-                                  }`}
-                                  onClick={() => hasSubordinates && handleHierarchyDrillDown(staff)}
-                                  title={hasSubordinates ? `Click to view ${staff.name}'s subordinates` : ''}
-                                >
-                                  <td className="py-3 px-3 font-mono text-xs text-left whitespace-nowrap">
-                                    <div className="flex items-center gap-2">
-                                      {staff.id}
-                                      {hasSubordinates && (
-                                        <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                        </svg>
-                                      )}
-                                    </div>
-                                  </td>
-                                  <td className="py-3 px-3 font-medium text-left whitespace-nowrap">{staff.name}</td>
-                                  <td className="py-3 px-3 text-left whitespace-nowrap">
-                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                      staff.hierarchy === 'Supervisor' ? 'bg-purple-100 text-purple-800' :
-                                      staff.hierarchy === 'Senior Executive' ? 'bg-blue-100 text-blue-800' :
-                                      staff.hierarchy === 'Executive' ? 'bg-green-100 text-green-800' :
-                                      'bg-gray-100 text-gray-800'
-                                    }`}>
-                                      {staff.hierarchy}
-                                    </span>
-                                  </td>
-                                  <td className="py-3 px-3 text-left whitespace-nowrap font-mono text-xs">{staff.piCode}</td>
-                                  <td className="py-3 px-3 text-left whitespace-nowrap">{staff.center}</td>
-                                  <td className="py-3 px-3 text-left whitespace-nowrap">{staff.district}</td>
-                                  <td className="py-3 px-3 text-left whitespace-nowrap">{staff.state}</td>
-                                  <td className="py-3 px-3 text-left whitespace-nowrap">
-                                    <span className={`px-3 py-1 rounded text-xs font-medium ${
-                                      staff.loanType === 'Tractor' ? 'bg-orange-100 text-orange-800' :
-                                      staff.loanType === 'Commercial Vehicle' ? 'bg-blue-100 text-blue-800' :
-                                      'bg-green-100 text-green-800'
-                                    }`}>
-                                      {staff.loanType}
-                                    </span>
-                                  </td>
-                                  <td className="py-3 px-3 text-left whitespace-nowrap">{staff.region}</td>
-                                  <td className="py-3 px-3 text-right font-medium whitespace-nowrap">
-                                    <button 
-                                      data-customer-count-button
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        handleCustomerCountClick(staff)
-                                      }}
+                                {hierarchyPath.map((item, index) => (
+                                  <React.Fragment key={item.id}>
+                                    <span className="text-gray-400">/</span>
+                                    <button
+                                      onClick={() => handleHierarchyBack(index + 1)}
                                       className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
                                     >
-                                      {staff.customers}
+                                      {item.name} ({item.hierarchy})
                                     </button>
-                                  </td>
-                                  <td className="py-3 px-3 text-right font-medium whitespace-nowrap">₹{(staff.due / 100000).toFixed(1)}L</td>
-                                  <td className="py-3 px-3 text-right font-medium whitespace-nowrap">₹{(staff.overdue / 100000).toFixed(1)}L</td>
-                                  <td className="py-3 px-3 text-right whitespace-nowrap">{staff.calls}</td>
-                                  <td className="py-3 px-3 text-right whitespace-nowrap">{staff.visits}</td>
-                                  <td className="py-3 px-3 text-right font-medium whitespace-nowrap">₹{(staff.collected / 100000).toFixed(1)}L</td>
-                                  <td className="py-3 px-3 text-right whitespace-nowrap">
-                                    <span className={`font-semibold ${
-                                      staff.efficiency >= 90 ? 'text-green-600' :
-                                      staff.efficiency >= 70 ? 'text-orange-600' :
-                                      'text-red-600'
-                                    }`}>
-                                      {staff.efficiency}%
-                                    </span>
-                                  </td>
-                                  <td className="py-3 px-3 text-right whitespace-nowrap">
-                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                      staff.escalations === 0 ? 'bg-green-100 text-green-800' :
-                                      staff.escalations <= 2 ? 'bg-yellow-100 text-yellow-800' :
-                                      'bg-red-100 text-red-800'
-                                    }`}>
-                                      {staff.escalations}
-                                    </span>
-                                  </td>
-                                </tr>
-                                )
-                              })
+                                  </React.Fragment>
+                                ))}
+                              </div>
                             )}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                    
-                    {/* Pagination */}
-                    <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
-                      <div className="text-sm text-gray-600">
-                        Showing {staffStartIndex + 1} to {Math.min(staffStartIndex + staffItemsPerPage, filteredStaffData.length)} of {filteredStaffData.length} entries
-                      </div>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => setStaffCurrentPage(Math.max(1, staffCurrentPage - 1))}
-                          disabled={staffCurrentPage === 1}
-                          className="px-4 py-2 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors cursor-pointer"
-                        >
-                          Previous
-                        </button>
-                        {Array.from({ length: staffTotalPages }, (_, i) => i + 1).map(page => (
-                          <button
-                            key={page}
-                            onClick={() => setStaffCurrentPage(page)}
-                            className={`px-4 py-2 border rounded-lg text-sm transition-colors cursor-pointer ${
-                              staffCurrentPage === page
-                                ? 'bg-blue-600 text-white border-blue-600'
-                                : 'border-gray-300 hover:bg-gray-50'
-                            }`}
-                          >
-                            {page}
-                          </button>
-                        ))}
-                        <button
-                          onClick={() => setStaffCurrentPage(Math.min(staffTotalPages, staffCurrentPage + 1))}
-                          disabled={staffCurrentPage === staffTotalPages}
-                          className="px-4 py-2 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors cursor-pointer"
-                        >
-                          Next
-                        </button>
-                      </div>
-                    </div>
+                          </div>
+
+                          {/* Search and Filter Controls */}
+                          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                            <input
+                              type="text"
+                              placeholder="Search by ID, Name, PI Code, Center, District, State, Loan Type, Customers, Due, Overdue..."
+                              value={staffSearchTerm}
+                              onChange={(e) => setStaffSearchTerm(e.target.value)}
+                              className="px-4 py-2 border border-gray-300 rounded-lg text-sm w-full sm:w-80 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                            <select
+                              value={staffSortBy}
+                              onChange={(e) => setStaffSortBy(e.target.value)}
+                              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            >
+                              <option value="efficiency">Sort by Efficiency</option>
+                              <option value="collected">Sort by Collected Amount</option>
+                              <option value="customers">Sort by Customers</option>
+                              <option value="due">Sort by Due Amount</option>
+                              <option value="overdue">Sort by Overdue Amount</option>
+                              <option value="calls">Sort by Calls</option>
+                              <option value="visits">Sort by Visits</option>
+                              <option value="name">Sort by Name</option>
+                              <option value="hierarchy">Sort by Hierarchy</option>
+                            </select>
+                            <select
+                              value={staffSortOrder}
+                              onChange={(e) => setStaffSortOrder(e.target.value)}
+                              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            >
+                              <option value="desc">Descending</option>
+                              <option value="asc">Ascending</option>
+                            </select>
+                            <button
+                              onClick={handleExportToExcel}
+                              className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors cursor-pointer whitespace-nowrap flex items-center gap-2"
+                              aria-label="Export to Excel"
+                              title="Export all filtered data to Excel"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              Export
+                            </button>
+                            <button
+                              onClick={() => {
+                                setSelectedStaffMetric(null)
+                                setHierarchyPath([])
+                                setCurrentHierarchyLevel(null)
+                              }}
+                              className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                              aria-label="Close leaderboard"
+                              title="Close table"
+                            >
+                              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Scrollable Table Container - Horizontal Scroll Only */}
+                        <div className="border border-gray-200 rounded-lg overflow-hidden" style={{ maxWidth: '100%' }}>
+                          <div className="overflow-x-auto" style={{ maxWidth: '100%' }}>
+                            <table className="w-full text-sm" style={{ tableLayout: 'auto', width: '100%' }}>
+                              <thead>
+                                <tr className="text-gray-600 border-b border-gray-200 bg-gray-50">
+                                  <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Emp ID</th>
+                                  <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Name</th>
+                                  <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Hierarchy</th>
+                                  <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">PI Code</th>
+                                  <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Center</th>
+                                  <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">District</th>
+                                  <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">State</th>
+                                  <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Loan Type</th>
+                                  <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Region</th>
+                                  <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Customers</th>
+                                  <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Due</th>
+                                  <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Overdue</th>
+                                  <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Calls</th>
+                                  <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Visits</th>
+                                  <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Collected</th>
+                                  <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Efficiency</th>
+                                  <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Escalations</th>
+                                </tr>
+                              </thead>
+                              <tbody className="text-gray-700">
+                                {paginatedStaffData.length === 0 ? (
+                                  <tr>
+                                    <td colSpan="16" className="py-8 text-center text-gray-500">
+                                      No staff data found
+                                    </td>
+                                  </tr>
+                                ) : (
+                                  paginatedStaffData.map((staff) => {
+                                    const hasSubordinates = staffLeaderboardBaseData.some(s => s.parentId === staff.id)
+                                    return (
+                                      <tr
+                                        key={staff.id}
+                                        className={`border-b border-gray-100 transition-colors ${hasSubordinates
+                                            ? 'hover:bg-blue-50 cursor-pointer'
+                                            : 'hover:bg-gray-50'
+                                          }`}
+                                        onClick={() => hasSubordinates && handleHierarchyDrillDown(staff)}
+                                        title={hasSubordinates ? `Click to view ${staff.name}'s subordinates` : ''}
+                                      >
+                                        <td className="py-3 px-3 font-mono text-xs text-left whitespace-nowrap">
+                                          <div className="flex items-center gap-2">
+                                            {staff.id}
+                                            {hasSubordinates && (
+                                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                              </svg>
+                                            )}
+                                          </div>
+                                        </td>
+                                        <td className="py-3 px-3 font-medium text-left whitespace-nowrap">{staff.name}</td>
+                                        <td className="py-3 px-3 text-left whitespace-nowrap">
+                                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${staff.hierarchy === 'Supervisor' ? 'bg-purple-100 text-purple-800' :
+                                              staff.hierarchy === 'Senior Executive' ? 'bg-blue-100 text-blue-800' :
+                                                staff.hierarchy === 'Executive' ? 'bg-green-100 text-green-800' :
+                                                  'bg-gray-100 text-gray-800'
+                                            }`}>
+                                            {staff.hierarchy}
+                                          </span>
+                                        </td>
+                                        <td className="py-3 px-3 text-left whitespace-nowrap font-mono text-xs">{staff.piCode}</td>
+                                        <td className="py-3 px-3 text-left whitespace-nowrap">{staff.center}</td>
+                                        <td className="py-3 px-3 text-left whitespace-nowrap">{staff.district}</td>
+                                        <td className="py-3 px-3 text-left whitespace-nowrap">{staff.state}</td>
+                                        <td className="py-3 px-3 text-left whitespace-nowrap">
+                                          <span className={`px-3 py-1 rounded text-xs font-medium ${staff.loanType === 'Tractor' ? 'bg-orange-100 text-orange-800' :
+                                              staff.loanType === 'Commercial Vehicle' ? 'bg-blue-100 text-blue-800' :
+                                                'bg-green-100 text-green-800'
+                                            }`}>
+                                            {staff.loanType}
+                                          </span>
+                                        </td>
+                                        <td className="py-3 px-3 text-left whitespace-nowrap">{staff.region}</td>
+                                        <td className="py-3 px-3 text-right font-medium whitespace-nowrap">
+                                          <button
+                                            data-customer-count-button
+                                            onClick={(e) => {
+                                              e.stopPropagation()
+                                              handleCustomerCountClick(staff)
+                                            }}
+                                            className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                                          >
+                                            {staff.customers}
+                                          </button>
+                                        </td>
+                                        <td className="py-3 px-3 text-right font-medium whitespace-nowrap">₹{(staff.due / 100000).toFixed(1)}L</td>
+                                        <td className="py-3 px-3 text-right font-medium whitespace-nowrap">₹{(staff.overdue / 100000).toFixed(1)}L</td>
+                                        <td className="py-3 px-3 text-right whitespace-nowrap">{staff.calls}</td>
+                                        <td className="py-3 px-3 text-right whitespace-nowrap">{staff.visits}</td>
+                                        <td className="py-3 px-3 text-right font-medium whitespace-nowrap">₹{(staff.collected / 100000).toFixed(1)}L</td>
+                                        <td className="py-3 px-3 text-right whitespace-nowrap">
+                                          <span className={`font-semibold ${staff.efficiency >= 90 ? 'text-green-600' :
+                                              staff.efficiency >= 70 ? 'text-orange-600' :
+                                                'text-red-600'
+                                            }`}>
+                                            {staff.efficiency}%
+                                          </span>
+                                        </td>
+                                        <td className="py-3 px-3 text-right whitespace-nowrap">
+                                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${staff.escalations === 0 ? 'bg-green-100 text-green-800' :
+                                              staff.escalations <= 2 ? 'bg-yellow-100 text-yellow-800' :
+                                                'bg-red-100 text-red-800'
+                                            }`}>
+                                            {staff.escalations}
+                                          </span>
+                                        </td>
+                                      </tr>
+                                    )
+                                  })
+                                )}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {/* Pagination */}
+                        <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
+                          <div className="text-sm text-gray-600">
+                            Showing {staffStartIndex + 1} to {Math.min(staffStartIndex + staffItemsPerPage, filteredStaffData.length)} of {filteredStaffData.length} entries
+                          </div>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => setStaffCurrentPage(Math.max(1, staffCurrentPage - 1))}
+                              disabled={staffCurrentPage === 1}
+                              className="px-4 py-2 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors cursor-pointer"
+                            >
+                              Previous
+                            </button>
+                            {Array.from({ length: staffTotalPages }, (_, i) => i + 1).map(page => (
+                              <button
+                                key={page}
+                                onClick={() => setStaffCurrentPage(page)}
+                                className={`px-4 py-2 border rounded-lg text-sm transition-colors cursor-pointer ${staffCurrentPage === page
+                                    ? 'bg-blue-600 text-white border-blue-600'
+                                    : 'border-gray-300 hover:bg-gray-50'
+                                  }`}
+                              >
+                                {page}
+                              </button>
+                            ))}
+                            <button
+                              onClick={() => setStaffCurrentPage(Math.min(staffTotalPages, staffCurrentPage + 1))}
+                              disabled={staffCurrentPage === staffTotalPages}
+                              className="px-4 py-2 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors cursor-pointer"
+                            >
+                              Next
+                            </button>
+                          </div>
+                        </div>
                       </>
                     )}
                   </div>
@@ -6073,8 +6048,8 @@ const Dashboard = () => {
 
                 {/* Customer Details Table */}
                 {showCustomerDetails && selectedStaff && (
-                  <div 
-                    ref={customerDetailsRef} 
+                  <div
+                    ref={customerDetailsRef}
                     className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm mt-6 w-full"
                     style={{
                       animation: 'fadeIn 0.3s ease-in-out',
@@ -6094,7 +6069,7 @@ const Dashboard = () => {
                         ×
                       </button>
                     </div>
-                    
+
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm min-w-max">
                         <thead>
@@ -6121,11 +6096,10 @@ const Dashboard = () => {
                                 <td className="py-3 px-3 text-right font-medium">₹{(customer.dueAmount / 100000).toFixed(1)}L</td>
                                 <td className="py-3 px-3 text-right font-medium">₹{(customer.overdueAmount / 100000).toFixed(1)}L</td>
                                 <td className="py-3 px-3 text-left">
-                                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                    customer.status === 'Active' ? 'bg-green-100 text-green-800' :
-                                    customer.status === 'Overdue' ? 'bg-red-100 text-red-800' :
-                                    'bg-gray-100 text-gray-800'
-                                  }`}>
+                                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${customer.status === 'Active' ? 'bg-green-100 text-green-800' :
+                                      customer.status === 'Overdue' ? 'bg-red-100 text-red-800' :
+                                        'bg-gray-100 text-gray-800'
+                                    }`}>
                                     {customer.status}
                                   </span>
                                 </td>
@@ -6149,7 +6123,7 @@ const Dashboard = () => {
                         </tbody>
                       </table>
                     </div>
-                    
+
                     {/* Customer Pagination */}
                     {customerTotalPages > 1 && (
                       <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
@@ -6168,11 +6142,10 @@ const Dashboard = () => {
                             <button
                               key={page}
                               onClick={() => setCustomerCurrentPage(page)}
-                              className={`px-4 py-2 border rounded-lg text-sm transition-colors cursor-pointer ${
-                                customerCurrentPage === page
+                              className={`px-4 py-2 border rounded-lg text-sm transition-colors cursor-pointer ${customerCurrentPage === page
                                   ? 'bg-blue-600 text-white border-blue-600'
                                   : 'border-gray-300 hover:bg-gray-50'
-                              }`}
+                                }`}
                             >
                               {page}
                             </button>
@@ -6194,7 +6167,7 @@ const Dashboard = () => {
                 <div className="mb-8 w-full ml-2">
                   <h2 className="text-lg font-semibold text-gray-800 mb-4">Customer Engagement</h2>
                   <div className="grid grid-cols-4 gap-3 relative z-10">
-                    <div 
+                    <div
                       data-engagement-card
                       className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement ${selectedEngagementCard === 'whatsapp' ? 'card-selected-zoom' : ''}`}
                       onClick={(e) => {
@@ -6207,24 +6180,24 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Messages Sent</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Delivered</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Read</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Responded</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
                         </div>
                       </div>
                     </div>
 
-                    <div 
+                    <div
                       data-engagement-card
                       className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement ${selectedEngagementCard === 'aiCalls' ? 'card-selected-zoom' : ''}`}
                       onClick={(e) => {
@@ -6237,20 +6210,20 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Calls Triggered</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Answered</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Positive Response</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
                         </div>
                       </div>
                     </div>
 
-                    <div 
+                    <div
                       data-engagement-card
                       className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement ${selectedEngagementCard === 'dialler' ? 'card-selected-zoom' : ''}`}
                       onClick={(e) => {
@@ -6263,20 +6236,20 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Total Calls</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Successful Connects</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Follow-up Actions</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
                         </div>
+                      </div>
                     </div>
-                  </div>
 
-                    <div 
+                    <div
                       data-engagement-card
                       className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement ${selectedEngagementCard === 'fieldVisits' ? 'card-selected-zoom' : ''}`}
                       onClick={(e) => {
@@ -6289,195 +6262,194 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Planned Visits</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Completed Visits</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Geo-tagging Compliance</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
                         </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
 
-                {/* Customer Engagement Detailed Section */}
-                {selectedEngagementCard && (
-                  <div ref={engagementSectionRef} className="mb-8 bg-white border border-gray-200 rounded-lg p-6 shadow-sm mt-6">
-                  {/* Header with Close Button */}
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-semibold text-gray-900">Customer Engagement Details</h2>
-                    <button
-                      onClick={() => setSelectedEngagementCard(null)}
-                      className="p-2 rounded-lg transition-colors cursor-pointer hover:bg-gray-100"
-                      aria-label="Close engagement section"
-                      title="Close"
-                    >
-                      <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
-                
-                  {/* 🔹 Timeline Section */}
-                  <div className="flex overflow-x-auto gap-3 pb-4 mb-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                    {[
-                      "01-10-2025", "02-10-2025", "03-10-2025", "04-10-2025", "05-10-2025",
-                      "06-10-2025", "07-10-2025", "08-10-2025", "09-10-2025", "10-10-2025",
-                      "11-10-2025", "12-10-2025", "13-10-2025", "14-10-2025"
-                    ].map((date, index) => (
-                      <div
-                        key={index}
-                        className={`min-w-[90px] text-center border rounded-lg py-2 shadow-sm cursor-pointer transition-all duration-200 ${
-                          selectedDate === date
-                            ? "bg-blue-100 border-blue-600 text-blue-800 font-semibold"
-                            : "bg-white border-gray-200 hover:bg-gray-50 text-gray-700"
-                        }`}
-                        onClick={() => setSelectedDate(date)}
-                      >
-                        <div className="text-lg font-bold">0</div>
-                        <div className="text-xs">{date}</div>
-                      </div>
-                    ))}
-                  </div>
-                
-                  {/* Engagement Grid Section */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-                    {/* Total Engagement + Breakdown */}
-                    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="text-sm font-semibold text-gray-900">Total Customers Engagement</div>
-                        <div className="text-2xl font-bold text-gray-800">
-                          {customerEngagementData.totalEngagement.toLocaleString()}
-                        </div>
-                      </div>
-                
-                      <div className="grid grid-cols-4 gap-3 mb-4">
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
-                          <div className="text-2xl">💬</div>
-                          <div className="text-sm font-semibold text-green-800">
-                            {customerEngagementData.engagementBreakdown.whatsapp.toLocaleString()}
-                          </div>
-                          <div className="text-xs text-green-700">WhatsApp</div>
-                        </div>
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
-                          <div className="text-2xl">🔊</div>
-                          <div className="text-sm font-semibold text-blue-800">
-                            {customerEngagementData.engagementBreakdown.blaster.toLocaleString()}
-                          </div>
-                          <div className="text-xs text-blue-700">Blaster</div>
-                        </div>
-                        <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
-                          <div className="text-2xl">🤖</div>
-                          <div className="text-sm font-semibold text-purple-800">
-                            {customerEngagementData.engagementBreakdown.aiCalls.toLocaleString()}
-                          </div>
-                          <div className="text-xs text-purple-700">AI Calls</div>
-                        </div>
-                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 text-center">
-                          <div className="text-2xl">📞</div>
-                          <div className="text-sm font-semibold text-orange-800">
-                            {customerEngagementData.engagementBreakdown.dialers.toLocaleString()}
-                          </div>
-                          <div className="text-xs text-orange-700">Dialers</div>
-                        </div>
-                      </div>
-                
-                      <div className="grid grid-cols-4 gap-3">
-                        <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
-                          <div className="text-2xl">👤</div>
-                          <div className="text-base font-semibold text-gray-800">
-                            {customerEngagementData.customerMetrics.totalCustomers.toLocaleString()}
-                          </div>
-                          <div className="text-xs text-gray-600">Total Customers</div>
-                        </div>
-                        <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
-                          <div className="text-2xl">👥</div>
-                          <div className="text-base font-semibold text-gray-800">
-                            {customerEngagementData.customerMetrics.connectedCustomers.toLocaleString()}
-                          </div>
-                          <div className="text-xs text-gray-600">Connected</div>
-                        </div>
-                        <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
-                          <div className="text-2xl">💰</div>
-                          <div className="text-base font-semibold text-gray-800">
-                            ₹{customerEngagementData.customerMetrics.amountPromised.toLocaleString()}
-                          </div>
-                          <div className="text-xs text-gray-600">Amount Promised</div>
-                        </div>
-                        <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
-                          <div className="text-2xl">💳</div>
-                          <div className="text-base font-semibold text-gray-800">
-                            ₹{customerEngagementData.customerMetrics.amountCollected.toLocaleString()}
-                          </div>
-                          <div className="text-xs text-gray-600">Amount Collected</div>
-                        </div>
-                      </div>
-                    </div>
-                
-                    {/* Chart */}
-                    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-sm font-semibold text-gray-900">Customers Engagement</h4>
-                        <select
-                          defaultValue="Last 15 days"
-                          className="px-3 py-1 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                  {/* Customer Engagement Detailed Section */}
+                  {selectedEngagementCard && (
+                    <div ref={engagementSectionRef} className="mb-8 bg-white border border-gray-200 rounded-lg p-6 shadow-sm mt-6">
+                      {/* Header with Close Button */}
+                      <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-xl font-semibold text-gray-900">Customer Engagement Details</h2>
+                        <button
+                          onClick={() => setSelectedEngagementCard(null)}
+                          className="p-2 rounded-lg transition-colors cursor-pointer hover:bg-gray-100"
+                          aria-label="Close engagement section"
+                          title="Close"
                         >
-                          <option value="Last 7 days">Last 7 days</option>
-                          <option value="Last 15 days">Last 15 days</option>
-                          <option value="Last 30 days">Last 30 days</option>
-                        </select>
+                          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
                       </div>
-                      <Chart options={engagementChartOptions} series={engagementChartSeries} type="bar" height={260} />
+
+                      {/* 🔹 Timeline Section */}
+                      <div className="flex overflow-x-auto gap-3 pb-4 mb-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                        {[
+                          "01-10-2025", "02-10-2025", "03-10-2025", "04-10-2025", "05-10-2025",
+                          "06-10-2025", "07-10-2025", "08-10-2025", "09-10-2025", "10-10-2025",
+                          "11-10-2025", "12-10-2025", "13-10-2025", "14-10-2025"
+                        ].map((date, index) => (
+                          <div
+                            key={index}
+                            className={`min-w-[90px] text-center border rounded-lg py-2 shadow-sm cursor-pointer transition-all duration-200 ${selectedDate === date
+                                ? "bg-blue-100 border-blue-600 text-blue-800 font-semibold"
+                                : "bg-white border-gray-200 hover:bg-gray-50 text-gray-700"
+                              }`}
+                            onClick={() => setSelectedDate(date)}
+                          >
+                            <div className="text-lg font-bold">0</div>
+                            <div className="text-xs">{date}</div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Engagement Grid Section */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                        {/* Total Engagement + Breakdown */}
+                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="text-sm font-semibold text-gray-900">Total Customers Engagement</div>
+                            <div className="text-2xl font-bold text-gray-800">
+                              {customerEngagementData.totalEngagement.toLocaleString()}
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-4 gap-3 mb-4">
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                              <div className="text-2xl">💬</div>
+                              <div className="text-sm font-semibold text-green-800">
+                                {customerEngagementData.engagementBreakdown.whatsapp.toLocaleString()}
+                              </div>
+                              <div className="text-xs text-green-700">WhatsApp</div>
+                            </div>
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+                              <div className="text-2xl">🔊</div>
+                              <div className="text-sm font-semibold text-blue-800">
+                                {customerEngagementData.engagementBreakdown.blaster.toLocaleString()}
+                              </div>
+                              <div className="text-xs text-blue-700">Blaster</div>
+                            </div>
+                            <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
+                              <div className="text-2xl">🤖</div>
+                              <div className="text-sm font-semibold text-purple-800">
+                                {customerEngagementData.engagementBreakdown.aiCalls.toLocaleString()}
+                              </div>
+                              <div className="text-xs text-purple-700">AI Calls</div>
+                            </div>
+                            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 text-center">
+                              <div className="text-2xl">📞</div>
+                              <div className="text-sm font-semibold text-orange-800">
+                                {customerEngagementData.engagementBreakdown.dialers.toLocaleString()}
+                              </div>
+                              <div className="text-xs text-orange-700">Dialers</div>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-4 gap-3">
+                            <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
+                              <div className="text-2xl">👤</div>
+                              <div className="text-base font-semibold text-gray-800">
+                                {customerEngagementData.customerMetrics.totalCustomers.toLocaleString()}
+                              </div>
+                              <div className="text-xs text-gray-600">Total Customers</div>
+                            </div>
+                            <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
+                              <div className="text-2xl">👥</div>
+                              <div className="text-base font-semibold text-gray-800">
+                                {customerEngagementData.customerMetrics.connectedCustomers.toLocaleString()}
+                              </div>
+                              <div className="text-xs text-gray-600">Connected</div>
+                            </div>
+                            <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
+                              <div className="text-2xl">💰</div>
+                              <div className="text-base font-semibold text-gray-800">
+                                ₹{customerEngagementData.customerMetrics.amountPromised.toLocaleString()}
+                              </div>
+                              <div className="text-xs text-gray-600">Amount Promised</div>
+                            </div>
+                            <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
+                              <div className="text-2xl">💳</div>
+                              <div className="text-base font-semibold text-gray-800">
+                                ₹{customerEngagementData.customerMetrics.amountCollected.toLocaleString()}
+                              </div>
+                              <div className="text-xs text-gray-600">Amount Collected</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Chart */}
+                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="text-sm font-semibold text-gray-900">Customers Engagement</h4>
+                            <select
+                              defaultValue="Last 15 days"
+                              className="px-3 py-1 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                            >
+                              <option value="Last 7 days">Last 7 days</option>
+                              <option value="Last 15 days">Last 15 days</option>
+                              <option value="Last 30 days">Last 30 days</option>
+                            </select>
+                          </div>
+                          <Chart options={engagementChartOptions} series={engagementChartSeries} type="bar" height={260} />
+                        </div>
+                      </div>
+
+                      {/* Status Cards */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                          <div className="flex items-center justify-between border-b border-green-200 pb-2 mb-2">
+                            <h4 className="text-sm font-semibold text-green-800">Promised to Pay</h4>
+                          </div>
+                          <div className="text-2xl font-bold text-green-900">{customerEngagementData.statusCards.promisedToPay.accounts}</div>
+                          <div className="text-xs text-green-700 mt-1">Accounts</div>
+                          <div className="text-sm font-semibold text-green-800 mt-2">
+                            ₹{customerEngagementData.statusCards.promisedToPay.amount.toLocaleString()}
+                          </div>
+                        </div>
+
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                          <div className="flex items-center justify-between border-b border-red-200 pb-2 mb-2">
+                            <h4 className="text-sm font-semibold text-red-800">Refused to Pay</h4>
+                          </div>
+                          <div className="text-2xl font-bold text-red-900">{customerEngagementData.statusCards.refusedToPay.accounts}</div>
+                          <div className="text-xs text-red-700 mt-1">Accounts</div>
+                        </div>
+
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <div className="flex items-center justify-between border-b border-blue-200 pb-2 mb-2">
+                            <h4 className="text-sm font-semibold text-blue-800">Already Paid</h4>
+                          </div>
+                          <div className="text-2xl font-bold text-blue-900">{customerEngagementData.statusCards.alreadyPaid.accounts}</div>
+                          <div className="text-xs text-blue-700 mt-1">Accounts</div>
+                          <div className="text-sm font-semibold text-blue-800 mt-2">
+                            ₹{customerEngagementData.statusCards.alreadyPaid.amount.toLocaleString()}
+                          </div>
+                        </div>
+
+                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                          <div className="flex items-center justify-between border-b border-orange-200 pb-2 mb-2">
+                            <h4 className="text-sm font-semibold text-orange-800">Wrong Number</h4>
+                          </div>
+                          <div className="text-2xl font-bold text-orange-900">{customerEngagementData.statusCards.wrongNumber.accounts}</div>
+                          <div className="text-xs text-orange-700 mt-1">Accounts</div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                
-                  {/* Status Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between border-b border-green-200 pb-2 mb-2">
-                        <h4 className="text-sm font-semibold text-green-800">Promised to Pay</h4>
-                      </div>
-                      <div className="text-2xl font-bold text-green-900">{customerEngagementData.statusCards.promisedToPay.accounts}</div>
-                      <div className="text-xs text-green-700 mt-1">Accounts</div>
-                      <div className="text-sm font-semibold text-green-800 mt-2">
-                        ₹{customerEngagementData.statusCards.promisedToPay.amount.toLocaleString()}
-                      </div>
-                    </div>
-                
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between border-b border-red-200 pb-2 mb-2">
-                        <h4 className="text-sm font-semibold text-red-800">Refused to Pay</h4>
-                      </div>
-                      <div className="text-2xl font-bold text-red-900">{customerEngagementData.statusCards.refusedToPay.accounts}</div>
-                      <div className="text-xs text-red-700 mt-1">Accounts</div>
-                    </div>
-                
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between border-b border-blue-200 pb-2 mb-2">
-                        <h4 className="text-sm font-semibold text-blue-800">Already Paid</h4>
-                      </div>
-                      <div className="text-2xl font-bold text-blue-900">{customerEngagementData.statusCards.alreadyPaid.accounts}</div>
-                      <div className="text-xs text-blue-700 mt-1">Accounts</div>
-                      <div className="text-sm font-semibold text-blue-800 mt-2">
-                        ₹{customerEngagementData.statusCards.alreadyPaid.amount.toLocaleString()}
-                      </div>
-                    </div>
-                
-                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between border-b border-orange-200 pb-2 mb-2">
-                        <h4 className="text-sm font-semibold text-orange-800">Wrong Number</h4>
-                      </div>
-                      <div className="text-2xl font-bold text-orange-900">{customerEngagementData.statusCards.wrongNumber.accounts}</div>
-                      <div className="text-xs text-orange-700 mt-1">Accounts</div>
-                    </div>
-                  </div>
+
+                  )}
                 </div>
-                
-                )}
-            </div>
 
                 {/* Payment Intent & Behavior */}
                 <div className="mb-8 ml-2">
@@ -6489,11 +6461,11 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Customer Count</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>45</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>45</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Amount</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>₹1.25Cr</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>₹1.25Cr</span>
                         </div>
                       </div>
                     </div>
@@ -6504,21 +6476,21 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex flex-row justify-between text-xs text-gray-800">
                           <span># Todays PTP</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
 
-                          
+
                           <span># Future PTP</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
-                        
-                        </div>
-                       <div className="flex flex-row justify-between text-xs text-gray-800">
-                          <span># Failed PTP</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
 
-                          
+                        </div>
+                        <div className="flex flex-row justify-between text-xs text-gray-800">
+                          <span># Failed PTP</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+
+
                           <span># Total PTP</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
-                        
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+
                         </div>
                       </div>
                     </div>
@@ -6529,11 +6501,11 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span># Customers</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Pending Amount</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
                         </div>
                       </div>
                     </div>
@@ -6544,11 +6516,11 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span># Customers</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Collected Amount</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
                         </div>
                       </div>
                     </div>
@@ -6559,14 +6531,14 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span># Customers</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Broken Amount</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
                         </div>
+                      </div>
                     </div>
-                  </div>
 
                     <div className="group bg-white rounded-lg p-3 relative card-with-wave card-with-wave-thin card-wave-payment">
                       {renderFavoritePin('wrong')}
@@ -6574,22 +6546,22 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Count of Invalid Contacts</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Status</span>
-                          <span className="font-semibold" style={{color: '#003366'}}>Data Correction</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>Data Correction</span>
                         </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
                 {/* Case Management & DPD Analysis */}
                 <div className="mb-8 ml-2">
                   <h2 className="text-lg font-semibold text-gray-800 mb-4">Case Management & DPD Analysis</h2>
                   <div className="grid grid-cols-4 gap-3">
-                    <div 
+                    <div
                       data-case-card="reposition"
                       className="group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-staff"
                       onClick={() => {
@@ -6605,24 +6577,24 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Total Cases</span>
-                          <span className="font-semibold" style={{color: '#DC2626'}}>1,247</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>1,247</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Pending</span>
-                          <span className="font-semibold" style={{color: '#DC2626'}}>342</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>342</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Completed</span>
-                          <span className="font-semibold" style={{color: '#DC2626'}}>905</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>905</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Amount</span>
-                          <span className="font-semibold" style={{color: '#DC2626'}}>₹3.45Cr</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>₹3.45Cr</span>
                         </div>
                       </div>
                     </div>
 
-                    <div 
+                    <div
                       data-case-card="deposition"
                       className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-staff ${selectedCaseMetric === 'deposition' ? 'card-selected-zoom' : ''}`}
                       onClick={() => {
@@ -6639,19 +6611,19 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Total Records</span>
-                          <span className="font-semibold" style={{color: '#DC2626'}}>{depositionData?.pagination?.total_count || 0}</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>{depositionData?.pagination?.total_count || 0}</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Current Page</span>
-                          <span className="font-semibold" style={{color: '#DC2626'}}>{depositionData?.pagination?.current_page || 1}</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>{depositionData?.pagination?.current_page || 1}</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Total Pages</span>
-                          <span className="font-semibold" style={{color: '#DC2626'}}>{depositionData?.pagination?.total_pages || 1}</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>{depositionData?.pagination?.total_pages || 1}</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Date Range</span>
-                          <span className="font-semibold text-xs" style={{color: '#DC2626'}}>
+                          <span className="font-semibold text-xs" style={{ color: '#DC2626' }}>
                             {depositionData?.from_date || '-'} to {depositionData?.to_date || '-'}
                           </span>
                         </div>
@@ -6664,19 +6636,19 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Total Settlements</span>
-                          <span className="font-semibold" style={{color: '#DC2626'}}>567</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>567</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Pending Approval</span>
-                          <span className="font-semibold" style={{color: '#DC2626'}}>89</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>89</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Approved</span>
-                          <span className="font-semibold" style={{color: '#DC2626'}}>478</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>478</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Settlement Amount</span>
-                          <span className="font-semibold" style={{color: '#DC2626'}}>₹1.87Cr</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>₹1.87Cr</span>
                         </div>
                       </div>
                     </div>
@@ -6687,19 +6659,19 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>0-30 Days</span>
-                          <span className="font-semibold" style={{color: '#DC2626'}}>4,523</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>4,523</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>31-60 Days</span>
-                          <span className="font-semibold" style={{color: '#DC2626'}}>2,187</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>2,187</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>61-90 Days</span>
-                          <span className="font-semibold" style={{color: '#DC2626'}}>1,456</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>1,456</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>90+ Days</span>
-                          <span className="font-semibold" style={{color: '#DC2626'}}>892</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>892</span>
                         </div>
                       </div>
                     </div>
@@ -6721,10 +6693,10 @@ const Dashboard = () => {
                       className="flex items-center justify-center w-8 h-8 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
                       aria-label={selectedRollMetric === 'rollbackReport' ? 'Close roll rate analysis' : 'Open roll rate analysis'}
                     >
-                      <svg 
+                      <svg
                         className={`w-5 h-5 text-gray-600 transition-transform ${selectedRollMetric === 'rollbackReport' ? 'rotate-180' : ''}`}
-                        fill="none" 
-                        stroke="currentColor" 
+                        fill="none"
+                        stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -6732,7 +6704,7 @@ const Dashboard = () => {
                     </button>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    <div 
+                    <div
                       className="group bg-white rounded-lg p-3 transition-all duration-200 relative card-with-wave card-with-wave-thin card-wave-staff"
                     >
                       {renderFavoritePin('rollbackReport')}
@@ -6740,24 +6712,24 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Total Rollbacks</span>
-                          <span className="font-semibold" style={{color: '#DC2626'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Pending</span>
-                          <span className="font-semibold" style={{color: '#DC2626'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Completed</span>
-                          <span className="font-semibold" style={{color: '#DC2626'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Amount</span>
-                          <span className="font-semibold" style={{color: '#DC2626'}}>₹0</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>₹0</span>
                         </div>
                       </div>
                     </div>
 
-                    <div 
+                    <div
                       data-roll-card="rollForward"
                       className="group bg-white rounded-lg p-3 transition-all duration-200 relative card-with-wave card-with-wave-thin card-wave-staff"
                     >
@@ -6766,19 +6738,19 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Total Roll Forwards</span>
-                          <span className="font-semibold" style={{color: '#DC2626'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Pending</span>
-                          <span className="font-semibold" style={{color: '#DC2626'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Completed</span>
-                          <span className="font-semibold" style={{color: '#DC2626'}}>0</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>0</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Amount</span>
-                          <span className="font-semibold" style={{color: '#DC2626'}}>₹0</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>₹0</span>
                         </div>
                       </div>
                     </div>
@@ -6790,8 +6762,8 @@ const Dashboard = () => {
                   <div ref={rollForwardRef} className="mb-8 w-full space-y-6">
                     <div className="flex justify-between items-center">
                       <h2 className="text-xl font-semibold text-gray-900">Zone Wise Roll Rate Analysis</h2>
-                      <button 
-                        onClick={() => setSelectedRollMetric(null)} 
+                      <button
+                        onClick={() => setSelectedRollMetric(null)}
                         className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
                         aria-label="Close roll forward section"
                       >
@@ -7502,8 +7474,8 @@ const Dashboard = () => {
                   <div className="mb-8 w-full space-y-6">
                     <div className="flex justify-between items-center">
                       <h2 className="text-xl font-semibold text-gray-900">Roll Rate Analysis</h2>
-                      <button 
-                        onClick={() => setSelectedRollMetric(null)} 
+                      <button
+                        onClick={() => setSelectedRollMetric(null)}
                         className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
                         aria-label="Close roll rate analysis section"
                       >
@@ -7564,31 +7536,28 @@ const Dashboard = () => {
                       <div className="flex border-b border-gray-200">
                         <button
                           onClick={() => setRollRateAnalysisTab('customerNumbers')}
-                          className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-                            rollRateAnalysisTab === 'customerNumbers'
+                          className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${rollRateAnalysisTab === 'customerNumbers'
                               ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
                               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                          }`}
+                            }`}
                         >
                           Customer Numbers
                         </button>
                         <button
                           onClick={() => setRollRateAnalysisTab('customerOutstanding')}
-                          className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-                            rollRateAnalysisTab === 'customerOutstanding'
+                          className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${rollRateAnalysisTab === 'customerOutstanding'
                               ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
                               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                          }`}
+                            }`}
                         >
                           Customer Outstanding
                         </button>
                         <button
                           onClick={() => setRollRateAnalysisTab('trendAnalysis')}
-                          className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-                            rollRateAnalysisTab === 'trendAnalysis'
+                          className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${rollRateAnalysisTab === 'trendAnalysis'
                               ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
                               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                          }`}
+                            }`}
                         >
                           Trend Analysis
                         </button>
@@ -7601,222 +7570,6 @@ const Dashboard = () => {
                         {/* Roll Rate Analysis for Loans */}
                         <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                           <h3 className="text-sm font-semibold text-gray-900 mb-4">Roll Rate Analysis for Loans</h3>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-xs">
-                          <thead>
-                            <tr className="bg-gray-50 border-b">
-                              <th className="text-left py-2 px-2 font-semibold text-gray-700">BaseMonth_Bucket</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Regular</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">1 to 30</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">New Loan</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Roll Forward %</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Roll Backward %</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Stabilized %</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">Regularised %</th>
-                              <th className="text-right py-2 px-2 font-semibold text-gray-700">ClosedLoan %</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr className="border-b hover:bg-gray-50">
-                              <td className="py-2 px-2 text-gray-800 font-medium">Regular</td>
-                              <td className="text-right py-2 px-2 text-gray-700">665,487</td>
-                              <td className="text-right py-2 px-2 text-gray-700">17,574</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">41,165</td>
-                              <td className="text-right py-2 px-2 text-gray-700">2.43%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">91.89%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">91.89%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">5.68%</td>
-                            </tr>
-                            <tr className="border-b hover:bg-gray-50">
-                              <td className="py-2 px-2 text-gray-800 font-medium">1 to 30</td>
-                              <td className="text-right py-2 px-2 text-gray-700">8,093</td>
-                              <td className="text-right py-2 px-2 text-gray-700">14,461</td>
-                              <td className="text-right py-2 px-2 text-gray-700">9,584</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">1,968</td>
-                              <td className="text-right py-2 px-2 text-gray-700">28.10%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">23.73%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">42.40%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">5.77%</td>
-                            </tr>
-                            <tr className="border-b hover:bg-gray-50">
-                              <td className="py-2 px-2 text-gray-800 font-medium">31 to 60</td>
-                              <td className="text-right py-2 px-2 text-gray-700">3,465</td>
-                              <td className="text-right py-2 px-2 text-gray-700">2,124</td>
-                              <td className="text-right py-2 px-2 text-gray-700">5,789</td>
-                              <td className="text-right py-2 px-2 text-gray-700">3,211</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">1,234</td>
-                              <td className="text-right py-2 px-2 text-gray-700">39.65%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">15.32%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">37.89%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">8.14%</td>
-                            </tr>
-                            <tr className="border-b hover:bg-gray-50">
-                              <td className="py-2 px-2 text-gray-800 font-medium">61 to 90</td>
-                              <td className="text-right py-2 px-2 text-gray-700">2,345</td>
-                              <td className="text-right py-2 px-2 text-gray-700">1,567</td>
-                              <td className="text-right py-2 px-2 text-gray-700">1,234</td>
-                              <td className="text-right py-2 px-2 text-gray-700">4,567</td>
-                              <td className="text-right py-2 px-2 text-gray-700">2,890</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">987</td>
-                              <td className="text-right py-2 px-2 text-gray-700">47.23%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">12.45%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">36.98%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">7.99%</td>
-                            </tr>
-                            <tr className="border-b hover:bg-gray-50">
-                              <td className="py-2 px-2 text-gray-800 font-medium">91 to 120</td>
-                              <td className="text-right py-2 px-2 text-gray-700">1,789</td>
-                              <td className="text-right py-2 px-2 text-gray-700">1,234</td>
-                              <td className="text-right py-2 px-2 text-gray-700">987</td>
-                              <td className="text-right py-2 px-2 text-gray-700">654</td>
-                              <td className="text-right py-2 px-2 text-gray-700">3,456</td>
-                              <td className="text-right py-2 px-2 text-gray-700">2,123</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">765</td>
-                              <td className="text-right py-2 px-2 text-gray-700">52.34%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">10.12%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">34.56%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">8.23%</td>
-                            </tr>
-                            <tr className="border-b hover:bg-gray-50">
-                              <td className="py-2 px-2 text-gray-800 font-medium">121 to 180</td>
-                              <td className="text-right py-2 px-2 text-gray-700">3,456</td>
-                              <td className="text-right py-2 px-2 text-gray-700">2,345</td>
-                              <td className="text-right py-2 px-2 text-gray-700">1,789</td>
-                              <td className="text-right py-2 px-2 text-gray-700">1,234</td>
-                              <td className="text-right py-2 px-2 text-gray-700">987</td>
-                              <td className="text-right py-2 px-2 text-gray-700">8,123</td>
-                              <td className="text-right py-2 px-2 text-gray-700">4,567</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">1,456</td>
-                              <td className="text-right py-2 px-2 text-gray-700">58.45%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">8.90%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">30.12%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">7.89%</td>
-                            </tr>
-                            <tr className="border-b hover:bg-gray-50">
-                              <td className="py-2 px-2 text-gray-800 font-medium">181 to 365</td>
-                              <td className="text-right py-2 px-2 text-gray-700">5,678</td>
-                              <td className="text-right py-2 px-2 text-gray-700">3,456</td>
-                              <td className="text-right py-2 px-2 text-gray-700">2,345</td>
-                              <td className="text-right py-2 px-2 text-gray-700">1,789</td>
-                              <td className="text-right py-2 px-2 text-gray-700">1,234</td>
-                              <td className="text-right py-2 px-2 text-gray-700">987</td>
-                              <td className="text-right py-2 px-2 text-gray-700">12,345</td>
-                              <td className="text-right py-2 px-2 text-gray-700">6,789</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">2,345</td>
-                              <td className="text-right py-2 px-2 text-gray-700">61.23%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">7.45%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">28.34%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">8.12%</td>
-                            </tr>
-                            <tr className="border-b hover:bg-gray-50">
-                              <td className="py-2 px-2 text-gray-800 font-medium">&gt;365</td>
-                              <td className="text-right py-2 px-2 text-gray-700">8,901</td>
-                              <td className="text-right py-2 px-2 text-gray-700">5,678</td>
-                              <td className="text-right py-2 px-2 text-gray-700">3,456</td>
-                              <td className="text-right py-2 px-2 text-gray-700">2,345</td>
-                              <td className="text-right py-2 px-2 text-gray-700">1,789</td>
-                              <td className="text-right py-2 px-2 text-gray-700">1,234</td>
-                              <td className="text-right py-2 px-2 text-gray-700">987</td>
-                              <td className="text-right py-2 px-2 text-gray-700">15,678</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">3,456</td>
-                              <td className="text-right py-2 px-2 text-gray-700">64.56%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">6.78%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">25.34%</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">9.12%</td>
-                            </tr>
-                            <tr className="border-b hover:bg-gray-50">
-                              <td className="py-2 px-2 text-gray-800 font-medium">New Loan</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">12,345</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                              <td className="text-right py-2 px-2 text-gray-700">-</td>
-                            </tr>
-                            <tr className="bg-gray-100 border-t-2 border-gray-300 font-bold">
-                              <td className="py-2 px-2 text-gray-900">Total</td>
-                              <td className="text-right py-2 px-2 text-gray-900">707,280</td>
-                              <td className="text-right py-2 px-2 text-gray-900">33,198</td>
-                              <td className="text-right py-2 px-2 text-gray-900">14,589</td>
-                              <td className="text-right py-2 px-2 text-gray-900">12,350</td>
-                              <td className="text-right py-2 px-2 text-gray-900">12,323</td>
-                              <td className="text-right py-2 px-2 text-gray-900">23,941</td>
-                              <td className="text-right py-2 px-2 text-gray-900">45,101</td>
-                              <td className="text-right py-2 px-2 text-gray-900">61,788</td>
-                              <td className="text-right py-2 px-2 text-gray-900">12,345</td>
-                              <td className="text-right py-2 px-2 text-gray-900">47,501</td>
-                              <td className="text-right py-2 px-2 text-gray-900">29.49%</td>
-                              <td className="text-right py-2 px-2 text-gray-900">12.34%</td>
-                              <td className="text-right py-2 px-2 text-gray-900">54.23%</td>
-                              <td className="text-right py-2 px-2 text-gray-900">91.89%</td>
-                              <td className="text-right py-2 px-2 text-gray-900">6.78%</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Customer Outstanding Tab Content */}
-                    {rollRateAnalysisTab === 'customerOutstanding' && (
-                      <div className="space-y-6">
-                        {/* Roll Rate Analysis for AUM */}
-                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Roll Rate Analysis for AUM</h3>
                           <div className="overflow-x-auto">
                             <table className="w-full text-xs">
                               <thead>
@@ -7842,8 +7595,8 @@ const Dashboard = () => {
                               <tbody>
                                 <tr className="border-b hover:bg-gray-50">
                                   <td className="py-2 px-2 text-gray-800 font-medium">Regular</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">2,028.58</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">77.72</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">665,487</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">17,574</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
@@ -7851,7 +7604,7 @@ const Dashboard = () => {
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">33.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">41,165</td>
                                   <td className="text-right py-2 px-2 text-gray-700">2.43%</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">91.89%</td>
@@ -7860,16 +7613,16 @@ const Dashboard = () => {
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
                                   <td className="py-2 px-2 text-gray-800 font-medium">1 to 30</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">18.51</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">32.77</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">22.36</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">8,093</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">14,461</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">9,584</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">1.13</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">1,968</td>
                                   <td className="text-right py-2 px-2 text-gray-700">28.10%</td>
                                   <td className="text-right py-2 px-2 text-gray-700">23.73%</td>
                                   <td className="text-right py-2 px-2 text-gray-700">42.40%</td>
@@ -7878,16 +7631,16 @@ const Dashboard = () => {
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
                                   <td className="py-2 px-2 text-gray-800 font-medium">31 to 60</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">12.34</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">8.45</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">19.23</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">11.56</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">3,465</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">2,124</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">5,789</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">3,211</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">4.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">1,234</td>
                                   <td className="text-right py-2 px-2 text-gray-700">39.65%</td>
                                   <td className="text-right py-2 px-2 text-gray-700">15.32%</td>
                                   <td className="text-right py-2 px-2 text-gray-700">37.89%</td>
@@ -7896,16 +7649,16 @@ const Dashboard = () => {
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
                                   <td className="py-2 px-2 text-gray-800 font-medium">61 to 90</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">9.87</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">6.54</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">5.12</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">18.45</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">12.34</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">2,345</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">1,567</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">1,234</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">4,567</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">2,890</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">3.89</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">987</td>
                                   <td className="text-right py-2 px-2 text-gray-700">47.23%</td>
                                   <td className="text-right py-2 px-2 text-gray-700">12.45%</td>
                                   <td className="text-right py-2 px-2 text-gray-700">36.98%</td>
@@ -7914,16 +7667,16 @@ const Dashboard = () => {
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
                                   <td className="py-2 px-2 text-gray-800 font-medium">91 to 120</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">7.65</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">5.23</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">4.12</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">2.78</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">14.56</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">9.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">1,789</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">1,234</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">987</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">654</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">3,456</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">2,123</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">3.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">765</td>
                                   <td className="text-right py-2 px-2 text-gray-700">52.34%</td>
                                   <td className="text-right py-2 px-2 text-gray-700">10.12%</td>
                                   <td className="text-right py-2 px-2 text-gray-700">34.56%</td>
@@ -7932,16 +7685,16 @@ const Dashboard = () => {
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
                                   <td className="py-2 px-2 text-gray-800 font-medium">121 to 180</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">14.56</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">9.87</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">7.65</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">5.23</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">4.12</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">33.45</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">19.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">3,456</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">2,345</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">1,789</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">1,234</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">987</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">8,123</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">4,567</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">5.89</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">1,456</td>
                                   <td className="text-right py-2 px-2 text-gray-700">58.45%</td>
                                   <td className="text-right py-2 px-2 text-gray-700">8.90%</td>
                                   <td className="text-right py-2 px-2 text-gray-700">30.12%</td>
@@ -7950,16 +7703,16 @@ const Dashboard = () => {
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
                                   <td className="py-2 px-2 text-gray-800 font-medium">181 to 365</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">23.45</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">14.56</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">9.87</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">7.65</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">5.23</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">4.12</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">51.23</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">28.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">5,678</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">3,456</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">2,345</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">1,789</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">1,234</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">987</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">12,345</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">6,789</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">9.78</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">2,345</td>
                                   <td className="text-right py-2 px-2 text-gray-700">61.23%</td>
                                   <td className="text-right py-2 px-2 text-gray-700">7.45%</td>
                                   <td className="text-right py-2 px-2 text-gray-700">28.34%</td>
@@ -7968,16 +7721,16 @@ const Dashboard = () => {
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
                                   <td className="py-2 px-2 text-gray-800 font-medium">&gt;365</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">36.78</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">23.45</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">14.56</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">9.87</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">7.65</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">5.23</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">4.12</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">63.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">8,901</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">5,678</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">3,456</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">2,345</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">1,789</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">1,234</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">987</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">15,678</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">14.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">3,456</td>
                                   <td className="text-right py-2 px-2 text-gray-700">64.56%</td>
                                   <td className="text-right py-2 px-2 text-gray-700">6.78%</td>
                                   <td className="text-right py-2 px-2 text-gray-700">25.34%</td>
@@ -7994,7 +7747,7 @@ const Dashboard = () => {
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">50.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">12,345</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
@@ -8004,16 +7757,16 @@ const Dashboard = () => {
                                 </tr>
                                 <tr className="bg-gray-100 border-t-2 border-gray-300 font-bold">
                                   <td className="py-2 px-2 text-gray-900">Total</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">2,028.58</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">77.72</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">33.12</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">28.31</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">29.11</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">56.94</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">100.15</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">119.89</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">50.12</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">119.89</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">707,280</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">33,198</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">14,589</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">12,350</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">12,323</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">23,941</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">45,101</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">61,788</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">12,345</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">47,501</td>
                                   <td className="text-right py-2 px-2 text-gray-900">29.49%</td>
                                   <td className="text-right py-2 px-2 text-gray-900">12.34%</td>
                                   <td className="text-right py-2 px-2 text-gray-900">54.23%</td>
@@ -8024,17 +7777,7 @@ const Dashboard = () => {
                             </table>
                           </div>
                         </div>
-                      </div>
-                    )}
 
-                    {/* Trend Analysis Tab Content */}
-                    {rollRateAnalysisTab === 'trendAnalysis' && (
-                      <div className="space-y-6">
-                        {/* Main Content Grid - Charts */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                      {/* Left Column - Tables */}
-                      <div className="lg:col-span-2 space-y-4">
-                        {/* Zone and Division wise Roll Rate Analysis for Loans */}
                         <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                           <h3 className="text-sm font-semibold text-gray-900 mb-4">Zone and Division wise Roll Rate Analysis for Loans</h3>
                           <div className="overflow-x-auto">
@@ -8526,91 +8269,222 @@ const Dashboard = () => {
                           </div>
                         </div>
                       </div>
+                    )}
 
-                      {/* Right Column - Charts */}
-                      <div className="space-y-4">
-                        {/* Sum of Loans by Zone - Donut Chart */}
+                    {/* Customer Outstanding Tab Content */}
+                    {rollRateAnalysisTab === 'customerOutstanding' && (
+                      <div className="space-y-6">
+                        {/* Roll Rate Analysis for AUM */}
                         <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Sum of Loans by Zone</h3>
-                          <Chart
-                            type="donut"
-                            height={300}
-                            series={[222197, 221890, 201240, 167482, 145262]}
-                            options={{
-                              chart: {
-                                type: 'donut',
-                                toolbar: { show: false }
-                              },
-                              labels: ['Patna', 'Moradabad', 'Jabalpur', 'Prayagraj', 'Gorakhpur'],
-                              colors: ['#3b82f6', '#1e3a8a', '#f59e0b', '#8b5cf6', '#ec4899'],
-                              legend: {
-                                position: 'bottom',
-                                fontSize: '11px'
-                              },
-                              dataLabels: {
-                                enabled: true,
-                                formatter: function (val) {
-                                  return val.toFixed(1) + '%'
-                                },
-                                style: {
-                                  fontSize: '10px'
-                                }
-                              },
-                              plotOptions: {
-                                pie: {
-                                  donut: {
-                                    size: '65%'
-                                  }
-                                }
-                              }
-                            }}
-                          />
+                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Roll Rate Analysis for AUM</h3>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-xs">
+                              <thead>
+                                <tr className="bg-gray-50 border-b">
+                                  <th className="text-left py-2 px-2 font-semibold text-gray-700">BaseMonth_Bucket</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Regular</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">1 to 30</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">New Loan</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Roll Forward %</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Roll Backward %</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Stabilized %</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Regularised %</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">ClosedLoan %</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2 text-gray-800 font-medium">Regular</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">2,028.58</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">77.72</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">33.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">2.43%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">91.89%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">91.89%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">5.68%</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2 text-gray-800 font-medium">1 to 30</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">18.51</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">32.77</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">22.36</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">1.13</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">28.10%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">23.73%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">42.40%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">5.77%</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2 text-gray-800 font-medium">31 to 60</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">12.34</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">8.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">19.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">11.56</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">4.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">39.65%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">15.32%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">37.89%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">8.14%</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2 text-gray-800 font-medium">61 to 90</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">9.87</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">6.54</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">5.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">18.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">12.34</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">3.89</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">47.23%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">12.45%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">36.98%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">7.99%</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2 text-gray-800 font-medium">91 to 120</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">7.65</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">5.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">4.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">2.78</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">14.56</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">9.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">3.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">52.34%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">10.12%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">34.56%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">8.23%</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2 text-gray-800 font-medium">121 to 180</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">14.56</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">9.87</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">7.65</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">5.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">4.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">33.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">19.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">5.89</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">58.45%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">8.90%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">30.12%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">7.89%</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2 text-gray-800 font-medium">181 to 365</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">23.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">14.56</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">9.87</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">7.65</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">5.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">4.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">51.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">28.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">9.78</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">61.23%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">7.45%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">28.34%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">8.12%</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2 text-gray-800 font-medium">&gt;365</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">36.78</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">23.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">14.56</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">9.87</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">7.65</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">5.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">4.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">63.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">14.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">64.56%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">6.78%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">25.34%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">9.12%</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2 text-gray-800 font-medium">New Loan</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">50.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                </tr>
+                                <tr className="bg-gray-100 border-t-2 border-gray-300 font-bold">
+                                  <td className="py-2 px-2 text-gray-900">Total</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">2,028.58</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">77.72</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">33.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">28.31</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">29.11</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">56.94</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">100.15</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">119.89</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">50.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">119.89</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">29.49%</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">12.34%</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">54.23%</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">91.89%</td>
+                                  <td className="text-right py-2 px-2 text-gray-900">6.78%</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
 
-                        {/* Comparison Month Principle OS (Crores) by Zone - Donut Chart */}
-                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Comparison Month Principle OS (Crores) by Zone</h3>
-                          <Chart
-                            type="donut"
-                            height={300}
-                            series={[580.58, 569.82, 515.03, 444.40, 393.48]}
-                            options={{
-                              chart: {
-                                type: 'donut',
-                                toolbar: { show: false }
-                              },
-                              labels: ['Patna', 'Moradabad', 'Jabalpur', 'Prayagraj', 'Gorakhpur'],
-                              colors: ['#60a5fa', '#1e3a8a', '#f59e0b', '#8b5cf6', '#ec4899'],
-                              legend: {
-                                position: 'bottom',
-                                fontSize: '11px'
-                              },
-                              dataLabels: {
-                                enabled: true,
-                                formatter: function (val) {
-                                  return val.toFixed(1) + '%'
-                                },
-                                style: {
-                                  fontSize: '10px'
-                                }
-                              },
-                              plotOptions: {
-                                pie: {
-                                  donut: {
-                                    size: '65%'
-                                  }
-                                }
-                              }
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* State-wise Analysis Section */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
-                      {/* Left Column - Tables */}
-                      <div className="lg:col-span-2 space-y-4">
                         {/* Zone and Division wise Roll Rate Analysis for Loans - State wise */}
                         <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                           <h3 className="text-sm font-semibold text-gray-900 mb-4">Zone and Division wise Roll Rate Analysis for Loans</h3>
@@ -8882,7 +8756,7 @@ const Dashboard = () => {
 
                         {/* Zone and Division wise Roll Rate Analysis for AUM - State wise */}
                         <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Zone and Division wise Roll Rate Analysis for AUM</h3>
+                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Zone and Division wise Roll Rate Analysis for AUM </h3>
                           <div className="overflow-x-auto">
                             <table className="w-full text-xs">
                               <thead>
@@ -9149,122 +9023,220 @@ const Dashboard = () => {
                           </div>
                         </div>
                       </div>
+                    )}
 
-                      {/* Right Column - Charts */}
-                      <div className="space-y-4">
-                        {/* Loans by State - Horizontal Bar Chart */}
-                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Loans by State</h3>
-                          <Chart
-                            type="bar"
-                            height={400}
-                            series={[{
-                              name: 'Loans',
-                              data: [7600483, 3111032, 2588299, 383644, 334231, 326578, 240645, 76803, 73549, 31140]
-                            }]}
-                            options={{
-                              chart: {
-                                type: 'bar',
-                                horizontal: true,
-                                toolbar: { show: false }
-                              },
-                              plotOptions: {
-                                bar: {
-                                  borderRadius: 4,
-                                  horizontal: true
-                                }
-                              },
-                              dataLabels: {
-                                enabled: true,
-                                formatter: function (val) {
-                                  return (val / 1000000).toFixed(1) + 'M'
+
+
+                    {/* Trend Analysis Tab Content */}
+                    {rollRateAnalysisTab === 'trendAnalysis' && (
+                      <div className="">
+                        {/* Main Content Grid - Charts */}
+                        <div className="grid grid-rows-2 lg:grid-rows-3 ">
+                          {/* Left Column - Tables */}
+
+
+                          {/* Right Column - Charts */}
+                          <div className="space-y-4">
+                            {/* Sum of Loans by Zone - Donut Chart */}
+                            <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                              <h3 className="text-sm font-semibold text-gray-900 mb-4">Sum of Loans by Zone</h3>
+                              <Chart
+                                type="donut"
+                                height={300}
+                                series={[222197, 221890, 201240, 167482, 145262]}
+                                options={{
+                                  chart: {
+                                    type: 'donut',
+                                    toolbar: { show: false }
+                                  },
+                                  labels: ['Patna', 'Moradabad', 'Jabalpur', 'Prayagraj', 'Gorakhpur'],
+                                  colors: ['#3b82f6', '#1e3a8a', '#f59e0b', '#8b5cf6', '#ec4899'],
+                                  legend: {
+                                    position: 'bottom',
+                                    fontSize: '11px'
+                                  },
+                                  dataLabels: {
+                                    enabled: true,
+                                    formatter: function (val) {
+                                      return val.toFixed(1) + '%'
+                                    },
+                                    style: {
+                                      fontSize: '10px'
+                                    }
+                                  },
+                                  plotOptions: {
+                                    pie: {
+                                      donut: {
+                                        size: '65%'
+                                      }
+                                    }
+                                  }
+                                }}
+                              />
+                            </div>
+
+                            {/* Comparison Month Principle OS (Crores) by Zone - Donut Chart */}
+                            <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                              <h3 className="text-sm font-semibold text-gray-900 mb-4">Comparison Month Principle OS (Crores) by Zone</h3>
+                              <Chart
+                                type="donut"
+                                height={300}
+                                series={[580.58, 569.82, 515.03, 444.40, 393.48]}
+                                options={{
+                                  chart: {
+                                    type: 'donut',
+                                    toolbar: { show: false }
+                                  },
+                                  labels: ['Patna', 'Moradabad', 'Jabalpur', 'Prayagraj', 'Gorakhpur'],
+                                  colors: ['#60a5fa', '#1e3a8a', '#f59e0b', '#8b5cf6', '#ec4899'],
+                                  legend: {
+                                    position: 'bottom',
+                                    fontSize: '11px'
+                                  },
+                                  dataLabels: {
+                                    enabled: true,
+                                    formatter: function (val) {
+                                      return val.toFixed(1) + '%'
+                                    },
+                                    style: {
+                                      fontSize: '10px'
+                                    }
+                                  },
+                                  plotOptions: {
+                                    pie: {
+                                      donut: {
+                                        size: '65%'
+                                      }
+                                    }
+                                  }
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mt-4">
+                            <h3 className="text-sm font-semibold text-gray-900 mb-4">Loans by State</h3>
+                            <Chart
+                              type="bar"
+                              height={400}
+                              series={[{
+                                name: 'Loans',
+                                data: [7600483, 3111032, 2588299, 383644, 334231, 326578, 240645, 76803, 73549, 31140]
+                              }]}
+                              options={{
+                                chart: {
+                                  type: 'bar',
+                                  horizontal: true,
+                                  toolbar: { show: false }
                                 },
-                                style: {
-                                  fontSize: '10px'
-                                }
-                              },
-                              xaxis: {
-                                categories: ['Uttar Pradesh', 'Bihar', 'Madhya Pradesh', 'Jharkhand', 'Rajasthan', 'Haryana', 'Uttarakhand', 'Maharashtra', 'Punjab', 'Chhattisgarh'],
-                                labels: {
-                                  style: { fontSize: '10px' },
+                                plotOptions: {
+                                  bar: {
+                                    borderRadius: 4,
+                                    horizontal: true
+                                  }
+                                },
+                                dataLabels: {
+                                  enabled: true,
                                   formatter: function (val) {
                                     return (val / 1000000).toFixed(1) + 'M'
+                                  },
+                                  style: {
+                                    fontSize: '10px'
                                   }
-                                }
-                              },
-                              yaxis: {
-                                labels: {
-                                  style: { fontSize: '10px' }
-                                }
-                              },
-                              colors: ['#3b82f6'],
-                              grid: { borderColor: '#E5E7EB' }
-                            }}
-                          />
+                                },
+                                xaxis: {
+                                  categories: ['Uttar Pradesh', 'Bihar', 'Madhya Pradesh', 'Jharkhand', 'Rajasthan', 'Haryana', 'Uttarakhand', 'Maharashtra', 'Punjab', 'Chhattisgarh'],
+                                  labels: {
+                                    style: { fontSize: '10px' },
+                                    formatter: function (val) {
+                                      return (val / 1000000).toFixed(1) + 'M'
+                                    }
+                                  }
+                                },
+                                yaxis: {
+                                  labels: {
+                                    style: { fontSize: '10px' }
+                                  }
+                                },
+                                colors: ['#3b82f6'],
+                                grid: { borderColor: '#E5E7EB' }
+                              }}
+                            />
+                          </div>
+
+                          {/* Comparison Month Principle OS (Crores) by State - Horizontal Bar Chart */}
+                          <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mt-4">
+                            <h3 className="text-sm font-semibold text-gray-900 mb-4">Comparison Month Principle OS (Crores) by State</h3>
+                            <Chart
+                              type="bar"
+                              height={400}
+                              series={[{
+                                name: 'Principle OS (Crores)',
+                                data: [20326.54, 8615.60, 6397.14, 973.67, 860.29, 818.16, 561.88, 143.32, 137.78, 80.57]
+                              }]}
+                              options={{
+                                chart: {
+                                  type: 'bar',
+                                  horizontal: true,
+                                  toolbar: { show: false }
+                                },
+                                plotOptions: {
+                                  bar: {
+                                    borderRadius: 4,
+                                    horizontal: true
+                                  }
+                                },
+                                dataLabels: {
+                                  enabled: true,
+                                  formatter: function (val) {
+                                    return val.toFixed(2)
+                                  },
+                                  style: {
+                                    fontSize: '10px'
+                                  }
+                                },
+                                xaxis: {
+                                  categories: ['Uttar Pradesh', 'Bihar', 'Madhya Pradesh', 'Jharkhand', 'Rajasthan', 'Haryana', 'Uttarakhand', 'Maharashtra', 'Punjab', 'Chhattisgarh'],
+                                  labels: {
+                                    style: { fontSize: '10px' },
+                                    formatter: function (val) {
+                                      return (val / 1000).toFixed(0) + 'K'
+                                    }
+                                  }
+                                },
+                                yaxis: {
+                                  labels: {
+                                    style: { fontSize: '10px' }
+                                  }
+                                },
+                                colors: ['#3b82f6'],
+                                grid: { borderColor: '#E5E7EB' }
+                              }}
+                            />
+                          </div>
                         </div>
 
-                        {/* Comparison Month Principle OS (Crores) by State - Horizontal Bar Chart */}
-                        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Comparison Month Principle OS (Crores) by State</h3>
-                          <Chart
-                            type="bar"
-                            height={400}
-                            series={[{
-                              name: 'Principle OS (Crores)',
-                              data: [20326.54, 8615.60, 6397.14, 973.67, 860.29, 818.16, 561.88, 143.32, 137.78, 80.57]
-                            }]}
-                            options={{
-                              chart: {
-                                type: 'bar',
-                                horizontal: true,
-                                toolbar: { show: false }
-                              },
-                              plotOptions: {
-                                bar: {
-                                  borderRadius: 4,
-                                  horizontal: true
-                                }
-                              },
-                              dataLabels: {
-                                enabled: true,
-                                formatter: function (val) {
-                                  return val.toFixed(2)
-                                },
-                                style: {
-                                  fontSize: '10px'
-                                }
-                              },
-                              xaxis: {
-                                categories: ['Uttar Pradesh', 'Bihar', 'Madhya Pradesh', 'Jharkhand', 'Rajasthan', 'Haryana', 'Uttarakhand', 'Maharashtra', 'Punjab', 'Chhattisgarh'],
-                                labels: {
-                                  style: { fontSize: '10px' },
-                                  formatter: function (val) {
-                                    return (val / 1000).toFixed(0) + 'K'
-                                  }
-                                }
-                              },
-                              yaxis: {
-                                labels: {
-                                  style: { fontSize: '10px' }
-                                }
-                              },
-                              colors: ['#3b82f6'],
-                              grid: { borderColor: '#E5E7EB' }
-                            }}
-                          />
+                        {/* State-wise Analysis Section */}
+                        <div className="grid grid-rows-1 lg:grid-rows-3 gap-4 ">
+                          {/* Left Column - Tables */}
+
+
+                          {/* Right Column - Charts */}
+                          <div className="">
+                            {/* Loans by State - Horizontal Bar Chart */}
+
+                          </div>
                         </div>
-                      </div>
-                    </div>
                       </div>
                     )}
                   </div>
                 )}
 
                 {/* Trend Charts Section - Move to Trend Analysis Tab */}
-                {selectedRollMetric === 'rollbackReport' && (
+                {rollRateAnalysisTab === 'trendAnalysis' && (
                   <div className="mb-8 w-full space-y-6 mt-6">
-                    <h2 className="text-xl font-semibold text-gray-900">Trend Analysis (Lakhs)</h2>
-                    
+                    <h2 className="text-xl font-semibold text-gray-900">Trend Analysis (Lakhs) 5555</h2>
+
                     {/* Top 6 Charts in 2x3 Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Row 1: Roll Forward and Roll Backward */}
@@ -9685,8 +9657,8 @@ const Dashboard = () => {
                   <div ref={leaderboardTableRef} className="mb-8 w-full space-y-6">
                     <div className="flex justify-between items-center">
                       <h2 className="text-xl font-semibold text-gray-900">Reposition - Details</h2>
-                      <button 
-                        onClick={() => setSelectedCaseMetric(null)} 
+                      <button
+                        onClick={() => setSelectedCaseMetric(null)}
                         className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
                         aria-label="Close reposition tables"
                       >
@@ -9753,165 +9725,165 @@ const Dashboard = () => {
                 <div className="grid grid-cols-3 gap-4 mb-8">
                   {/* Left Side - Charts */}
                   <div className="col-span-2 space-y-4">
-                     {/* Collection Trend Chart */}
-                     <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mt-1 relative">
-                       <div className="flex justify-between items-center mb-4">
-                         <h3 className="text-sm font-semibold text-gray-900">{currentChartData.title}</h3>
-                         <select 
-                           value={chartFilter} 
-                           onChange={(e) => setChartFilter(e.target.value)}
-                           className="px-3 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                         >
-                           <option value="ftd">For the Day (FTD)</option>
-                           <option value="wtd">Week Till Date (WTD)</option>
-                           <option value="mtd">Month Till Date (MTD)</option>
-                           <option value="fy">Current Financial Year</option>
-                           <option value="lfy">Last Financial Year</option>
-                         </select>
-                       </div>
-                       
-                       <div className="relative">
-                         <Chart
-                         options={{
-                           chart: {
-                             type: 'bar',
-                             height: 350,
-                             toolbar: { show: false },
-                             animations: {
-                               enabled: true,
-                               easing: 'easeinout',
-                               speed: 800
-                             }
-                           },
-                           plotOptions: {
-                             bar: {
-                               borderRadius: 4,
-                               columnWidth: currentChartData.data.length > 20 ? '60%' : currentChartData.data.length > 10 ? '70%' : '80%',
-                               dataLabels: {
-                                 position: 'top'
-                               }
-                             }
-                           },
-                           dataLabels: {
-                             enabled: true,
-                             offsetY: -20,
-                             style: {
-                               fontSize: '11px',
-                               fontWeight: 600,
-                               colors: ['#1e40af']
-                             },
-                             formatter: function (val) {
-                               if (val >= 10000000) {
-                                 return `₹${(val / 10000000).toFixed(2)}Cr`;
-                               } else if (val >= 100000) {
-                                 return `₹${(val / 100000).toFixed(2)}L`;
-                               } else if (val >= 1000) {
-                                 return `₹${(val / 1000).toFixed(1)}K`;
-                               }
-                               return `₹${val}`;
-                             }
-                           },
-                           xaxis: {
-                             categories: currentChartData.data.map(item => item.day),
-                             labels: {
-                               style: {
-                                 fontSize: '11px',
-                                 fontWeight: 500,
-                                 colors: '#4b5563'
-                               }
-                             },
-                             axisBorder: {
-                               show: true,
-                               color: '#e5e7eb'
-                             },
-                             axisTicks: {
-                               show: true,
-                               color: '#e5e7eb'
-                             }
-                           },
-                           yaxis: {
-                             title: {
-                               text: 'Collection (₹)',
-                               style: {
-                                 fontSize: '11px',
-                                 fontWeight: 600,
-                                 color: '#4b5563'
-                               }
-                             },
-                             labels: {
-                               style: {
-                                 fontSize: '11px',
-                                 colors: '#6b7280'
-                               },
-                               formatter: function (val) {
-                                 if (val >= 10000000) {
-                                   return `₹${(val / 10000000).toFixed(2)}Cr`;
-                                 } else if (val >= 100000) {
-                                   return `₹${(val / 100000).toFixed(2)}L`;
-                                 } else if (val >= 1000) {
-                                   return `₹${(val / 1000).toFixed(1)}K`;
-                                 }
-                                 return `₹${val}`;
-                               }
-                             }
-                           },
-                           colors: ['#3b82f6'],
-                           grid: {
-                             borderColor: '#e5e7eb',
-                             strokeDashArray: 3,
-                             xaxis: {
-                               lines: {
-                                 show: false
-                               }
-                             },
-                             yaxis: {
-                               lines: {
-                                 show: true
-                               }
-                             }
-                           },
-                           tooltip: {
-                             theme: 'light',
-                             y: {
-                               formatter: function (val) {
-                                 if (val >= 10000000) {
-                                   return `₹${(val / 10000000).toFixed(2)} Cr (₹${val.toLocaleString('en-IN')})`;
-                                 } else if (val >= 100000) {
-                                   return `₹${(val / 100000).toFixed(2)} L (₹${val.toLocaleString('en-IN')})`;
-                                 } else if (val >= 1000) {
-                                   return `₹${(val / 1000).toFixed(1)} K (₹${val.toLocaleString('en-IN')})`;
-                                 }
-                                 return `₹${val.toLocaleString('en-IN')}`;
-                               }
-                             }
-                           },
-                           responsive: [{
-                             breakpoint: 768,
-                             options: {
-                               chart: {
-                                 height: 300
-                               },
-                               dataLabels: {
-                                 fontSize: '9px'
-                               }
-                             }
-                           }]
-                         }}
-                         series={[{
-                           name: 'Collection',
-                           data: currentChartData.data.map(item => item.value)
-                         }]}
-                         type="bar"
-                         height={350}
-                       />
-                         <div className="absolute top-2 right-2 bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
-                           📊 Live Chart
-                         </div>
-                       </div>
-                     </div>
+                    {/* Collection Trend Chart */}
+                    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mt-1 relative">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-sm font-semibold text-gray-900">{currentChartData.title}</h3>
+                        <select
+                          value={chartFilter}
+                          onChange={(e) => setChartFilter(e.target.value)}
+                          className="px-3 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                        >
+                          <option value="ftd">For the Day (FTD)</option>
+                          <option value="wtd">Week Till Date (WTD)</option>
+                          <option value="mtd">Month Till Date (MTD)</option>
+                          <option value="fy">Current Financial Year</option>
+                          <option value="lfy">Last Financial Year</option>
+                        </select>
+                      </div>
 
-                    
-          </div>
+                      <div className="relative">
+                        <Chart
+                          options={{
+                            chart: {
+                              type: 'bar',
+                              height: 350,
+                              toolbar: { show: false },
+                              animations: {
+                                enabled: true,
+                                easing: 'easeinout',
+                                speed: 800
+                              }
+                            },
+                            plotOptions: {
+                              bar: {
+                                borderRadius: 4,
+                                columnWidth: currentChartData.data.length > 20 ? '60%' : currentChartData.data.length > 10 ? '70%' : '80%',
+                                dataLabels: {
+                                  position: 'top'
+                                }
+                              }
+                            },
+                            dataLabels: {
+                              enabled: true,
+                              offsetY: -20,
+                              style: {
+                                fontSize: '11px',
+                                fontWeight: 600,
+                                colors: ['#1e40af']
+                              },
+                              formatter: function (val) {
+                                if (val >= 10000000) {
+                                  return `₹${(val / 10000000).toFixed(2)}Cr`;
+                                } else if (val >= 100000) {
+                                  return `₹${(val / 100000).toFixed(2)}L`;
+                                } else if (val >= 1000) {
+                                  return `₹${(val / 1000).toFixed(1)}K`;
+                                }
+                                return `₹${val}`;
+                              }
+                            },
+                            xaxis: {
+                              categories: currentChartData.data.map(item => item.day),
+                              labels: {
+                                style: {
+                                  fontSize: '11px',
+                                  fontWeight: 500,
+                                  colors: '#4b5563'
+                                }
+                              },
+                              axisBorder: {
+                                show: true,
+                                color: '#e5e7eb'
+                              },
+                              axisTicks: {
+                                show: true,
+                                color: '#e5e7eb'
+                              }
+                            },
+                            yaxis: {
+                              title: {
+                                text: 'Collection (₹)',
+                                style: {
+                                  fontSize: '11px',
+                                  fontWeight: 600,
+                                  color: '#4b5563'
+                                }
+                              },
+                              labels: {
+                                style: {
+                                  fontSize: '11px',
+                                  colors: '#6b7280'
+                                },
+                                formatter: function (val) {
+                                  if (val >= 10000000) {
+                                    return `₹${(val / 10000000).toFixed(2)}Cr`;
+                                  } else if (val >= 100000) {
+                                    return `₹${(val / 100000).toFixed(2)}L`;
+                                  } else if (val >= 1000) {
+                                    return `₹${(val / 1000).toFixed(1)}K`;
+                                  }
+                                  return `₹${val}`;
+                                }
+                              }
+                            },
+                            colors: ['#3b82f6'],
+                            grid: {
+                              borderColor: '#e5e7eb',
+                              strokeDashArray: 3,
+                              xaxis: {
+                                lines: {
+                                  show: false
+                                }
+                              },
+                              yaxis: {
+                                lines: {
+                                  show: true
+                                }
+                              }
+                            },
+                            tooltip: {
+                              theme: 'light',
+                              y: {
+                                formatter: function (val) {
+                                  if (val >= 10000000) {
+                                    return `₹${(val / 10000000).toFixed(2)} Cr (₹${val.toLocaleString('en-IN')})`;
+                                  } else if (val >= 100000) {
+                                    return `₹${(val / 100000).toFixed(2)} L (₹${val.toLocaleString('en-IN')})`;
+                                  } else if (val >= 1000) {
+                                    return `₹${(val / 1000).toFixed(1)} K (₹${val.toLocaleString('en-IN')})`;
+                                  }
+                                  return `₹${val.toLocaleString('en-IN')}`;
+                                }
+                              }
+                            },
+                            responsive: [{
+                              breakpoint: 768,
+                              options: {
+                                chart: {
+                                  height: 300
+                                },
+                                dataLabels: {
+                                  fontSize: '9px'
+                                }
+                              }
+                            }]
+                          }}
+                          series={[{
+                            name: 'Collection',
+                            data: currentChartData.data.map(item => item.value)
+                          }]}
+                          type="bar"
+                          height={350}
+                        />
+                        <div className="absolute top-2 right-2 bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
+                          📊 Live Chart
+                        </div>
+                      </div>
+                    </div>
+
+
+                  </div>
 
                   {/* Right Side - Alerts and Actions */}
                   <div className="space-y-4">
@@ -9919,77 +9891,77 @@ const Dashboard = () => {
                     <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mt-3">
                       <h3 className="text-sm font-semibold text-gray-900 mb-2">Allocation Monitoring</h3>
                       <div className="space-y-2">
-                      
-                       
+
+
                         <div className="bg-orange-50 border border-orange-200 rounded-lg p-2">
                           <div className="text-orange-800 text-xs font-semibold">Unallocated Cases</div>
                           <div className="text-orange-600 text-xs mt-1">Pending: 23</div>
                           <button className="mt-1 bg-orange-600 hover:bg-orange-700 text-white px-2 py-1 rounded text-xs transition-colors cursor-pointer">
                             Auto Allocate
                           </button>
-                          </div>
                         </div>
-                        
                       </div>
-                      {/* DPD Distribution Chart */}
-                     <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                       <h3 className="text-sm font-semibold text-gray-900 mb-3">DPD Distribution</h3>
-                       <div className="flex items-center space-x-6">
-                         <div className="relative">
-                           <div className="h-40 w-40 bg-gradient-to-br from-green-100 via-yellow-100 to-red-100 rounded-full flex items-center justify-center border-4 border-gray-200">
-                             <div className="h-32 w-32 bg-white rounded-full flex items-center justify-center">
-                               <div className="text-center">
-                                 <div className="text-2xl font-bold text-gray-700">38</div>
-                                 <div className="text-xs text-gray-500">Total Cases</div>
-                               </div>
-                             </div>
-                           </div>
-                           {/* Mock donut chart segments */}
-                           <div className="absolute inset-0 rounded-full" style={{
-                             background: `conic-gradient(
+
+                    </div>
+                    {/* DPD Distribution Chart */}
+                    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <h3 className="text-sm font-semibold text-gray-900 mb-3">DPD Distribution</h3>
+                      <div className="flex items-center space-x-6">
+                        <div className="relative">
+                          <div className="h-40 w-40 bg-gradient-to-br from-green-100 via-yellow-100 to-red-100 rounded-full flex items-center justify-center border-4 border-gray-200">
+                            <div className="h-32 w-32 bg-white rounded-full flex items-center justify-center">
+                              <div className="text-center">
+                                <div className="text-2xl font-bold text-gray-700">38</div>
+                                <div className="text-xs text-gray-500">Total Cases</div>
+                              </div>
+                            </div>
+                          </div>
+                          {/* Mock donut chart segments */}
+                          <div className="absolute inset-0 rounded-full" style={{
+                            background: `conic-gradient(
                                #10b981 0deg 162deg,
                                #f59e0b 162deg 252deg,
                                #3b82f6 252deg 324deg,
                                #ef4444 324deg 360deg
                              )`
-                           }}></div>
-                           <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center">
-                             <div className="text-center">
-                               <div className="text-2xl font-bold text-gray-700">38</div>
-                               <div className="text-xs text-gray-500">Total Cases</div>
-                             </div>
+                          }}></div>
+                          <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center">
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-gray-700">38</div>
+                              <div className="text-xs text-gray-500">Total Cases</div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="space-y-3">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-4 h-4 bg-green-500 rounded"></div>
+                            <span className="text-gray-700 text-[12px] font-medium">0-30 days (45%)</span>
+                            <span className="text-gray-500 text-[12px]">17 cases</span>
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <div className="w-4 h-4 bg-orange-500 rounded"></div>
+                            <span className="text-gray-700 text-[12px] font-medium">31-60 days (25%)</span>
+                            <span className="text-gray-500 text-[12px]">10 cases</span>
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                            <span className="text-gray-700 text-[12px] font-medium">61-90 days (18%)</span>
+                            <span className="text-gray-500 text-[12px]">7 cases</span>
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <div className="w-4 h-4 bg-red-500 rounded"></div>
+                            <span className="text-gray-700 text-[12px] font-medium">90+ days (12%)</span>
+                            <span className="text-gray-500 text-[12px]">4 cases</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                         <div className="space-y-3">
-                           <div className="flex items-center space-x-3">
-                             <div className="w-4 h-4 bg-green-500 rounded"></div>
-                             <span className="text-gray-700 text-[12px] font-medium">0-30 days (45%)</span>
-                             <span className="text-gray-500 text-[12px]">17 cases</span>
-                           </div>
-                           <div className="flex items-center space-x-3">
-                             <div className="w-4 h-4 bg-orange-500 rounded"></div>
-                             <span className="text-gray-700 text-[12px] font-medium">31-60 days (25%)</span>
-                             <span className="text-gray-500 text-[12px]">10 cases</span>
-                           </div>
-                           <div className="flex items-center space-x-3">
-                             <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                             <span className="text-gray-700 text-[12px] font-medium">61-90 days (18%)</span>
-                             <span className="text-gray-500 text-[12px]">7 cases</span>
-                           </div>
-                           <div className="flex items-center space-x-3">
-                             <div className="w-4 h-4 bg-red-500 rounded"></div>
-                             <span className="text-gray-700 text-[12px] font-medium">90+ days (12%)</span>
-                             <span className="text-gray-500 text-[12px]">4 cases</span>
                   </div>
                 </div>
               </div>
             </div>
-                    </div>
-              </div>
-            </div>
           </div>
-        </div>
-      </main>
+        </main>
       </div>
     </div>
   )
