@@ -4122,6 +4122,16 @@ const Dashboard = () => {
         .card-with-wave.card-selected::after {
           display: none;
         }
+        .card-selected {
+          transform: scale(1.05) translateY(8px);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+          z-index: 10;
+        }
+        .card-selected-zoom {
+          transform: scale(1.05) translateY(8px);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+          z-index: 10;
+        }
         .card-wave-indigo::after { background-color: #003366; }
         .card-wave-blue::after { background-color: #2196F3; }
         .card-wave-green::after { background-color: #4CAF50; }
@@ -4703,13 +4713,13 @@ const Dashboard = () => {
                 )}
 
                 {/* Staff Monitoring (Summary) */}
-                <div className="mb-8 w-full">
+                <div className="mb-8 w-full ml-2">
                   <h2 className="text-lg font-semibold text-gray-800 mb-4">Staff Monitoring</h2>
                   <div className="grid grid-cols-5 gap-3 relative w-full">
                     {/* Allocation Summary Card */}
                     <div 
                       data-staff-card
-                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'allocation' ? 'expanded' : ''} ${selectedStaffMetric === 'allocation' ? 'shadow-sm border border-blue-600 card-selected' : 'border border-gray-200'}`}
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'allocation' ? 'expanded' : ''} ${selectedStaffMetric === 'allocation' ? 'card-selected' : 'border border-gray-200'}`}
                       onMouseEnter={() => setExpandedCard('allocation')}
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={(e) => {
@@ -4753,7 +4763,7 @@ const Dashboard = () => {
                     {/* Collection Efficiency Card */}
                     <div 
                       data-staff-card
-                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'collection' ? 'expanded' : ''} ${selectedStaffMetric === 'collection' ? 'shadow-sm border border-blue-600 card-selected' : 'border border-gray-200'}`}
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'collection' ? 'expanded' : ''} ${selectedStaffMetric === 'collection' ? 'card-selected' : 'border border-gray-200'}`}
                       onMouseEnter={() => setExpandedCard('collection')}
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={(e) => {
@@ -4789,7 +4799,7 @@ const Dashboard = () => {
                     {/* PTP Conversion Rate Card */}
                     <div 
                       data-staff-card
-                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'ptp' ? 'expanded' : ''} ${selectedStaffMetric === 'ptp' ? 'shadow-sm border border-blue-600 card-selected' : 'border border-gray-200'}`}
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'ptp' ? 'expanded' : ''} ${selectedStaffMetric === 'ptp' ? 'card-selected' : 'border border-gray-200'}`}
                       onMouseEnter={() => setExpandedCard('ptp')}
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={(e) => {
@@ -4825,7 +4835,7 @@ const Dashboard = () => {
                     {/* Staff Productivity Index Card */}
                     <div 
                       data-staff-card
-                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'productivity' ? 'expanded' : ''} ${selectedStaffMetric === 'productivity' ? 'shadow-sm border border-blue-600 card-selected' : 'border border-gray-200'}`}
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-300 relative card-with-wave card-wave-staff h-20 ${expandedCard === 'productivity' ? 'expanded' : ''} ${selectedStaffMetric === 'productivity' ? 'card-selected' : 'border border-gray-200'}`}
                       onMouseEnter={() => setExpandedCard('productivity')}
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={(e) => {
@@ -4861,7 +4871,7 @@ const Dashboard = () => {
                     {/* Inactive/Non-performing Staff Card */}
                     <div 
                       data-staff-card
-                      className={`group bg-white rounded-lg p-3 relative cursor-pointer transition-all duration-300 card-with-wave card-wave-staff h-20 ${expandedCard === 'inactive' ? 'expanded' : ''} ${selectedStaffMetric === 'inactive' ? 'shadow-sm border border-blue-600 card-selected' : 'border border-gray-200'}`}
+                      className={`group bg-white rounded-lg p-3 relative cursor-pointer transition-all duration-300 card-with-wave card-wave-staff h-20 ${expandedCard === 'inactive' ? 'expanded' : ''} ${selectedStaffMetric === 'inactive' ? 'card-selected' : 'border border-gray-200'}`}
                       onMouseEnter={() => setExpandedCard('inactive')}
                       onMouseLeave={() => setExpandedCard(null)}
                       onClick={(e) => {
@@ -4937,7 +4947,7 @@ const Dashboard = () => {
                         {/* Tractor Finance Card */}
                         <div
                           onClick={() => setSelectedLoanType('tractor')}
-                          className={`group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border ${selectedLoanType === 'tractor' ? 'border-red-600 ring-2 ring-red-600' : 'border-gray-200 hover:border-red-600'}`}
+                          className={`group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer ${selectedLoanType === 'tractor' ? 'card-selected-zoom' : 'border border-gray-200 hover:border-red-600'}`}
                           style={{
                             backgroundImage: tractorFinanceImage ? `url("${tractorFinanceImage}")` : 'none',
                             backgroundSize: 'cover',
@@ -4966,7 +4976,7 @@ const Dashboard = () => {
                         {/* Commercial Vehicle Card */}
                         <div
                           onClick={() => setSelectedLoanType('vehicle')}
-                          className={`group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border ${selectedLoanType === 'vehicle' ? 'border-red-600 ring-2 ring-red-600' : 'border-gray-200 hover:border-red-600'}`}
+                          className={`group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer ${selectedLoanType === 'vehicle' ? 'card-selected-zoom' : 'border border-gray-200 hover:border-red-600'}`}
                           style={{
                             backgroundImage: commercialVehicleImage ? `url("${commercialVehicleImage}")` : 'none',
                             backgroundSize: 'cover',
@@ -4995,7 +5005,7 @@ const Dashboard = () => {
                         {/* Construction Equipment Card */}
                         <div
                           onClick={() => setSelectedLoanType('construction')}
-                          className={`group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border ${selectedLoanType === 'construction' ? 'border-red-600 ring-2 ring-red-600' : 'border-gray-200 hover:border-red-600'}`}
+                          className={`group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer ${selectedLoanType === 'construction' ? 'card-selected-zoom' : 'border border-gray-200 hover:border-red-600'}`}
                           style={{
                             backgroundImage: constructionEquipmentImage ? `url("${constructionEquipmentImage}")` : 'none',
                             backgroundSize: 'cover',
@@ -5024,7 +5034,7 @@ const Dashboard = () => {
                         {/* Home Loan Card */}
                         <div
                           onClick={() => setSelectedLoanType('home')}
-                          className={`group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border ${selectedLoanType === 'home' ? 'border-red-600 ring-2 ring-red-600' : 'border-gray-200 hover:border-red-600'}`}
+                          className={`group relative rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer ${selectedLoanType === 'home' ? 'card-selected-zoom' : 'border border-gray-200 hover:border-red-600'}`}
                           style={{
                             backgroundImage: homeLoanImage ? `url("${homeLoanImage}")` : 'none',
                             backgroundSize: 'cover',
@@ -6180,12 +6190,12 @@ const Dashboard = () => {
                 )}
 
                 {/* Customer Engagement */}
-                <div className="mb-8 border bg-[] border-red-400 rounded-lg p-4" style={{borderColor: '#e5e7eb'}}>
+                <div className="mb-8 w-full ml-2">
                   <h2 className="text-lg font-semibold text-gray-800 mb-4">Customer Engagement</h2>
                   <div className="grid grid-cols-4 gap-3 relative z-10">
                     <div 
                       data-engagement-card
-                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement ${selectedEngagementCard === 'whatsapp' ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement ${selectedEngagementCard === 'whatsapp' ? 'card-selected-zoom' : ''}`}
                       onClick={(e) => {
                         e.stopPropagation()
                         handleEngagementCardClick('whatsapp')
@@ -6215,7 +6225,7 @@ const Dashboard = () => {
 
                     <div 
                       data-engagement-card
-                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement ${selectedEngagementCard === 'aiCalls' ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement ${selectedEngagementCard === 'aiCalls' ? 'card-selected-zoom' : ''}`}
                       onClick={(e) => {
                         e.stopPropagation()
                         handleEngagementCardClick('aiCalls')
@@ -6241,7 +6251,7 @@ const Dashboard = () => {
 
                     <div 
                       data-engagement-card
-                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement ${selectedEngagementCard === 'dialler' ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement ${selectedEngagementCard === 'dialler' ? 'card-selected-zoom' : ''}`}
                       onClick={(e) => {
                         e.stopPropagation()
                         handleEngagementCardClick('dialler')
@@ -6267,7 +6277,7 @@ const Dashboard = () => {
 
                     <div 
                       data-engagement-card
-                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement ${selectedEngagementCard === 'fieldVisits' ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-engagement ${selectedEngagementCard === 'fieldVisits' ? 'card-selected-zoom' : ''}`}
                       onClick={(e) => {
                         e.stopPropagation()
                         handleEngagementCardClick('fieldVisits')
@@ -6469,7 +6479,7 @@ const Dashboard = () => {
             </div>
 
                 {/* Payment Intent & Behavior */}
-                <div className="mb-8">
+                <div className="mb-8 ml-2">
                   <h2 className="text-lg font-semibold text-gray-800 mb-4">Payment Intent & Behavior</h2>
                   <div className="grid grid-cols-3 gap-4">
                     <div className="group bg-white rounded-lg p-3 relative card-with-wave card-with-wave-thin card-wave-payment">
@@ -6575,7 +6585,7 @@ const Dashboard = () => {
             </div>
 
                 {/* Case Management & DPD Analysis */}
-                <div className="mb-8">
+                <div className="mb-8 ml-2">
                   <h2 className="text-lg font-semibold text-gray-800 mb-4">Case Management & DPD Analysis</h2>
                   <div className="grid grid-cols-4 gap-3">
                     <div 
@@ -6613,7 +6623,7 @@ const Dashboard = () => {
 
                     <div 
                       data-case-card="deposition"
-                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-staff ${selectedCaseMetric === 'deposition' ? 'ring-2 ring-red-600 shadow-lg' : ''}`}
+                      className={`group bg-white rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-md relative card-with-wave card-with-wave-thin card-wave-staff ${selectedCaseMetric === 'deposition' ? 'card-selected-zoom' : ''}`}
                       onClick={() => {
                         if (selectedCaseMetric === 'deposition') {
                           setSelectedCaseMetric(null)
