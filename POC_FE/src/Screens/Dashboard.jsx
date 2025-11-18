@@ -1691,7 +1691,19 @@ const Dashboard = () => {
         p2pConverted: 5
       },
       {
-        dpd: '121-180 days',
+        dpd: '121-150 days',
+        casesAllocated: 10000,
+        totalOutstandingPOS: 65000000,
+        odAmountCurrentDue: 1800000,
+        collectedAccounts: 2600,
+        clientsVisited: 3200,
+        p2pReceived: 95,
+        collectedAmount: 135000,
+        clientsNotVisited: 6800,
+        p2pConverted: 4
+      },
+      {
+        dpd: '151-180 days',
         casesAllocated: 10000,
         totalOutstandingPOS: 65000000,
         odAmountCurrentDue: 1800000,
@@ -1871,7 +1883,20 @@ const Dashboard = () => {
         p2pConverted: '4.17%'
       },
       {
-        dpd: '121-180 days',
+        dpd: '121-150 days',
+        casesAllocated: 10000,
+        totalOutstandingPOS: '14.2%',
+        odAmountCurrentDue: 1800000,
+        collectedAccounts: '26.0%',
+        clientsVisited: '32.0%',
+        p2pReceivedOverall: '0.95%',
+        p2pReceivedVisitedClients: '2.97%',
+        collectedAmount: '0.28%',
+        clientsNotVisited: '68.00%',
+        p2pConverted: '4.00%'
+      },
+      {
+        dpd: '151-180 days',
         casesAllocated: 10000,
         totalOutstandingPOS: '14.2%',
         odAmountCurrentDue: 1800000,
@@ -6678,6 +6703,75 @@ const Dashboard = () => {
                   </div>
                 </div>
 
+                {/* Deposition Table - Show when deposition card is clicked */}
+                {selectedCaseMetric === 'deposition' && (
+                  <div ref={leaderboardTableRef} className="mb-8 w-full space-y-6">
+                    <div className="flex justify-between items-center">
+                      <h2 className="text-xl font-semibold text-gray-900">Deposition Data</h2>
+                      <button
+                        onClick={() => setSelectedCaseMetric(null)}
+                        className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                        aria-label="Close deposition table"
+                      >
+                        Close
+                      </button>
+                    </div>
+                    {renderDepositionTable()}
+                  </div>
+                )}
+
+                {/* Reposition Expanded Section */}
+                {selectedCaseMetric === 'reposition' && (
+                  <div ref={leaderboardTableRef} className="mb-8 w-full space-y-6">
+                    <div className="flex justify-between items-center">
+                      <h2 className="text-xl font-semibold text-gray-900">Reposition - Details</h2>
+                      <button
+                        onClick={() => setSelectedCaseMetric(null)}
+                        className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                        aria-label="Close reposition tables"
+                      >
+                        Close
+                      </button>
+                    </div>
+
+                    {/* Summary Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Total Repo Cases</div>
+                        <div className="text-2xl font-bold text-gray-900">107,287</div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Total Outstanding Amount</div>
+                        <div className="text-2xl font-bold text-gray-900">₹489.46Cr</div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Vehicles Sold</div>
+                        <div className="text-2xl font-bold text-gray-900">24</div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Total Cases Allocated</div>
+                        <div className="text-2xl font-bold text-gray-900">88,712</div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Surrendered Cases</div>
+                        <div className="text-2xl font-bold text-gray-900">78</div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Total Reposition Cases</div>
+                        <div className="text-2xl font-bold text-gray-900">31</div>
+                      </div>
+                    </div>
+
+                    {/* Tables Grid */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div className="lg:col-span-2">{renderPortfolioWiseSummaryTable()}</div>
+                      <div className="lg:col-span-2">{renderDPDWiseSummaryTable()}</div>
+                      <div>{renderApplicationStatusSummaryTable()}</div>
+                      <div>{renderRepossessionStatusSummaryTable()}</div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Portfolio Performance */}
                 <div className="mb-8">
                   <div className="flex justify-between items-center mb-4">
@@ -6863,7 +6957,8 @@ const Dashboard = () => {
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 150</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">151 to 180</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
@@ -7109,7 +7204,8 @@ const Dashboard = () => {
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 150</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">151 to 180</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
@@ -7580,7 +7676,8 @@ const Dashboard = () => {
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 150</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">151 to 180</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">New Loan</th>
@@ -7672,7 +7769,8 @@ const Dashboard = () => {
                                   <td className="text-right py-2 px-2 text-gray-700">987</td>
                                   <td className="text-right py-2 px-2 text-gray-700">654</td>
                                   <td className="text-right py-2 px-2 text-gray-700">3,456</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">2,123</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">1,062</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">1,061</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
@@ -7684,13 +7782,33 @@ const Dashboard = () => {
                                   <td className="text-right py-2 px-2 text-gray-700">8.23%</td>
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
-                                  <td className="py-2 px-2 text-gray-800 font-medium">121 to 180</td>
+                                  <td className="py-2 px-2 text-gray-800 font-medium">121 to 150</td>
                                   <td className="text-right py-2 px-2 text-gray-700">3,456</td>
                                   <td className="text-right py-2 px-2 text-gray-700">2,345</td>
                                   <td className="text-right py-2 px-2 text-gray-700">1,789</td>
                                   <td className="text-right py-2 px-2 text-gray-700">1,234</td>
                                   <td className="text-right py-2 px-2 text-gray-700">987</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">8,123</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">4,062</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">4,062</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">4,567</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">1,456</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">58.45%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">8.90%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">30.12%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">7.89%</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2 text-gray-800 font-medium">151 to 180</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">3,456</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">2,345</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">1,789</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">1,234</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">987</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">4,061</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">4,061</td>
                                   <td className="text-right py-2 px-2 text-gray-700">4,567</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
@@ -7790,7 +7908,8 @@ const Dashboard = () => {
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 150</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">151 to 180</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
@@ -8036,7 +8155,8 @@ const Dashboard = () => {
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 150</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">151 to 180</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
@@ -8287,7 +8407,8 @@ const Dashboard = () => {
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 150</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">151 to 180</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">New Loan</th>
@@ -8391,13 +8512,33 @@ const Dashboard = () => {
                                   <td className="text-right py-2 px-2 text-gray-700">8.23%</td>
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
-                                  <td className="py-2 px-2 text-gray-800 font-medium">121 to 180</td>
+                                  <td className="py-2 px-2 text-gray-800 font-medium">121 to 150</td>
                                   <td className="text-right py-2 px-2 text-gray-700">14.56</td>
                                   <td className="text-right py-2 px-2 text-gray-700">9.87</td>
                                   <td className="text-right py-2 px-2 text-gray-700">7.65</td>
                                   <td className="text-right py-2 px-2 text-gray-700">5.23</td>
                                   <td className="text-right py-2 px-2 text-gray-700">4.12</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">33.45</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">16.73</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">16.73</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">19.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">5.89</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">58.45%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">8.90%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">30.12%</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">7.89%</td>
+                                </tr>
+                                <tr className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-2 text-gray-800 font-medium">151 to 180</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">14.56</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">9.87</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">7.65</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">5.23</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">4.12</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">16.72</td>
+                                  <td className="text-right py-2 px-2 text-gray-700">16.72</td>
                                   <td className="text-right py-2 px-2 text-gray-700">19.23</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
                                   <td className="text-right py-2 px-2 text-gray-700">-</td>
@@ -8498,7 +8639,8 @@ const Dashboard = () => {
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 150</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">151 to 180</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
@@ -8767,7 +8909,8 @@ const Dashboard = () => {
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 150</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">151 to 180</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
@@ -9649,75 +9792,6 @@ const Dashboard = () => {
                         }}
                       />
                     </div>
-                  </div>
-                )}
-
-                {/* Reposition Expanded Section */}
-                {selectedCaseMetric === 'reposition' && (
-                  <div ref={leaderboardTableRef} className="mb-8 w-full space-y-6">
-                    <div className="flex justify-between items-center">
-                      <h2 className="text-xl font-semibold text-gray-900">Reposition - Details</h2>
-                      <button
-                        onClick={() => setSelectedCaseMetric(null)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
-                        aria-label="Close reposition tables"
-                      >
-                        Close
-                      </button>
-                    </div>
-
-                    {/* Summary Cards */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                        <div className="text-sm text-gray-600 mb-1">Total Repo Cases</div>
-                        <div className="text-2xl font-bold text-gray-900">107,287</div>
-                      </div>
-                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                        <div className="text-sm text-gray-600 mb-1">Total Outstanding Amount</div>
-                        <div className="text-2xl font-bold text-gray-900">₹489.46Cr</div>
-                      </div>
-                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                        <div className="text-sm text-gray-600 mb-1">Vehicles Sold</div>
-                        <div className="text-2xl font-bold text-gray-900">24</div>
-                      </div>
-                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                        <div className="text-sm text-gray-600 mb-1">Total Cases Allocated</div>
-                        <div className="text-2xl font-bold text-gray-900">88,712</div>
-                      </div>
-                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                        <div className="text-sm text-gray-600 mb-1">Surrendered Cases</div>
-                        <div className="text-2xl font-bold text-gray-900">78</div>
-                      </div>
-                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                        <div className="text-sm text-gray-600 mb-1">Total Reposition Cases</div>
-                        <div className="text-2xl font-bold text-gray-900">31</div>
-                      </div>
-                    </div>
-
-                    {/* Tables Grid */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      <div className="lg:col-span-2">{renderPortfolioWiseSummaryTable()}</div>
-                      <div className="lg:col-span-2">{renderDPDWiseSummaryTable()}</div>
-                      <div>{renderApplicationStatusSummaryTable()}</div>
-                      <div>{renderRepossessionStatusSummaryTable()}</div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Deposition Table - Show when deposition card is clicked */}
-                {selectedCaseMetric === 'deposition' && (
-                  <div ref={leaderboardTableRef} className="mb-8 w-full space-y-6">
-                    <div className="flex justify-between items-center">
-                      <h2 className="text-xl font-semibold text-gray-900">Deposition Data</h2>
-                      <button
-                        onClick={() => setSelectedCaseMetric(null)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
-                        aria-label="Close deposition table"
-                      >
-                        Close
-                      </button>
-                    </div>
-                    {renderDepositionTable()}
                   </div>
                 )}
 
