@@ -1691,19 +1691,7 @@ const Dashboard = () => {
         p2pConverted: 5
       },
       {
-        dpd: '121-150 days',
-        casesAllocated: 10000,
-        totalOutstandingPOS: 65000000,
-        odAmountCurrentDue: 1800000,
-        collectedAccounts: 2600,
-        clientsVisited: 3200,
-        p2pReceived: 95,
-        collectedAmount: 135000,
-        clientsNotVisited: 6800,
-        p2pConverted: 4
-      },
-      {
-        dpd: '151-180 days',
+        dpd: '121-180 days',
         casesAllocated: 10000,
         totalOutstandingPOS: 65000000,
         odAmountCurrentDue: 1800000,
@@ -1883,20 +1871,7 @@ const Dashboard = () => {
         p2pConverted: '4.17%'
       },
       {
-        dpd: '121-150 days',
-        casesAllocated: 10000,
-        totalOutstandingPOS: '14.2%',
-        odAmountCurrentDue: 1800000,
-        collectedAccounts: '26.0%',
-        clientsVisited: '32.0%',
-        p2pReceivedOverall: '0.95%',
-        p2pReceivedVisitedClients: '2.97%',
-        collectedAmount: '0.28%',
-        clientsNotVisited: '68.00%',
-        p2pConverted: '4.00%'
-      },
-      {
-        dpd: '151-180 days',
+        dpd: '121-180 days',
         casesAllocated: 10000,
         totalOutstandingPOS: '14.2%',
         odAmountCurrentDue: 1800000,
@@ -6703,79 +6678,10 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Deposition Table - Show when deposition card is clicked */}
-                {selectedCaseMetric === 'deposition' && (
-                  <div ref={leaderboardTableRef} className="mb-8 w-full space-y-6">
-                    <div className="flex justify-between items-center">
-                      <h2 className="text-xl font-semibold text-gray-900">Deposition Data</h2>
-                      <button
-                        onClick={() => setSelectedCaseMetric(null)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
-                        aria-label="Close deposition table"
-                      >
-                        Close
-                      </button>
-                    </div>
-                    {renderDepositionTable()}
-                  </div>
-                )}
-
-                {/* Reposition Expanded Section */}
-                {selectedCaseMetric === 'reposition' && (
-                  <div ref={leaderboardTableRef} className="mb-8 w-full space-y-6">
-                    <div className="flex justify-between items-center">
-                      <h2 className="text-xl font-semibold text-gray-900">Reposition - Details</h2>
-                      <button
-                        onClick={() => setSelectedCaseMetric(null)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
-                        aria-label="Close reposition tables"
-                      >
-                        Close
-                      </button>
-                    </div>
-
-                    {/* Summary Cards */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                        <div className="text-sm text-gray-600 mb-1">Total Repo Cases</div>
-                        <div className="text-2xl font-bold text-gray-900">107,287</div>
-                      </div>
-                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                        <div className="text-sm text-gray-600 mb-1">Total Outstanding Amount</div>
-                        <div className="text-2xl font-bold text-gray-900">₹489.46Cr</div>
-                      </div>
-                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                        <div className="text-sm text-gray-600 mb-1">Vehicles Sold</div>
-                        <div className="text-2xl font-bold text-gray-900">24</div>
-                      </div>
-                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                        <div className="text-sm text-gray-600 mb-1">Total Cases Allocated</div>
-                        <div className="text-2xl font-bold text-gray-900">88,712</div>
-                      </div>
-                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                        <div className="text-sm text-gray-600 mb-1">Surrendered Cases</div>
-                        <div className="text-2xl font-bold text-gray-900">78</div>
-                      </div>
-                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                        <div className="text-sm text-gray-600 mb-1">Total Reposition Cases</div>
-                        <div className="text-2xl font-bold text-gray-900">31</div>
-                      </div>
-                    </div>
-
-                    {/* Tables Grid */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      <div className="lg:col-span-2">{renderPortfolioWiseSummaryTable()}</div>
-                      <div className="lg:col-span-2">{renderDPDWiseSummaryTable()}</div>
-                      <div>{renderApplicationStatusSummaryTable()}</div>
-                      <div>{renderRepossessionStatusSummaryTable()}</div>
-                    </div>
-                  </div>
-                )}
-
                 {/* Portfolio Performance */}
                 <div className="mb-8">
                   <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-semibold text-gray-800">Portfolio Performance</h2>
+                    <h2 className="text-lg font-semibold text-gray-800">Roll Rate Analysis</h2>
                     <button
                       onClick={() => {
                         if (selectedRollMetric === 'rollbackReport') {
@@ -6802,7 +6708,7 @@ const Dashboard = () => {
                       className="group bg-white rounded-lg p-3 transition-all duration-200 relative card-with-wave card-with-wave-thin card-wave-staff"
                     >
                       {renderFavoritePin('rollbackReport')}
-                      <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Portfolio Performance</h3>
+                      <h3 className="text-sm font-semibold mb-2 relative z-10 text-gray-800">Roll Back</h3>
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Total Rollbacks</span>
@@ -6887,33 +6793,15 @@ const Dashboard = () => {
 
                     {/* Filters Section */}
                     <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                         <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">FunderName</label>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Cluster/Location</label>
                           <select className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option>All</option>
                           </select>
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Zone</label>
-                          <select className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option>All</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Division</label>
-                          <select className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option>All</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">StateName</label>
-                          <select className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option>All</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">DistrictName</label>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Area/State</label>
                           <select className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option>All</option>
                           </select>
@@ -6925,16 +6813,15 @@ const Dashboard = () => {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Branch</label>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Zonal</label>
                           <select className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option>All</option>
                           </select>
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Year, Month</label>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">HO</label>
                           <select className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option>2024 (Year) + De...</option>
-                            <option>2025 (Year) + Ja...</option>
+                            <option>All</option>
                           </select>
                         </div>
                       </div>
@@ -6957,8 +6844,7 @@ const Dashboard = () => {
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 150</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">151 to 180</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
@@ -6983,28 +6869,28 @@ const Dashboard = () => {
                                       {expandedZones.has('gorakhpur') ? '−' : '+'} Gorakhpur
                                     </button>
                                   </td>
-                                  <td className="text-right py-2 px-2 text-gray-700">145,262</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">12,456</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">8,234</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">5,678</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">3,456</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">2,345</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">1,234</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">567</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">234</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">145,262</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">12,456</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">8,234</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">5,678</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,456</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,345</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,234</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">567</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">234</td>
                                 </tr>
                                 {expandedZones.has('gorakhpur') && (
                                   <tr className="bg-gray-50 border-b">
                                     <td className="py-2 px-2 pl-6 text-gray-600">Lucknow Division</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">72,631</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">6,228</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">4,117</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">2,839</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">1,728</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">1,173</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">617</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">284</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">117</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">72,631</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">6,228</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4,117</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,839</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,728</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,173</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">617</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">284</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">117</td>
                                   </tr>
                                 )}
                                 {/* Jabalpur Zone */}
@@ -7039,51 +6925,51 @@ const Dashboard = () => {
                                   <>
                                     <tr className="bg-gray-50 border-b">
                                       <td className="py-2 px-2 pl-6 text-gray-600">Jhansi</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">50,310</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">4,559</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">3,114</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">2,142</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">1,309</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">864</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">447</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">223</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">86</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">50,310</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4,559</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,114</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,142</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,309</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">864</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">447</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">223</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">86</td>
                                     </tr>
                                     <tr className="bg-gray-50 border-b">
                                       <td className="py-2 px-2 pl-6 text-gray-600">Katni</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">50,310</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">4,559</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">3,114</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">2,142</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">1,309</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">864</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">447</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">223</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">86</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">50,310</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4,559</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,114</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,142</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,309</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">864</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">447</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">223</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">86</td>
                                     </tr>
                                     <tr className="bg-gray-50 border-b">
                                       <td className="py-2 px-2 pl-6 text-gray-600">Nagpur</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">50,310</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">4,559</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">3,114</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">2,142</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">1,309</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">864</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">447</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">223</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">86</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">50,310</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4,559</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,114</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,142</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,309</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">864</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">447</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">223</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">86</td>
                                     </tr>
                                     <tr className="bg-gray-50 border-b">
                                       <td className="py-2 px-2 pl-6 text-gray-600">Sagar</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">50,310</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">4,559</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">3,114</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">2,142</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">1,309</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">864</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">447</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">223</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">86</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">50,310</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4,559</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,114</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,142</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,309</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">864</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">447</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">223</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">86</td>
                                     </tr>
                                   </>
                                 )}
@@ -7119,27 +7005,27 @@ const Dashboard = () => {
                                   <>
                                     <tr className="bg-gray-50 border-b">
                                       <td className="py-2 px-2 pl-6 text-gray-600">Jaipur</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">110,945</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">9,728</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">6,617</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">4,562</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">2,839</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">1,895</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">978</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">489</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">228</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">110,945</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">9,728</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">6,617</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4,562</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,839</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,895</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">978</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">489</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">228</td>
                                     </tr>
                                     <tr className="bg-gray-50 border-b">
                                       <td className="py-2 px-2 pl-6 text-gray-600">Moradabad</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">110,945</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">9,728</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">6,617</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">4,562</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">2,839</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">1,895</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">978</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">489</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">228</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">110,945</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">9,728</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">6,617</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4,562</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,839</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,895</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">978</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">489</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">228</td>
                                     </tr>
                                   </>
                                 )}
@@ -7175,16 +7061,16 @@ const Dashboard = () => {
                                 </tr>
                                 {/* Total Row */}
                                 <tr className="bg-gray-100 border-t-2 border-gray-300 font-bold">
-                                  <td className="py-2 px-2 text-gray-900">Total</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">958,071</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">84,502</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">57,392</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">39,589</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">24,502</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">16,370</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">8,458</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">4,189</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">1,847</td>
+                                  <td className="py-2 px-3 text-gray-900 whitespace-nowrap">Total</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">958,071</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">84,502</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">57,392</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">39,589</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">24,502</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">16,370</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">8,458</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">4,189</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">1,847</td>
                                 </tr>
                               </tbody>
                             </table>
@@ -7204,8 +7090,7 @@ const Dashboard = () => {
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 150</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">151 to 180</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
@@ -7230,15 +7115,15 @@ const Dashboard = () => {
                                       {expandedStates.has('bihar') ? '−' : '+'} Bihar
                                     </button>
                                   </td>
-                                  <td className="text-right py-2 px-2 text-gray-700">2,456.78</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">215.45</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">146.23</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">100.89</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">62.45</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">41.67</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">21.52</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">10.65</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">4.69</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,456.78</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">215.45</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">146.23</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">100.89</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">62.45</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">41.67</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">21.52</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">10.65</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4.69</td>
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
                                   <td className="py-2 px-2">
@@ -7367,16 +7252,16 @@ const Dashboard = () => {
                                 </tr>
                                 {/* Total Row */}
                                 <tr className="bg-gray-100 border-t-2 border-gray-300 font-bold">
-                                  <td className="py-2 px-2 text-gray-900">Total</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">28,283.51</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">2,494.19</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">1,696.50</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">1,170.77</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">724.33</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">483.01</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">249.49</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">123.57</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">54.46</td>
+                                  <td className="py-2 px-3 text-gray-900 whitespace-nowrap">Total</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">28,283.51</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">2,494.19</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">1,696.50</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">1,170.77</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">724.33</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">483.01</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">249.49</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">123.57</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">54.46</td>
                                 </tr>
                               </tbody>
                             </table>
@@ -7464,7 +7349,7 @@ const Dashboard = () => {
 
                         {/* Loans by State - Bar Chart */}
                         <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Loans by State</h3>
+                          <h3 className="text-sm font-semibold text-gray-900 mb-4">Loans by State ndf </h3>
                           <Chart
                             type="bar"
                             height={400}
@@ -7629,31 +7514,48 @@ const Dashboard = () => {
 
                     {/* Tab Navigation */}
                     <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
-                      <div className="flex border-b border-gray-200">
+                      <div className="relative flex border-b border-gray-200 px-3">
+                        {/* Animated Slider Line */}
+                        <div 
+                          className={`absolute bottom-0 h-0.5 bg-gradient-to-r from-blue-600 to-blue-700 transition-all duration-300 ease-in-out ${
+                            rollRateAnalysisTab === 'customerNumbers' ? 'left-3' :
+                            rollRateAnalysisTab === 'customerOutstanding' ? 'left-[calc(33.33%+0.75rem)]' :
+                            'left-[calc(66.66%+0.75rem)]'
+                          }`}
+                          style={{
+                            width: rollRateAnalysisTab === 'customerNumbers' ? 'calc(33.33% - 1.5rem)' :
+                                   rollRateAnalysisTab === 'customerOutstanding' ? 'calc(33.33% - 1.5rem)' :
+                                   'calc(33.33% - 1.5rem)'
+                          }}
+                        />
+                        
                         <button
                           onClick={() => setRollRateAnalysisTab('customerNumbers')}
-                          className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${rollRateAnalysisTab === 'customerNumbers'
-                              ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
-                              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                            }`}
+                          className={`flex-1 px-4 py-2.5 text-xs font-semibold transition-colors duration-200 relative z-10 ${
+                            rollRateAnalysisTab === 'customerNumbers'
+                              ? 'text-blue-600'
+                              : 'text-gray-600 hover:text-gray-900'
+                          }`}
                         >
                           Customer Numbers
                         </button>
                         <button
                           onClick={() => setRollRateAnalysisTab('customerOutstanding')}
-                          className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${rollRateAnalysisTab === 'customerOutstanding'
-                              ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
-                              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                            }`}
+                          className={`flex-1 px-4 py-2.5 text-xs font-semibold transition-colors duration-200 relative z-10 ${
+                            rollRateAnalysisTab === 'customerOutstanding'
+                              ? 'text-blue-600'
+                              : 'text-gray-600 hover:text-gray-900'
+                          }`}
                         >
                           Customer Outstanding
                         </button>
                         <button
                           onClick={() => setRollRateAnalysisTab('trendAnalysis')}
-                          className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${rollRateAnalysisTab === 'trendAnalysis'
-                              ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
-                              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                            }`}
+                          className={`flex-1 px-4 py-2.5 text-xs font-semibold transition-colors duration-200 relative z-10 ${
+                            rollRateAnalysisTab === 'trendAnalysis'
+                              ? 'text-blue-600'
+                              : 'text-gray-600 hover:text-gray-900'
+                          }`}
                         >
                           Trend Analysis
                         </button>
@@ -7667,229 +7569,227 @@ const Dashboard = () => {
                         <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                           <h3 className="text-sm font-semibold text-gray-900 mb-4">Roll Rate Analysis for Loans</h3>
                           <div className="overflow-x-auto">
-                            <table className="w-full text-xs">
+                            <table className="min-w-full text-xs whitespace-nowrap">
                               <thead>
                                 <tr className="bg-gray-50 border-b">
-                                  <th className="text-left py-2 px-2 font-semibold text-gray-700">BaseMonth_Bucket</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Regular</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">1 to 30</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 150</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">151 to 180</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">New Loan</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Roll Forward %</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Roll Backward %</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Stabilized %</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">Regularised %</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">ClosedLoan %</th>
+                                  <th className="text-left py-2 px-3 font-semibold text-gray-700 whitespace-nowrap">BaseMonth_Bucket</th>
+                                  <th className="text-right py-2 px-3 font-semibold text-gray-700 whitespace-nowrap">Regular</th>
+                                  <th className="text-right py-2 px-3 font-semibold text-gray-700 whitespace-nowrap">1 to 30</th>
+                                  <th className="text-right py-2 px-3 font-semibold text-gray-700 whitespace-nowrap">31 to 60</th>
+                                  <th className="text-right py-2 px-3 font-semibold text-gray-700 whitespace-nowrap">61 to 90</th>
+                                  <th className="text-right py-2 px-3 font-semibold text-gray-700 whitespace-nowrap">91 to 120</th>
+                                  <th className="text-right py-2 px-3 font-semibold text-gray-700 whitespace-nowrap">121 to 150</th>
+                                  <th className="text-right py-2 px-3 font-semibold text-gray-700 whitespace-nowrap">151 to 180</th>
+                                  <th className="text-right py-2 px-3 font-semibold text-gray-700 whitespace-nowrap">181 to 365</th>
+                                  <th className="text-right py-2 px-3 font-semibold text-gray-700 whitespace-nowrap">&gt;365</th>
+                                  <th className="text-right py-2 px-3 font-semibold text-gray-700 whitespace-nowrap">New Loan</th>
+                                  <th className="text-right py-2 px-3 font-semibold text-gray-700 whitespace-nowrap">Closed Loan</th>
+                                  <th className="text-right py-2 px-3 font-semibold text-gray-700 whitespace-nowrap">Roll Forward %</th>
+                                  <th className="text-right py-2 px-3 font-semibold text-gray-700 whitespace-nowrap">Roll Backward %</th>
+                                  <th className="text-right py-2 px-3 font-semibold text-gray-700 whitespace-nowrap">Stabilized %</th>
+                                  <th className="text-right py-2 px-3 font-semibold text-gray-700 whitespace-nowrap">Regularised %</th>
+                                  <th className="text-right py-2 px-3 font-semibold text-gray-700 whitespace-nowrap">ClosedLoan %</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 <tr className="border-b hover:bg-gray-50">
-                                  <td className="py-2 px-2 text-gray-800 font-medium">Regular</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">665,487</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">17,574</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">41,165</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">2.43%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">91.89%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">91.89%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">5.68%</td>
+                                  <td className="py-2 px-3 text-gray-800 font-medium whitespace-nowrap">Regular</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">665,487</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">17,574</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">41,165</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2.43%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">91.89%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">91.89%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">5.68%</td>
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
-                                  <td className="py-2 px-2 text-gray-800 font-medium">1 to 30</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">8,093</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">14,461</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">9,584</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">1,968</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">28.10%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">23.73%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">42.40%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">5.77%</td>
+                                  <td className="py-2 px-3 text-gray-800 font-medium whitespace-nowrap">1 to 30</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">8,093</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">14,461</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">9,584</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,968</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">28.10%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">23.73%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">42.40%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">5.77%</td>
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
-                                  <td className="py-2 px-2 text-gray-800 font-medium">31 to 60</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">3,465</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">2,124</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">5,789</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">3,211</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">1,234</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">39.65%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">15.32%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">37.89%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">8.14%</td>
+                                  <td className="py-2 px-3 text-gray-800 font-medium whitespace-nowrap">31 to 60</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,465</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,124</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">5,789</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,211</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,234</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">39.65%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">15.32%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">37.89%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">8.14%</td>
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
-                                  <td className="py-2 px-2 text-gray-800 font-medium">61 to 90</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">2,345</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">1,567</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">1,234</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">4,567</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">2,890</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">987</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">47.23%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">12.45%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">36.98%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">7.99%</td>
+                                  <td className="py-2 px-3 text-gray-800 font-medium whitespace-nowrap">61 to 90</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,345</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,567</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,234</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4,567</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,890</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">987</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">47.23%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">12.45%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">36.98%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">7.99%</td>
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
-                                  <td className="py-2 px-2 text-gray-800 font-medium">91 to 120</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">1,789</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">1,234</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">987</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">654</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">3,456</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">1,062</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">1,061</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">765</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">52.34%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">10.12%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">34.56%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">8.23%</td>
+                                  <td className="py-2 px-3 text-gray-800 font-medium whitespace-nowrap">91 to 120</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,789</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,234</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">987</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">654</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,456</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,123</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">765</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">52.34%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">10.12%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">34.56%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">8.23%</td>
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
-                                  <td className="py-2 px-2 text-gray-800 font-medium">121 to 150</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">3,456</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">2,345</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">1,789</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">1,234</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">987</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">4,062</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">4,062</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">4,567</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">1,456</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">58.45%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">8.90%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">30.12%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">7.89%</td>
+                                  <td className="py-2 px-3 text-gray-800 font-medium whitespace-nowrap">121 to 150</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,728</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,173</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">895</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">617</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">494</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4,062</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,284</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">728</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">58.45%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">8.90%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">30.12%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3.95%</td>
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
-                                  <td className="py-2 px-2 text-gray-800 font-medium">151 to 180</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">3,456</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">2,345</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">1,789</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">1,234</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">987</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">4,061</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">4,061</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">4,567</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">1,456</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">58.45%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">8.90%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">30.12%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">7.89%</td>
+                                  <td className="py-2 px-3 text-gray-800 font-medium whitespace-nowrap">151 to 180</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,728</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,172</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">894</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">617</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">493</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4,061</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,283</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">728</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">58.45%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">8.90%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">30.12%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3.94%</td>
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
-                                  <td className="py-2 px-2 text-gray-800 font-medium">181 to 365</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">5,678</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">3,456</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">2,345</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">1,789</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">1,234</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">987</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">12,345</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">6,789</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">2,345</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">61.23%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">7.45%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">28.34%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">8.12%</td>
+                                  <td className="py-2 px-3 text-gray-800 font-medium whitespace-nowrap">181 to 365</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">5,678</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,456</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,345</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,789</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,234</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">987</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">12,345</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">6,789</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,345</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">61.23%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">7.45%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">28.34%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">8.12%</td>
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
-                                  <td className="py-2 px-2 text-gray-800 font-medium">&gt;365</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">8,901</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">5,678</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">3,456</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">2,345</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">1,789</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">1,234</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">987</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">15,678</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">3,456</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">64.56%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">6.78%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">25.34%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">9.12%</td>
+                                  <td className="py-2 px-3 text-gray-800 font-medium whitespace-nowrap">&gt;365</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">8,901</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">5,678</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,456</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,345</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,789</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,234</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">987</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">15,678</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,456</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">64.56%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">6.78%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">25.34%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">9.12%</td>
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
-                                  <td className="py-2 px-2 text-gray-800 font-medium">New Loan</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">12,345</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="py-2 px-3 text-gray-800 font-medium whitespace-nowrap">New Loan</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">12,345</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
                                 </tr>
                                 <tr className="bg-gray-100 border-t-2 border-gray-300 font-bold">
-                                  <td className="py-2 px-2 text-gray-900">Total</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">707,280</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">33,198</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">14,589</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">12,350</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">12,323</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">23,941</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">45,101</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">61,788</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">12,345</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">47,501</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">29.49%</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">12.34%</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">54.23%</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">91.89%</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">6.78%</td>
+                                  <td className="py-2 px-3 text-gray-900 whitespace-nowrap">Total</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">707,280</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">33,198</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">14,589</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">12,350</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">12,323</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">23,941</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">45,101</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">61,788</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">12,345</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">47,501</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">29.49%</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">12.34%</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">54.23%</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">91.89%</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">6.78%</td>
                                 </tr>
                               </tbody>
                             </table>
@@ -7908,8 +7808,7 @@ const Dashboard = () => {
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 150</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">151 to 180</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
@@ -7934,28 +7833,28 @@ const Dashboard = () => {
                                       {expandedZones.has('gorakhpur') ? '−' : '+'} Gorakhpur
                                     </button>
                                   </td>
-                                  <td className="text-right py-2 px-2 text-gray-700">145,262</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">12,456</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">8,234</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">5,678</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">3,456</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">2,345</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">1,234</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">567</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">234</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">145,262</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">12,456</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">8,234</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">5,678</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,456</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,345</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,234</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">567</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">234</td>
                                 </tr>
                                 {expandedZones.has('gorakhpur') && (
                                   <tr className="bg-gray-50 border-b">
                                     <td className="py-2 px-2 pl-6 text-gray-600">Lucknow Division</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">72,631</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">6,228</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">4,117</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">2,839</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">1,728</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">1,173</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">617</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">284</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">117</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">72,631</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">6,228</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4,117</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,839</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,728</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,173</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">617</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">284</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">117</td>
                                   </tr>
                                 )}
                                 {/* Jabalpur Zone */}
@@ -7990,51 +7889,51 @@ const Dashboard = () => {
                                   <>
                                     <tr className="bg-gray-50 border-b">
                                       <td className="py-2 px-2 pl-6 text-gray-600">Jhansi</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">50,310</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">4,559</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">3,114</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">2,142</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">1,309</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">864</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">447</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">223</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">3,830</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">50,310</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4,559</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,114</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,142</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,309</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">864</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">447</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">223</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,830</td>
                                     </tr>
                                     <tr className="bg-gray-50 border-b">
                                       <td className="py-2 px-2 pl-6 text-gray-600">Katni</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">50,310</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">4,559</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">3,114</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">2,142</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">1,309</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">864</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">447</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">223</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">3,830</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">50,310</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4,559</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,114</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,142</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,309</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">864</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">447</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">223</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,830</td>
                                     </tr>
                                     <tr className="bg-gray-50 border-b">
                                       <td className="py-2 px-2 pl-6 text-gray-600">Nagpur</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">50,310</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">4,559</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">3,114</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">2,142</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">1,309</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">864</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">447</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">223</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">3,830</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">50,310</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4,559</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,114</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,142</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,309</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">864</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">447</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">223</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,830</td>
                                     </tr>
                                     <tr className="bg-gray-50 border-b">
                                       <td className="py-2 px-2 pl-6 text-gray-600">Sagar</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">50,310</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">4,559</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">3,114</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">2,142</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">1,309</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">864</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">447</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">223</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">3,830</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">50,310</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4,559</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,114</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,142</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,309</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">864</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">447</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">223</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,830</td>
                                     </tr>
                                   </>
                                 )}
@@ -8070,27 +7969,27 @@ const Dashboard = () => {
                                   <>
                                     <tr className="bg-gray-50 border-b">
                                       <td className="py-2 px-2 pl-6 text-gray-600">Jaipur</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">89,573</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">7,895</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">5,378</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">3,706</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">2,306</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">1,539</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">795</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">397</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">5,098</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">89,573</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">7,895</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">5,378</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,706</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,306</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,539</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">795</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">397</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">5,098</td>
                                     </tr>
                                     <tr className="bg-gray-50 border-b">
                                       <td className="py-2 px-2 pl-6 text-gray-600">Moradabad</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">89,573</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">7,895</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">5,378</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">3,706</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">2,306</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">1,539</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">795</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">397</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">5,098</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">89,573</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">7,895</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">5,378</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,706</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,306</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,539</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">795</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">397</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">5,098</td>
                                     </tr>
                                   </>
                                 )}
@@ -8126,16 +8025,16 @@ const Dashboard = () => {
                                 </tr>
                                 {/* Total Row */}
                                 <tr className="bg-gray-100 border-t-2 border-gray-300 font-bold">
-                                  <td className="py-2 px-2 text-gray-900">Total</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">707,280</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">33,198</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">14,589</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">12,350</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">12,323</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">23,941</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">45,101</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">61,788</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">47,501</td>
+                                  <td className="py-2 px-3 text-gray-900 whitespace-nowrap">Total</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">707,280</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">33,198</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">14,589</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">12,350</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">12,323</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">23,941</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">45,101</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">61,788</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">47,501</td>
                                 </tr>
                               </tbody>
                             </table>
@@ -8155,8 +8054,7 @@ const Dashboard = () => {
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 150</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">151 to 180</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
@@ -8181,28 +8079,28 @@ const Dashboard = () => {
                                       {expandedZones.has('gorakhpur-aum') ? '−' : '+'} Gorakhpur
                                     </button>
                                   </td>
-                                  <td className="text-right py-2 px-2 text-gray-700">393.48</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">33.78</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">22.33</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">15.40</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">9.37</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">6.36</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">3.35</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">1.54</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">0.63</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">393.48</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">33.78</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">22.33</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">15.40</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">9.37</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">6.36</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3.35</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1.54</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">0.63</td>
                                 </tr>
                                 {expandedZones.has('gorakhpur-aum') && (
                                   <tr className="bg-gray-50 border-b">
                                     <td className="py-2 px-2 pl-6 text-gray-600">Lucknow Division</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">196.74</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">16.89</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">11.17</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">7.70</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">4.69</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">3.18</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">1.67</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">0.77</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">0.32</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">196.74</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">16.89</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">11.17</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">7.70</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4.69</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3.18</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1.67</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">0.77</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">0.32</td>
                                   </tr>
                                 )}
                                 {/* Jabalpur Zone */}
@@ -8237,51 +8135,51 @@ const Dashboard = () => {
                                   <>
                                     <tr className="bg-gray-50 border-b">
                                       <td className="py-2 px-2 pl-6 text-gray-600">Jhansi</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">128.76</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">11.66</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">7.96</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">5.48</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">3.35</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">2.21</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">1.14</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">0.57</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">6.99</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">128.76</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">11.66</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">7.96</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">5.48</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3.35</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2.21</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1.14</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">0.57</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">6.99</td>
                                     </tr>
                                     <tr className="bg-gray-50 border-b">
                                       <td className="py-2 px-2 pl-6 text-gray-600">Katni</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">128.76</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">11.66</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">7.96</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">5.48</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">3.35</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">2.21</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">1.14</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">0.57</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">6.99</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">128.76</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">11.66</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">7.96</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">5.48</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3.35</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2.21</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1.14</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">0.57</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">6.99</td>
                                     </tr>
                                     <tr className="bg-gray-50 border-b">
                                       <td className="py-2 px-2 pl-6 text-gray-600">Nagpur</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">128.76</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">11.66</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">7.96</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">5.48</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">3.35</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">2.21</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">1.14</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">0.57</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">6.99</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">128.76</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">11.66</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">7.96</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">5.48</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3.35</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2.21</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1.14</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">0.57</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">6.99</td>
                                     </tr>
                                     <tr className="bg-gray-50 border-b">
                                       <td className="py-2 px-2 pl-6 text-gray-600">Sagar</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">128.76</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">11.66</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">7.96</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">5.48</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">3.35</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">2.21</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">1.14</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">0.57</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">6.99</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">128.76</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">11.66</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">7.96</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">5.48</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3.35</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2.21</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1.14</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">0.57</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">6.99</td>
                                     </tr>
                                   </>
                                 )}
@@ -8317,27 +8215,27 @@ const Dashboard = () => {
                                   <>
                                     <tr className="bg-gray-50 border-b">
                                       <td className="py-2 px-2 pl-6 text-gray-600">Jaipur</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">248.75</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">6.07</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">14.59</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">10.05</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">6.26</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">4.18</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">2.16</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">1.08</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">13.83</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">248.75</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">6.07</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">14.59</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">10.05</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">6.26</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4.18</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2.16</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1.08</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">13.83</td>
                                     </tr>
                                     <tr className="bg-gray-50 border-b">
                                       <td className="py-2 px-2 pl-6 text-gray-600">Moradabad</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">248.75</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">6.07</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">14.59</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">10.05</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">6.26</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">4.18</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">2.16</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">1.08</td>
-                                      <td className="text-right py-2 px-2 text-gray-700">13.83</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">248.75</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">6.07</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">14.59</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">10.05</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">6.26</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4.18</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2.16</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1.08</td>
+                                      <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">13.83</td>
                                     </tr>
                                   </>
                                 )}
@@ -8373,16 +8271,16 @@ const Dashboard = () => {
                                 </tr>
                                 {/* Total Row */}
                                 <tr className="bg-gray-100 border-t-2 border-gray-300 font-bold">
-                                  <td className="py-2 px-2 text-gray-900">Total</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">2,028.58</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">77.72</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">33.12</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">28.31</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">29.11</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">56.94</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">100.15</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">119.89</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">29.49</td>
+                                  <td className="py-2 px-3 text-gray-900 whitespace-nowrap">Total</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">2,028.58</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">77.72</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">33.12</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">28.31</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">29.11</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">56.94</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">100.15</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">119.89</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">29.49</td>
                                 </tr>
                               </tbody>
                             </table>
@@ -8407,8 +8305,7 @@ const Dashboard = () => {
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 150</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">151 to 180</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">New Loan</th>
@@ -8422,204 +8319,184 @@ const Dashboard = () => {
                               </thead>
                               <tbody>
                                 <tr className="border-b hover:bg-gray-50">
-                                  <td className="py-2 px-2 text-gray-800 font-medium">Regular</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">2,028.58</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">77.72</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">33.12</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">2.43%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">91.89%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">91.89%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">5.68%</td>
+                                  <td className="py-2 px-3 text-gray-800 font-medium whitespace-nowrap">Regular</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2,028.58</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">77.72</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">33.12</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2.43%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">91.89%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">91.89%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">5.68%</td>
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
-                                  <td className="py-2 px-2 text-gray-800 font-medium">1 to 30</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">18.51</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">32.77</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">22.36</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">1.13</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">28.10%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">23.73%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">42.40%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">5.77%</td>
+                                  <td className="py-2 px-3 text-gray-800 font-medium whitespace-nowrap">1 to 30</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">18.51</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">32.77</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">22.36</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1.13</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">28.10%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">23.73%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">42.40%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">5.77%</td>
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
-                                  <td className="py-2 px-2 text-gray-800 font-medium">31 to 60</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">12.34</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">8.45</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">19.23</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">11.56</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">4.12</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">39.65%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">15.32%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">37.89%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">8.14%</td>
+                                  <td className="py-2 px-3 text-gray-800 font-medium whitespace-nowrap">31 to 60</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">12.34</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">8.45</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">19.23</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">11.56</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4.12</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">39.65%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">15.32%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">37.89%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">8.14%</td>
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
-                                  <td className="py-2 px-2 text-gray-800 font-medium">61 to 90</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">9.87</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">6.54</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">5.12</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">18.45</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">12.34</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">3.89</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">47.23%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">12.45%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">36.98%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">7.99%</td>
+                                  <td className="py-2 px-3 text-gray-800 font-medium whitespace-nowrap">61 to 90</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">9.87</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">6.54</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">5.12</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">18.45</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">12.34</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3.89</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">47.23%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">12.45%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">36.98%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">7.99%</td>
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
-                                  <td className="py-2 px-2 text-gray-800 font-medium">91 to 120</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">7.65</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">5.23</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">4.12</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">2.78</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">14.56</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">9.12</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">3.12</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">52.34%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">10.12%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">34.56%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">8.23%</td>
+                                  <td className="py-2 px-3 text-gray-800 font-medium whitespace-nowrap">91 to 120</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">7.65</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">5.23</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4.12</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">2.78</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">14.56</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">9.12</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3.12</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">52.34%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">10.12%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">34.56%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">8.23%</td>
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
-                                  <td className="py-2 px-2 text-gray-800 font-medium">121 to 150</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">14.56</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">9.87</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">7.65</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">5.23</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">4.12</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">16.73</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">16.73</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">19.23</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">5.89</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">58.45%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">8.90%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">30.12%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">7.89%</td>
+                                  <td className="py-2 px-3 text-gray-800 font-medium whitespace-nowrap">121 to 180</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">14.56</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">9.87</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">7.65</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">5.23</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4.12</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">33.45</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">19.23</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">5.89</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">58.45%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">8.90%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">30.12%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">7.89%</td>
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
-                                  <td className="py-2 px-2 text-gray-800 font-medium">151 to 180</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">14.56</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">9.87</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">7.65</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">5.23</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">4.12</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">16.72</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">16.72</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">19.23</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">5.89</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">58.45%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">8.90%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">30.12%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">7.89%</td>
+                                  <td className="py-2 px-3 text-gray-800 font-medium whitespace-nowrap">181 to 365</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">23.45</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">14.56</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">9.87</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">7.65</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">5.23</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4.12</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">51.23</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">28.45</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">9.78</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">61.23%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">7.45%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">28.34%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">8.12%</td>
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
-                                  <td className="py-2 px-2 text-gray-800 font-medium">181 to 365</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">23.45</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">14.56</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">9.87</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">7.65</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">5.23</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">4.12</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">51.23</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">28.45</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">9.78</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">61.23%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">7.45%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">28.34%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">8.12%</td>
+                                  <td className="py-2 px-3 text-gray-800 font-medium whitespace-nowrap">&gt;365</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">36.78</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">23.45</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">14.56</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">9.87</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">7.65</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">5.23</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">4.12</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">63.45</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">14.23</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">64.56%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">6.78%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">25.34%</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">9.12%</td>
                                 </tr>
                                 <tr className="border-b hover:bg-gray-50">
-                                  <td className="py-2 px-2 text-gray-800 font-medium">&gt;365</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">36.78</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">23.45</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">14.56</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">9.87</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">7.65</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">5.23</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">4.12</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">63.45</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">14.23</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">64.56%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">6.78%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">25.34%</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">9.12%</td>
-                                </tr>
-                                <tr className="border-b hover:bg-gray-50">
-                                  <td className="py-2 px-2 text-gray-800 font-medium">New Loan</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">50.12</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
-                                  <td className="text-right py-2 px-2 text-gray-700">-</td>
+                                  <td className="py-2 px-3 text-gray-800 font-medium whitespace-nowrap">New Loan</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">50.12</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
+                                  <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">-</td>
                                 </tr>
                                 <tr className="bg-gray-100 border-t-2 border-gray-300 font-bold">
-                                  <td className="py-2 px-2 text-gray-900">Total</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">2,028.58</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">77.72</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">33.12</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">28.31</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">29.11</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">56.94</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">100.15</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">119.89</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">50.12</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">119.89</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">29.49%</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">12.34%</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">54.23%</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">91.89%</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">6.78%</td>
+                                  <td className="py-2 px-3 text-gray-900 whitespace-nowrap">Total</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">2,028.58</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">77.72</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">33.12</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">28.31</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">29.11</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">56.94</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">100.15</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">119.89</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">50.12</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">119.89</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">29.49%</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">12.34%</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">54.23%</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">91.89%</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">6.78%</td>
                                 </tr>
                               </tbody>
                             </table>
@@ -8639,8 +8516,7 @@ const Dashboard = () => {
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 150</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">151 to 180</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
@@ -8678,15 +8554,15 @@ const Dashboard = () => {
                                 {expandedStates.has('uttar-pradesh') && (
                                   <tr className="bg-gray-50 border-b">
                                     <td className="py-2 px-2 pl-6 text-gray-600">Division 1</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">3,090,943</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">145,314</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">52,262</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">40,973</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">34,562</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">59,784</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">125,117</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">142,284</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">151,057</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,090,943</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">145,314</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">52,262</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">40,973</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">34,562</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">59,784</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">125,117</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">142,284</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">151,057</td>
                                   </tr>
                                 )}
                                 {/* Bihar */}
@@ -8720,15 +8596,15 @@ const Dashboard = () => {
                                 {expandedStates.has('bihar') && (
                                   <tr className="bg-gray-50 border-b">
                                     <td className="py-2 px-2 pl-6 text-gray-600">Division 1</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">1,265,728</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">59,473</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">21,395</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">16,784</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">14,173</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">24,506</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">51,228</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">58,117</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">61,784</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,265,728</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">59,473</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">21,395</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">16,784</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">14,173</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">24,506</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">51,228</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">58,117</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">61,784</td>
                                   </tr>
                                 )}
                                 {/* Madhya Pradesh */}
@@ -8762,15 +8638,15 @@ const Dashboard = () => {
                                 {expandedStates.has('madhya-pradesh') && (
                                   <tr className="bg-gray-50 border-b">
                                     <td className="py-2 px-2 pl-6 text-gray-600">Division 1</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">1,054,356</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">49,562</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">17,839</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">13,973</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">11,806</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">20,423</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">42,673</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">48,445</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">51,473</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">1,054,356</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">49,562</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">17,839</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">13,973</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">11,806</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">20,423</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">42,673</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">48,445</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">51,473</td>
                                   </tr>
                                 )}
                                 {/* Jharkhand */}
@@ -8880,16 +8756,16 @@ const Dashboard = () => {
                                 </tr>
                                 {/* Total Row */}
                                 <tr className="bg-gray-100 border-t-2 border-gray-300 font-bold">
-                                  <td className="py-2 px-2 text-gray-900">Total</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">11,616,839</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">622,590</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">224,065</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">175,356</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">147,870</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">255,779</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">534,986</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">607,255</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">599,275</td>
+                                  <td className="py-2 px-3 text-gray-900 whitespace-nowrap">Total</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">11,616,839</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">622,590</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">224,065</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">175,356</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">147,870</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">255,779</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">534,986</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">607,255</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">599,275</td>
                                 </tr>
                               </tbody>
                             </table>
@@ -8909,8 +8785,7 @@ const Dashboard = () => {
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">31 to 60</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">61 to 90</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">91 to 120</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 150</th>
-                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">151 to 180</th>
+                                  <th className="text-right py-2 px-2 font-semibold text-gray-700">121 to 180</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">181 to 365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">&gt;365</th>
                                   <th className="text-right py-2 px-2 font-semibold text-gray-700">Closed Loan</th>
@@ -8948,15 +8823,15 @@ const Dashboard = () => {
                                 {expandedStates.has('uttar-pradesh-aum') && (
                                   <tr className="bg-gray-50 border-b">
                                     <td className="py-2 px-2 pl-6 text-gray-600">Division 1</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">8,875.73</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">333.02</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">119.83</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">93.95</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">79.28</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">137.18</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">286.89</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">325.73</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">99.43</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">8,875.73</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">333.02</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">119.83</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">93.95</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">79.28</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">137.18</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">286.89</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">325.73</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">99.43</td>
                                   </tr>
                                 )}
                                 {/* Bihar */}
@@ -8990,15 +8865,15 @@ const Dashboard = () => {
                                 {expandedStates.has('bihar-aum') && (
                                   <tr className="bg-gray-50 border-b">
                                     <td className="py-2 px-2 pl-6 text-gray-600">Division 1</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">3,632.90</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">170.65</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">61.40</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">48.17</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">40.68</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">70.33</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">147.03</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">166.77</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">177.24</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,632.90</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">170.65</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">61.40</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">48.17</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">40.68</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">70.33</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">147.03</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">166.77</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">177.24</td>
                                   </tr>
                                 )}
                                 {/* Madhya Pradesh */}
@@ -9032,15 +8907,15 @@ const Dashboard = () => {
                                 {expandedStates.has('madhya-pradesh-aum') && (
                                   <tr className="bg-gray-50 border-b">
                                     <td className="py-2 px-2 pl-6 text-gray-600">Division 1</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">3,026.00</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">142.22</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">51.20</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">40.12</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">33.89</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">58.62</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">122.50</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">139.04</td>
-                                    <td className="text-right py-2 px-2 text-gray-700">147.73</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">3,026.00</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">142.22</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">51.20</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">40.12</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">33.89</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">58.62</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">122.50</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">139.04</td>
+                                    <td className="text-right py-2 px-3 text-gray-700 whitespace-nowrap">147.73</td>
                                   </tr>
                                 )}
                                 {/* Jharkhand */}
@@ -9150,16 +9025,16 @@ const Dashboard = () => {
                                 </tr>
                                 {/* Total Row */}
                                 <tr className="bg-gray-100 border-t-2 border-gray-300 font-bold">
-                                  <td className="py-2 px-2 text-gray-900">Total</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">33,237.95</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">1,407.42</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">484.16</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">376.67</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">319.27</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">552.65</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">1,115.84</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">1,114.19</td>
-                                  <td className="text-right py-2 px-2 text-gray-900">358.85</td>
+                                  <td className="py-2 px-3 text-gray-900 whitespace-nowrap">Total</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">33,237.95</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">1,407.42</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">484.16</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">376.67</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">319.27</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">552.65</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">1,115.84</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">1,114.19</td>
+                                  <td className="text-right py-2 px-3 text-gray-900 whitespace-nowrap">358.85</td>
                                 </tr>
                               </tbody>
                             </table>
@@ -9172,92 +9047,90 @@ const Dashboard = () => {
 
                     {/* Trend Analysis Tab Content */}
                     {rollRateAnalysisTab === 'trendAnalysis' && (
-                      <div className="">
-                        {/* Main Content Grid - Charts */}
-                        <div className="grid grid-rows-2 lg:grid-rows-3 ">
-                          {/* Left Column - Tables */}
-
-
-                          {/* Right Column - Charts */}
-                          <div className="space-y-4">
-                            {/* Sum of Loans by Zone - Donut Chart */}
-                            <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                              <h3 className="text-sm font-semibold text-gray-900 mb-4">Sum of Loans by Zone</h3>
-                              <Chart
-                                type="donut"
-                                height={300}
-                                series={[222197, 221890, 201240, 167482, 145262]}
-                                options={{
-                                  chart: {
-                                    type: 'donut',
-                                    toolbar: { show: false }
+                      <div className="space-y-4">
+                        {/* First Row: Zone Charts - 50-50% width */}
+                        <div className="grid grid-cols-2 gap-4">
+                          {/* Sum of Loans by Zone - Donut Chart */}
+                          <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                            <h3 className="text-sm font-semibold text-gray-900 mb-4">Sum of Loans by Zone</h3>
+                            <Chart
+                              type="donut"
+                              height={300}
+                              series={[222197, 221890, 201240, 167482, 145262]}
+                              options={{
+                                chart: {
+                                  type: 'donut',
+                                  toolbar: { show: false }
+                                },
+                                labels: ['Patna', 'Moradabad', 'Jabalpur', 'Prayagraj', 'Gorakhpur'],
+                                colors: ['#3b82f6', '#1e3a8a', '#f59e0b', '#8b5cf6', '#ec4899'],
+                                legend: {
+                                  position: 'bottom',
+                                  fontSize: '11px'
+                                },
+                                dataLabels: {
+                                  enabled: true,
+                                  formatter: function (val) {
+                                    return val.toFixed(1) + '%'
                                   },
-                                  labels: ['Patna', 'Moradabad', 'Jabalpur', 'Prayagraj', 'Gorakhpur'],
-                                  colors: ['#3b82f6', '#1e3a8a', '#f59e0b', '#8b5cf6', '#ec4899'],
-                                  legend: {
-                                    position: 'bottom',
-                                    fontSize: '11px'
-                                  },
-                                  dataLabels: {
-                                    enabled: true,
-                                    formatter: function (val) {
-                                      return val.toFixed(1) + '%'
-                                    },
-                                    style: {
-                                      fontSize: '10px'
-                                    }
-                                  },
-                                  plotOptions: {
-                                    pie: {
-                                      donut: {
-                                        size: '65%'
-                                      }
+                                  style: {
+                                    fontSize: '10px'
+                                  }
+                                },
+                                plotOptions: {
+                                  pie: {
+                                    donut: {
+                                      size: '65%'
                                     }
                                   }
-                                }}
-                              />
-                            </div>
-
-                            {/* Comparison Month Principle OS (Crores) by Zone - Donut Chart */}
-                            <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                              <h3 className="text-sm font-semibold text-gray-900 mb-4">Comparison Month Principle OS (Crores) by Zone</h3>
-                              <Chart
-                                type="donut"
-                                height={300}
-                                series={[580.58, 569.82, 515.03, 444.40, 393.48]}
-                                options={{
-                                  chart: {
-                                    type: 'donut',
-                                    toolbar: { show: false }
-                                  },
-                                  labels: ['Patna', 'Moradabad', 'Jabalpur', 'Prayagraj', 'Gorakhpur'],
-                                  colors: ['#60a5fa', '#1e3a8a', '#f59e0b', '#8b5cf6', '#ec4899'],
-                                  legend: {
-                                    position: 'bottom',
-                                    fontSize: '11px'
-                                  },
-                                  dataLabels: {
-                                    enabled: true,
-                                    formatter: function (val) {
-                                      return val.toFixed(1) + '%'
-                                    },
-                                    style: {
-                                      fontSize: '10px'
-                                    }
-                                  },
-                                  plotOptions: {
-                                    pie: {
-                                      donut: {
-                                        size: '65%'
-                                      }
-                                    }
-                                  }
-                                }}
-                              />
-                            </div>
+                                }
+                              }}
+                            />
                           </div>
 
-                          <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mt-4">
+                          {/* Comparison Month Principle OS (Crores) by Zone - Donut Chart */}
+                          <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                            <h3 className="text-sm font-semibold text-gray-900 mb-4">Comparison Month Principle OS (Crores) by Zone</h3>
+                            <Chart
+                              type="donut"
+                              height={300}
+                              series={[580.58, 569.82, 515.03, 444.40, 393.48]}
+                              options={{
+                                chart: {
+                                  type: 'donut',
+                                  toolbar: { show: false }
+                                },
+                                labels: ['Patna', 'Moradabad', 'Jabalpur', 'Prayagraj', 'Gorakhpur'],
+                                colors: ['#60a5fa', '#1e3a8a', '#f59e0b', '#8b5cf6', '#ec4899'],
+                                legend: {
+                                  position: 'bottom',
+                                  fontSize: '11px'
+                                },
+                                dataLabels: {
+                                  enabled: true,
+                                  formatter: function (val) {
+                                    return val.toFixed(1) + '%'
+                                  },
+                                  style: {
+                                    fontSize: '10px'
+                                  }
+                                },
+                                plotOptions: {
+                                  pie: {
+                                    donut: {
+                                      size: '65%'
+                                    }
+                                  }
+                                }
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Second Row: State Charts - 50-50% width */}
+                        <div className="grid grid-cols-2 gap-4">
+                          {/* Loans by State - Bar Chart */}
+                          <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                             <h3 className="text-sm font-semibold text-gray-900 mb-4">Loans by State</h3>
                             <Chart
                               type="bar"
@@ -9308,7 +9181,7 @@ const Dashboard = () => {
                           </div>
 
                           {/* Comparison Month Principle OS (Crores) by State - Horizontal Bar Chart */}
-                          <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mt-4">
+                          <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                             <h3 className="text-sm font-semibold text-gray-900 mb-4">Comparison Month Principle OS (Crores) by State</h3>
                             <Chart
                               type="bar"
@@ -9356,18 +9229,6 @@ const Dashboard = () => {
                                 grid: { borderColor: '#E5E7EB' }
                               }}
                             />
-                          </div>
-                        </div>
-
-                        {/* State-wise Analysis Section */}
-                        <div className="grid grid-rows-1 lg:grid-rows-3 gap-4 ">
-                          {/* Left Column - Tables */}
-
-
-                          {/* Right Column - Charts */}
-                          <div className="">
-                            {/* Loans by State - Horizontal Bar Chart */}
-
                           </div>
                         </div>
                       </div>
@@ -9795,6 +9656,75 @@ const Dashboard = () => {
                   </div>
                 )}
 
+                {/* Reposition Expanded Section */}
+                {selectedCaseMetric === 'reposition' && (
+                  <div ref={leaderboardTableRef} className="mb-8 w-full space-y-6">
+                    <div className="flex justify-between items-center">
+                      <h2 className="text-xl font-semibold text-gray-900">Reposition - Details</h2>
+                      <button
+                        onClick={() => setSelectedCaseMetric(null)}
+                        className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                        aria-label="Close reposition tables"
+                      >
+                        Close
+                      </button>
+                    </div>
+
+                    {/* Summary Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Total Repo Cases</div>
+                        <div className="text-2xl font-bold text-gray-900">107,287</div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Total Outstanding Amount</div>
+                        <div className="text-2xl font-bold text-gray-900">₹489.46Cr</div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Vehicles Sold</div>
+                        <div className="text-2xl font-bold text-gray-900">24</div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Total Cases Allocated</div>
+                        <div className="text-2xl font-bold text-gray-900">88,712</div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Surrendered Cases</div>
+                        <div className="text-2xl font-bold text-gray-900">78</div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="text-sm text-gray-600 mb-1">Total Reposition Cases</div>
+                        <div className="text-2xl font-bold text-gray-900">31</div>
+                      </div>
+                    </div>
+
+                    {/* Tables Grid */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div className="lg:col-span-2">{renderPortfolioWiseSummaryTable()}</div>
+                      <div className="lg:col-span-2">{renderDPDWiseSummaryTable()}</div>
+                      <div>{renderApplicationStatusSummaryTable()}</div>
+                      <div>{renderRepossessionStatusSummaryTable()}</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Deposition Table - Show when deposition card is clicked */}
+                {selectedCaseMetric === 'deposition' && (
+                  <div ref={leaderboardTableRef} className="mb-8 w-full space-y-6">
+                    <div className="flex justify-between items-center">
+                      <h2 className="text-xl font-semibold text-gray-900">Deposition Data</h2>
+                      <button
+                        onClick={() => setSelectedCaseMetric(null)}
+                        className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                        aria-label="Close deposition table"
+                      >
+                        Close
+                      </button>
+                    </div>
+                    {renderDepositionTable()}
+                  </div>
+                )}
+
                 {/* Charts and Right Panel Row */}
                 <div className="grid grid-cols-3 gap-4 mb-8">
                   {/* Left Side - Charts */}
@@ -10041,4 +9971,4 @@ const Dashboard = () => {
   )
 }
 
-export default Dashboard
+export default Dashboard;
