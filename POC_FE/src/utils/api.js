@@ -500,4 +500,38 @@ export async function adminUpdateAllocationDetails(accessToken, caseId, allocate
   return res.json()
 }
 
+export async function adminBulkUploadCSV(accessToken, file) {
+  const url = `${API_BASE}/admin/bulk-upload/`
+  
+  // Create FormData for file upload
+  const formData = new FormData()
+  formData.append('file', file)
+  
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      // Don't set Content-Type header - browser will set it with boundary for FormData
+    },
+    body: formData,
+  })
+  
+  const responseText = await res.text()
+  
+  if (!res.ok) {
+    try {
+      const errorData = JSON.parse(responseText)
+      throw new Error(errorData.error || errorData.details || 'Failed to upload CSV file')
+    } catch (e) {
+      throw new Error(responseText || 'Failed to upload CSV file')
+    }
+  }
+  
+  try {
+    return JSON.parse(responseText)
+  } catch (e) {
+    return { message: 'File uploaded successfully' }
+  }
+}
+
 

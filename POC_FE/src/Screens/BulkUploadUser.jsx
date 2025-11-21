@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import AdminSidebar from '../components/AdminSidebar'
 import Navbar from '../components/Navbar'
 import { useAuth } from '../contexts/AuthContext'
-import { adminGetTodayUploadedFiles } from '../utils/api'
+import { adminGetTodayUploadedFiles, adminBulkUploadCSV } from '../utils/api'
 
 const BulkUploadUser = () => {
   const navigate = useNavigate()
@@ -90,22 +90,52 @@ const BulkUploadUser = () => {
       return
     }
 
+    if (!user?.accessToken) {
+      setError('Authentication required. Please log in again.')
+      return
+    }
+
     setUploading(true)
     setError('')
     setSuccess('')
 
-    // Simulate upload
-    setTimeout(() => {
-      setUploading(false)
-      setSuccess(`Successfully uploaded ${file.name}. 25 users imported.`)
-      setFile(null)
-      // Refresh uploaded files list
-      if (user?.accessToken) {
-        adminGetTodayUploadedFiles(user.accessToken)
-          .then(data => setUploadedFiles(data.files || []))
-          .catch(err => console.error('Error refreshing files:', err))
+    try {
+      const response = await adminBulkUploadCSV(user.accessToken, file)
+      
+      // Handle different response scenarios
+      if (response.status === 'skipped') {
+        // File was already uploaded
+        setSuccess(`File "${response.file_name || file.name}" was already uploaded previously.`)
+      } else if (response.rows_inserted !== undefined) {
+        // Successful upload with row count
+        const rowCount = response.rows_inserted || 0
+        setSuccess(
+          `Successfully uploaded ${response.detected_file || file.name}. ` +
+          `${rowCount.toLocaleString()} row${rowCount !== 1 ? 's' : ''} imported.`
+        )
+      } else {
+        // Generic success message
+        setSuccess(response.message || `Successfully uploaded ${file.name}`)
       }
-    }, 2000)
+      
+      setFile(null)
+      
+      // Refresh uploaded files list
+      try {
+        const data = await adminGetTodayUploadedFiles(user.accessToken)
+        setUploadedFiles(data.files || [])
+        setLogs(data.logs || [])
+        setFilesError('')
+      } catch (refreshErr) {
+        console.error('Error refreshing files:', refreshErr)
+        // Don't show error for refresh failure, just log it
+      }
+    } catch (err) {
+      console.error('Upload error:', err)
+      setError(err.message || 'Failed to upload file. Please try again.')
+    } finally {
+      setUploading(false)
+    }
   }
 
   // Format timestamp for display
