@@ -11,8 +11,7 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollapsed })
       name: 'Dashboard',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
         </svg>
       ),
       path: '/dashboard',
@@ -144,8 +143,8 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollapsed })
                                 : 'px-3 py-3'
                             }`}
                             style={item.active ? {
-                              backgroundColor: '#ffffff',
-                              color: '#FA1432',
+                              backgroundColor: '#FA1432',
+                              color: '#ffffff',
                               border: '1px solid #FA1432',
                               fontWeight: '600'
                             } : {
@@ -165,7 +164,7 @@ const Sidebar = ({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollapsed })
                             }}
                   title={isCollapsed ? item.name : ''}
                 >
-                  <span className={`${isCollapsed ? '' : 'mr-3'}`} style={item.active ? {color: '#FA1432'} : {}}>
+                  <span className={`${isCollapsed ? '' : 'mr-3'}`} style={item.active ? {color: '#ffffff'} : {}}>
                     {item.icon}
                   </span>
                   {!isCollapsed && (
