@@ -1,9 +1,13 @@
 import React from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import Maintenance from '../Screens/Maintenance'
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth()
+
+  // Check maintenance mode
+  const maintenanceMode = localStorage.getItem('maintenanceMode') === 'true'
 
   if (loading) {
     return (
@@ -20,6 +24,11 @@ const ProtectedRoute = ({ children }) => {
   // Block admin users from accessing normal routes - redirect to admin dashboard
   if (user.role === 'admin') {
     return <Navigate to="/admin/dashboard" replace />
+  }
+
+  // If maintenance mode is enabled, show maintenance page (admins can still access)
+  if (maintenanceMode) {
+    return <Maintenance />
   }
 
   return children

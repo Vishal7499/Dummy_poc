@@ -206,7 +206,7 @@ const UserManagement = () => {
         
         {/* Overlay Sidebar when expanded */}
         {!isSidebarCollapsed && (
-          <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 shadow-lg">
+          <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200">
             <AdminSidebar
               isMobileOpen={isMobileSidebarOpen}
               setIsMobileOpen={setIsMobileSidebarOpen}

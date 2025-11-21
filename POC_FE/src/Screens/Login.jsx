@@ -30,6 +30,9 @@ const Login = () => {
     setLoading(true)
     setError('')
 
+    // Check maintenance mode before login
+    const maintenanceMode = localStorage.getItem('maintenanceMode') === 'true'
+    
     try {
       const data = await loginApi({ username: formData.email, password: formData.password })
       console.log('Login response data:', data)
@@ -46,6 +49,12 @@ const Login = () => {
         name: data.username,
       }
       login(userData)
+      
+      // If maintenance mode is enabled and user is not admin, show maintenance page
+      if (maintenanceMode && data.role !== 'admin') {
+        navigate('/maintenance')
+        return
+      }
       
       // Route based on role: admin goes to admin dashboard, others go to normal dashboard
       if (data.role === 'admin') {

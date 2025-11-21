@@ -23,26 +23,46 @@ import BranchManagement from './Screens/BranchManagement'
 import AllocationManagement from './Screens/AllocationManagement'
 import IncentiveManagement from './Screens/IncentiveManagement'
 import HierarchyManagement from './Screens/HierarchyManagement'
+import MaintenanceManagement from './Screens/MaintenanceManagement'
+import Maintenance from './Screens/Maintenance'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
+// Check if maintenance mode is enabled
+const isMaintenanceMode = () => {
+  const maintenance = localStorage.getItem('maintenanceMode')
+  return maintenance === 'true'
+}
+
 function App() {
+  const maintenanceEnabled = isMaintenanceMode()
+
   return (
     <AuthProvider>
       <Router>
         <ActivityTrackerProvider apiBaseUrl={API_BASE}>
           <div className="App">
             <Routes>
+              {/* Maintenance Route - Show when maintenance is enabled */}
+              <Route path="/maintenance" element={<Maintenance />} />
+              
               {/* Public Routes */}
-              <Route path="/login" element={<Login />} />
+              <Route 
+                path="/login" 
+                element={maintenanceEnabled ? <Maintenance /> : <Login />} 
+              />
 
               {/* Protected Routes */}
               <Route
                 path="/dashboard"
                 element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
+                  maintenanceEnabled ? (
+                    <Maintenance />
+                  ) : (
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  )
                 }
               />
               <Route
@@ -63,6 +83,14 @@ function App() {
               />
 
               {/* Admin Routes */}
+              <Route
+                path="/admin/maintenance"
+                element={
+                  <AdminProtectedRoute>
+                    <MaintenanceManagement />
+                  </AdminProtectedRoute>
+                }
+              />
               <Route
                 path="/admin/dashboard"
                 element={
@@ -187,10 +215,28 @@ function App() {
               />
 
               {/* Default redirect */}
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route 
+                path="/" 
+                element={
+                  maintenanceEnabled ? (
+                    <Navigate to="/maintenance" replace />
+                  ) : (
+                    <Navigate to="/dashboard" replace />
+                  )
+                } 
+              />
 
-              {/* Catch all - redirect to dashboard */}
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              {/* Catch all - redirect based on maintenance mode */}
+              <Route 
+                path="*" 
+                element={
+                  maintenanceEnabled ? (
+                    <Maintenance />
+                  ) : (
+                    <Navigate to="/dashboard" replace />
+                  )
+                } 
+              />
             </Routes>
           </div>
         </ActivityTrackerProvider>

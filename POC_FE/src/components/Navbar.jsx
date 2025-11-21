@@ -56,11 +56,13 @@ const Navbar = ({ onMobileMenuClick, isSidebarCollapsed, onBellClick }) => {
 
   return (
     <header 
-      className="bg-white border-b border-gray-200 shadow-sm h-16 fixed top-0 z-30 transition-all duration-300" 
+      className="bg-white border-b border-gray-200 h-16 fixed top-0 z-30 transition-all duration-300" 
       style={{
         borderBottomColor: '#e5e7eb', 
         left: getNavbarLeft(), 
-        right: '0'
+        right: '0',
+        borderTopLeftRadius: isAdminPage && !isSidebarCollapsed ? '0' : '0',
+        borderTopRightRadius: '0'
       }}
     >
       <div className="px-4 h-full">

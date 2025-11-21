@@ -38,6 +38,8 @@ const Dashboard = () => {
   // Hierarchy drill-down state
   const [hierarchyPath, setHierarchyPath] = useState([]) // Array to track hierarchy path: [{level, id, name}, ...]
   const [currentHierarchyLevel, setCurrentHierarchyLevel] = useState(null) // Current hierarchy level being viewed
+  // Expanded rows state for Collection Efficiency table
+  const [expandedRows, setExpandedRows] = useState(new Set()) // Track which rows are expanded
   const [staffSearchTerm, setStaffSearchTerm] = useState('')
   const [staffSortBy, setStaffSortBy] = useState('efficiency')
   const [staffSortOrder, setStaffSortOrder] = useState('desc')
@@ -738,6 +740,82 @@ const Dashboard = () => {
     { id: 'EMP044', name: 'Rohit Jadhav', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP036', piCode: 'PI044', center: 'Nagpur', district: 'Nagpur', state: 'Maharashtra', loanType: 'Construction Equipment', region: 'West', customers: 63, due: 1380000, overdue: 440000, calls: 30, visits: 6, collected: 1250000, efficiency: 60, escalations: 4 }
   ]
 
+  // Hierarchical data structure for Collection Efficiency table
+  // Hierarchy: GF (Group Fields) > BH (Business Head) > NCM > ZCM > RCM > ACM > CLM > TCM > DTR
+  const hierarchicalData = [
+    // GF (Group Fields) - Level 0
+    { id: 'GF001', name: 'Group Field North', hierarchy: 'GF', hierarchyLevel: 0, parentId: null, piCode: 'GF001', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'All', region: 'North', customers: 1250, due: 25000000, overdue: 2500000, calls: 450, visits: 120, collected: 20000000, efficiency: 88, escalations: 5 },
+    { id: 'GF002', name: 'Group Field South', hierarchy: 'GF', hierarchyLevel: 0, parentId: null, piCode: 'GF002', center: 'Bangalore', district: 'Bangalore', state: 'Karnataka', loanType: 'All', region: 'South', customers: 1180, due: 24000000, overdue: 2200000, calls: 440, visits: 115, collected: 19500000, efficiency: 87, escalations: 4 },
+    { id: 'GF003', name: 'Group Field West', hierarchy: 'GF', hierarchyLevel: 0, parentId: null, piCode: 'GF003', center: 'Mumbai', district: 'Mumbai', state: 'Maharashtra', loanType: 'All', region: 'West', customers: 1320, due: 27000000, overdue: 2800000, calls: 480, visits: 130, collected: 22000000, efficiency: 89, escalations: 6 },
+    { id: 'GF004', name: 'Group Field East', hierarchy: 'GF', hierarchyLevel: 0, parentId: null, piCode: 'GF004', center: 'Kolkata', district: 'Kolkata', state: 'West Bengal', loanType: 'All', region: 'East', customers: 1100, due: 22000000, overdue: 2100000, calls: 420, visits: 110, collected: 18000000, efficiency: 85, escalations: 5 },
+    
+    // BH (Business Head) - Level 1 - under GF001
+    { id: 'BH001', name: 'Business Head North Zone 1', hierarchy: 'BH', hierarchyLevel: 1, parentId: 'GF001', piCode: 'BH001', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 420, due: 8500000, overdue: 850000, calls: 150, visits: 40, collected: 6800000, efficiency: 88, escalations: 2 },
+    { id: 'BH002', name: 'Business Head North Zone 2', hierarchy: 'BH', hierarchyLevel: 1, parentId: 'GF001', piCode: 'BH002', center: 'Chandigarh', district: 'Chandigarh', state: 'Punjab', loanType: 'Commercial Vehicle', region: 'North', customers: 380, due: 7800000, overdue: 780000, calls: 140, visits: 38, collected: 6200000, efficiency: 87, escalations: 1 },
+    { id: 'BH003', name: 'Business Head North Zone 3', hierarchy: 'BH', hierarchyLevel: 1, parentId: 'GF001', piCode: 'BH003', center: 'Jaipur', district: 'Jaipur', state: 'Rajasthan', loanType: 'Construction Equipment', region: 'North', customers: 450, due: 8700000, overdue: 870000, calls: 160, visits: 42, collected: 7000000, efficiency: 89, escalations: 2 },
+    
+    // BH - Level 1 - under GF002
+    { id: 'BH004', name: 'Business Head South Zone 1', hierarchy: 'BH', hierarchyLevel: 1, parentId: 'GF002', piCode: 'BH004', center: 'Bangalore', district: 'Bangalore', state: 'Karnataka', loanType: 'Tractor', region: 'South', customers: 400, due: 8200000, overdue: 820000, calls: 145, visits: 39, collected: 6600000, efficiency: 88, escalations: 2 },
+    { id: 'BH005', name: 'Business Head South Zone 2', hierarchy: 'BH', hierarchyLevel: 1, parentId: 'GF002', piCode: 'BH005', center: 'Chennai', district: 'Chennai', state: 'Tamil Nadu', loanType: 'Commercial Vehicle', region: 'South', customers: 390, due: 7900000, overdue: 690000, calls: 142, visits: 38, collected: 6400000, efficiency: 86, escalations: 1 },
+    { id: 'BH006', name: 'Business Head South Zone 3', hierarchy: 'BH', hierarchyLevel: 1, parentId: 'GF002', piCode: 'BH006', center: 'Hyderabad', district: 'Hyderabad', state: 'Telangana', loanType: 'Construction Equipment', region: 'South', customers: 390, due: 7900000, overdue: 690000, calls: 153, visits: 38, collected: 6500000, efficiency: 87, escalations: 1 },
+    
+    // BH - Level 1 - under GF003
+    { id: 'BH007', name: 'Business Head West Zone 1', hierarchy: 'BH', hierarchyLevel: 1, parentId: 'GF003', piCode: 'BH007', center: 'Mumbai', district: 'Mumbai', state: 'Maharashtra', loanType: 'Tractor', region: 'West', customers: 450, due: 9200000, overdue: 920000, calls: 165, visits: 44, collected: 7500000, efficiency: 90, escalations: 2 },
+    { id: 'BH008', name: 'Business Head West Zone 2', hierarchy: 'BH', hierarchyLevel: 1, parentId: 'GF003', piCode: 'BH008', center: 'Pune', district: 'Pune', state: 'Maharashtra', loanType: 'Commercial Vehicle', region: 'West', customers: 440, due: 9000000, overdue: 900000, calls: 160, visits: 43, collected: 7300000, efficiency: 89, escalations: 2 },
+    { id: 'BH009', name: 'Business Head West Zone 3', hierarchy: 'BH', hierarchyLevel: 1, parentId: 'GF003', piCode: 'BH009', center: 'Ahmedabad', district: 'Ahmedabad', state: 'Gujarat', loanType: 'Construction Equipment', region: 'West', customers: 430, due: 8800000, overdue: 980000, calls: 155, visits: 43, collected: 7200000, efficiency: 88, escalations: 2 },
+    
+    // BH - Level 1 - under GF004
+    { id: 'BH010', name: 'Business Head East Zone 1', hierarchy: 'BH', hierarchyLevel: 1, parentId: 'GF004', piCode: 'BH010', center: 'Kolkata', district: 'Kolkata', state: 'West Bengal', loanType: 'Tractor', region: 'East', customers: 370, due: 7500000, overdue: 750000, calls: 135, visits: 36, collected: 6000000, efficiency: 86, escalations: 2 },
+    { id: 'BH011', name: 'Business Head East Zone 2', hierarchy: 'BH', hierarchyLevel: 1, parentId: 'GF004', piCode: 'BH011', center: 'Bhubaneswar', district: 'Bhubaneswar', state: 'Odisha', loanType: 'Commercial Vehicle', region: 'East', customers: 360, due: 7300000, overdue: 730000, calls: 132, visits: 35, collected: 5900000, efficiency: 85, escalations: 2 },
+    { id: 'BH012', name: 'Business Head East Zone 3', hierarchy: 'BH', hierarchyLevel: 1, parentId: 'GF004', piCode: 'BH012', center: 'Patna', district: 'Patna', state: 'Bihar', loanType: 'Construction Equipment', region: 'East', customers: 370, due: 7200000, overdue: 620000, calls: 153, visits: 39, collected: 6100000, efficiency: 84, escalations: 1 },
+    
+    // NCM (National Collection Manager) - Level 2 - under BH001
+    { id: 'NCM001', name: 'NCM North Region 1', hierarchy: 'NCM', hierarchyLevel: 2, parentId: 'BH001', piCode: 'NCM001', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 140, due: 2850000, overdue: 285000, calls: 50, visits: 13, collected: 2300000, efficiency: 88, escalations: 1 },
+    { id: 'NCM002', name: 'NCM North Region 2', hierarchy: 'NCM', hierarchyLevel: 2, parentId: 'BH001', piCode: 'NCM002', center: 'Gurgaon', district: 'Gurgaon', state: 'Haryana', loanType: 'Tractor', region: 'North', customers: 135, due: 2750000, overdue: 275000, calls: 48, visits: 13, collected: 2200000, efficiency: 87, escalations: 0 },
+    { id: 'NCM003', name: 'NCM North Region 3', hierarchy: 'NCM', hierarchyLevel: 2, parentId: 'BH001', piCode: 'NCM003', center: 'Noida', district: 'Noida', state: 'Uttar Pradesh', loanType: 'Tractor', region: 'North', customers: 145, due: 2900000, overdue: 290000, calls: 52, visits: 14, collected: 2300000, efficiency: 89, escalations: 1 },
+    
+    // NCM - Level 2 - under BH002
+    { id: 'NCM004', name: 'NCM North Commercial 1', hierarchy: 'NCM', hierarchyLevel: 2, parentId: 'BH002', piCode: 'NCM004', center: 'Chandigarh', district: 'Chandigarh', state: 'Punjab', loanType: 'Commercial Vehicle', region: 'North', customers: 130, due: 2650000, overdue: 265000, calls: 47, visits: 13, collected: 2100000, efficiency: 87, escalations: 1 },
+    { id: 'NCM005', name: 'NCM North Commercial 2', hierarchy: 'NCM', hierarchyLevel: 2, parentId: 'BH002', piCode: 'NCM005', center: 'Ludhiana', district: 'Ludhiana', state: 'Punjab', loanType: 'Commercial Vehicle', region: 'North', customers: 125, due: 2550000, overdue: 255000, calls: 46, visits: 12, collected: 2050000, efficiency: 86, escalations: 0 },
+    { id: 'NCM006', name: 'NCM North Commercial 3', hierarchy: 'NCM', hierarchyLevel: 2, parentId: 'BH002', piCode: 'NCM006', center: 'Amritsar', district: 'Amritsar', state: 'Punjab', loanType: 'Commercial Vehicle', region: 'North', customers: 125, due: 2600000, overdue: 260000, calls: 47, visits: 13, collected: 2050000, efficiency: 87, escalations: 1 },
+    
+    // NCM - Level 2 - under BH003
+    { id: 'NCM007', name: 'NCM North Construction 1', hierarchy: 'NCM', hierarchyLevel: 2, parentId: 'BH003', piCode: 'NCM007', center: 'Jaipur', district: 'Jaipur', state: 'Rajasthan', loanType: 'Construction Equipment', region: 'North', customers: 150, due: 3000000, overdue: 300000, calls: 54, visits: 14, collected: 2400000, efficiency: 89, escalations: 1 },
+    { id: 'NCM008', name: 'NCM North Construction 2', hierarchy: 'NCM', hierarchyLevel: 2, parentId: 'BH003', piCode: 'NCM008', center: 'Jodhpur', district: 'Jodhpur', state: 'Rajasthan', loanType: 'Construction Equipment', region: 'North', customers: 145, due: 2900000, overdue: 290000, calls: 52, visits: 14, collected: 2300000, efficiency: 88, escalations: 1 },
+    { id: 'NCM009', name: 'NCM North Construction 3', hierarchy: 'NCM', hierarchyLevel: 2, parentId: 'BH003', piCode: 'NCM009', center: 'Udaipur', district: 'Udaipur', state: 'Rajasthan', loanType: 'Construction Equipment', region: 'North', customers: 155, due: 2800000, overdue: 280000, calls: 54, visits: 14, collected: 2300000, efficiency: 90, escalations: 0 },
+    
+    // ZCM (Zone Collection Manager) - Level 3 - under NCM001
+    { id: 'ZCM001', name: 'ZCM Delhi Zone 1', hierarchy: 'ZCM', hierarchyLevel: 3, parentId: 'NCM001', piCode: 'ZCM001', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 47, due: 950000, overdue: 95000, calls: 17, visits: 4, collected: 770000, efficiency: 88, escalations: 0 },
+    { id: 'ZCM002', name: 'ZCM Delhi Zone 2', hierarchy: 'ZCM', hierarchyLevel: 3, parentId: 'NCM001', piCode: 'ZCM002', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 46, due: 940000, overdue: 94000, calls: 16, visits: 4, collected: 760000, efficiency: 87, escalations: 0 },
+    { id: 'ZCM003', name: 'ZCM Delhi Zone 3', hierarchy: 'ZCM', hierarchyLevel: 3, parentId: 'NCM001', piCode: 'ZCM003', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 47, due: 960000, overdue: 96000, calls: 17, visits: 5, collected: 770000, efficiency: 89, escalations: 0 },
+    
+    // ZCM - Level 3 - under NCM002
+    { id: 'ZCM004', name: 'ZCM Gurgaon Zone 1', hierarchy: 'ZCM', hierarchyLevel: 3, parentId: 'NCM002', piCode: 'ZCM004', center: 'Gurgaon', district: 'Gurgaon', state: 'Haryana', loanType: 'Tractor', region: 'North', customers: 45, due: 920000, overdue: 92000, calls: 16, visits: 4, collected: 740000, efficiency: 87, escalations: 0 },
+    { id: 'ZCM005', name: 'ZCM Gurgaon Zone 2', hierarchy: 'ZCM', hierarchyLevel: 3, parentId: 'NCM002', piCode: 'ZCM005', center: 'Gurgaon', district: 'Gurgaon', state: 'Haryana', loanType: 'Tractor', region: 'North', customers: 45, due: 910000, overdue: 91000, calls: 16, visits: 4, collected: 730000, efficiency: 86, escalations: 0 },
+    { id: 'ZCM006', name: 'ZCM Gurgaon Zone 3', hierarchy: 'ZCM', hierarchyLevel: 3, parentId: 'NCM002', piCode: 'ZCM006', center: 'Gurgaon', district: 'Gurgaon', state: 'Haryana', loanType: 'Tractor', region: 'North', customers: 45, due: 920000, overdue: 92000, calls: 16, visits: 5, collected: 730000, efficiency: 88, escalations: 0 },
+    
+    // RCM (Regional Collection Manager) - Level 4 - under ZCM001
+    { id: 'RCM001', name: 'RCM Delhi Central', hierarchy: 'RCM', hierarchyLevel: 4, parentId: 'ZCM001', piCode: 'RCM001', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 16, due: 320000, overdue: 32000, calls: 6, visits: 1, collected: 260000, efficiency: 88, escalations: 0 },
+    { id: 'RCM002', name: 'RCM Delhi East', hierarchy: 'RCM', hierarchyLevel: 4, parentId: 'ZCM001', piCode: 'RCM002', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 15, due: 310000, overdue: 31000, calls: 5, visits: 1, collected: 250000, efficiency: 87, escalations: 0 },
+    { id: 'RCM003', name: 'RCM Delhi West', hierarchy: 'RCM', hierarchyLevel: 4, parentId: 'ZCM001', piCode: 'RCM003', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 16, due: 320000, overdue: 32000, calls: 6, visits: 2, collected: 260000, efficiency: 89, escalations: 0 },
+    
+    // ACM (Area Collection Manager) - Level 5 - under RCM001
+    { id: 'ACM001', name: 'ACM Delhi Central Area 1', hierarchy: 'ACM', hierarchyLevel: 5, parentId: 'RCM001', piCode: 'ACM001', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 8, due: 160000, overdue: 16000, calls: 3, visits: 1, collected: 130000, efficiency: 88, escalations: 0 },
+    { id: 'ACM002', name: 'ACM Delhi Central Area 2', hierarchy: 'ACM', hierarchyLevel: 5, parentId: 'RCM001', piCode: 'ACM002', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 8, due: 160000, overdue: 16000, calls: 3, visits: 1, collected: 130000, efficiency: 88, escalations: 0 },
+    
+    // CLM (Cluster Collection Manager) - Level 6 - under ACM001
+    { id: 'CLM001', name: 'CLM Delhi Cluster 1', hierarchy: 'CLM', hierarchyLevel: 6, parentId: 'ACM001', piCode: 'CLM001', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 4, due: 80000, overdue: 8000, calls: 1, visits: 0, collected: 65000, efficiency: 88, escalations: 0 },
+    { id: 'CLM002', name: 'CLM Delhi Cluster 2', hierarchy: 'CLM', hierarchyLevel: 6, parentId: 'ACM001', piCode: 'CLM002', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 4, due: 80000, overdue: 8000, calls: 1, visits: 0, collected: 65000, efficiency: 88, escalations: 0 },
+    
+    // TCM (Territory Collection Manager) - Level 7 - under CLM001
+    { id: 'TCM001', name: 'TCM Delhi Territory 1', hierarchy: 'TCM', hierarchyLevel: 7, parentId: 'CLM001', piCode: 'TCM001', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 2, due: 40000, overdue: 4000, calls: 0, visits: 0, collected: 32000, efficiency: 88, escalations: 0 },
+    { id: 'TCM002', name: 'TCM Delhi Territory 2', hierarchy: 'TCM', hierarchyLevel: 7, parentId: 'CLM001', piCode: 'TCM002', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 2, due: 40000, overdue: 4000, calls: 0, visits: 0, collected: 32000, efficiency: 88, escalations: 0 },
+    
+    // DTR (District Collection Officer) - Level 8 - under TCM001
+    { id: 'DTR001', name: 'DTR Delhi District 1', hierarchy: 'DTR', hierarchyLevel: 8, parentId: 'TCM001', piCode: 'DTR001', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 1, due: 20000, overdue: 2000, calls: 0, visits: 0, collected: 16000, efficiency: 88, escalations: 0 },
+    { id: 'DTR002', name: 'DTR Delhi District 2', hierarchy: 'DTR', hierarchyLevel: 8, parentId: 'TCM001', piCode: 'DTR002', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 1, due: 20000, overdue: 2000, calls: 0, visits: 0, collected: 16000, efficiency: 88, escalations: 0 }
+  ]
+
   // Mock customer data for each staff member
   const customerData = {
     'EMP001': [
@@ -942,7 +1020,217 @@ const Dashboard = () => {
   }
 
   // Filter and sort staff data based on search, metric, filters, and hierarchy
+  // Helper function to get children count for a given parent ID
+  const getChildrenCount = (parentId, dataSource) => {
+    return dataSource.filter(item => item.parentId === parentId).length
+  }
+
+  // Helper function to get children for a given parent ID
+  const getChildren = (parentId, dataSource) => {
+    return dataSource.filter(item => item.parentId === parentId)
+  }
+
+  // Helper function to toggle row expansion
+  const toggleRowExpansion = (rowId) => {
+    setExpandedRows(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(rowId)) {
+        newSet.delete(rowId)
+      } else {
+        newSet.add(rowId)
+      }
+      return newSet
+    })
+  }
+
+  // Helper function to get hierarchy color
+  const getHierarchyColor = (hierarchy) => {
+    switch (hierarchy) {
+      case 'GF': return 'bg-indigo-100 text-indigo-800'
+      case 'BH': return 'bg-purple-100 text-purple-800'
+      case 'NCM': return 'bg-blue-100 text-blue-800'
+      case 'ZCM': return 'bg-cyan-100 text-cyan-800'
+      case 'RCM': return 'bg-teal-100 text-teal-800'
+      case 'ACM': return 'bg-green-100 text-green-800'
+      case 'CLM': return 'bg-yellow-100 text-yellow-800'
+      case 'TCM': return 'bg-orange-100 text-orange-800'
+      case 'DTR': return 'bg-red-100 text-red-800'
+      default: return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  // Recursive function to render a row with its children
+  const renderHierarchicalRow = (staff, level = 0) => {
+    const children = getChildren(staff.id, hierarchicalData)
+    const hasChildren = children.length > 0
+    const isExpanded = expandedRows.has(staff.id)
+    const indentLevel = level * 20
+
+    return (
+      <React.Fragment key={staff.id}>
+        <tr 
+          className={`border-b border-gray-100 transition-colors ${hasChildren ? 'hover:bg-blue-50 cursor-pointer' : 'hover:bg-gray-50'}`}
+          onClick={(e) => {
+            if (hasChildren) {
+              e.stopPropagation()
+              toggleRowExpansion(staff.id)
+            }
+          }}
+        >
+          <td className="py-3 px-3 font-mono text-xs text-left whitespace-nowrap" style={{ paddingLeft: `${12 + indentLevel}px` }}>
+            <div className="flex items-center gap-2">
+              {hasChildren && (
+                <span className="text-blue-600">
+                  {isExpanded ? '▼' : '▶'}
+                </span>
+              )}
+              {staff.id}
+            </div>
+          </td>
+          <td className="py-3 px-3 font-medium text-left whitespace-nowrap">{staff.name}</td>
+          <td className="py-3 px-3 text-left whitespace-nowrap">
+            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getHierarchyColor(staff.hierarchy)}`}>
+              {staff.hierarchy} {hasChildren && `(${children.length})`}
+            </span>
+          </td>
+          <td className="py-3 px-3 text-left whitespace-nowrap font-mono text-xs">{staff.piCode}</td>
+          <td className="py-3 px-3 text-left whitespace-nowrap">{staff.center}</td>
+          <td className="py-3 px-3 text-left whitespace-nowrap">{staff.district}</td>
+          <td className="py-3 px-3 text-left whitespace-nowrap">{staff.state}</td>
+          <td className="py-3 px-3 text-left whitespace-nowrap">
+            <span className={`px-3 py-1 rounded text-xs font-medium ${staff.loanType === 'Tractor' ? 'bg-orange-100 text-orange-800' :
+                staff.loanType === 'Commercial Vehicle' ? 'bg-blue-100 text-blue-800' :
+                  staff.loanType === 'All' ? 'bg-gray-100 text-gray-800' :
+                    'bg-green-100 text-green-800'
+              }`}>
+              {staff.loanType}
+            </span>
+          </td>
+          <td className="py-3 px-3 text-left whitespace-nowrap">{staff.region}</td>
+          <td className="py-3 px-3 text-right font-medium whitespace-nowrap">
+            <button
+              data-customer-count-button
+              onClick={(e) => {
+                e.stopPropagation()
+                handleCustomerCountClick(staff)
+              }}
+              className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+            >
+              {staff.customers}
+            </button>
+          </td>
+          <td className="py-3 px-3 text-right font-medium whitespace-nowrap">₹{(staff.due / 100000).toFixed(1)}L</td>
+          <td className="py-3 px-3 text-right font-medium whitespace-nowrap">₹{(staff.overdue / 100000).toFixed(1)}L</td>
+          <td className="py-3 px-3 text-right whitespace-nowrap">{staff.calls}</td>
+          <td className="py-3 px-3 text-right whitespace-nowrap">{staff.visits}</td>
+          <td className="py-3 px-3 text-right font-medium whitespace-nowrap">₹{(staff.collected / 100000).toFixed(1)}L</td>
+          <td className="py-3 px-3 text-right whitespace-nowrap">
+            <span className={`font-semibold ${staff.efficiency >= 90 ? 'text-green-600' :
+                staff.efficiency >= 70 ? 'text-orange-600' :
+                  'text-red-600'
+              }`}>
+              {staff.efficiency}%
+            </span>
+          </td>
+          <td className="py-3 px-3 text-right whitespace-nowrap">
+            <span className={`px-2 py-1 rounded-full text-xs font-medium ${staff.escalations === 0 ? 'bg-green-100 text-green-800' :
+                staff.escalations <= 2 ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-red-100 text-red-800'
+              }`}>
+              {staff.escalations}
+            </span>
+          </td>
+        </tr>
+        {isExpanded && hasChildren && children.map(child => renderHierarchicalRow(child, level + 1))}
+      </React.Fragment>
+    )
+  }
+
   const getFilteredStaffData = (metric) => {
+    // For collection metric, use hierarchical data
+    if (metric === 'collection') {
+      // Start with top level (GF - Group Fields)
+      let baseFiltered = hierarchicalData.filter(item => item.hierarchyLevel === 0)
+      
+      // Apply search filter
+      let filtered = baseFiltered.filter(staff => {
+        const matchesSearch = staff.id.toLowerCase().includes(staffSearchTerm.toLowerCase()) ||
+          staff.name.toLowerCase().includes(staffSearchTerm.toLowerCase()) ||
+          staff.piCode.toLowerCase().includes(staffSearchTerm.toLowerCase()) ||
+          staff.center.toLowerCase().includes(staffSearchTerm.toLowerCase()) ||
+          staff.district.toLowerCase().includes(staffSearchTerm.toLowerCase()) ||
+          staff.state.toLowerCase().includes(staffSearchTerm.toLowerCase()) ||
+          staff.loanType.toLowerCase().includes(staffSearchTerm.toLowerCase()) ||
+          staff.region.toLowerCase().includes(staffSearchTerm.toLowerCase()) ||
+          staff.customers.toString().includes(staffSearchTerm) ||
+          staff.due.toString().includes(staffSearchTerm) ||
+          staff.overdue.toString().includes(staffSearchTerm)
+
+        const matchesLoanType = filterLoanType === 'All Loans' ||
+          (filterLoanType === 'Tractor Finance' && staff.loanType === 'Tractor') ||
+          (filterLoanType === 'Commercial Vehicle' && staff.loanType === 'Commercial Vehicle') ||
+          (filterLoanType === 'Construction Equipment' && staff.loanType === 'Construction Equipment')
+
+        const matchesGeography = filterGeography === 'All Regions' ||
+          staff.region === filterGeography
+
+        const matchesState = filterState === 'All States' ||
+          staff.state === filterState
+
+        const matchesDistrict = filterDistrict === 'All Districts' ||
+          staff.district === filterDistrict
+
+        const matchesPICode = filterPICode === 'All PI Codes' ||
+          staff.piCode === filterPICode
+
+        return matchesSearch && matchesLoanType && matchesGeography && matchesState && matchesDistrict && matchesPICode
+      })
+
+      // Sort based on selected metric and sort order
+      filtered.sort((a, b) => {
+        let aValue, bValue
+        if (staffSortBy === 'efficiency') {
+          aValue = a.efficiency
+          bValue = b.efficiency
+        } else if (staffSortBy === 'collected') {
+          aValue = a.collected
+          bValue = b.collected
+        } else if (staffSortBy === 'customers') {
+          aValue = a.customers
+          bValue = b.customers
+        } else if (staffSortBy === 'due') {
+          aValue = a.due
+          bValue = b.due
+        } else if (staffSortBy === 'overdue') {
+          aValue = a.overdue
+          bValue = b.overdue
+        } else if (staffSortBy === 'calls') {
+          aValue = a.calls
+          bValue = b.calls
+        } else if (staffSortBy === 'visits') {
+          aValue = a.visits
+          bValue = b.visits
+        } else if (staffSortBy === 'name') {
+          aValue = a.name
+          bValue = b.name
+        } else if (staffSortBy === 'hierarchy') {
+          aValue = a.hierarchy
+          bValue = b.hierarchy
+        } else {
+          aValue = a.efficiency
+          bValue = b.efficiency
+        }
+
+        if (staffSortOrder === 'asc') {
+          return aValue > bValue ? 1 : -1
+        } else {
+          return aValue < bValue ? 1 : -1
+        }
+      })
+
+      return filtered
+    }
+
     // Determine which staff to show based on hierarchy path
     let baseFiltered = staffLeaderboardBaseData
 
@@ -1057,11 +1345,13 @@ const Dashboard = () => {
       setHierarchyPath([])
       setCurrentHierarchyLevel(null)
       setSelectedLoanType(null) // Reset loan type when closing
+      setExpandedRows(new Set()) // Reset expanded rows
     } else {
       setSelectedStaffMetric(metric)
       // Reset hierarchy to show top level (Supervisors)
       setHierarchyPath([])
       setCurrentHierarchyLevel(1) // Start with Supervisor level
+      setExpandedRows(new Set()) // Reset expanded rows when switching metrics
       // Reset loan type when switching to allocation
       if (metric === 'allocation') {
         setSelectedLoanType(null) // Show loan type cards first
@@ -1204,7 +1494,7 @@ const Dashboard = () => {
   const getCardName = (metric) => {
     const cardNames = {
       'allocation': 'Case Summary',
-      'collection': 'Collection Efficiency (%)',
+      'collection': 'Collection Efficiency (CV/CE)',
       'ptp': 'PTP Conversion Rate (%)',
       'productivity': 'Staff Productivity Index',
       'inactive': 'Inactive/Non-performing Staff'
@@ -5674,69 +5964,12 @@ const Dashboard = () => {
                           <tbody className="text-gray-700">
                             {paginatedStaffData.length === 0 ? (
                               <tr>
-                                <td colSpan="16" className="py-8 text-center text-gray-500">
+                                <td colSpan="17" className="py-8 text-center text-gray-500">
                                   No staff data found
                                 </td>
                               </tr>
                             ) : (
-                              paginatedStaffData.map((staff) => (
-                                <tr key={staff.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                                  <td className="py-3 px-3 font-mono text-xs text-left whitespace-nowrap">{staff.id}</td>
-                                  <td className="py-3 px-3 font-medium text-left whitespace-nowrap">{staff.name}</td>
-                                  <td className="py-3 px-3 text-left whitespace-nowrap">
-                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${staff.hierarchy === 'Supervisor' ? 'bg-purple-100 text-purple-800' :
-                                        staff.hierarchy === 'Senior Executive' ? 'bg-blue-100 text-blue-800' :
-                                          staff.hierarchy === 'Executive' ? 'bg-green-100 text-green-800' :
-                                            'bg-gray-100 text-gray-800'
-                                      }`}>
-                                      {staff.hierarchy}
-                                    </span>
-                                  </td>
-                                  <td className="py-3 px-3 text-left whitespace-nowrap font-mono text-xs">{staff.piCode}</td>
-                                  <td className="py-3 px-3 text-left whitespace-nowrap">{staff.center}</td>
-                                  <td className="py-3 px-3 text-left whitespace-nowrap">{staff.district}</td>
-                                  <td className="py-3 px-3 text-left whitespace-nowrap">{staff.state}</td>
-                                  <td className="py-3 px-3 text-left whitespace-nowrap">
-                                    <span className={`px-3 py-1 rounded text-xs font-medium ${staff.loanType === 'Tractor' ? 'bg-orange-100 text-orange-800' :
-                                        staff.loanType === 'Commercial Vehicle' ? 'bg-blue-100 text-blue-800' :
-                                          'bg-green-100 text-green-800'
-                                      }`}>
-                                      {staff.loanType}
-                                    </span>
-                                  </td>
-                                  <td className="py-3 px-3 text-left whitespace-nowrap">{staff.region}</td>
-                                  <td className="py-3 px-3 text-right font-medium whitespace-nowrap">
-                                    <button
-                                      data-customer-count-button
-                                      onClick={() => handleCustomerCountClick(staff)}
-                                      className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
-                                    >
-                                      {staff.customers}
-                                    </button>
-                                  </td>
-                                  <td className="py-3 px-3 text-right font-medium whitespace-nowrap">₹{(staff.due / 100000).toFixed(1)}L</td>
-                                  <td className="py-3 px-3 text-right font-medium whitespace-nowrap">₹{(staff.overdue / 100000).toFixed(1)}L</td>
-                                  <td className="py-3 px-3 text-right whitespace-nowrap">{staff.calls}</td>
-                                  <td className="py-3 px-3 text-right whitespace-nowrap">{staff.visits}</td>
-                                  <td className="py-3 px-3 text-right font-medium whitespace-nowrap">₹{(staff.collected / 100000).toFixed(1)}L</td>
-                                  <td className="py-3 px-3 text-right whitespace-nowrap">
-                                    <span className={`font-semibold ${staff.efficiency >= 90 ? 'text-green-600' :
-                                        staff.efficiency >= 70 ? 'text-orange-600' :
-                                          'text-red-600'
-                                      }`}>
-                                      {staff.efficiency}%
-                                    </span>
-                                  </td>
-                                  <td className="py-3 px-3 text-right whitespace-nowrap">
-                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${staff.escalations === 0 ? 'bg-green-100 text-green-800' :
-                                        staff.escalations <= 2 ? 'bg-yellow-100 text-yellow-800' :
-                                          'bg-red-100 text-red-800'
-                                      }`}>
-                                      {staff.escalations}
-                                    </span>
-                                  </td>
-                                </tr>
-                              ))
+                              paginatedStaffData.map((staff) => renderHierarchicalRow(staff, 0))
                             )}
                           </tbody>
                         </table>

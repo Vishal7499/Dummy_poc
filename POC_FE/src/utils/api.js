@@ -364,4 +364,140 @@ export async function adminGetDashboardStats(accessToken) {
   return data
 }
 
+export async function adminGetTodayUploadedFiles(accessToken) {
+  const url = `${API_BASE}/admin/today-uploaded-files/`
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+  })
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    try {
+      const errorData = JSON.parse(text)
+      throw new Error(errorData.error || errorData.details || 'Failed to fetch today\'s uploaded files')
+    } catch (e) {
+      throw new Error(text || 'Failed to fetch today\'s uploaded files')
+    }
+  }
+  return res.json()
+}
+
+export async function adminGetMaintenanceStatus(accessToken) {
+  // Check localStorage first as fallback
+  const localMaintenance = localStorage.getItem('maintenanceMode')
+  if (localMaintenance !== null) {
+    return { is_maintenance_mode: localMaintenance === 'true' }
+  }
+
+  // Try API call, but don't fail if it doesn't exist yet
+  try {
+    const url = `${API_BASE}/admin/maintenance/status/`
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    })
+    if (res.ok) {
+      return res.json()
+    }
+  } catch (e) {
+    console.log('Maintenance API not available, using localStorage')
+  }
+
+  // Default to false if nothing is set
+  return { is_maintenance_mode: false }
+}
+
+export async function adminSetMaintenanceMode(accessToken, enabled) {
+  // Store in localStorage immediately
+  localStorage.setItem('maintenanceMode', enabled.toString())
+
+  // Try API call, but don't fail if it doesn't exist yet
+  try {
+    const url = `${API_BASE}/admin/maintenance/toggle/`
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ enabled }),
+    })
+    if (res.ok) {
+      return res.json()
+    }
+  } catch (e) {
+    console.log('Maintenance API not available, using localStorage only')
+  }
+
+  // Return success even if API call fails (localStorage is set)
+  return { success: true, is_maintenance_mode: enabled }
+}
+
+export async function adminGetAllocationDetails(accessToken) {
+  const url = `${API_BASE}/admin/allocation-details/`
+  
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+  })
+  
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    try {
+      const errorData = JSON.parse(text)
+      throw new Error(errorData.error || errorData.details || 'Failed to fetch allocation details')
+    } catch (e) {
+      throw new Error(text || 'Failed to fetch allocation details')
+    }
+  }
+  
+  return res.json()
+}
+
+export async function adminUpdateAllocationDetails(accessToken, caseId, allocatedByUsername, allocatedToUsername) {
+  const url = `${API_BASE}/admin/allocation-details/`
+  
+  const payload = {
+    case_id: caseId,
+  }
+  
+  if (allocatedByUsername !== undefined && allocatedByUsername !== null) {
+    payload.allocated_by_username = allocatedByUsername
+  }
+  
+  if (allocatedToUsername !== undefined && allocatedToUsername !== null) {
+    payload.allocated_to_username = allocatedToUsername
+  }
+  
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+  
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    try {
+      const errorData = JSON.parse(text)
+      throw new Error(errorData.error || errorData.details || 'Failed to update allocation details')
+    } catch (e) {
+      throw new Error(text || 'Failed to update allocation details')
+    }
+  }
+  
+  return res.json()
+}
+
 
