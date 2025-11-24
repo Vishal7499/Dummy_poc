@@ -1,0 +1,57 @@
+@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Light Scrollbar Styling */
+/* For Chrome, Safari, Edge - Global */
+::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1 !important;
+  border-radius: 4px !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db !important;
+  border-radius: 4px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af !important;
+}
+
+/* Specific styling for table scroll containers */
+.table-scroll-container::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+.table-scroll-container::-webkit-scrollbar-track {
+  background: #f1f1f1 !important;
+  border-radius: 4px !important;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb {
+  background: #d1d5db !important;
+  border-radius: 4px !important;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af !important;
+}
+
+/* For Firefox - Global - Universal selector */
+* {
+  scrollbar-width: thin !important;
+  scrollbar-color: #d1d5db #f1f1f1 !important;
+}
+
+/* For Firefox - Table containers */
+.table-scroll-container {
+  scrollbar-width: thin !important;
+  scrollbar-color: #d1d5db #f1f1f1 !important;
+}
