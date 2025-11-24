@@ -56,9 +56,11 @@ const Login = () => {
         return
       }
       
-      // Route based on role: admin goes to admin dashboard, others go to normal dashboard
+      // Route based on role: admin goes to admin dashboard, supervisor goes to supervisor dashboard, others go to normal dashboard
       if (data.role === 'admin') {
         navigate('/admin/dashboard')
+      } else if (data.role === 'supervisor') {
+        navigate('/dashboard')
       } else {
         navigate('/dashboard')
       }

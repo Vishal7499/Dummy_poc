@@ -5,6 +5,8 @@ const delay = (ms = 500) => new Promise(resolve => setTimeout(resolve, ms))
 
 // Dummy users for login
 const dummyUsers = [
+  { username: 'kotakadmin', password: 'Admin1234', role: 'admin', name: 'Kotak Admin' },
+  { username: 'pradeepr', password: 'Sonata123@', role: 'supervisor', name: 'Supervisor User' },
   { username: 'admin', password: 'admin123', role: 'admin', name: 'Admin User' },
   { username: 'staff', password: 'staff123', role: 'staff', name: 'Staff User' },
   { username: 'user', password: 'user123', role: 'user', name: 'Regular User' },
