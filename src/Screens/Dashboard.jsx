@@ -6,6 +6,7 @@ import Chart from 'react-apexcharts'
 import * as XLSX from 'xlsx'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
+import Loader from '../components/Loader'
 import { useAuth } from '../contexts/AuthContext'
 import { generateDashboardData, generateCollectionGraphData, generateDepositionData, generateVerticalSummaryData, generateCollectionSummaryData, generateReportData, generateRollRateData, generateCustomerEngagementData, generatePaymentIntentData } from '../utils/dashboardData'
 import { formatIndianNumber } from '../utils/formatters'
@@ -79,6 +80,7 @@ const Dashboard = () => {
   const [depositionData, setDepositionData] = useState(null)
   const [depositionLoading, setDepositionLoading] = useState(false)
   const [depositionError, setDepositionError] = useState(null)
+  const [filterLoading, setFilterLoading] = useState(false)
   const [depositionCurrentPage, setDepositionCurrentPage] = useState(1)
   const [depositionPageSize] = useState(10)
   // Vertical summary data state
@@ -162,11 +164,17 @@ const Dashboard = () => {
       return
     }
 
-    // Generate data based on date filters
-    const data = generateDashboardData(fromDate, toDate)
-    setDashboardData(data)
-    setDashboardLoading(false)
-    setDashboardError(null)
+    setFilterLoading(true)
+    setDashboardLoading(true)
+    // Simulate loading delay for better UX
+    setTimeout(() => {
+      // Generate data based on date filters
+      const data = generateDashboardData(fromDate, toDate)
+      setDashboardData(data)
+      setDashboardLoading(false)
+      setDashboardError(null)
+      setFilterLoading(false)
+    }, 300)
   }, [user, fromDate, toDate])
 
   // Generate collection graph data directly based on date filters
@@ -175,13 +183,17 @@ const Dashboard = () => {
       return
     }
 
+    setCollectionGraphLoading(true)
     const defaultFromDate = fromDate || '2025-01-01'
     const defaultToDate = toDate || '2025-12-30'
 
-    const data = generateCollectionGraphData(defaultFromDate, defaultToDate)
-    setCollectionGraphData(data)
-    setCollectionGraphLoading(false)
-    setCollectionGraphError(null)
+    // Simulate loading delay
+    setTimeout(() => {
+      const data = generateCollectionGraphData(defaultFromDate, defaultToDate)
+      setCollectionGraphData(data)
+      setCollectionGraphLoading(false)
+      setCollectionGraphError(null)
+    }, 300)
   }, [user, fromDate, toDate])
 
   // Generate vertical summary data directly when Case Summary card is clicked
@@ -4169,8 +4181,8 @@ const Dashboard = () => {
   const renderDepositionTable = () => {
     if (depositionLoading) {
       return (
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-12 text-center">
-          <div className="flex flex-col items-center space-y-4">
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-12 text-center relative">
+          <Loader message="Loading deposition data..." color="red" size="md" overlay={true} />
             <div
               className="animate-spin h-10 w-10 border-4 border-red-600"
               style={{ borderRadius: '0' }}
@@ -4621,16 +4633,13 @@ const Dashboard = () => {
         />
 
         {/* Loading Overlay */}
-        {dashboardLoading && (
-          <div className="absolute inset-0 bg-white bg-opacity-95 flex flex-col items-center justify-center z-50">
-            <div className="flex flex-col items-center space-y-4">
-              <div
-                className="animate-spin h-12 w-12 border-4 border-red-600"
-                style={{ borderRadius: '0' }}
-              ></div>
-              <p className="text-sm font-medium text-gray-600">Loading dashboard data...</p>
-            </div>
-          </div>
+        {(dashboardLoading || filterLoading) && (
+          <Loader 
+            message={filterLoading ? "Applying date filters..." : "Loading dashboard data..."} 
+            color="red" 
+            size="md" 
+            fullScreen={true} 
+          />
         )}
 
         {/* Error Message */}

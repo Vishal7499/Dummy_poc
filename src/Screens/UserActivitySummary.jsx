@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import AdminSidebar from '../components/AdminSidebar';
 import Navbar from '../components/Navbar';
+import Loader from '../components/Loader';
 import { getActivitySummary } from '../utils/dummyData';
 
 const UserActivitySummary = () => {
@@ -11,6 +12,7 @@ const UserActivitySummary = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
   const [activityData, setActivityData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [filterLoading, setFilterLoading] = useState(false);
   const [error, setError] = useState(null);
   
   // Filter states
@@ -43,17 +45,27 @@ const UserActivitySummary = () => {
     }
   };
 
-  const handleApplyFilters = () => {
-    fetchActivitySummary();
+  const handleApplyFilters = async () => {
+    setFilterLoading(true);
+    try {
+      await fetchActivitySummary();
+    } finally {
+      setFilterLoading(false);
+    }
   };
 
-  const handleResetFilters = () => {
+  const handleResetFilters = async () => {
+    setFilterLoading(true);
     setFromDate('');
     setToDate('');
     setUsername('');
     // Fetch with empty filters after a short delay to allow state to update
-    setTimeout(() => {
-      fetchActivitySummary();
+    setTimeout(async () => {
+      try {
+        await fetchActivitySummary();
+      } finally {
+        setFilterLoading(false);
+      }
     }, 100);
   };
 
@@ -215,13 +227,15 @@ const UserActivitySummary = () => {
                     <div className="flex items-end gap-2">
                       <button
                         onClick={handleApplyFilters}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                        disabled={filterLoading}
+                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Apply Filters
+                        {filterLoading ? 'Applying...' : 'Apply Filters'}
                       </button>
                       <button
                         onClick={handleResetFilters}
-                        className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                        disabled={filterLoading}
+                        className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Reset
                       </button>
@@ -235,9 +249,16 @@ const UserActivitySummary = () => {
                     {error}
                   </div>
                 )}
+
+                {/* Filter Loading Overlay */}
+                {filterLoading && (
+                  <div className="mb-6 relative">
+                    <Loader message="Applying filters..." color="blue" size="md" overlay={true} />
+                  </div>
+                )}
                 
                 {/* Activity Summary Table - Multiple Sessions */}
-                {activityData && activitySummaries.length > 0 && (
+                {!filterLoading && activityData && activitySummaries.length > 0 && (
                   <>
                     <div className="bg-white border border-[#003366] rounded-lg overflow-hidden mb-6">
                       <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">

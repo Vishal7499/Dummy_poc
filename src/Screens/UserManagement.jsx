@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import AdminSidebar from '../components/AdminSidebar'
 import Navbar from '../components/Navbar'
+import Loader from '../components/Loader'
 import { useAuth } from '../contexts/AuthContext'
 import { adminGetUsers, adminCreateUser, adminUpdateUser, adminDeleteUser } from '../utils/api'
 
@@ -281,9 +282,7 @@ const UserManagement = () => {
 
               {/* Users Table */}
               {loading ? (
-                <div className="flex justify-center items-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: '#EF4444' }}></div>
-                </div>
+                <Loader message="Loading users..." color="red" size="md" />
               ) : (
                 <div className="bg-white border border-[#003366] rounded-lg overflow-hidden">
                   <div className="bg-white text-[#00005A] border border-[#003366] rounded-t-lg px-3 py-1.5 flex justify-between items-center">

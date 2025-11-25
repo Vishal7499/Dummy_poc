@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AdminSidebar from '../components/AdminSidebar'
 import Navbar from '../components/Navbar'
+import Loader from '../components/Loader'
 import { useAuth } from '../contexts/AuthContext'
 import { adminGetDashboardStats } from '../utils/api'
 
@@ -200,9 +201,7 @@ const AdminDashboard = () => {
 
               {/* Stats Cards */}
               {loading ? (
-                <div className="flex justify-center items-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: '#EF4444' }}></div>
-                </div>
+                <Loader message="Loading dashboard stats..." color="red" size="md" />
               ) : (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

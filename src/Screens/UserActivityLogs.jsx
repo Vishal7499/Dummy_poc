@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import AdminSidebar from '../components/AdminSidebar'
 import Navbar from '../components/Navbar'
+import Loader from '../components/Loader'
 import { useAuth } from '../contexts/AuthContext'
 import { adminGetActivityLogs } from '../utils/api'
 
@@ -162,9 +163,7 @@ const UserActivityLogs = () => {
 
               {/* Logs Table */}
               {loading ? (
-                <div className="flex justify-center items-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-                </div>
+                <Loader message="Loading activity logs..." color="blue" size="md" />
               ) : (
                 <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
                   <div className="overflow-x-auto">

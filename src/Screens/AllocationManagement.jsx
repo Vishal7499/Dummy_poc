@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import AdminSidebar from '../components/AdminSidebar'
 import Navbar from '../components/Navbar'
+import Loader from '../components/Loader'
 import { adminGetAllocationDetails, adminUpdateAllocationDetails } from '../utils/api'
 
 const AllocationManagement = () => {
@@ -21,6 +22,7 @@ const AllocationManagement = () => {
   const [editingCell, setEditingCell] = useState(null)
   const [editValues, setEditValues] = useState({})
   const [saving, setSaving] = useState(false)
+  const [filterLoading, setFilterLoading] = useState(false)
   const isFetchingRef = useRef(false)
 
   // Fetch allocation details from API
@@ -75,15 +77,22 @@ const AllocationManagement = () => {
 
   // Apply filters to allocations
   useEffect(() => {
-    let filteredData = allAllocations
-    if (selectedVertical) {
-      filteredData = filteredData.filter(a => a.vertical === selectedVertical)
-    }
-    if (selectedState) {
-      filteredData = filteredData.filter(a => a.state === selectedState)
-    }
-    setAllocations(filteredData)
-    setCurrentPage(1) // Reset to first page when filters change
+    if (allAllocations.length === 0) return
+    
+    setFilterLoading(true)
+    // Simulate filter processing delay
+    setTimeout(() => {
+      let filteredData = allAllocations
+      if (selectedVertical) {
+        filteredData = filteredData.filter(a => a.vertical === selectedVertical)
+      }
+      if (selectedState) {
+        filteredData = filteredData.filter(a => a.state === selectedState)
+      }
+      setAllocations(filteredData)
+      setCurrentPage(1) // Reset to first page when filters change
+      setFilterLoading(false)
+    }, 300)
   }, [allAllocations, selectedVertical, selectedState])
 
   // Pagination calculations
@@ -308,14 +317,11 @@ const AllocationManagement = () => {
               )}
 
               {/* Table Section */}
-              <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+              <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden relative">
                 {loading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <div className="flex flex-col items-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
-                      <p className="text-xs text-gray-600">Loading allocation details...</p>
-                    </div>
-                  </div>
+                  <Loader message="Loading allocation details..." color="blue" size="md" />
+                ) : filterLoading ? (
+                  <Loader message="Applying filters..." color="blue" size="md" overlay={true} />
                 ) : allocations.length === 0 ? (
                   <div className="flex items-center justify-center py-8">
                     <div className="text-center">
