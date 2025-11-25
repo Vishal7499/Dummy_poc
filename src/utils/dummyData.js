@@ -61,18 +61,22 @@ const generateDateRange = (fromDate, toDate) => {
 export async function dashboardApi(accessToken) {
   await delay(600)
   
+  const totalCases = random(75000, 120000)
+  const activeCases = random(45000, 70000)
+  const resolvedCases = random(30000, 50000)
+  
   return {
-    total_cases: random(50000, 100000),
-    active_cases: random(30000, 50000),
-    resolved_cases: random(20000, 40000),
-    total_collection: random(500000000, 2000000000),
-    today_collection: random(5000000, 50000000),
-    monthly_collection: random(100000000, 500000000),
-    collection_efficiency: randomFloat(65, 95),
-    staff_count: random(100, 500),
-    active_staff: random(80, 450),
-    pending_allocations: random(1000, 5000),
-    completed_allocations: random(5000, 20000)
+    total_cases: totalCases,
+    active_cases: activeCases,
+    resolved_cases: resolvedCases,
+    total_collection: random(800000000, 2500000000),
+    today_collection: random(10000000, 60000000),
+    monthly_collection: random(200000000, 800000000),
+    collection_efficiency: randomFloat(70, 95),
+    staff_count: random(150, 600),
+    active_staff: random(120, 550),
+    pending_allocations: random(2000, 8000),
+    completed_allocations: random(8000, 30000)
   }
 }
 
@@ -98,18 +102,19 @@ export async function dashboardCollectionGraphApi(accessToken, fromDate, toDate)
 export async function dashboardDepositionApi(accessToken, fromDate, toDate, page = 1, pageSize = 20) {
   await delay(500)
   
-  const totalRecords = random(100, 500)
+  const totalRecords = random(200, 800)
   const totalPages = Math.ceil(totalRecords / pageSize)
+  const actualPageSize = page === totalPages ? (totalRecords % pageSize || pageSize) : pageSize
   
-  const depositions = Array.from({ length: pageSize }, (_, i) => ({
+  const depositions = Array.from({ length: actualPageSize }, (_, i) => ({
     id: (page - 1) * pageSize + i + 1,
     case_id: `CASE${String((page - 1) * pageSize + i + 1).padStart(6, '0')}`,
-    customer_name: `Customer ${i + 1}`,
-    amount: random(50000, 500000),
-    date: new Date(Date.now() - random(0, 90) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    customer_name: `Customer ${(page - 1) * pageSize + i + 1}`,
+    amount: random(75000, 750000),
+    date: new Date(Date.now() - random(1, 90) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     status: ['Pending', 'Completed', 'In Progress'][random(0, 2)],
     loan_type: ['Home Loan', 'Tractor Finance', 'Commercial Vehicle', 'Construction Equipment'][random(0, 3)],
-    dpd: random(0, 180),
+    dpd: random(1, 180),
     branch: `Branch ${random(1, 50)}`,
     staff_name: `Staff ${random(1, 100)}`
   }))
@@ -177,11 +182,11 @@ export async function dashboardCollectionDataApi(accessToken, reportType, fromDa
       report_type: reportType,
       data: states.map(state => ({
         state,
-        total_cases: random(1000, 10000),
-        total_outstanding: random(50000000, 500000000),
-        collection_amount: random(10000000, 200000000),
-        efficiency: randomFloat(60, 95),
-        dpd_avg: random(30, 120)
+        total_cases: random(2000, 15000),
+        total_outstanding: random(80000000, 800000000),
+        collection_amount: random(20000000, 300000000),
+        efficiency: randomFloat(65, 95),
+        dpd_avg: random(35, 130)
       }))
     }
   }
@@ -191,11 +196,11 @@ export async function dashboardCollectionDataApi(accessToken, reportType, fromDa
       report_type: reportType,
       data: regions.map(region => ({
         region,
-        total_cases: random(5000, 30000),
-        total_outstanding: random(200000000, 2000000000),
-        collection_amount: random(50000000, 800000000),
-        efficiency: randomFloat(65, 95),
-        dpd_avg: random(25, 110)
+        total_cases: random(8000, 40000),
+        total_outstanding: random(300000000, 3000000000),
+        collection_amount: random(80000000, 1200000000),
+        efficiency: randomFloat(68, 96),
+        dpd_avg: random(30, 115)
       }))
     }
   }
@@ -205,23 +210,34 @@ export async function dashboardCollectionDataApi(accessToken, reportType, fromDa
       report_type: reportType,
       data: buckets.map(bucket => ({
         bucket,
-        total_cases: random(2000, 20000),
-        total_outstanding: random(100000000, 1000000000),
-        collection_amount: random(20000000, 400000000),
-        efficiency: randomFloat(50, 90),
-        percentage: randomFloat(5, 25)
+        total_cases: random(3000, 25000),
+        total_outstanding: random(150000000, 1500000000),
+        collection_amount: random(30000000, 600000000),
+        efficiency: randomFloat(55, 92),
+        percentage: randomFloat(8, 30)
       }))
     }
   }
   
-  return { report_type: reportType, data: [] }
+  // Default return with some data
+  return {
+    report_type: reportType,
+    data: states.slice(0, 3).map(state => ({
+      state,
+      total_cases: random(2000, 15000),
+      total_outstanding: random(80000000, 800000000),
+      collection_amount: random(20000000, 300000000),
+      efficiency: randomFloat(65, 95),
+      dpd_avg: random(35, 130)
+    }))
+  }
 }
 
 // Admin Users API replacement
 const generateDummyUsers = (count = 50) => {
-  const roles = ['admin', 'staff', 'user', 'manager']
-  const firstNames = ['Raj', 'Priya', 'Amit', 'Sneha', 'Vikram', 'Anjali', 'Rohit', 'Kavita', 'Suresh', 'Meera']
-  const lastNames = ['Sharma', 'Patel', 'Kumar', 'Singh', 'Gupta', 'Verma', 'Reddy', 'Nair', 'Desai', 'Joshi']
+  const roles = ['admin', 'staff', 'user', 'manager', 'supervisor', 'collector']
+  const firstNames = ['Raj', 'Priya', 'Amit', 'Sneha', 'Vikram', 'Anjali', 'Rohit', 'Kavita', 'Suresh', 'Meera', 'Pradeep', 'Kiran', 'Deepak', 'Sunita', 'Ramesh']
+  const lastNames = ['Sharma', 'Patel', 'Kumar', 'Singh', 'Gupta', 'Verma', 'Reddy', 'Nair', 'Desai', 'Joshi', 'Iyer', 'Menon', 'Rao', 'Shetty', 'Kamath']
   
   return Array.from({ length: count }, (_, i) => {
     const firstName = firstNames[random(0, firstNames.length - 1)]
@@ -236,9 +252,9 @@ const generateDummyUsers = (count = 50) => {
       email: `${username}@kotakbank.com`,
       mobile_number: `9${random(100000000, 999999999)}`,
       role: roles[random(0, roles.length - 1)],
-      is_active: random(0, 10) > 1,
-      created_at: new Date(Date.now() - random(0, 365) * 24 * 60 * 60 * 1000).toISOString(),
-      last_login: random(0, 5) > 2 ? new Date(Date.now() - random(0, 30) * 24 * 60 * 60 * 1000).toISOString() : null
+      is_active: random(0, 10) > 2, // More active users (70% active)
+      created_at: new Date(Date.now() - random(1, 365) * 24 * 60 * 60 * 1000).toISOString(),
+      last_login: random(0, 5) > 1 ? new Date(Date.now() - random(1, 30) * 24 * 60 * 60 * 1000).toISOString() : new Date(Date.now() - random(1, 7) * 24 * 60 * 60 * 1000).toISOString()
     }
   })
 }
@@ -246,18 +262,19 @@ const generateDummyUsers = (count = 50) => {
 export async function adminGetUsers(accessToken, page = 1, pageSize = 50) {
   await delay(500)
   
-  const allUsers = generateDummyUsers(200)
+  const totalUsers = random(250, 400)
+  const allUsers = generateDummyUsers(totalUsers)
   const startIndex = (page - 1) * pageSize
-  const endIndex = startIndex + pageSize
+  const endIndex = Math.min(startIndex + pageSize, allUsers.length)
   const users = allUsers.slice(startIndex, endIndex)
   
   return {
-    users,
+    users: users.length > 0 ? users : generateDummyUsers(pageSize), // Ensure at least some users
     pagination: {
       current_page: page,
       page_size: pageSize,
-      total_count: allUsers.length,
-      total_pages: Math.ceil(allUsers.length / pageSize),
+      total_count: totalUsers,
+      total_pages: Math.ceil(totalUsers / pageSize),
       has_next: endIndex < allUsers.length,
       has_previous: page > 1
     }
@@ -299,11 +316,15 @@ export async function adminDeleteUser(accessToken, username) {
 export async function adminGetDashboardStats(accessToken) {
   await delay(500)
   
+  const totalUsers = random(200, 400)
+  const activeUsers = random(150, totalUsers - 20)
+  const inactiveUsers = totalUsers - activeUsers
+  
   return {
-    total_users: random(150, 300),
-    active_users: random(120, 250),
-    inactive_users: random(10, 50),
-    recent_logins_24h: random(50, 200)
+    total_users: totalUsers,
+    active_users: activeUsers,
+    inactive_users: inactiveUsers > 0 ? inactiveUsers : random(10, 30),
+    recent_logins_24h: random(80, 250)
   }
 }
 
@@ -311,22 +332,23 @@ export async function adminGetDashboardStats(accessToken) {
 export async function adminGetActivityLogs(accessToken) {
   await delay(500)
   
-  const actions = ['Login', 'Logout', 'View Dashboard', 'Create User', 'Update User', 'Delete User', 'View Reports', 'Export Data']
-  const users = ['admin', 'staff1', 'user1', 'manager1', 'staff2', 'user2']
+  const actions = ['Login', 'Logout', 'View Dashboard', 'Create User', 'Update User', 'Delete User', 'View Reports', 'Export Data', 'Download Report', 'Upload File', 'View User Details', 'Edit Settings']
+  const users = ['admin', 'staff1', 'user1', 'manager1', 'staff2', 'user2', 'pradeepr', 'kotakadmin', 'supervisor1', 'collector1', 'collector2']
   
-  const logs = Array.from({ length: 100 }, (_, i) => ({
+  const logCount = random(150, 300)
+  const logs = Array.from({ length: logCount }, (_, i) => ({
     id: i + 1,
     username: users[random(0, users.length - 1)],
     action: actions[random(0, actions.length - 1)],
-    timestamp: new Date(Date.now() - random(0, 30) * 24 * 60 * 60 * 1000 - random(0, 86400000)).toISOString(),
-    ip_address: `${random(192, 223)}.${random(0, 255)}.${random(0, 255)}.${random(0, 255)}`,
-    user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    timestamp: new Date(Date.now() - random(1, 30) * 24 * 60 * 60 * 1000 - random(1, 86400000)).toISOString(),
+    ip_address: `${random(192, 223)}.${random(1, 255)}.${random(1, 255)}.${random(1, 255)}`,
+    user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
     status: random(0, 10) > 1 ? 'Success' : 'Failed'
   }))
   
   return {
     logs: logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)),
-    total_count: logs.length
+    total_count: logCount
   }
 }
 
@@ -334,14 +356,15 @@ export async function adminGetActivityLogs(accessToken) {
 export async function adminGetTodayUploadedFiles(accessToken) {
   await delay(400)
   
-  const files = Array.from({ length: random(5, 20) }, (_, i) => ({
+  const fileCount = random(8, 25)
+  const files = Array.from({ length: fileCount }, (_, i) => ({
     id: i + 1,
     filename: `upload_${new Date().toISOString().split('T')[0]}_${i + 1}.csv`,
-    uploaded_by: `user${random(1, 10)}`,
-    uploaded_at: new Date(Date.now() - random(0, 86400000)).toISOString(),
-    file_size: random(100000, 5000000),
+    uploaded_by: `user${random(1, 20)}`,
+    uploaded_at: new Date(Date.now() - random(1, 86400000)).toISOString(),
+    file_size: random(200000, 8000000),
     status: ['Completed', 'Processing', 'Failed'][random(0, 2)],
-    records_count: random(100, 10000)
+    records_count: random(500, 15000)
   }))
   
   return { files }
@@ -364,19 +387,20 @@ export async function adminSetMaintenanceMode(accessToken, enabled) {
 export async function adminGetAllocationDetails(accessToken) {
   await delay(500)
   
-  const allocations = Array.from({ length: random(50, 200) }, (_, i) => ({
+  const allocationCount = random(100, 300)
+  const allocations = Array.from({ length: allocationCount }, (_, i) => ({
     id: i + 1,
     case_id: `CASE${String(i + 1).padStart(6, '0')}`,
     customer_name: `Customer ${i + 1}`,
     loan_type: ['Home Loan', 'Tractor Finance', 'Commercial Vehicle', 'Construction Equipment'][random(0, 3)],
-    outstanding_amount: random(100000, 5000000),
-    dpd: random(0, 180),
-    allocated_by: `Manager ${random(1, 10)}`,
-    allocated_to: `Staff ${random(1, 50)}`,
-    allocated_date: new Date(Date.now() - random(0, 90) * 24 * 60 * 60 * 1000).toISOString(),
+    outstanding_amount: random(150000, 6000000),
+    dpd: random(1, 180),
+    allocated_by: `Manager ${random(1, 15)}`,
+    allocated_to: `Staff ${random(1, 80)}`,
+    allocated_date: new Date(Date.now() - random(1, 90) * 24 * 60 * 60 * 1000).toISOString(),
     status: ['Active', 'Completed', 'Pending'][random(0, 2)],
-    branch: `Branch ${random(1, 50)}`,
-    state: ['Maharashtra', 'Gujarat', 'Karnataka', 'Tamil Nadu'][random(0, 3)]
+    branch: `Branch ${random(1, 60)}`,
+    state: ['Maharashtra', 'Gujarat', 'Karnataka', 'Tamil Nadu', 'Rajasthan', 'Punjab', 'Haryana', 'Uttar Pradesh'][random(0, 7)]
   }))
   
   return { allocations }
@@ -399,12 +423,16 @@ export async function adminUpdateAllocationDetails(accessToken, caseId, allocate
 export async function adminBulkUploadCSV(accessToken, file) {
   await delay(1500)
   
+  const recordsProcessed = random(500, 8000)
+  const recordsSuccessful = random(recordsProcessed * 0.85, recordsProcessed * 0.98)
+  const recordsFailed = recordsProcessed - recordsSuccessful
+  
   return {
     message: 'File uploaded successfully',
     filename: file.name,
-    records_processed: random(100, 5000),
-    records_successful: random(80, 4500),
-    records_failed: random(0, 500),
+    records_processed: recordsProcessed,
+    records_successful: Math.floor(recordsSuccessful),
+    records_failed: Math.floor(recordsFailed) > 0 ? Math.floor(recordsFailed) : random(1, 50),
     uploaded_at: new Date().toISOString()
   }
 }
@@ -413,17 +441,17 @@ export async function adminBulkUploadCSV(accessToken, file) {
 export async function getActivitySummary(accessToken, username, fromDate, toDate) {
   await delay(500)
   
-  const users = username ? [username] : ['admin', 'staff1', 'user1', 'manager1', 'staff2']
+  const users = username ? [username] : ['admin', 'staff1', 'user1', 'manager1', 'staff2', 'pradeepr', 'kotakadmin', 'supervisor1']
   
   return {
     summary: users.map(u => ({
       username: u,
-      total_sessions: random(10, 100),
-      total_time_seconds: random(3600, 86400),
-      avg_session_duration: random(300, 3600),
-      last_activity: new Date(Date.now() - random(0, 7) * 24 * 60 * 60 * 1000).toISOString(),
-      pages_visited: random(50, 500),
-      actions_performed: random(100, 1000)
+      total_sessions: random(15, 150),
+      total_time_seconds: random(7200, 172800),
+      avg_session_duration: random(600, 5400),
+      last_activity: new Date(Date.now() - random(1, 7) * 24 * 60 * 60 * 1000).toISOString(),
+      pages_visited: random(80, 800),
+      actions_performed: random(200, 2000)
     })),
     period: {
       from_date: fromDate || '2025-01-01',
