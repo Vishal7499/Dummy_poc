@@ -7,7 +7,7 @@ import * as XLSX from 'xlsx'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
 import { useAuth } from '../contexts/AuthContext'
-import { dashboardApi, dashboardCollectionGraphApi, dashboardDepositionApi, dashboardDataApi, dashboardCollectionDataApi } from '../utils/api'
+import { generateDashboardData, generateCollectionGraphData, generateDepositionData, generateVerticalSummaryData, generateCollectionSummaryData, generateReportData } from '../utils/dashboardData'
 import { formatIndianNumber } from '../utils/formatters'
 import tractorFinanceImage from '../assets/Images/tractor_finance.png'
 import commercialVehicleImage from '../assets/Images/commercial_vehicle.png'
@@ -141,299 +141,158 @@ const Dashboard = () => {
   const isFetchingRef = useRef(false)
   const filtersRef = useRef(null)
 
-  // Fetch dashboard data from API when component mounts
+  // Generate dashboard data directly - no API calls
   useEffect(() => {
-    // Prevent duplicate API calls - check if already fetching or have data
-    if (isFetchingRef.current || dashboardData) {
+    if (!user) {
       return
     }
 
-    if (!user?.accessToken) {
-      // Wait for auth to load
-      return
-    }
+    // Generate data based on date filters
+    const data = generateDashboardData(fromDate, toDate)
+    setDashboardData(data)
+    setDashboardLoading(false)
+    setDashboardError(null)
+  }, [user, fromDate, toDate])
 
-    const fetchDashboardData = async () => {
-      // Mark as fetching to prevent duplicate calls
-      isFetchingRef.current = true
-
-      try {
-        setDashboardLoading(true)
-        setDashboardError(null)
-        const data = await dashboardApi(user.accessToken)
-        setDashboardData(data)
-        console.log('Dashboard data fetched:', data)
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error)
-        setDashboardError(error.message || 'Failed to fetch dashboard data')
-      } finally {
-        setDashboardLoading(false)
-        isFetchingRef.current = false
-      }
-    }
-
-    fetchDashboardData()
-  }, [user?.accessToken, dashboardData])
-
-  // Fetch collection graph data using dynamic date filters
+  // Generate collection graph data directly based on date filters
   useEffect(() => {
-    if (!user?.accessToken) {
+    if (!user) {
       return
     }
 
-    const fetchCollectionGraphData = async () => {
-      try {
-        setCollectionGraphLoading(true)
-        setCollectionGraphError(null)
+    const defaultFromDate = fromDate || '2025-01-01'
+    const defaultToDate = toDate || '2025-12-30'
 
-        const defaultFromDate = fromDate || '2025-01-01'
-        const defaultToDate = toDate || '2025-12-30'
+    const data = generateCollectionGraphData(defaultFromDate, defaultToDate)
+    setCollectionGraphData(data)
+    setCollectionGraphLoading(false)
+    setCollectionGraphError(null)
+  }, [user, fromDate, toDate])
 
-        console.log('Fetching collection graph data from:', defaultFromDate, 'to:', defaultToDate)
-
-        const data = await dashboardCollectionGraphApi(user.accessToken, defaultFromDate, defaultToDate)
-        setCollectionGraphData(data)
-        console.log('Collection graph data fetched:', data)
-        console.log('Collection graph data - from_date:', data?.from_date)
-        console.log('Collection graph data - to_date:', data?.to_date)
-        console.log('Collection graph data - day array:', data?.day)
-        console.log('Collection graph data - day array length:', data?.day?.length)
-        if (data?.day && data.day.length > 0) {
-          console.log('Sample day data:', data.day[0])
-          console.log('All dates in response:', data.day.map(d => d.date))
-        }
-      } catch (error) {
-        console.error('Error fetching collection graph data:', error)
-        setCollectionGraphError(error.message || 'Failed to fetch collection graph data')
-      } finally {
-        setCollectionGraphLoading(false)
-      }
-    }
-
-    fetchCollectionGraphData()
-  }, [user?.accessToken, fromDate, toDate])
-
-  // Fetch vertical summary data from dashboarddata API when Case Summary card is clicked
+  // Generate vertical summary data directly when Case Summary card is clicked
   useEffect(() => {
     if (selectedStaffMetric !== 'allocation') {
       return
     }
 
-    if (!user?.accessToken) {
+    if (!user) {
       return
     }
 
-    const fetchVerticalSummaryData = async () => {
-      try {
-        setVerticalDataLoading(true)
-        setVerticalDataError(null)
+    const defaultFromDate = fromDate || '2025-01-01'
+    const defaultToDate = toDate || '2025-12-30'
 
-        const defaultFromDate = fromDate || '2025-01-01'
-        const defaultToDate = toDate || '2025-12-30'
+    const data = generateVerticalSummaryData(defaultFromDate, defaultToDate)
 
-        console.log('Fetching vertical summary data from dashboarddata API from:', defaultFromDate, 'to:', defaultToDate)
-
-        const data = await dashboardDataApi(user.accessToken, 'ALL', defaultFromDate, defaultToDate)
-        console.log('Vertical summary data fetched:', data)
-
-        // Extract and transform the data
-        if (data && data['vertical summary']) {
-          const transformedSummary = data['vertical summary']
-            .filter(item => {
-              // Filter out "Totals" row as we calculate it ourselves
-              const vertical = item.VERTICAL || item.vertical || ''
-              return vertical && vertical.toLowerCase() !== 'totals'
-            })
-            .map(item => ({
-              product: item.VERTICAL || item.vertical || '',
-              total: item.TOTAL || item.total || 0,
-              good: item.GOOD || item.good || 0,
-              npa: item.NPA || item.npa || 0,
-              sma0: item.SMA0 || item.sma0 || 0,
-              sma1: item.SMA1 || item.sma1 || 0,
-              sma2: item.SMA2 || item.sma2 || 0
-            }))
-          setVerticalSummaryData(transformedSummary)
-        }
-
-        if (data && data['vertical allocation summary']) {
-          const transformedAllocation = data['vertical allocation summary']
-            .filter(item => {
-              // Filter out "Totals" row as we calculate it ourselves
-              const vertical = item.VERTICAL || item.vertical || ''
-              return vertical && vertical.toLowerCase() !== 'totals'
-            })
-            .map(item => ({
-              product: item.VERTICAL || item.vertical || '',
-              total: item.TOTAL || item.total || 0,
-              good: item.GOOD || item.good || 0,
-              npa: item.NPA || item.npa || 0,
-              sma0: item.SMA0 || item.sma0 || 0,
-              sma1: item.SMA1 || item.sma1 || 0,
-              sma2: item.SMA2 || item.sma2 || 0
-            }))
-          setVerticalAllocationData(transformedAllocation)
-        }
-
-        // Transform and store data for individual tables
-        const transformTableData = (tableData) => {
-          if (!tableData) return null
-          return tableData
-            .filter(item => {
-              const vertical = item.VERTICAL || item.vertical || ''
-              return vertical && vertical.toLowerCase() !== 'totals'
-            })
-            .map(item => ({
-              product: item.VERTICAL || item.vertical || '',
-              total: item.TOTAL || item.total || 0,
-              good: item.GOOD || item.good || 0,
-              npa: item.NPA || item.npa || 0,
-              sma0: item.SMA0 || item.sma0 || 0,
-              sma1: item.SMA1 || item.sma1 || 0,
-              sma2: item.SMA2 || item.sma2 || 0
-            }))
-        }
-
-        // Set data for each table
-        if (data && data.ACM) setAcmData(transformTableData(data.ACM))
-        if (data && data.ALLOCATION_ADMIN) setAllocationAdminData(transformTableData(data.ALLOCATION_ADMIN))
-        if (data && data.BO) setBoData(transformTableData(data.BO))
-        if (data && data.CLM) setClmData(transformTableData(data.CLM))
-        if (data && data.DTR) setDtrData(transformTableData(data.DTR))
-        if (data && data.NCM) setNcmData(transformTableData(data.NCM))
-        if (data && data.RCM) setRcmData(transformTableData(data.RCM))
-        if (data && data.TCM) setTcmData(transformTableData(data.TCM))
-      } catch (error) {
-        console.error('Error fetching vertical summary data:', error)
-        setVerticalDataError(error.message || 'Failed to fetch vertical summary data')
-      } finally {
-        setVerticalDataLoading(false)
-      }
+    // Transform the data
+    const transformTableData = (tableData) => {
+      if (!tableData) return null
+      return tableData.map(item => ({
+        product: item.product || '',
+        total: item.total || 0,
+        good: item.good || 0,
+        npa: item.npa || 0,
+        sma0: item.sma0 || 0,
+        sma1: item.sma1 || 0,
+        sma2: item.sma2 || 0
+      }))
     }
 
-    fetchVerticalSummaryData()
-  }, [selectedStaffMetric, user?.accessToken, fromDate, toDate])
+    if (data['vertical summary']) {
+      setVerticalSummaryData(transformTableData(data['vertical summary']))
+    }
 
-  // Fetch collection summary data from dashboardcollectiondata API when Collection Efficiency card is clicked
+    if (data['vertical allocation summary']) {
+      setVerticalAllocationData(transformTableData(data['vertical allocation summary']))
+    }
+
+    // Set data for each table
+    if (data.ACM) setAcmData(transformTableData(data.ACM))
+    if (data.ALLOCATION_ADMIN) setAllocationAdminData(transformTableData(data.ALLOCATION_ADMIN))
+    if (data.BO) setBoData(transformTableData(data.BO))
+    if (data.CLM) setClmData(transformTableData(data.CLM))
+    if (data.DTR) setDtrData(transformTableData(data.DTR))
+    if (data.NCM) setNcmData(transformTableData(data.NCM))
+    if (data.RCM) setRcmData(transformTableData(data.RCM))
+    if (data.TCM) setTcmData(transformTableData(data.TCM))
+
+    setVerticalDataLoading(false)
+    setVerticalDataError(null)
+  }, [selectedStaffMetric, user, fromDate, toDate])
+
+  // Generate collection summary data directly when Collection Efficiency card is clicked
   useEffect(() => {
     if (selectedStaffMetric !== 'collection') {
       return
     }
 
-    if (!user?.accessToken) {
+    if (!user) {
       return
     }
 
-    const fetchCollectionData = async () => {
-      try {
-        setCollectionDataLoading(true)
-        setCollectionDataError(null)
+    const defaultFromDate = fromDate || '2025-01-01'
+    const defaultToDate = toDate || '2025-12-30'
 
-        const defaultFromDate = fromDate || '2025-01-01'
-        const defaultToDate = toDate || '2025-12-30'
+    const data = generateCollectionSummaryData(defaultFromDate, defaultToDate)
 
-        console.log('Fetching collection summary data from:', defaultFromDate, 'to:', defaultToDate)
-
-        const data = await dashboardCollectionDataApi(user.accessToken, 'ALL', defaultFromDate, defaultToDate)
-        console.log('Collection summary data fetched:', data)
-
-        // Extract and transform the data
-        if (data && data['collection state wise summary']) {
-          const transformedStateData = data['collection state wise summary']
-            .filter(item => {
-              // Filter out "Totals" row as we calculate it ourselves
-              const state = item.STATE || item.state || ''
-              return state && state.toLowerCase() !== 'totals'
-            })
-            .map(item => ({
-              state: item.STATE || item.state || '',
-              totalCases: item.TotalCases || item.totalCases || 0,
-              outstandingBalance: item['Outstanding Balance (in Cr.)'] || item['Outstanding Balance (in Cr.)'] || item.outstandingBalance || 0,
-              resolutionCount: item['Resolution Count'] || item.resolutionCount || item['Resolution Count'] || 0,
-              resolutionCountPercent: item['Resolution Count%'] || item['Resolution Count%'] || item.resolutionCountPercent || 0,
-              resolutionAmount: item['Resolution Amount'] || item.resolutionAmount || item['Resolution Amount'] || 0,
-              resolutionAmountPercent: item['Resolution Amount %'] || item['Resolution Amount %'] || item.resolutionAmountPercent || 0
-            }))
-          setStateWiseData(transformedStateData)
-        }
-
-        if (data && data['collection location wise summary']) {
-          const transformedRegionData = data['collection location wise summary']
-            .filter(item => {
-              // Filter out "Totals" row as we calculate it ourselves
-              const location = item.LOCATION || item.location || ''
-              return location && location.toLowerCase() !== 'totals'
-            })
-            .map(item => ({
-              region: item.LOCATION || item.location || '',
-              cases: item.Cases || item.cases || 0,
-              outstandingBalance: item['Outstanding balance'] || item.outstandingBalance || 0,
-              resolutionCount: item['Resolution count'] || item.resolutionCount || 0,
-              resolutionCountPercent: item['Resolution Count%'] || item.resolutionCountPercent || 0,
-              resolutionAmount: item['Resolution amount'] || item.resolutionAmount || 0,
-              resolutionAmountPercent: item['Resolution Amount%'] || item.resolutionAmountPercent || 0
-            }))
-          setRegionWiseData(transformedRegionData)
-        }
-
-        if (data && data['collection bucket wise summary']) {
-          const transformedBucketData = data['collection bucket wise summary']
-            .filter(item => {
-              // Filter out "Totals" row as we calculate it ourselves
-              const bucket = item.BUCKET || item.bucket || ''
-              return bucket && bucket.toLowerCase() !== 'totals'
-            })
-            .map(item => ({
-              bucket: item.BUCKET || item.bucket || '',
-              cases: item.Cases || item.cases || 0,
-              outstandingBalance: item['Outstanding balance'] || item.outstandingBalance || 0,
-              resolutionCount: item['Resolution count'] || item.resolutionCount || 0,
-              resolutionCountPercent: item['Resolution Count%'] || item.resolutionCountPercent || 0,
-              resolutionAmount: item['Resolution amount'] || item.resolutionAmount || 0,
-              resolutionAmountPercent: item['Resolution Amount%'] || item.resolutionAmountPercent || 0
-            }))
-          setBucketWiseData(transformedBucketData)
-        }
-      } catch (error) {
-        console.error('Error fetching collection summary data:', error)
-        setCollectionDataError(error.message || 'Failed to fetch collection summary data')
-      } finally {
-        setCollectionDataLoading(false)
-      }
+    // Transform the data
+    if (data['collection state wise summary']) {
+      const transformedStateData = data['collection state wise summary'].map(item => ({
+        state: item.STATE || '',
+        totalCases: item.TotalCases || 0,
+        outstandingBalance: item['Outstanding Balance (in Cr.)'] || 0,
+        resolutionCount: item['Resolution Count'] || 0,
+        resolutionCountPercent: item['Resolution Count%'] || 0,
+        resolutionAmount: item['Resolution Amount'] || 0,
+        resolutionAmountPercent: item['Resolution Amount %'] || 0
+      }))
+      setStateWiseData(transformedStateData)
     }
 
-    fetchCollectionData()
-  }, [selectedStaffMetric, fromDate, toDate, user?.accessToken])
+    if (data['collection location wise summary']) {
+      const transformedRegionData = data['collection location wise summary'].map(item => ({
+        region: item.LOCATION || '',
+        cases: item.Cases || 0,
+        outstandingBalance: item['Outstanding balance'] || 0,
+        resolutionCount: item['Resolution count'] || 0,
+        resolutionCountPercent: item['Resolution Count%'] || 0,
+        resolutionAmount: item['Resolution amount'] || 0,
+        resolutionAmountPercent: item['Resolution Amount%'] || 0
+      }))
+      setRegionWiseData(transformedRegionData)
+    }
 
-  // Fetch deposition data
+    if (data['collection bucket wise summary']) {
+      const transformedBucketData = data['collection bucket wise summary'].map(item => ({
+        bucket: item.BUCKET || '',
+        cases: item.Cases || 0,
+        outstandingBalance: item['Outstanding balance'] || 0,
+        resolutionCount: item['Resolution count'] || 0,
+        resolutionCountPercent: item['Resolution Count%'] || 0,
+        resolutionAmount: item['Resolution amount'] || 0,
+        resolutionAmountPercent: item['Resolution Amount%'] || 0
+      }))
+      setBucketWiseData(transformedBucketData)
+    }
+
+    setCollectionDataLoading(false)
+    setCollectionDataError(null)
+  }, [selectedStaffMetric, user, fromDate, toDate])
+
+  // Generate deposition data directly
   useEffect(() => {
-    if (!user?.accessToken) {
+    if (!user) {
       return
     }
 
-    const fetchDepositionData = async () => {
-      try {
-        setDepositionLoading(true)
-        setDepositionError(null)
+    const defaultFromDate = fromDate || '2025-01-01'
+    const defaultToDate = toDate || '2025-12-30'
 
-        const defaultFromDate = fromDate || '2025-01-01'
-        const defaultToDate = toDate || '2025-12-30'
-
-        console.log('Fetching deposition data from:', defaultFromDate, 'to:', defaultToDate, 'page:', depositionCurrentPage, 'page_size:', depositionPageSize)
-
-        const data = await dashboardDepositionApi(user.accessToken, defaultFromDate, defaultToDate, depositionCurrentPage, depositionPageSize)
-        setDepositionData(data)
-        console.log('Deposition data fetched:', data)
-      } catch (error) {
-        console.error('Error fetching deposition data:', error)
-        setDepositionError(error.message || 'Failed to fetch deposition data')
-      } finally {
-        setDepositionLoading(false)
-      }
-    }
-
-    fetchDepositionData()
-  }, [depositionCurrentPage, depositionPageSize, user?.accessToken, fromDate, toDate])
+    const data = generateDepositionData(defaultFromDate, defaultToDate, depositionCurrentPage, depositionPageSize)
+    setDepositionData(data)
+    setDepositionLoading(false)
+    setDepositionError(null)
+  }, [depositionCurrentPage, depositionPageSize, user, fromDate, toDate])
 
   // Click outside handler for alerts dropdown, sidebar, and leaderboard table
   useEffect(() => {
@@ -4504,7 +4363,7 @@ const Dashboard = () => {
                     try {
                       setDashboardLoading(true)
                       setDashboardError(null)
-                      const data = await dashboardApi(user.accessToken)
+                      const data = generateDashboardData(fromDate, toDate)
                       setDashboardData(data)
                     } catch (error) {
                       setDashboardError(error.message || 'Failed to fetch dashboard data')
