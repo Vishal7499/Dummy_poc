@@ -7,16 +7,25 @@ import * as XLSX from 'xlsx'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
 import { useAuth } from '../contexts/AuthContext'
-import { generateDashboardData, generateCollectionGraphData, generateDepositionData, generateVerticalSummaryData, generateCollectionSummaryData, generateReportData } from '../utils/dashboardData'
+import { generateDashboardData, generateCollectionGraphData, generateDepositionData, generateVerticalSummaryData, generateCollectionSummaryData, generateReportData, generateRollRateData, generateCustomerEngagementData, generatePaymentIntentData } from '../utils/dashboardData'
 import { formatIndianNumber } from '../utils/formatters'
 import tractorFinanceImage from '../assets/Images/tractor_finance.png'
 import commercialVehicleImage from '../assets/Images/commercial_vehicle.png'
 import constructionEquipmentImage from '../assets/Images/construction_equipment.png'
 import homeLoanImage from '../assets/Images/home_loan.jpg'
+import caseSummaryImage from '../assets/Images/caseSummery.png'
+import collectionEfficiencyImage from '../assets/Images/ce.png'
+import ptpImage from '../assets/Images/ptp.png'
+import staffProductivityImage from '../assets/Images/staffP.png'
+import inactiveStaffImage from '../assets/Images/NPE.png'
 
 const Dashboard = () => {
   const navigate = useNavigate()
   const { user } = useAuth()
+  
+  // Helper function for random numbers
+  const random = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min
+  const randomFloat = (min, max) => Math.random() * (max - min) + min
   const [activeTab, setActiveTab] = useState('ftd')
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true)
@@ -26,7 +35,7 @@ const Dashboard = () => {
   const [selectedCaseMetric, setSelectedCaseMetric] = useState(null)
   const [selectedRollMetric, setSelectedRollMetric] = useState(null) // Track selected roll metric (rollForward, rollbackReport)
   const [selectedLoanType, setSelectedLoanType] = useState(null) // Track selected loan type for Case Summary
-  const [chartFilter, setChartFilter] = useState('ftd')
+  const [chartFilter, setChartFilter] = useState('wtd')
   const [rollRateAnalysisTab, setRollRateAnalysisTab] = useState('customerNumbers') // Track active tab in Roll Rate Analysis: 'customerNumbers', 'customerOutstanding', 'trendAnalysis'
   const leaderboardTableRef = useRef(null)
   const rollForwardRef = useRef(null)
@@ -106,6 +115,12 @@ const Dashboard = () => {
   const [bucketWiseData, setBucketWiseData] = useState(null)
   const [collectionDataLoading, setCollectionDataLoading] = useState(false)
   const [collectionDataError, setCollectionDataError] = useState(null)
+  // Roll Rate data state
+  const [rollRateData, setRollRateData] = useState(null)
+  // Customer Engagement data state
+  const [customerEngagementData, setCustomerEngagementData] = useState(null)
+  // Payment Intent data state
+  const [paymentIntentData, setPaymentIntentData] = useState(null)
   const itemsPerPage = 10
   // Initialize date filters - default to last 30 days
   const getDefaultFromDate = () => {
@@ -285,14 +300,54 @@ const Dashboard = () => {
       return
     }
 
-    const defaultFromDate = fromDate || '2025-01-01'
-    const defaultToDate = toDate || '2025-12-30'
+    // Fixed date range from screenshot: 2025-10-26 to 2025-11-25
+    const defaultFromDate = fromDate || '2025-10-26'
+    const defaultToDate = toDate || '2025-11-25'
 
     const data = generateDepositionData(defaultFromDate, defaultToDate, depositionCurrentPage, depositionPageSize)
     setDepositionData(data)
     setDepositionLoading(false)
     setDepositionError(null)
   }, [depositionCurrentPage, depositionPageSize, user, fromDate, toDate])
+
+  // Generate Roll Rate data directly
+  useEffect(() => {
+    if (!user) {
+      return
+    }
+
+    const defaultFromDate = fromDate || '2025-01-01'
+    const defaultToDate = toDate || '2025-12-30'
+
+    const data = generateRollRateData(defaultFromDate, defaultToDate)
+    setRollRateData(data)
+  }, [user, fromDate, toDate])
+
+  // Generate Customer Engagement data directly
+  useEffect(() => {
+    if (!user) {
+      return
+    }
+
+    const defaultFromDate = fromDate || '2025-01-01'
+    const defaultToDate = toDate || '2025-12-30'
+
+    const data = generateCustomerEngagementData(defaultFromDate, defaultToDate)
+    setCustomerEngagementData(data)
+  }, [user, fromDate, toDate])
+
+  // Generate Payment Intent data directly
+  useEffect(() => {
+    if (!user) {
+      return
+    }
+
+    const defaultFromDate = fromDate || '2025-01-01'
+    const defaultToDate = toDate || '2025-12-30'
+
+    const data = generatePaymentIntentData(defaultFromDate, defaultToDate)
+    setPaymentIntentData(data)
+  }, [user, fromDate, toDate])
 
   // Click outside handler for alerts dropdown, sidebar, and leaderboard table
   useEffect(() => {
@@ -310,7 +365,7 @@ const Dashboard = () => {
         const isInsideLeaderboardRef = leaderboardTableRef.current.contains(event.target)
 
         // For allocation and collection sections, never close if clicking inside the ref
-        if ((selectedStaffMetric === 'allocation' || selectedStaffMetric === 'collection') && isInsideLeaderboardRef) {
+        if ((selectedStaffMetric === 'allocation' || selectedStaffMetric === 'collection' || selectedStaffMetric === 'ptp') && isInsideLeaderboardRef) {
           return // Don't close - user clicked inside the section
         }
 
@@ -438,14 +493,46 @@ const Dashboard = () => {
     }
   }
 
-  const engagementData = {
-    whatsapp: { reached: 1245, engaged: 892, rate: 71.6 },
-    aiCalls: { total: 2100, connected: 1580, rate: 75.2 },
-    diallerCalls: { total: 1850, successful: 1340, rate: 72.4 }
+  // Use state data or generate default
+  const engagementDataForDisplay = customerEngagementData || {
+    whatsapp: { messagesSent: 1245, delivered: 1180, read: 892, responded: 650 },
+    aiCalls: { callsTriggered: 2100, answered: 1580, positiveResponse: 1200 },
+    diallerCalls: { totalCalls: 1850, successfulConnects: 1340, followUpActions: 980 },
+    fieldVisits: { plannedVisits: 156, completedVisits: 142, geotaggingCompliance: 138 }
   }
 
-  // Customer Engagement detailed data
-  const customerEngagementData = {
+  // Customer Engagement detailed data - use state or default
+  const customerEngagementDataForDisplay = customerEngagementData ? {
+    totalEngagement: (customerEngagementData.whatsapp.messagesSent || 0) + 
+                     (customerEngagementData.aiCalls.callsTriggered || 0) + 
+                     (customerEngagementData.diallerCalls.totalCalls || 0),
+    engagementBreakdown: {
+      whatsapp: customerEngagementData.whatsapp.messagesSent || 0,
+      blaster: random(100000, 300000),
+      aiCalls: customerEngagementData.aiCalls.callsTriggered || 0,
+      dialers: customerEngagementData.diallerCalls.totalCalls || 0
+    },
+    customerMetrics: {
+      totalCustomers: random(20000, 35000),
+      connectedCustomers: random(18000, 30000),
+      amountPromised: random(30000000, 50000000),
+      amountCollected: random(150000000, 200000000)
+    },
+    statusCards: {
+      promisedToPay: { accounts: random(1000, 2500), amount: random(30000000, 50000000) },
+      refusedToPay: { accounts: random(100, 300) },
+      alreadyPaid: { accounts: random(500, 1000), amount: random(5000000, 10000000) },
+      wrongNumber: { accounts: random(800, 1500) }
+    },
+    chartData: {
+      dates: Array.from({ length: 15 }, (_, i) => {
+        const date = new Date()
+        date.setDate(date.getDate() - (14 - i))
+        return date.toISOString().split('T')[0].split('-').reverse().join('-')
+      }),
+      values: Array.from({ length: 15 }, () => random(1, 15))
+    }
+  } : {
     totalEngagement: 764081,
     engagementBreakdown: {
       whatsapp: 349550,
@@ -467,7 +554,7 @@ const Dashboard = () => {
     },
     chartData: {
       dates: ['15-10-2025', '16-10-2025', '17-10-2025', '18-10-2025', '19-10-2025', '20-10-2025', '21-10-2025', '22-10-2025', '23-10-2025', '24-10-2025', '25-10-2025', '26-10-2025', '27-10-2025', '28-10-2025', '29-10-2025'],
-      values: [3, 4, 2, 5, 0, 0, 0, 0, 0, 1, 0, 0, 8, 0, 0]
+      values: [3, 4, 2, 5, 8, 6, 7, 9, 4, 11, 8, 12, 8, 10, 9]
     }
   }
 
@@ -490,7 +577,7 @@ const Dashboard = () => {
       enabled: false
     },
     xaxis: {
-      categories: customerEngagementData.chartData.dates,
+      categories: customerEngagementDataForDisplay.chartData.dates,
       labels: {
         style: {
           colors: '#407BFF',
@@ -523,7 +610,7 @@ const Dashboard = () => {
 
   const engagementChartSeries = [{
     name: 'Engagement',
-    data: customerEngagementData.chartData.values
+    data: customerEngagementDataForDisplay.chartData.values
   }]
 
   const paymentData = {
@@ -599,9 +686,18 @@ const Dashboard = () => {
     { id: 'EMP044', name: 'Rohit Jadhav', hierarchy: 'Collection Officer', hierarchyLevel: 4, parentId: 'EMP036', piCode: 'PI044', center: 'Nagpur', district: 'Nagpur', state: 'Maharashtra', loanType: 'Construction Equipment', region: 'West', customers: 63, due: 1380000, overdue: 440000, calls: 30, visits: 6, collected: 1250000, efficiency: 60, escalations: 4 }
   ]
 
-  // Hierarchical data structure for Collection Efficiency table
+  // Helper function to calculate PTP metrics
+  const calculatePTPMetrics = (baseData) => {
+    const totalPTPs = random(150, 600)
+    const ptpsFulfilled = Math.floor(totalPTPs * (baseData.efficiency / 100) * randomFloat(0.6, 0.9))
+    const pendingPTPs = totalPTPs - ptpsFulfilled
+    const ptpConversionRate = totalPTPs > 0 ? Math.round((ptpsFulfilled / totalPTPs) * 100 * 10) / 10 : 0
+    return { totalPTPs, ptpsFulfilled, pendingPTPs, ptpConversionRate }
+  }
+
+  // Hierarchical data structure for Collection Efficiency and PTP Conversion Rate tables
   // Hierarchy: GF (Group Fields) > BH (Business Head) > NCM > ZCM > RCM > ACM > CLM > TCM > DTR
-  const hierarchicalData = [
+  const hierarchicalDataBase = [
     // GF (Group Fields) - Level 0
     { id: 'GF001', name: 'Group Field North', hierarchy: 'GF', hierarchyLevel: 0, parentId: null, piCode: 'GF001', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'All', region: 'North', customers: 1250, due: 25000000, overdue: 2500000, calls: 450, visits: 120, collected: 20000000, efficiency: 88, escalations: 5 },
     { id: 'GF002', name: 'Group Field South', hierarchy: 'GF', hierarchyLevel: 0, parentId: null, piCode: 'GF002', center: 'Bangalore', district: 'Bangalore', state: 'Karnataka', loanType: 'All', region: 'South', customers: 1180, due: 24000000, overdue: 2200000, calls: 440, visits: 115, collected: 19500000, efficiency: 87, escalations: 4 },
@@ -674,6 +770,12 @@ const Dashboard = () => {
     { id: 'DTR001', name: 'DTR Delhi District 1', hierarchy: 'DTR', hierarchyLevel: 8, parentId: 'TCM001', piCode: 'DTR001', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 1, due: 20000, overdue: 2000, calls: 0, visits: 0, collected: 16000, efficiency: 88, escalations: 0 },
     { id: 'DTR002', name: 'DTR Delhi District 2', hierarchy: 'DTR', hierarchyLevel: 8, parentId: 'TCM001', piCode: 'DTR002', center: 'Delhi', district: 'Delhi', state: 'Delhi', loanType: 'Tractor', region: 'North', customers: 1, due: 20000, overdue: 2000, calls: 0, visits: 0, collected: 16000, efficiency: 88, escalations: 0 }
   ]
+
+  // Add PTP metrics to all hierarchical data entries
+  const hierarchicalData = hierarchicalDataBase.map(item => ({
+    ...item,
+    ...calculatePTPMetrics({ efficiency: item.efficiency })
+  }))
 
   // Mock customer data for each staff member
   const customerData = {
@@ -918,7 +1020,7 @@ const Dashboard = () => {
     }
   }
 
-  // Recursive function to render a row with its children
+  // Recursive function to render a row with its children for Collection Efficiency
   const renderHierarchicalRow = (staff, level = 0) => {
     const children = getChildren(staff.id, hierarchicalData)
     const hasChildren = children.length > 0
@@ -1005,9 +1107,159 @@ const Dashboard = () => {
     )
   }
 
+  // Recursive function to render a row with its children for Case Summary
+  const renderCaseSummaryHierarchicalRow = (staff, level = 0) => {
+    const children = getChildren(staff.id, hierarchicalData)
+    const hasChildren = children.length > 0
+    const isExpanded = expandedRows.has(staff.id)
+    const indentLevel = level * 20
+
+    return (
+      <React.Fragment key={staff.id}>
+        <tr 
+          className={`border-b border-gray-100 transition-colors ${hasChildren ? 'hover:bg-blue-50 cursor-pointer' : 'hover:bg-gray-50'}`}
+          onClick={(e) => {
+            if (hasChildren) {
+              e.stopPropagation()
+              toggleRowExpansion(staff.id)
+            }
+          }}
+        >
+          <td className="py-3 px-3 font-mono text-xs text-left whitespace-nowrap" style={{ paddingLeft: `${12 + indentLevel}px` }}>
+            <div className="flex items-center gap-2">
+              {hasChildren && (
+                <span className="text-blue-600">
+                  {isExpanded ? '▼' : '▶'}
+                </span>
+              )}
+              {staff.id}
+            </div>
+          </td>
+          <td className="py-3 px-3 font-medium text-left whitespace-nowrap">{staff.name}</td>
+          <td className="py-3 px-3 text-left whitespace-nowrap">
+            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getHierarchyColor(staff.hierarchy)}`}>
+              {staff.hierarchy} {hasChildren && `(${children.length})`}
+            </span>
+          </td>
+          <td className="py-3 px-3 text-left whitespace-nowrap font-mono text-xs">{staff.piCode}</td>
+          <td className="py-3 px-3 text-left whitespace-nowrap">{staff.center}</td>
+          <td className="py-3 px-3 text-left whitespace-nowrap">{staff.district}</td>
+          <td className="py-3 px-3 text-left whitespace-nowrap">{staff.state}</td>
+          <td className="py-3 px-3 text-left whitespace-nowrap">
+            <span className={`px-3 py-1 rounded text-xs font-medium ${staff.loanType === 'Tractor' ? 'bg-orange-100 text-orange-800' :
+                staff.loanType === 'Commercial Vehicle' ? 'bg-blue-100 text-blue-800' :
+                  staff.loanType === 'All' ? 'bg-gray-100 text-gray-800' :
+                    'bg-green-100 text-green-800'
+              }`}>
+              {staff.loanType}
+            </span>
+          </td>
+          <td className="py-3 px-3 text-left whitespace-nowrap">{staff.region}</td>
+          <td className="py-3 px-3 text-right font-medium whitespace-nowrap">
+            <button
+              data-customer-count-button
+              onClick={(e) => {
+                e.stopPropagation()
+                handleCustomerCountClick(staff)
+              }}
+              className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+            >
+              {staff.customers}
+            </button>
+          </td>
+          <td className="py-3 px-3 text-right font-medium whitespace-nowrap">₹{(staff.due / 100000).toFixed(1)}L</td>
+          <td className="py-3 px-3 text-right font-medium whitespace-nowrap">₹{(staff.overdue / 100000).toFixed(1)}L</td>
+          <td className="py-3 px-3 text-right whitespace-nowrap">{staff.calls}</td>
+          <td className="py-3 px-3 text-right whitespace-nowrap">{staff.visits}</td>
+          <td className="py-3 px-3 text-right font-medium whitespace-nowrap">₹{(staff.collected / 100000).toFixed(1)}L</td>
+          <td className="py-3 px-3 text-right whitespace-nowrap">
+            <span className={`font-semibold ${staff.efficiency >= 90 ? 'text-green-600' :
+                staff.efficiency >= 70 ? 'text-orange-600' :
+                  'text-red-600'
+              }`}>
+              {staff.efficiency}%
+            </span>
+          </td>
+        </tr>
+        {isExpanded && hasChildren && children.map(child => renderCaseSummaryHierarchicalRow(child, level + 1))}
+      </React.Fragment>
+    )
+  }
+
+  // Recursive function to render a row with its children for PTP Conversion Rate
+  const renderPTPHierarchicalRow = (staff, level = 0) => {
+    const children = getChildren(staff.id, hierarchicalData)
+    const hasChildren = children.length > 0
+    const isExpanded = expandedRows.has(staff.id)
+    const indentLevel = level * 20
+    const ptpData = {
+      totalPTPs: staff.totalPTPs || random(150, 600),
+      ptpsFulfilled: staff.ptpsFulfilled || random(100, 500),
+      pendingPTPs: staff.pendingPTPs || random(20, 150),
+      ptpConversionRate: staff.ptpConversionRate || randomFloat(65, 85)
+    }
+
+    return (
+      <React.Fragment key={staff.id}>
+        <tr 
+          className={`border-b border-gray-100 transition-colors ${hasChildren ? 'hover:bg-blue-50 cursor-pointer' : 'hover:bg-gray-50'}`}
+          onClick={(e) => {
+            if (hasChildren) {
+              e.stopPropagation()
+              toggleRowExpansion(staff.id)
+            }
+          }}
+        >
+          <td className="py-3 px-3 font-mono text-xs text-left whitespace-nowrap" style={{ paddingLeft: `${12 + indentLevel}px` }}>
+            <div className="flex items-center gap-2">
+              {hasChildren && (
+                <span className="text-blue-600">
+                  {isExpanded ? '▼' : '▶'}
+                </span>
+              )}
+              {staff.id}
+            </div>
+          </td>
+          <td className="py-3 px-3 font-medium text-left whitespace-nowrap">{staff.name}</td>
+          <td className="py-3 px-3 text-left whitespace-nowrap">
+            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getHierarchyColor(staff.hierarchy)}`}>
+              {staff.hierarchy} {hasChildren && `(${children.length})`}
+            </span>
+          </td>
+          <td className="py-3 px-3 text-left whitespace-nowrap font-mono text-xs">{staff.piCode}</td>
+          <td className="py-3 px-3 text-left whitespace-nowrap">{staff.center}</td>
+          <td className="py-3 px-3 text-left whitespace-nowrap">{staff.district}</td>
+          <td className="py-3 px-3 text-left whitespace-nowrap">{staff.state}</td>
+          <td className="py-3 px-3 text-left whitespace-nowrap">
+            <span className={`px-3 py-1 rounded text-xs font-medium ${staff.loanType === 'Tractor' ? 'bg-orange-100 text-orange-800' :
+                staff.loanType === 'Commercial Vehicle' ? 'bg-blue-100 text-blue-800' :
+                  staff.loanType === 'All' ? 'bg-gray-100 text-gray-800' :
+                    'bg-green-100 text-green-800'
+              }`}>
+              {staff.loanType}
+            </span>
+          </td>
+          <td className="py-3 px-3 text-left whitespace-nowrap">{staff.region}</td>
+          <td className="py-3 px-3 text-right font-medium whitespace-nowrap">{ptpData.totalPTPs.toLocaleString()}</td>
+          <td className="py-3 px-3 text-right font-medium whitespace-nowrap">{ptpData.ptpsFulfilled.toLocaleString()}</td>
+          <td className="py-3 px-3 text-right font-medium whitespace-nowrap">{ptpData.pendingPTPs.toLocaleString()}</td>
+          <td className="py-3 px-3 text-right whitespace-nowrap">
+            <span className={`font-semibold ${ptpData.ptpConversionRate >= 80 ? 'text-green-600' :
+                ptpData.ptpConversionRate >= 70 ? 'text-orange-600' :
+                  'text-red-600'
+              }`}>
+              {ptpData.ptpConversionRate.toFixed(1)}%
+            </span>
+          </td>
+        </tr>
+        {isExpanded && hasChildren && children.map(child => renderPTPHierarchicalRow(child, level + 1))}
+      </React.Fragment>
+    )
+  }
+
   const getFilteredStaffData = (metric) => {
-    // For collection metric, use hierarchical data
-    if (metric === 'collection') {
+    // For collection, ptp, and allocation metrics, use hierarchical data
+    if (metric === 'collection' || metric === 'ptp' || metric === 'allocation') {
       // Start with top level (GF - Group Fields)
       let baseFiltered = hierarchicalData.filter(item => item.hierarchyLevel === 0)
       
@@ -1048,36 +1300,90 @@ const Dashboard = () => {
       // Sort based on selected metric and sort order
       filtered.sort((a, b) => {
         let aValue, bValue
-        if (staffSortBy === 'efficiency') {
-          aValue = a.efficiency
-          bValue = b.efficiency
-        } else if (staffSortBy === 'collected') {
-          aValue = a.collected
-          bValue = b.collected
-        } else if (staffSortBy === 'customers') {
-          aValue = a.customers
-          bValue = b.customers
-        } else if (staffSortBy === 'due') {
-          aValue = a.due
-          bValue = b.due
-        } else if (staffSortBy === 'overdue') {
-          aValue = a.overdue
-          bValue = b.overdue
-        } else if (staffSortBy === 'calls') {
-          aValue = a.calls
-          bValue = b.calls
-        } else if (staffSortBy === 'visits') {
-          aValue = a.visits
-          bValue = b.visits
-        } else if (staffSortBy === 'name') {
-          aValue = a.name
-          bValue = b.name
-        } else if (staffSortBy === 'hierarchy') {
-          aValue = a.hierarchy
-          bValue = b.hierarchy
+        if (metric === 'ptp') {
+          // For PTP, sort by PTP conversion rate
+          if (staffSortBy === 'efficiency' || staffSortBy === 'ptpConversionRate') {
+            aValue = a.ptpConversionRate || 0
+            bValue = b.ptpConversionRate || 0
+          } else if (staffSortBy === 'ptpsFulfilled') {
+            aValue = a.ptpsFulfilled || 0
+            bValue = b.ptpsFulfilled || 0
+          } else if (staffSortBy === 'totalPTPs') {
+            aValue = a.totalPTPs || 0
+            bValue = b.totalPTPs || 0
+          } else if (staffSortBy === 'pendingPTPs') {
+            aValue = a.pendingPTPs || 0
+            bValue = b.pendingPTPs || 0
+          } else {
+            aValue = a.ptpConversionRate || 0
+            bValue = b.ptpConversionRate || 0
+          }
+        } else if (metric === 'allocation') {
+          // For allocation (Case Summary), sort by customers by default
+          if (staffSortBy === 'customers') {
+            aValue = a.customers
+            bValue = b.customers
+          } else if (staffSortBy === 'due') {
+            aValue = a.due
+            bValue = b.due
+          } else if (staffSortBy === 'overdue') {
+            aValue = a.overdue
+            bValue = b.overdue
+          } else if (staffSortBy === 'collected') {
+            aValue = a.collected
+            bValue = b.collected
+          } else if (staffSortBy === 'efficiency') {
+            aValue = a.efficiency
+            bValue = b.efficiency
+          } else if (staffSortBy === 'calls') {
+            aValue = a.calls
+            bValue = b.calls
+          } else if (staffSortBy === 'visits') {
+            aValue = a.visits
+            bValue = b.visits
+          } else if (staffSortBy === 'name') {
+            aValue = a.name
+            bValue = b.name
+          } else if (staffSortBy === 'hierarchy') {
+            aValue = a.hierarchy
+            bValue = b.hierarchy
+          } else {
+            aValue = a.customers
+            bValue = b.customers
+          }
         } else {
-          aValue = a.efficiency
-          bValue = b.efficiency
+          // For collection, use existing sorting
+          if (staffSortBy === 'efficiency') {
+            aValue = a.efficiency
+            bValue = b.efficiency
+          } else if (staffSortBy === 'collected') {
+            aValue = a.collected
+            bValue = b.collected
+          } else if (staffSortBy === 'customers') {
+            aValue = a.customers
+            bValue = b.customers
+          } else if (staffSortBy === 'due') {
+            aValue = a.due
+            bValue = b.due
+          } else if (staffSortBy === 'overdue') {
+            aValue = a.overdue
+            bValue = b.overdue
+          } else if (staffSortBy === 'calls') {
+            aValue = a.calls
+            bValue = b.calls
+          } else if (staffSortBy === 'visits') {
+            aValue = a.visits
+            bValue = b.visits
+          } else if (staffSortBy === 'name') {
+            aValue = a.name
+            bValue = b.name
+          } else if (staffSortBy === 'hierarchy') {
+            aValue = a.hierarchy
+            bValue = b.hierarchy
+          } else {
+            aValue = a.efficiency
+            bValue = b.efficiency
+          }
         }
 
         if (staffSortOrder === 'asc') {
@@ -2904,7 +3210,7 @@ const Dashboard = () => {
                   <th className="text-right py-2 px-2 font-semibold">Total Cases</th>
                   <th className="text-right py-2 px-2 font-semibold">Outstanding Balance (in Cr.)</th>
                   <th className="text-right py-2 px-2 font-semibold">Resolution Count</th>
-                  <th className="text-right py-2 px-2 font-semibold">Resolution Count%</th>
+                  <th className="text-center py-2 px-2 font-semibold">Resolution Count%</th>
                   <th className="text-right py-2 px-2 font-semibold">Resolution Amount</th>
                   <th className="text-right py-2 px-2 font-semibold">Resolution Amount %</th>
                 </tr>
@@ -2922,21 +3228,17 @@ const Dashboard = () => {
                         <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.totalCases || 0)}</td>
                         <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(parseFloat(row.outstandingBalance) || 0)}</td>
                         <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.resolutionCount || 0)}</td>
-                        <td className="py-2 px-2 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <div className="flex-1 max-w-[100px] bg-gray-200 rounded-full h-4 relative overflow-hidden">
+                        <td className="py-2 px-2 text-center">
+                          <div className="flex items-center justify-center">
+                            <div className="flex-1 max-w-[100px] bg-gray-200 rounded-full h-4 relative overflow-hidden flex items-center justify-center">
                               <div
-                                className="bg-green-500 h-4 rounded-full transition-all relative flex items-center justify-center"
+                                className="bg-green-500 h-4 rounded-full transition-all absolute left-0 top-0"
                                 style={{ width: `${Math.min(Math.max(parseFloat(row.resolutionCountPercent) || 0, 0), 100)}%`, minWidth: parseFloat(row.resolutionCountPercent) > 0 ? '2px' : '0' }}
-                              >
-                                {parseFloat(row.resolutionCountPercent) > 5 && (
-                                  <span className="text-[10px] text-white font-medium whitespace-nowrap">
-                                    {(parseFloat(row.resolutionCountPercent) || 0).toFixed(2)}%
-                                  </span>
-                                )}
-                              </div>
+                              ></div>
+                              <span className="text-[10px] text-black font-medium whitespace-nowrap relative z-10">
+                                {(parseFloat(row.resolutionCountPercent) || 0).toFixed(2)}%
+                              </span>
                             </div>
-                            <span className="text-gray-700 min-w-[50px] text-right font-medium text-xs">{(parseFloat(row.resolutionCountPercent) || 0).toFixed(2)}%</span>
                           </div>
                         </td>
                         <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(parseFloat(row.resolutionAmount) || 0)}</td>
@@ -2949,7 +3251,7 @@ const Dashboard = () => {
                         <td className="py-2 px-2 text-right">{formatIndianNumber(totals.totalCases)}</td>
                         <td className="py-2 px-2 text-right">{formatIndianNumber(totals.outstandingBalance)}</td>
                         <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionCount)}</td>
-                        <td className="py-2 px-2 text-right">{totalResolutionCountPercent}%</td>
+                        <td className="py-2 px-2 text-center">{totalResolutionCountPercent}%</td>
                         <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionAmount)}</td>
                         <td className="py-2 px-2 text-right">{totalResolutionAmountPercent}%</td>
                       </tr>
@@ -3032,7 +3334,7 @@ const Dashboard = () => {
                   <th className="text-right py-2 px-2 font-semibold">Cases</th>
                   <th className="text-right py-2 px-2 font-semibold">Outstanding balance</th>
                   <th className="text-right py-2 px-2 font-semibold">Resolution count</th>
-                  <th className="text-right py-2 px-2 font-semibold">Resolution Count%</th>
+                  <th className="text-center py-2 px-2 font-semibold">Resolution Count%</th>
                   <th className="text-right py-2 px-2 font-semibold">Resolution amount</th>
                   <th className="text-right py-2 px-2 font-semibold">Resolution Amount%</th>
                 </tr>
@@ -3050,21 +3352,17 @@ const Dashboard = () => {
                         <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.cases || 0)}</td>
                         <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(parseFloat(row.outstandingBalance) || 0)}</td>
                         <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.resolutionCount || 0)}</td>
-                        <td className="py-2 px-2 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <div className="flex-1 max-w-[100px] bg-gray-200 rounded-full h-4 relative overflow-hidden">
+                        <td className="py-2 px-2 text-center">
+                          <div className="flex items-center justify-center">
+                            <div className="flex-1 max-w-[100px] bg-gray-200 rounded-full h-4 relative overflow-hidden flex items-center justify-center">
                               <div
-                                className="bg-green-500 h-4 rounded-full transition-all relative flex items-center justify-center"
+                                className="bg-green-500 h-4 rounded-full transition-all absolute left-0 top-0"
                                 style={{ width: `${Math.min(Math.max(parseFloat(row.resolutionCountPercent) || 0, 0), 100)}%`, minWidth: parseFloat(row.resolutionCountPercent) > 0 ? '2px' : '0' }}
-                              >
-                                {parseFloat(row.resolutionCountPercent) > 5 && (
-                                  <span className="text-[10px] text-white font-medium whitespace-nowrap">
-                                    {(parseFloat(row.resolutionCountPercent) || 0).toFixed(2)}%
-                                  </span>
-                                )}
-                              </div>
+                              ></div>
+                              <span className="text-[10px] text-black font-medium whitespace-nowrap relative z-10">
+                                {(parseFloat(row.resolutionCountPercent) || 0).toFixed(2)}%
+                              </span>
                             </div>
-                            <span className="text-gray-700 min-w-[50px] text-right font-medium text-xs">{(parseFloat(row.resolutionCountPercent) || 0).toFixed(2)}%</span>
                           </div>
                         </td>
                         <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(parseFloat(row.resolutionAmount) || 0)}</td>
@@ -3077,7 +3375,7 @@ const Dashboard = () => {
                         <td className="py-2 px-2 text-right">{formatIndianNumber(totals.cases)}</td>
                         <td className="py-2 px-2 text-right">{formatIndianNumber(totals.outstandingBalance)}</td>
                         <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionCount)}</td>
-                        <td className="py-2 px-2 text-right">{totalResolutionCountPercent}%</td>
+                        <td className="py-2 px-2 text-center">{totalResolutionCountPercent}%</td>
                         <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionAmount)}</td>
                         <td className="py-2 px-2 text-right">{totalResolutionAmountPercent}%</td>
                       </tr>
@@ -3160,7 +3458,7 @@ const Dashboard = () => {
                   <th className="text-right py-2 px-2 font-semibold">Cases</th>
                   <th className="text-right py-2 px-2 font-semibold">Outstanding balance</th>
                   <th className="text-right py-2 px-2 font-semibold">Resolution count</th>
-                  <th className="text-right py-2 px-2 font-semibold">Resolution Count%</th>
+                  <th className="text-center py-2 px-2 font-semibold">Resolution Count%</th>
                   <th className="text-right py-2 px-2 font-semibold">Resolution amount</th>
                   <th className="text-right py-2 px-2 font-semibold">Resolution Amount%</th>
                 </tr>
@@ -3178,21 +3476,17 @@ const Dashboard = () => {
                         <td className={`py-2 px-2 text-right ${row.bucket === 'X bucket = 1-30' || row.bucket === '>180' ? 'bg-yellow-100 font-semibold' : 'text-gray-700'}`}>{formatIndianNumber(row.cases || 0)}</td>
                         <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(parseFloat(row.outstandingBalance) || 0)}</td>
                         <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(row.resolutionCount || 0)}</td>
-                        <td className="py-2 px-2 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <div className="flex-1 max-w-[100px] bg-gray-200 rounded-full h-4 relative overflow-hidden">
+                        <td className="py-2 px-2 text-center">
+                          <div className="flex items-center justify-center">
+                            <div className="flex-1 max-w-[100px] bg-gray-200 rounded-full h-4 relative overflow-hidden flex items-center justify-center">
                               <div
-                                className="bg-green-500 h-4 rounded-full transition-all relative flex items-center justify-center"
+                                className="bg-green-500 h-4 rounded-full transition-all absolute left-0 top-0"
                                 style={{ width: `${Math.min(Math.max(parseFloat(row.resolutionCountPercent) || 0, 0), 100)}%`, minWidth: parseFloat(row.resolutionCountPercent) > 0 ? '2px' : '0' }}
-                              >
-                                {parseFloat(row.resolutionCountPercent) > 5 && (
-                                  <span className="text-[10px] text-white font-medium whitespace-nowrap">
-                                    {(parseFloat(row.resolutionCountPercent) || 0).toFixed(2)}%
-                                  </span>
-                                )}
-                              </div>
+                              ></div>
+                              <span className="text-[10px] text-black font-medium whitespace-nowrap relative z-10">
+                                {(parseFloat(row.resolutionCountPercent) || 0).toFixed(2)}%
+                              </span>
                             </div>
-                            <span className="text-gray-700 min-w-[50px] text-right font-medium text-xs">{(parseFloat(row.resolutionCountPercent) || 0).toFixed(2)}%</span>
                           </div>
                         </td>
                         <td className="py-2 px-2 text-right text-gray-700">{formatIndianNumber(parseFloat(row.resolutionAmount) || 0)}</td>
@@ -3205,7 +3499,7 @@ const Dashboard = () => {
                         <td className="py-2 px-2 text-right">{formatIndianNumber(totals.cases)}</td>
                         <td className="py-2 px-2 text-right">{formatIndianNumber(totals.outstandingBalance)}</td>
                         <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionCount)}</td>
-                        <td className="py-2 px-2 text-right">{totalResolutionCountPercent}%</td>
+                        <td className="py-2 px-2 text-center">{totalResolutionCountPercent}%</td>
                         <td className="py-2 px-2 text-right">{formatIndianNumber(totals.resolutionAmount)}</td>
                         <td className="py-2 px-2 text-right">{totalResolutionAmountPercent}%</td>
                       </tr>
@@ -4663,7 +4957,7 @@ const Dashboard = () => {
                           return (
                             <div key={cardId} className="group bg-white  rounded-lg p-3 cursor-pointer transition-all duration-300 h-20 relative shadow-lg card-with-wave card-wave-staff">
                               <div className="text-xs text-gray-800 relative z-10">Deposition</div>
-                              <div className="text-lg font-bold relative z-10" style={{ color: '#DC2626' }}>{depositionData?.pagination?.total_count || 0}</div>
+                              <div className="text-lg font-bold relative z-10" style={{ color: '#DC2626' }}>{dashboardData?.case_summary_count || depositionData?.pagination?.total_count || random(5000, 15000)}</div>
                               {renderFavoritePin('deposition')}
                             </div>
                           )
@@ -4675,11 +4969,19 @@ const Dashboard = () => {
                               <div className="space-y-1 relative z-10">
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Messages Sent</span>
-                                  <span className="font-semibold" style={{ color: '#003366' }}>1,245</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.whatsapp?.messagesSent || 234599).toLocaleString()}</span>
                                 </div>
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Delivered</span>
-                                  <span className="font-semibold" style={{ color: '#003366' }}>1,180</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.whatsapp?.delivered || 220400).toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between text-xs text-gray-800">
+                                  <span>Read</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.whatsapp?.read || 185750).toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between text-xs text-gray-800">
+                                  <span>Responded</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.whatsapp?.responded || 130299).toLocaleString()}</span>
                                 </div>
                               </div>
                             </div>
@@ -4692,11 +4994,15 @@ const Dashboard = () => {
                               <div className="space-y-1 relative z-10">
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Calls Triggered</span>
-                                  <span className="font-semibold" style={{ color: '#003366' }}>2,100</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.aiCalls?.callsTriggered || 125677).toLocaleString()}</span>
                                 </div>
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Answered</span>
-                                  <span className="font-semibold" style={{ color: '#003366' }}>1,580</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.aiCalls?.answered || 120455).toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between text-xs text-gray-800">
+                                  <span>Positive Response</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.aiCalls?.positiveResponse || 81473).toLocaleString()}</span>
                                 </div>
                               </div>
                             </div>
@@ -4709,11 +5015,15 @@ const Dashboard = () => {
                               <div className="space-y-1 relative z-10">
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Total Calls</span>
-                                  <span className="font-semibold" style={{ color: '#003366' }}>1,850</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.diallerCalls?.totalCalls || 60987).toLocaleString()}</span>
                                 </div>
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Successful Connects</span>
-                                  <span className="font-semibold" style={{ color: '#003366' }}>1,340</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.diallerCalls?.successfulConnects || 55854).toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between text-xs text-gray-800">
+                                  <span>Follow-up Actions</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.diallerCalls?.followUpActions || 38895).toLocaleString()}</span>
                                 </div>
                               </div>
                             </div>
@@ -4726,11 +5036,15 @@ const Dashboard = () => {
                               <div className="space-y-1 relative z-10">
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Planned Visits</span>
-                                  <span className="font-semibold" style={{ color: '#003366' }}>156</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.fieldVisits?.plannedVisits || 30870).toLocaleString()}</span>
                                 </div>
                                 <div className="flex justify-between text-xs text-gray-800">
                                   <span>Completed Visits</span>
-                                  <span className="font-semibold" style={{ color: '#003366' }}>122</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.fieldVisits?.completedVisits || 22903).toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between text-xs text-gray-800">
+                                  <span>Geo-tagging Compliance</span>
+                                  <span className="font-semibold" style={{ color: '#003366' }}>{customerEngagementData?.fieldVisits?.geotaggingCompliance !== null && customerEngagementData?.fieldVisits?.geotaggingCompliance !== undefined ? customerEngagementData.fieldVisits.geotaggingCompliance.toLocaleString() : '-'}</span>
                                 </div>
                               </div>
                             </div>
@@ -4864,6 +5178,7 @@ const Dashboard = () => {
                       }}
                     >
                       {renderFavoritePin('allocation')}
+                      <img src={caseSummaryImage} alt="Case Summary" className="absolute top-2 right-2 w-12 h-12 object-contain opacity-80 z-0" />
                       <div className="text-xs text-gray-800 relative z-10">Case Summary</div>
                       <div className="text-lg font-bold relative z-10" style={{ color: '#DC2626' }}>{formatIndianNumber(dashboardData?.loan_data?.total_loans)}</div>
                       {expandedCard === 'allocation' && (
@@ -4908,12 +5223,13 @@ const Dashboard = () => {
                       }}
                     >
                       {renderFavoritePin('collection')}
+                      <img src={collectionEfficiencyImage} alt="Collection Efficiency" className="absolute top-2 right-2 w-12 h-12 object-contain opacity-80 z-0" />
                       <div className="text-xs text-gray-800 relative z-10">Collection Efficiency (%)</div>
-                      <div className="text-lg font-bold relative z-10" style={{ color: '#DC2626' }}>{dashboardData?.collection_data?.collection_percentage}%</div>
+                      <div className="text-lg font-bold relative z-10" style={{ color: '#DC2626' }}>{dashboardData?.collection_data?.collection_percentage || random(75, 92)}%</div>
                       {expandedCard === 'collection' && (
                         <div className="card-expanded-content">
                           <div className="text-xs text-gray-800 mb-1">Collection Efficiency (%)</div>
-                          <div className="text-lg font-bold mb-2" style={{ color: '#DC2626' }}>{dashboardData?.collection_data?.collection_percentage}%</div>
+                          <div className="text-lg font-bold mb-2" style={{ color: '#DC2626' }}>{dashboardData?.collection_data?.collection_percentage || random(75, 92)}%</div>
                           <div className="space-y-1">
                             <div className="flex justify-between text-xs text-gray-800">
                               <span>Amount Collected:</span>
@@ -4944,6 +5260,7 @@ const Dashboard = () => {
                       }}
                     >
                       {renderFavoritePin('ptp')}
+                      <img src={ptpImage} alt="PTP Conversion Rate" className="absolute top-2 right-2 w-12 h-12 object-contain opacity-80 z-0" />
                       <div className="text-xs text-gray-800 relative z-10">PTP Conversion Rate (%)</div>
                       <div className="text-lg font-bold relative z-10" style={{ color: '#DC2626' }}>72.3%</div>
                       {expandedCard === 'ptp' && (
@@ -4980,6 +5297,7 @@ const Dashboard = () => {
                       }}
                     >
                       {renderFavoritePin('productivity')}
+                      <img src={staffProductivityImage} alt="Staff Productivity Index" className="absolute top-2 right-2 w-12 h-12 object-contain opacity-80 z-0" />
                       <div className="text-xs text-gray-800 relative z-10">Staff Productivity Index</div>
                       <div className="text-lg font-bold relative z-10" style={{ color: '#DC2626' }}>156</div>
                       {expandedCard === 'productivity' && (
@@ -4996,8 +5314,6 @@ const Dashboard = () => {
                               <span style={{ color: '#DC2626' }}>89</span>
                             </div>
                             <div className="flex justify-between text-xs text-gray-800">
-                              <span>Weight:</span>
-                              <span style={{ color: '#DC2626' }}>1.2x</span>
                             </div>
                           </div>
                         </div>
@@ -5016,6 +5332,7 @@ const Dashboard = () => {
                       }}
                     >
                       {renderFavoritePin('inactive')}
+                      <img src={inactiveStaffImage} alt="Inactive/Non-performing Staff" className="absolute top-2 right-2 w-12 h-12 object-contain opacity-80 z-0" />
                       <div className="absolute top-0 right-0 bg-red-600 text-white text-xs rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center font-bold z-20 shadow-sm">3</div>
                       <div className="text-xs text-gray-800 relative z-10">Inactive/Non-performing Staff</div>
                       <div className="text-lg font-bold relative z-10" style={{ color: '#DC2626' }}>3</div>
@@ -5251,6 +5568,147 @@ const Dashboard = () => {
                             </div>
                           </div>
                         </div>
+
+                        {/* Case Summary Hierarchical Table */}
+                        <div className="mt-6 lg:col-span-2">
+                          <div ref={leaderboardTableRef} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm w-full" style={{ maxWidth: '100%', overflow: 'hidden', boxSizing: 'border-box' }}>
+                            {/* Header with Title */}
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                              <h2 className="text-xl font-semibold text-gray-900">Case Summary Table</h2>
+
+                              {/* Search and Filter Controls */}
+                              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                                <input
+                                  type="text"
+                                  placeholder="Search by ID, Name, PI Code, Center, Dist"
+                                  value={staffSearchTerm}
+                                  onChange={(e) => setStaffSearchTerm(e.target.value)}
+                                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm w-full sm:w-80 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                                <select
+                                  value={staffSortBy}
+                                  onChange={(e) => setStaffSortBy(e.target.value)}
+                                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                  <option value="customers">Sort by Customers</option>
+                                  <option value="due">Sort by Due Amount</option>
+                                  <option value="overdue">Sort by Overdue Amount</option>
+                                  <option value="collected">Sort by Collected Amount</option>
+                                  <option value="efficiency">Sort by Efficiency</option>
+                                  <option value="calls">Sort by Calls</option>
+                                  <option value="visits">Sort by Visits</option>
+                                  <option value="name">Sort by Name</option>
+                                  <option value="hierarchy">Sort by Hierarchy</option>
+                                </select>
+                                <select
+                                  value={staffSortOrder}
+                                  onChange={(e) => setStaffSortOrder(e.target.value)}
+                                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                  <option value="desc">Descending</option>
+                                  <option value="asc">Ascending</option>
+                                </select>
+                                <button
+                                  onClick={handleExportToExcel}
+                                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors cursor-pointer flex items-center gap-2"
+                                  title="Export to Excel"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                  </svg>
+                                  Export
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Scrollable Table Container */}
+                            <div className="border border-gray-200 rounded-lg overflow-hidden" style={{ maxWidth: '100%' }}>
+                              <div className="overflow-x-auto" style={{ maxWidth: '100%' }}>
+                                <table className="w-full text-sm" style={{ tableLayout: 'auto', width: '100%' }}>
+                                  <thead>
+                                    <tr className="text-gray-600 border-b border-gray-200 bg-gray-50">
+                                      <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Emp ID</th>
+                                      <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Name</th>
+                                      <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Hierarchy</th>
+                                      <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">PI Code</th>
+                                      <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Center</th>
+                                      <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">District</th>
+                                      <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">State</th>
+                                      <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Loan Type</th>
+                                      <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Region</th>
+                                      <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Customers</th>
+                                      <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Due</th>
+                                      <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Overdue</th>
+                                      <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Calls</th>
+                                      <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Visits</th>
+                                      <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Collected</th>
+                                      <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Efficiency (%)</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {paginatedStaffData.length === 0 ? (
+                                      <tr>
+                                        <td colSpan={16} className="py-8 text-center text-gray-500">
+                                          No data available
+                                        </td>
+                                      </tr>
+                                    ) : (
+                                      paginatedStaffData.map((staff) => renderCaseSummaryHierarchicalRow(staff, 0))
+                                    )}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+
+                            {/* Pagination */}
+                            <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
+                              <div className="text-sm text-gray-600">
+                                Showing {staffStartIndex + 1} to {Math.min(staffStartIndex + staffItemsPerPage, filteredStaffData.length)} of {filteredStaffData.length} entries
+                              </div>
+                              <div className="flex space-x-2">
+                                <button
+                                  onClick={() => setStaffCurrentPage(Math.max(1, staffCurrentPage - 1))}
+                                  disabled={staffCurrentPage === 1}
+                                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors cursor-pointer"
+                                >
+                                  Previous
+                                </button>
+                                {Array.from({ length: Math.min(staffTotalPages, 5) }, (_, i) => {
+                                  let pageNum
+                                  if (staffTotalPages <= 5) {
+                                    pageNum = i + 1
+                                  } else if (staffCurrentPage <= 3) {
+                                    pageNum = i + 1
+                                  } else if (staffCurrentPage >= staffTotalPages - 2) {
+                                    pageNum = staffTotalPages - 4 + i
+                                  } else {
+                                    pageNum = staffCurrentPage - 2 + i
+                                  }
+                                  return (
+                                    <button
+                                      key={pageNum}
+                                      onClick={() => setStaffCurrentPage(pageNum)}
+                                      className={`px-4 py-2 border rounded-lg text-sm transition-colors cursor-pointer ${
+                                        staffCurrentPage === pageNum
+                                          ? 'bg-blue-600 text-white border-blue-600'
+                                          : 'border-gray-300 hover:bg-gray-50'
+                                      }`}
+                                    >
+                                      {pageNum}
+                                    </button>
+                                  )
+                                })}
+                                <button
+                                  onClick={() => setStaffCurrentPage(Math.min(staffTotalPages, staffCurrentPage + 1))}
+                                  disabled={staffCurrentPage >= staffTotalPages}
+                                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors cursor-pointer"
+                                >
+                                  Next
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </>
                     )}
                   </div>
@@ -5316,6 +5774,148 @@ const Dashboard = () => {
                         </div>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* PTP Conversion Rate Hierarchical Table - Show when ptp card is clicked */}
+                {selectedStaffMetric === 'ptp' && (
+                  <div ref={leaderboardTableRef} className="mb-8 bg-white border border-gray-200 rounded-lg p-6 shadow-sm w-full" style={{ maxWidth: '100%', overflow: 'hidden', boxSizing: 'border-box' }}>
+                    {/* Header with Title and Close Button */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                      <h2 className="text-xl font-semibold text-gray-900">{getCardName(selectedStaffMetric)}</h2>
+
+                      {/* Search and Filter Controls */}
+                      <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        <input
+                          type="text"
+                          placeholder="Search by ID, Name, PI Code, Center, Dist"
+                          value={staffSearchTerm}
+                          onChange={(e) => setStaffSearchTerm(e.target.value)}
+                          className="px-4 py-2 border border-gray-300 rounded-lg text-sm w-full sm:w-80 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                        <select
+                          value={staffSortBy}
+                          onChange={(e) => setStaffSortBy(e.target.value)}
+                          className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="ptpConversionRate">Sort by PTP Conversion Rate</option>
+                          <option value="ptpsFulfilled">Sort by PTPs Fulfilled</option>
+                          <option value="totalPTPs">Sort by Total PTPs</option>
+                          <option value="pendingPTPs">Sort by Pending PTPs</option>
+                          <option value="name">Sort by Name</option>
+                          <option value="hierarchy">Sort by Hierarchy</option>
+                        </select>
+                        <select
+                          value={staffSortOrder}
+                          onChange={(e) => setStaffSortOrder(e.target.value)}
+                          className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="desc">Descending</option>
+                          <option value="asc">Ascending</option>
+                        </select>
+                        <button
+                          onClick={handleExportToExcel}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors cursor-pointer flex items-center gap-2"
+                          title="Export to Excel"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          Export
+                        </button>
+                        <button
+                          onClick={() => setSelectedStaffMetric(null)}
+                          className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                          aria-label="Close PTP table"
+                        >
+                          Close
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Scrollable Table Container */}
+                    <div className="border border-gray-200 rounded-lg overflow-hidden" style={{ maxWidth: '100%' }}>
+                      <div className="overflow-x-auto" style={{ maxWidth: '100%' }}>
+                        <table className="w-full text-sm" style={{ tableLayout: 'auto', width: '100%' }}>
+                          <thead>
+                            <tr className="text-gray-600 border-b border-gray-200 bg-gray-50">
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Emp ID</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Name</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Hierarchy</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">PI Code</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Center</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">District</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">State</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Loan Type</th>
+                              <th className="text-left py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Region</th>
+                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Total PTPs</th>
+                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">PTPs Fulfilled</th>
+                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">Pending PTPs</th>
+                              <th className="text-right py-4 px-3 font-semibold bg-gray-50 whitespace-nowrap">PTP Conversion Rate (%)</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {paginatedStaffData.length === 0 ? (
+                              <tr>
+                                <td colSpan={13} className="py-8 text-center text-gray-500">
+                                  No data available
+                                </td>
+                              </tr>
+                            ) : (
+                              paginatedStaffData.map((staff) => renderPTPHierarchicalRow(staff, 0))
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* Pagination */}
+                    <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
+                      <div className="text-sm text-gray-600">
+                        Showing {staffStartIndex + 1} to {Math.min(staffStartIndex + staffItemsPerPage, filteredStaffData.length)} of {filteredStaffData.length} entries
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => setStaffCurrentPage(Math.max(1, staffCurrentPage - 1))}
+                          disabled={staffCurrentPage === 1}
+                          className="px-4 py-2 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors cursor-pointer"
+                        >
+                          Previous
+                        </button>
+                        {Array.from({ length: Math.min(staffTotalPages, 5) }, (_, i) => {
+                          let pageNum
+                          if (staffTotalPages <= 5) {
+                            pageNum = i + 1
+                          } else if (staffCurrentPage <= 3) {
+                            pageNum = i + 1
+                          } else if (staffCurrentPage >= staffTotalPages - 2) {
+                            pageNum = staffTotalPages - 4 + i
+                          } else {
+                            pageNum = staffCurrentPage - 2 + i
+                          }
+                          return (
+                            <button
+                              key={pageNum}
+                              onClick={() => setStaffCurrentPage(pageNum)}
+                              className={`px-4 py-2 border rounded-lg text-sm transition-colors cursor-pointer ${
+                                staffCurrentPage === pageNum
+                                  ? 'bg-blue-600 text-white border-blue-600'
+                                  : 'border-gray-300 hover:bg-gray-50'
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          )
+                        })}
+                        <button
+                          onClick={() => setStaffCurrentPage(Math.min(staffTotalPages, staffCurrentPage + 1))}
+                          disabled={staffCurrentPage >= staffTotalPages}
+                          className="px-4 py-2 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors cursor-pointer"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -6272,19 +6872,19 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Messages Sent</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.whatsapp?.messagesSent || engagementDataForDisplay?.whatsapp?.messagesSent || random(5000, 20000)).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Delivered</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.whatsapp?.delivered || engagementDataForDisplay?.whatsapp?.delivered || random(4500, 19000)).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Read</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.whatsapp?.read || engagementDataForDisplay?.whatsapp?.read || random(3500, 15000)).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Responded</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.whatsapp?.responded || engagementDataForDisplay?.whatsapp?.responded || random(2000, 10000)).toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
@@ -6302,15 +6902,15 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Calls Triggered</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.aiCalls?.callsTriggered || engagementDataForDisplay?.aiCalls?.callsTriggered || random(3000, 15000)).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Answered</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.aiCalls?.answered || engagementDataForDisplay?.aiCalls?.answered || random(2000, 12000)).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Positive Response</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.aiCalls?.positiveResponse || engagementDataForDisplay?.aiCalls?.positiveResponse || random(1500, 9000)).toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
@@ -6328,15 +6928,15 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Total Calls</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.diallerCalls?.totalCalls || engagementDataForDisplay?.diallerCalls?.totalCalls || random(4000, 18000)).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Successful Connects</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.diallerCalls?.successfulConnects || engagementDataForDisplay?.diallerCalls?.successfulConnects || random(2800, 14000)).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Follow-up Actions</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.diallerCalls?.followUpActions || engagementDataForDisplay?.diallerCalls?.followUpActions || random(1500, 8000)).toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
@@ -6354,15 +6954,15 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Planned Visits</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.fieldVisits?.plannedVisits || engagementDataForDisplay?.fieldVisits?.plannedVisits || random(500, 3000)).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Completed Visits</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.fieldVisits?.completedVisits || engagementDataForDisplay?.fieldVisits?.completedVisits || random(400, 2500)).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Geo-tagging Compliance</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>{(customerEngagementData?.fieldVisits?.geotaggingCompliance || engagementDataForDisplay?.fieldVisits?.geotaggingCompliance || random(350, 2200)).toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
@@ -6414,7 +7014,7 @@ const Dashboard = () => {
                           <div className="flex items-center justify-between mb-4">
                             <div className="text-sm font-semibold text-gray-900">Total Customers Engagement</div>
                             <div className="text-2xl font-bold text-gray-800">
-                              {customerEngagementData.totalEngagement.toLocaleString()}
+                              {customerEngagementDataForDisplay.totalEngagement.toLocaleString()}
                             </div>
                           </div>
 
@@ -6422,28 +7022,28 @@ const Dashboard = () => {
                             <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
                               <div className="text-2xl">💬</div>
                               <div className="text-sm font-semibold text-green-800">
-                                {customerEngagementData.engagementBreakdown.whatsapp.toLocaleString()}
+                                {customerEngagementDataForDisplay.engagementBreakdown.whatsapp.toLocaleString()}
                               </div>
                               <div className="text-xs text-green-700">WhatsApp</div>
                             </div>
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
                               <div className="text-2xl">🔊</div>
                               <div className="text-sm font-semibold text-blue-800">
-                                {customerEngagementData.engagementBreakdown.blaster.toLocaleString()}
+                                {customerEngagementDataForDisplay.engagementBreakdown.blaster.toLocaleString()}
                               </div>
                               <div className="text-xs text-blue-700">Blaster</div>
                             </div>
                             <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
                               <div className="text-2xl">🤖</div>
                               <div className="text-sm font-semibold text-purple-800">
-                                {customerEngagementData.engagementBreakdown.aiCalls.toLocaleString()}
+                                {customerEngagementDataForDisplay.engagementBreakdown.aiCalls.toLocaleString()}
                               </div>
                               <div className="text-xs text-purple-700">AI Calls</div>
                             </div>
                             <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 text-center">
                               <div className="text-2xl">📞</div>
                               <div className="text-sm font-semibold text-orange-800">
-                                {customerEngagementData.engagementBreakdown.dialers.toLocaleString()}
+                                {customerEngagementDataForDisplay.engagementBreakdown.dialers.toLocaleString()}
                               </div>
                               <div className="text-xs text-orange-700">Dialers</div>
                             </div>
@@ -6453,28 +7053,28 @@ const Dashboard = () => {
                             <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
                               <div className="text-2xl">👤</div>
                               <div className="text-base font-semibold text-gray-800">
-                                {customerEngagementData.customerMetrics.totalCustomers.toLocaleString()}
+                                {customerEngagementDataForDisplay.customerMetrics.totalCustomers.toLocaleString()}
                               </div>
                               <div className="text-xs text-gray-600">Total Customers</div>
                             </div>
                             <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
                               <div className="text-2xl">👥</div>
                               <div className="text-base font-semibold text-gray-800">
-                                {customerEngagementData.customerMetrics.connectedCustomers.toLocaleString()}
+                                {customerEngagementDataForDisplay.customerMetrics.connectedCustomers.toLocaleString()}
                               </div>
                               <div className="text-xs text-gray-600">Connected</div>
                             </div>
                             <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
                               <div className="text-2xl">💰</div>
                               <div className="text-base font-semibold text-gray-800">
-                                ₹{customerEngagementData.customerMetrics.amountPromised.toLocaleString()}
+                                ₹{customerEngagementDataForDisplay.customerMetrics.amountPromised.toLocaleString()}
                               </div>
                               <div className="text-xs text-gray-600">Amount Promised</div>
                             </div>
                             <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
                               <div className="text-2xl">💳</div>
                               <div className="text-base font-semibold text-gray-800">
-                                ₹{customerEngagementData.customerMetrics.amountCollected.toLocaleString()}
+                                ₹{customerEngagementDataForDisplay.customerMetrics.amountCollected.toLocaleString()}
                               </div>
                               <div className="text-xs text-gray-600">Amount Collected</div>
                             </div>
@@ -6553,11 +7153,11 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Customer Count</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>45</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>{(paymentIntentData?.overdueAccounts?.customerCount || random(30, 80)).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Amount</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>₹1.25Cr</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>₹{(paymentIntentData?.overdueAccounts?.amount || randomFloat(0.8, 2.5)).toFixed(2)}Cr</span>
                         </div>
                       </div>
                     </div>
@@ -6568,20 +7168,20 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex flex-row justify-between text-xs text-gray-800">
                           <span># Todays PTP</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>{(paymentIntentData?.promisedToPay?.todayPTP || random(50, 200)).toLocaleString()}</span>
 
 
                           <span># Future PTP</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>{(paymentIntentData?.promisedToPay?.futurePTP || random(100, 400)).toLocaleString()}</span>
 
                         </div>
                         <div className="flex flex-row justify-between text-xs text-gray-800">
                           <span># Failed PTP</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>{(paymentIntentData?.promisedToPay?.failedPTP || random(10, 50)).toLocaleString()}</span>
 
 
                           <span># Total PTP</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>{(paymentIntentData?.promisedToPay?.totalPTP || random(200, 600)).toLocaleString()}</span>
 
                         </div>
                       </div>
@@ -6593,11 +7193,11 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span># Customers</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>{(paymentIntentData?.refusedToPay?.customers || random(5, 30)).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Pending Amount</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>₹{((paymentIntentData?.refusedToPay?.pendingAmount || randomFloat(0.2, 1.5)) * 100).toFixed(0)}L</span>
                         </div>
                       </div>
                     </div>
@@ -6608,11 +7208,11 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span># Customers</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>{(paymentIntentData?.alreadyPaid?.customers || random(20, 100)).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Collected Amount</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>₹{((paymentIntentData?.alreadyPaid?.collectedAmount || randomFloat(0.5, 3.0)) * 100).toFixed(0)}L</span>
                         </div>
                       </div>
                     </div>
@@ -6623,11 +7223,11 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span># Customers</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>{(paymentIntentData?.brokenPromises?.customers || random(15, 60)).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Broken Amount</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>₹{((paymentIntentData?.brokenPromises?.brokenAmount || randomFloat(0.3, 2.0)) * 100).toFixed(0)}L</span>
                         </div>
                       </div>
                     </div>
@@ -6638,7 +7238,7 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Count of Invalid Contacts</span>
-                          <span className="font-semibold" style={{ color: '#003366' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#003366' }}>{(paymentIntentData?.wrongNumbers?.invalidContacts || random(50, 200)).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Status</span>
@@ -6804,19 +7404,19 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Total Rollbacks</span>
-                          <span className="font-semibold" style={{ color: '#DC2626' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>{rollRateData?.rollBack?.total || random(150, 500)}</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Pending</span>
-                          <span className="font-semibold" style={{ color: '#DC2626' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>{rollRateData?.rollBack?.pending || random(20, 150)}</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Completed</span>
-                          <span className="font-semibold" style={{ color: '#DC2626' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>{rollRateData?.rollBack?.completed || random(100, 350)}</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Amount</span>
-                          <span className="font-semibold" style={{ color: '#DC2626' }}>₹0</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>₹{(rollRateData?.rollBack?.amount || random(5000000, 50000000)).toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
@@ -6830,19 +7430,19 @@ const Dashboard = () => {
                       <div className="space-y-1 relative z-10">
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Total Roll Forwards</span>
-                          <span className="font-semibold" style={{ color: '#DC2626' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>{rollRateData?.rollForward?.total || random(200, 600)}</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Pending</span>
-                          <span className="font-semibold" style={{ color: '#DC2626' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>{rollRateData?.rollForward?.pending || random(30, 200)}</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Completed</span>
-                          <span className="font-semibold" style={{ color: '#DC2626' }}>0</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>{rollRateData?.rollForward?.completed || random(100, 400)}</span>
                         </div>
                         <div className="flex justify-between text-xs text-gray-800">
                           <span>Amount</span>
-                          <span className="font-semibold" style={{ color: '#DC2626' }}>₹0</span>
+                          <span className="font-semibold" style={{ color: '#DC2626' }}>₹{(rollRateData?.rollForward?.amount || random(8000000, 80000000)).toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
@@ -10007,23 +10607,23 @@ const Dashboard = () => {
                           <div className="h-40 w-40 bg-gradient-to-br from-green-100 via-yellow-100 to-red-100 rounded-full flex items-center justify-center border-4 border-gray-200">
                             <div className="h-32 w-32 bg-white rounded-full flex items-center justify-center">
                               <div className="text-center">
-                                <div className="text-2xl font-bold text-gray-700">38</div>
+                                <div className="text-2xl font-bold text-gray-700">1,87,406</div>
                                 <div className="text-xs text-gray-500">Total Cases</div>
                               </div>
                             </div>
                           </div>
-                          {/* Mock donut chart segments */}
+                          {/* Mock donut chart segments - 89% green, 5% orange, 3% blue, 4% red */}
                           <div className="absolute inset-0 rounded-full" style={{
                             background: `conic-gradient(
-                               #10b981 0deg 162deg,
-                               #f59e0b 162deg 252deg,
-                               #3b82f6 252deg 324deg,
-                               #ef4444 324deg 360deg
+                               #10b981 0deg 320.4deg,
+                               #f59e0b 320.4deg 338.4deg,
+                               #3b82f6 338.4deg 349.2deg,
+                               #ef4444 349.2deg 360deg
                              )`
                           }}></div>
                           <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center">
                             <div className="text-center">
-                              <div className="text-2xl font-bold text-gray-700">38</div>
+                              <div className="text-2xl font-bold text-gray-700">1,87,406</div>
                               <div className="text-xs text-gray-500">Total Cases</div>
                             </div>
                           </div>
@@ -10031,23 +10631,23 @@ const Dashboard = () => {
                         <div className="space-y-3">
                           <div className="flex items-center space-x-3">
                             <div className="w-4 h-4 bg-green-500 rounded"></div>
-                            <span className="text-gray-700 text-[12px] font-medium">0-30 days (45%)</span>
-                            <span className="text-gray-500 text-[12px]">17 cases</span>
+                            <span className="text-gray-700 text-[12px] font-medium">0-30 days (89%)</span>
+                            <span className="text-gray-500 text-[12px]">1,67,057 cases</span>
                           </div>
                           <div className="flex items-center space-x-3">
                             <div className="w-4 h-4 bg-orange-500 rounded"></div>
-                            <span className="text-gray-700 text-[12px] font-medium">31-60 days (25%)</span>
-                            <span className="text-gray-500 text-[12px]">10 cases</span>
+                            <span className="text-gray-700 text-[12px] font-medium">31-60 days (5%)</span>
+                            <span className="text-gray-500 text-[12px]">8,553 cases</span>
                           </div>
                           <div className="flex items-center space-x-3">
                             <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                            <span className="text-gray-700 text-[12px] font-medium">61-90 days (18%)</span>
-                            <span className="text-gray-500 text-[12px]">7 cases</span>
+                            <span className="text-gray-700 text-[12px] font-medium">61-90 days (3%)</span>
+                            <span className="text-gray-500 text-[12px]">4,926 cases</span>
                           </div>
                           <div className="flex items-center space-x-3">
                             <div className="w-4 h-4 bg-red-500 rounded"></div>
-                            <span className="text-gray-700 text-[12px] font-medium">90+ days (12%)</span>
-                            <span className="text-gray-500 text-[12px]">4 cases</span>
+                            <span className="text-gray-700 text-[12px] font-medium">90+ days (4%)</span>
+                            <span className="text-gray-500 text-[12px]">6,870 cases</span>
                           </div>
                         </div>
                       </div>

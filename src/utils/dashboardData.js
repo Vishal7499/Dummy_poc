@@ -20,22 +20,41 @@ const generateDateRange = (fromDate, toDate) => {
 
 // Generate dashboard data based on date range
 export const generateDashboardData = (fromDate, toDate) => {
-  const totalCases = random(75000, 120000)
-  const activeCases = random(45000, 70000)
-  const resolvedCases = random(30000, 50000)
+  // Fixed values from screenshots
+  const totalLoans = 187406
+  const uniqueStaff = 1161
+  const avgLoansPerStaff = 161.42
+  const totalTosInCr = 404.56
+  const unallocatedCases = 23
+  const collectionPercentage = 58.77
+  const collectionAmountCr = 103.4
+  const totalDueCr = 72.54
   
   return {
-    total_cases: totalCases,
-    active_cases: activeCases,
-    resolved_cases: resolvedCases,
+    total_cases: random(75000, 120000),
+    active_cases: random(45000, 70000),
+    resolved_cases: random(30000, 50000),
     total_collection: random(800000000, 2500000000),
     today_collection: random(10000000, 60000000),
     monthly_collection: random(200000000, 800000000),
-    collection_efficiency: randomFloat(70, 95),
+    collection_efficiency: collectionPercentage,
     staff_count: random(150, 600),
     active_staff: random(120, 550),
     pending_allocations: random(2000, 8000),
-    completed_allocations: random(8000, 30000)
+    completed_allocations: random(8000, 30000),
+    collection_data: {
+      collection_percentage: collectionPercentage,
+      collection_amount_cr: collectionAmountCr,
+      total_overdue_cr: totalDueCr
+    },
+    case_summary_count: random(5000, 15000),
+    loan_data: {
+      total_loans: totalLoans,
+      unique_staff: uniqueStaff,
+      avg_loans_per_staff: avgLoansPerStaff,
+      total_tos_in_cr: totalTosInCr,
+      unallocated_cases: unallocatedCases
+    }
   }
 }
 
@@ -57,32 +76,24 @@ export const generateCollectionGraphData = (fromDate, toDate) => {
 
 // Generate deposition data
 export const generateDepositionData = (fromDate, toDate, page = 1, pageSize = 20) => {
-  const totalRecords = random(200, 800)
-  const totalPages = Math.ceil(totalRecords / pageSize)
-  const actualPageSize = page === totalPages ? (totalRecords % pageSize || pageSize) : pageSize
+  // Fixed values from screenshot: 0 records, page 1, total pages 1, date range 2025-10-26 to 2025-11-25
+  const totalRecords = 0
+  const totalPages = 1
+  const actualPageSize = 0
   
-  const depositions = Array.from({ length: actualPageSize }, (_, i) => ({
-    id: (page - 1) * pageSize + i + 1,
-    case_id: `CASE${String((page - 1) * pageSize + i + 1).padStart(6, '0')}`,
-    customer_name: `Customer ${(page - 1) * pageSize + i + 1}`,
-    amount: random(75000, 750000),
-    date: new Date(Date.now() - random(1, 90) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    status: ['Pending', 'Completed', 'In Progress'][random(0, 2)],
-    loan_type: ['Home Loan', 'Tractor Finance', 'Commercial Vehicle', 'Construction Equipment'][random(0, 3)],
-    dpd: random(1, 180),
-    branch: `Branch ${random(1, 50)}`,
-    staff_name: `Staff ${random(1, 100)}`
-  }))
+  const depositions = []
   
   return {
     depositions,
+    from_date: fromDate || '2025-10-26',
+    to_date: toDate || '2025-11-25',
     pagination: {
       current_page: page,
       page_size: pageSize,
       total_count: totalRecords,
       total_pages: totalPages,
-      has_next: page < totalPages,
-      has_previous: page > 1
+      has_next: false,
+      has_previous: false
     }
   }
 }
@@ -240,5 +251,89 @@ export const generateReportData = (reportType, fromDate, toDate) => {
   }
   
   return reportTypes[reportType] || reportTypes['ftd']
+}
+
+// Generate Roll Rate data
+export const generateRollRateData = (fromDate, toDate) => {
+  const totalRollBacks = random(150, 500)
+  const totalRollForwards = random(200, 600)
+  
+  return {
+    rollBack: {
+      total: totalRollBacks,
+      pending: random(20, totalRollBacks * 0.3),
+      completed: totalRollBacks - random(20, totalRollBacks * 0.3),
+      amount: random(5000000, 50000000)
+    },
+    rollForward: {
+      total: totalRollForwards,
+      pending: random(30, totalRollForwards * 0.4),
+      completed: totalRollForwards - random(30, totalRollForwards * 0.4),
+      amount: random(8000000, 80000000)
+    }
+  }
+}
+
+// Generate Customer Engagement data
+export const generateCustomerEngagementData = (fromDate, toDate) => {
+  // Fixed values from screenshots
+  return {
+    whatsapp: {
+      messagesSent: 234599,
+      delivered: 220400,
+      read: 185750,
+      responded: 130299
+    },
+    aiCalls: {
+      callsTriggered: 125677,
+      answered: 120455,
+      positiveResponse: 81473
+    },
+    diallerCalls: {
+      totalCalls: 60987,
+      successfulConnects: 55854,
+      followUpActions: 38895
+    },
+    fieldVisits: {
+      plannedVisits: 30870,
+      completedVisits: 22903,
+      geotaggingCompliance: null // Dash in screenshot
+    }
+  }
+}
+
+// Generate Payment Intent data
+export const generatePaymentIntentData = (fromDate, toDate) => {
+  const overdueAccounts = random(30, 80)
+  const overdueAmount = randomFloat(0.8, 2.5) // in Cr
+  
+  return {
+    overdueAccounts: {
+      customerCount: overdueAccounts,
+      amount: overdueAmount
+    },
+    promisedToPay: {
+      todayPTP: random(50, 200),
+      failedPTP: random(10, 50),
+      futurePTP: random(100, 400),
+      totalPTP: random(200, 600)
+    },
+    refusedToPay: {
+      customers: random(5, 30),
+      pendingAmount: randomFloat(0.2, 1.5) // in Cr
+    },
+    alreadyPaid: {
+      customers: random(20, 100),
+      collectedAmount: randomFloat(0.5, 3.0) // in Cr
+    },
+    brokenPromises: {
+      customers: random(15, 60),
+      brokenAmount: randomFloat(0.3, 2.0) // in Cr
+    },
+    wrongNumbers: {
+      invalidContacts: random(50, 200),
+      status: 'Data Correction'
+    }
+  }
 }
 
